@@ -10,7 +10,13 @@ For electrical/infrastructure engineers, Python developers, and educators: repla
 
 ![Actual synthetic dashboard](docs/images/overview.png)
 
-## Run
+## Try the released dashboard
+
+Use the [Python-only quickstart](docs/quickstart.md#run-the-released-dashboard-python-only) to install the [0.2.0a0 release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v0.2.0a0) in an isolated environment. The wheel includes the built dashboard, so this route needs Python 3.12+ with pip and a browser; Git and Node are not needed. Installation downloads the wheel and API dependencies. The installed examples run locally.
+
+The [worked tutorial](docs/tutorials/continuity-walkthrough.md) explains what to look for: one surviving path serves 665 kW of a 1,000 kW request, and the generator-failure fixture depletes its battery at 607.8 s.
+
+## Run from source
 
 Clone the repository, then run with Python 3.12+:
 
@@ -47,6 +53,8 @@ Read the [quickstart](docs/quickstart.md), [electrical boundary](docs/engineerin
 
 ## Provenance and contributions
 
-Original code, documentation, and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [synthetic provenance](data/provenance/manifest.json), and the dated catalogue packaged in `datacenter_twin/resources/catalog.json`. No private manual, planning brief, Git history, internal campaign records, credentials, or customer traces are included in this export.
+Original code, documentation, and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [synthetic provenance](data/provenance/manifest.json), and the dated catalogue packaged in `datacenter_twin/resources/catalog.json`. No private manual, planning brief, prior private Git history, internal campaign records, credentials, or customer traces are included in this export.
+
+[SOURCE-MANIFEST.json](SOURCE-MANIFEST.json) records the original `v0.2.0a0` release snapshot. Its hashes apply to the [tagged source](https://github.com/mohammadrezwankhan/datacenter-twin-lab/tree/v0.2.0a0), not subsequent documentation changes on `main`.
 
 Contribute a reproducible mismatch, an independently derived numerical edge case, or a primary-source correction with its date and uncertainty. Run the tests and describe assumptions and actual validation. Preserve third-party notices. See [contribution guidance](CONTRIBUTING.md) and [citation metadata](CITATION.cff). Cite the exact release or commit you use.

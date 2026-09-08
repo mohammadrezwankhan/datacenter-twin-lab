@@ -1,6 +1,6 @@
 # Local API and dashboard
 
-Start with `python -m datacenter_twin serve`, after installing the optional API dependencies and building `apps/web`. The CLI binds only to `127.0.0.1:8000`; `--port` accepts 1–65535. The compiled React dashboard is served from the same process and origin. OpenAPI operation metadata is available at `/openapi.json`. The exact input and output fields are documented in [electrical-v2.md](electrical-v2.md); the domain constructors enforce constraints that OpenAPI metadata alone does not express.
+Start with `python -m datacenter_twin serve` after installing the optional API dependencies. The [released wheel](../quickstart.md#run-the-released-dashboard-python-only) includes the compiled dashboard; a source checkout requires building `apps/web` first. The CLI binds only to `127.0.0.1:8000`; `--port` accepts 1–65535. The compiled React dashboard is served from the same process and origin. OpenAPI operation metadata is available at `/openapi.json`. The exact input and output fields are documented in [electrical-v2.md](electrical-v2.md); the domain constructors enforce constraints that OpenAPI metadata alone does not express.
 
 | Method / path | Input | Result |
 | --- | --- | --- |
