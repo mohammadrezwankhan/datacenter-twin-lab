@@ -1,0 +1,27 @@
+{
+  "retrieved_on": "2026-09-08",
+  "source_url": "https://prices.azure.com/api/retail/prices?$filter=armSkuName%20eq%20%27Standard_ND96isr_H100_v5%27%20and%20armRegionName%20eq%20%27eastus%27%20and%20priceType%20eq%20%27Consumption%27",
+  "selection": "East US, USD, primary Consumption meter, non-Windows base product; excludes Spot and Low Priority",
+  "record": {
+    "currencyCode": "USD",
+    "tierMinimumUnits": 0.0,
+    "retailPrice": 98.32,
+    "unitPrice": 98.32,
+    "armRegionName": "eastus",
+    "location": "US East",
+    "effectiveStartDate": "2023-12-01T00:00:00Z",
+    "meterId": "03f48dbf-423c-5af8-9e6f-36e42dda07ec",
+    "meterName": "ND96isrH100v5",
+    "productId": "DZH318Z0KN53",
+    "skuId": "DZH318Z0KN53/0046",
+    "productName": "Virtual Machines NDsr H100 v5 Series",
+    "skuName": "ND96isrH100v5",
+    "serviceName": "Virtual Machines",
+    "serviceId": "DZH313Z7MMC8",
+    "serviceFamily": "Compute",
+    "unitOfMeasure": "1 Hour",
+    "type": "Consumption",
+    "isPrimaryMeterRegion": true,
+    "armSkuName": "Standard_ND96isr_H100_v5"
+  }
+}

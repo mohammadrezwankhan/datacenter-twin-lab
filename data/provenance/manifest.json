@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "DEMO-001",
+      "source_type": "original_synthetic_assumption",
+      "license": "Apache-2.0",
+      "assumption_date": "2026-09-08",
+      "notes": "Declared demand, efficiency, PUE, and fictional tariff assumptions; no measured facility data"
+    },
+    {
+      "id": "PUBLIC-FIXTURE-001",
+      "source_type": "explicit_synthetic_fixture",
+      "license": "Apache-2.0",
+      "notes": "1,000 kW \u00d7 8,760 h \u00d7 assumed PUE (1.25 or 1.15); tariff USD 0.10/kWh. Original mathematical examples, not a market quote or equipment validation."
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-09-08",
+  "sources": [
+    {
+      "id": "DEMO-ELECTRICAL-002", "title": "Synthetic electrical continuity reference", "url": null,
+      "locator": "resources/reference-site-v2.json", "retrieved_on": "2026-09-08", "evidence_type": "synthetic_assumption",
+      "claim": "Original 1 MW IT-demand fixture with two 700 kW gross distribution paths, shared control domain, a 100 kWh battery and a 30-second generator delay.",
+      "limitations": "All capacities, efficiencies, timings and tariffs are illustrative. No site measurements, equipment selection or topology certification. User edits remain assumptions under this model."
+    },
+    {
+      "id": "NVIDIA-DGX-H100-20260908", "title": "NVIDIA DGX H100/H200 system introduction",
+      "url": "https://docs.nvidia.com/dgx/dgxh100-user-guide/introduction-to-dgxh100.html",
+      "locator": "System specifications, power and environmental tables", "retrieved_on": "2026-09-08", "evidence_type": "vendor_specification",
+      "claim": "DGX H100: eight H100 GPUs, 640 GB aggregate GPU memory, 8U chassis and 10.2 kW maximum system power. DGX H200 has eight H200 GPUs and 1128 GB aggregate GPU memory, with the same listed chassis and power envelope.",
+      "limitations": "Maximum system power is not a measured workload profile. GPU memory is aggregate, not automatically usable by a single process. These specifications are not assigned to the synthetic site's assets."
+    },
+    {
+      "id": "AWS-P5-20260908", "title": "AWS accelerated computing instance specifications",
+      "url": "https://docs.aws.amazon.com/ec2/latest/instancetypes/ac.html",
+      "locator": "Performance specifications: p5.48xlarge", "retrieved_on": "2026-09-08", "evidence_type": "vendor_specification",
+      "claim": "p5.48xlarge lists eight NVIDIA H100 GPUs and 640 GiB aggregate accelerator memory. The documentation lists Linux support for this size.",
+      "limitations": "A documented shape is not a capacity reservation or regional availability guarantee. AWS reports GiB; this register preserves that unit."
+    },
+    {
+      "id": "AWS-BILLING-20260908", "title": "AWS EC2 On-Demand pricing",
+      "url": "https://aws.amazon.com/ec2/pricing/on-demand/", "locator": "On-Demand compute billing and per-second billing",
+      "retrieved_on": "2026-09-08", "evidence_type": "vendor_billing_rule",
+      "claim": "Compute is priced for the instance, with hourly or second-based usage and a 60-second minimum where per-second billing applies. GPU count does not multiply a whole-instance hourly rate.",
+      "limitations": "No region, OS-specific rate, account discount or current capacity has been selected. Normalization accepts already-billed hours; it does not implement invoice rounding or taxes."
+    },
+    {
+      "id": "AZURE-ND-H100-20260908", "title": "Azure ND H100 v5 series",
+      "url": "https://learn.microsoft.com/en-us/azure/virtual-machines/sizes/gpu-accelerated/ndh100v5-series",
+      "locator": "Sizes in series and accelerator specifications", "retrieved_on": "2026-09-08", "evidence_type": "vendor_specification",
+      "claim": "Standard_ND96isr_H100_v5 lists 96 vCPUs, eight H100 GPUs and 640 GB aggregate accelerator memory.",
+      "limitations": "Regional quota, availability, operating-system image and commercial offer require separate verification. Memory is preserved in the vendor's stated GB unit."
+    },
+    {
+      "id": "AZURE-BILLING-20260908", "title": "Azure East US H100 retail meter snapshot",
+      "url": "https://prices.azure.com/api/retail/prices?$filter=armSkuName%20eq%20%27Standard_ND96isr_H100_v5%27%20and%20armRegionName%20eq%20%27eastus%27%20and%20priceType%20eq%20%27Consumption%27",
+      "locator": "Meter 03f48dbf-423c-5af8-9e6f-36e42dda07ec; retained response in resources/azure-retail-snapshot.json",
+      "retrieved_on": "2026-09-08", "evidence_type": "vendor_retail_snapshot",
+      "claim": "The primary East US Consumption meter for Standard_ND96isr_H100_v5, base non-Windows product and non-Spot meter, returned USD 98.32 per 1 Hour. Effective start: 2023-12-01. The unit covers the VM, not each GPU.",
+      "limitations": "This is a dated public retail snapshot, not an account quote or capacity commitment. Windows, Spot and Low Priority records are excluded. Taxes, ancillary charges, contract discounts and current availability are not established. Recheck before purchasing."
+    },
+    {
+      "id": "OCI-H100-20260908", "title": "OCI Compute shapes",
+      "url": "https://docs.oracle.com/en-us/iaas/Content/Compute/References/computeshapes.htm",
+      "locator": "Bare metal GPU shapes: BM.GPU.H100.8", "retrieved_on": "2026-09-08", "evidence_type": "vendor_specification",
+      "claim": "BM.GPU.H100.8 lists eight H100 80 GB GPUs and 640 GB aggregate GPU memory.",
+      "limitations": "No current capacity, quota, region or measured performance has been verified."
+    },
+    {
+      "id": "OCI-BILLING-20260908", "title": "Oracle Cloud price list",
+      "url": "https://www.oracle.com/cloud/price-list/", "locator": "GPU compute: BM.GPU.H100.8 and server price footnote",
+      "retrieved_on": "2026-09-08", "evidence_type": "vendor_billing_rule",
+      "claim": "BM.GPU.H100.8 is listed in GPU per hour units. The server-hour amount uses the GPU rate multiplied by the number of GPUs.",
+      "limitations": "The retrieved page did not expose a numeric rate in its text representation. Price remains unknown; no quote or capacity is implied."
+    },
+    {
+      "id": "OPENAI-OSS-20260908", "title": "OpenAI introducing gpt-oss",
+      "url": "https://openai.com/index/introducing-gpt-oss/", "locator": "Introduction and availability; release dated 2025-08-05",
+      "retrieved_on": "2026-09-08", "evidence_type": "publisher_deployment_statement",
+      "claim": "OpenAI released gpt-oss-20b and gpt-oss-120b as open-weight models under Apache 2.0, supporting deployment on the user's own infrastructure.",
+      "limitations": "Weights are not bundled. The actual weight revision, license obligations, use policy, inference stack and workload benchmark must be reviewed for deployment. No throughput is inferred from marketing comparisons."
+    },
+    {
+      "id": "OPENAI-API-20260908", "title": "OpenAI GPT-5.4 API model reference",
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.4", "locator": "Model endpoints and snapshot list",
+      "retrieved_on": "2026-09-08", "evidence_type": "publisher_deployment_statement",
+      "claim": "The model page documents API access and the exact snapshot gpt-5.4-2026-03-05.",
+      "limitations": "This source establishes an API route. It does not establish a downloadable weights license or self-hosting permission. Account access, terms, lifecycle status and pricing must be rechecked before use."
+    },
+    {
+      "id": "DE-ENEFG-20260908", "title": "Germany Energy Efficiency Act (EnEfG)",
+      "url": "https://www.gesetze-im-internet.de/enefg/BJNR1350B0023.html", "locator": "Section 4, particularly section 11; definitions and exceptions also require review",
+      "retrieved_on": "2026-09-08", "evidence_type": "government_primary",
+      "claim": "Section 11 distinguishes data centers by commencement date and addresses annual energy effectiveness and energy reuse. Those obligations cannot be assessed using this electrical-only outage simulation.",
+      "limitations": "This is an applicability pointer, not a legal conclusion or a complete German permitting register. Statutory definitions, dates, exceptions, amendments and project facts require review."
+    },
+    {
+      "id": "US-VA-USBC-20260908", "title": "Virginia Uniform Statewide Building Code",
+      "url": "https://www.dhcd.virginia.gov/virginia-uniform-statewide-building-code-usbc", "locator": "Scope and code adoption and enforcement",
+      "retrieved_on": "2026-09-08", "evidence_type": "government_primary",
+      "claim": "Virginia DHCD describes the USBC's building-work scope and enforcement by local building inspection departments.",
+      "limitations": "The governing edition, local project scope, fire requirements, electrical approvals and other permits have not been determined. This is not a nationwide US code pack."
+    },
+    {
+      "id": "IN-CEA-20260908", "title": "CEA safety and electric supply regulation register",
+      "url": "https://cea.nic.in/regulations-category/measures-relating-to-safety-and-electric-supply/?lang=en",
+      "locator": "2023 regulations and 2026 amendment entries", "retrieved_on": "2026-09-08", "evidence_type": "government_primary",
+      "claim": "CEA's register lists both the 2023 safety and electric supply regulations and a 2026 amendment.",
+      "limitations": "The consolidated clauses, amendment commencement, state inspectorate process and site-specific duties have not been assessed. The register entry alone is not a compliance determination."
+    }
+  ],
+  "hardware": [
+    {"id":"dgx-h100","vendor":"NVIDIA","sku":"DGX H100","gpu":"H100","gpu_count":8,"gpu_memory_total_gb":640,"max_system_power_kw":"10.2","rack_units":8,"price":null,"calibrated":false,"source_ids":["NVIDIA-DGX-H100-20260908"]},
+    {"id":"dgx-h200","vendor":"NVIDIA","sku":"DGX H200","gpu":"H200","gpu_count":8,"gpu_memory_total_gb":1128,"max_system_power_kw":"10.2","rack_units":8,"price":null,"calibrated":false,"source_ids":["NVIDIA-DGX-H100-20260908"]}
+  ],
+  "cloud_offers": [
+    {"id":"aws-p5","provider":"AWS","sku":"p5.48xlarge","gpu":"H100","gpu_count":8,"gpu_memory_total":640,"gpu_memory_unit":"GiB","billing_unit":"node_hour","billing_status":"documented","region":null,"rate":null,"currency":"USD","price_status":"unknown","availability":"not_verified","source_ids":["AWS-P5-20260908","AWS-BILLING-20260908"]},
+    {"id":"azure-nd-h100","provider":"Azure","sku":"Standard_ND96isr_H100_v5","gpu":"H100","gpu_count":8,"gpu_memory_total":640,"gpu_memory_unit":"GB","billing_unit":"node_hour","billing_status":"documented","region":"eastus","rate":"98.32","currency":"USD","price_status":"public_retail_snapshot","observed_on":"2026-09-08","effective_from":"2023-12-01T00:00:00Z","availability":"not_verified","source_ids":["AZURE-ND-H100-20260908","AZURE-BILLING-20260908"]},
+    {"id":"oci-h100","provider":"OCI","sku":"BM.GPU.H100.8","gpu":"H100","gpu_count":8,"gpu_memory_total":640,"gpu_memory_unit":"GB","billing_unit":"gpu_hour","billing_status":"documented","region":null,"rate":null,"currency":"USD","price_status":"unknown","availability":"not_verified","source_ids":["OCI-H100-20260908","OCI-BILLING-20260908"]}
+  ],
+  "models": [
+    {"id":"gpt-oss-20b","provider":"OpenAI","exact_model":"gpt-oss-20b","deployment_route":"self_hosted_open_weights","weights_license":"Apache-2.0","self_hosting":"publisher_supported_subject_to_terms","performance":null,"source_ids":["OPENAI-OSS-20260908"]},
+    {"id":"gpt-oss-120b","provider":"OpenAI","exact_model":"gpt-oss-120b","deployment_route":"self_hosted_open_weights","weights_license":"Apache-2.0","self_hosting":"publisher_supported_subject_to_terms","performance":null,"source_ids":["OPENAI-OSS-20260908"]},
+    {"id":"gpt-5.4-api","provider":"OpenAI","exact_model":"gpt-5.4-2026-03-05","deployment_route":"provider_api","weights_license":null,"self_hosting":"not_established_by_source","performance":null,"source_ids":["OPENAI-API-20260908"]}
+  ],
+  "jurisdictions": [
+    {"id":"de","name":"Germany","instrument":"EnEfG, section 4","applicability":"requires_project_review","screening_question":"Which statutory definition, commencement date, capacity and exception applies, and where is the annual whole-facility energy evidence?","decision":"Not assessed. Electrical-only replay cannot demonstrate annual PUE, energy reuse or legal compliance.","source_ids":["DE-ENEFG-20260908"]},
+    {"id":"us-va","name":"United States · Virginia","instrument":"Virginia USBC","applicability":"requires_project_review","screening_question":"Which adopted code edition and local inspection authority govern this building and electrical scope?","decision":"Not assessed. Confirm the project jurisdiction, code edition and applicable permitting scope.","source_ids":["US-VA-USBC-20260908"]},
+    {"id":"in","name":"India","instrument":"CEA safety regulations, 2023 + 2026 amendment","applicability":"requires_project_review","screening_question":"Which consolidated provisions, amendment dates and state electrical inspectorate approvals apply?","decision":"Not assessed. Review the 2026 amendment and state/local requirements before relying on a clause checklist.","source_ids":["IN-CEA-20260908"]}
+  ]
+}

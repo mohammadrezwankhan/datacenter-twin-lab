@@ -1,0 +1,371 @@
+{
+  "schema_version": 1,
+  "status": "validated_public_source",
+  "source_repository": "mohammadrezwankhan/ai-datacenter-twin",
+  "source_head": "426234da8686b6b142c07b4985b2353501fb2629",
+  "source_method": "Allowlisted current working files, not a Git-object migration; file hashes are authoritative",
+  "created_at": "2026-09-08T22:11:26.615588+00:00",
+  "excluded": [
+    "All Git objects/history",
+    "Private planning and source provenance",
+    "Internal agent instructions",
+    "Campaign records",
+    "Untracked files and generated bundles"
+  ],
+  "transformations": [
+    "New candidate README and NOTICE",
+    "Synthetic provenance replaces brief-section references in two fixtures",
+    "Public companion URLs and citation metadata",
+    "Original tutorial and contribution guidance",
+    "Standalone public CI and generic regression/distribution labels",
+    "Owner-authorized companion release; original private repository/history preserved"
+  ],
+  "validation": {
+    "completed_at": "2026-09-08T22:13:57.113075+00:00",
+    "python": "3.12.14 on Windows",
+    "application_suite": {
+      "tests_run": 89,
+      "passed": 88,
+      "skipped": 1,
+      "skip_reason": "Windows symlink privilege unavailable"
+    },
+    "frontend": "Locked npm install, formatting, TypeScript and Vite build passed",
+    "wheel": {
+      "file": "datacenter_twin_lab-0.2.0a0-py3-none-any.whl",
+      "sha256": "0a6c56ce5fe5fd25d9886d35112eea56408450c8b7181e62b698b3c58a901261",
+      "offline_isolated_install": "passed",
+      "module_console_continuity_catalogue": "passed",
+      "dashboard_and_dependency_notices_bundled": true
+    },
+    "source_audit": "Allowlisted 65 source files; all per-file hashes verified; no prior Git objects; standalone public workflow",
+    "scope": "Software and synthetic fixtures only; no facility calibration or physical validation"
+  },
+  "files": [
+    {
+      "path": ".github/workflows/tests.yml",
+      "sha256": "ebfedb485fc65aebc8dad6379f9969b893e8620eb089fe59b2b5d57cfa6d39e6",
+      "bytes": 2804
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "32be2c1421534431fe430abb40facb982d03fc310a3f88695e7a0e86031ab1f0",
+      "bytes": 327
+    },
+    {
+      "path": "apps/web/.prettierrc.json",
+      "sha256": "4927fe80046372da124fd1400d74eaf7e2d8fa4a19e5c81abeed3827d3ac11ed",
+      "bytes": 47
+    },
+    {
+      "path": "apps/web/index.html",
+      "sha256": "7efe840381b01340910fef25710caeabc3445c32740b7af8d9bef7665276bbff",
+      "bytes": 501
+    },
+    {
+      "path": "apps/web/package-lock.json",
+      "sha256": "46a7a601000dbce85e4a420d9c8ea0d83d5f862c9411172242f17591751c9bba",
+      "bytes": 42905
+    },
+    {
+      "path": "apps/web/package.json",
+      "sha256": "1d30405ebb8954688d72906a509e3c8a8fe99a998149ced98aede2268f2f15c2",
+      "bytes": 694
+    },
+    {
+      "path": "apps/web/playwright.config.ts",
+      "sha256": "f8431ea0750c96b517ed03fe264876e438bcb99b3bc997f53a9842afabd48b7b",
+      "bytes": 744
+    },
+    {
+      "path": "apps/web/public/THIRD-PARTY-NOTICES.txt",
+      "sha256": "bb4a1fa6a860404665c35dd364bef4ca843a3f9954679e03ad49a513a64a62bc",
+      "bytes": 1134
+    },
+    {
+      "path": "apps/web/src/App.tsx",
+      "sha256": "4bb78ab72b25ac7b164801c408b798ce6ba19a08ebfd96d10310764d04d019a8",
+      "bytes": 32762
+    },
+    {
+      "path": "apps/web/src/client.ts",
+      "sha256": "768ae446a381d2cd41acc95c66575e8051dac8fad53081c457a2b0d9cd81b655",
+      "bytes": 702
+    },
+    {
+      "path": "apps/web/src/Evidence.tsx",
+      "sha256": "f5afafc354a7b66d1220b61a81a049e7f489b27f31a17decb8c18ef146eaec1f",
+      "bytes": 12325
+    },
+    {
+      "path": "apps/web/src/main.tsx",
+      "sha256": "f6406e11478ea3e58ba521df287d48f47bc2479ee126354cfba677d38ad29882",
+      "bytes": 236
+    },
+    {
+      "path": "apps/web/src/styles.css",
+      "sha256": "d08054d97476e940bf734b7632fd7f9ec60639ccebc6593087f7b8b43ce53972",
+      "bytes": 19059
+    },
+    {
+      "path": "apps/web/src/tokens.css",
+      "sha256": "50193e895bf17bb104523f3780c981aa82619a60dcebefe49d3ac4629315373e",
+      "bytes": 174
+    },
+    {
+      "path": "apps/web/src/types.ts",
+      "sha256": "c0f9f922224e7a95fed7dbd154aad7ef8424e02d4a3f34261737d9a919cef211",
+      "bytes": 3393
+    },
+    {
+      "path": "apps/web/src/vite-env.d.ts",
+      "sha256": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
+      "bytes": 38
+    },
+    {
+      "path": "apps/web/tests/journey.spec.ts",
+      "sha256": "ce89d4d0635bdab95e361128adf14eeb32f782be5075d6a3705c4cc752b52844",
+      "bytes": 7643
+    },
+    {
+      "path": "apps/web/tsconfig.json",
+      "sha256": "c89b7464448ca0a2a05c494fecd5f2048045ae1a5546c5fbf6f2ba8dc94eadb6",
+      "bytes": 360
+    },
+    {
+      "path": "apps/web/vite.config.ts",
+      "sha256": "07a3da2dc456d784fd28e4b74a8d53436324c94cc213215731ee460bac28878f",
+      "bytes": 282
+    },
+    {
+      "path": "CITATION.cff",
+      "sha256": "a512688fb396902b76d7adfef2b2ba3e4f89c55ef105387508e742992b3427a7",
+      "bytes": 759
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "sha256": "7a9cf198955bb9112a0c7490eb1a249fcecf0a9c050cfa4c62d20a06eaf935c3",
+      "bytes": 1079
+    },
+    {
+      "path": "data/provenance/manifest.json",
+      "sha256": "af1572bf19ed0cda2a9fb436d49b17522946542fb53d681c388012b917ec256b",
+      "bytes": 637
+    },
+    {
+      "path": "data/scenarios/alternative-pue-115.json",
+      "sha256": "488f3b1209a944231acdeef0823d6909cde8e6a6a9979a787005bb45e5db764f",
+      "bytes": 506
+    },
+    {
+      "path": "data/scenarios/baseline-10mw.json",
+      "sha256": "4e254a12d7f9ed5538468cc306fd144704bd3f0bfdf0e18c35f8cb87518737e0",
+      "bytes": 407
+    },
+    {
+      "path": "data/scenarios/baseline-1mw.json",
+      "sha256": "28d6dd626e0e1fc4f29d55f0db7d94b710f520fc4ec7c0df9ffa9bfc09d50e59",
+      "bytes": 489
+    },
+    {
+      "path": "data/scenarios/baseline-40mw.json",
+      "sha256": "faf7997dfaff89bc0f9f28c2b73b804853eb7270e8c70c895dc2d7cdd0a569ed",
+      "bytes": 407
+    },
+    {
+      "path": "datacenter_twin/__init__.py",
+      "sha256": "9fb0ce593a341a9a0ad0dc378337c7c619ed44049570b3cc6cfe12089924792c",
+      "bytes": 97
+    },
+    {
+      "path": "datacenter_twin/__main__.py",
+      "sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+      "bytes": 48
+    },
+    {
+      "path": "datacenter_twin/api.py",
+      "sha256": "54739a747441bd79e6df7585c58348c603cc8794e0790e9194e95965575be0a6",
+      "bytes": 4238
+    },
+    {
+      "path": "datacenter_twin/calculations.py",
+      "sha256": "9ccfed37f94956506c2aaf82d3048195bf46dba7b6fade3840911b22dfb83853",
+      "bytes": 2206
+    },
+    {
+      "path": "datacenter_twin/catalog.py",
+      "sha256": "aac5cc2282b5dab11db71991059674dc52c1b86e65b66ff73c57f58997a5c3f9",
+      "bytes": 2717
+    },
+    {
+      "path": "datacenter_twin/cli.py",
+      "sha256": "2f45aafaf3f1608fa26b24aba2bc56263d29df12f71239894bc98c582030751f",
+      "bytes": 3593
+    },
+    {
+      "path": "datacenter_twin/continuity.py",
+      "sha256": "9be46dedb80f62e0344877b1f6d5fcd8e260b0863e1aa294983d28347c9112f1",
+      "bytes": 14451
+    },
+    {
+      "path": "datacenter_twin/contracts.py",
+      "sha256": "f3d547c322e8b255e6f1c967f2c5a2e75b8cd80d7e18890db8f8fd6d713c96d2",
+      "bytes": 8096
+    },
+    {
+      "path": "datacenter_twin/demo.py",
+      "sha256": "e632802dc76eb6c8081420ce98ed34ca78a4f1621c977bab62eb71fb5fa49328",
+      "bytes": 1576
+    },
+    {
+      "path": "datacenter_twin/engine.py",
+      "sha256": "93ca072b3fc4c8f3ab713310c19116999264016c334fae41018635c0fd822c9d",
+      "bytes": 5160
+    },
+    {
+      "path": "datacenter_twin/output.py",
+      "sha256": "c9848743e36d0cd2c2ce42bfb3904f3b0d6675bb8907849deebb81a0fb529602",
+      "bytes": 1885
+    },
+    {
+      "path": "datacenter_twin/resources/azure-retail-snapshot.json",
+      "sha256": "92830e971a4853e912cf5e5370d5bafbfe3877a36f051f050a95f3c29ca083c3",
+      "bytes": 1076
+    },
+    {
+      "path": "datacenter_twin/resources/catalog.json",
+      "sha256": "ab44efde34e3400a548dd097f9e5b9f060c6bf9fefa60b50d620ff410f71ad33",
+      "bytes": 12618
+    },
+    {
+      "path": "datacenter_twin/resources/reference-site-v2.json",
+      "sha256": "b6487e79244293de259fa8e7729b5e0be016fed44ecf77ad59ca7e5eae4657b5",
+      "bytes": 2469
+    },
+    {
+      "path": "datacenter_twin/topology.py",
+      "sha256": "dd96825df128d6649de5720c0b7dcd8880b9e287c7e31c7f0cce8994ff10e1e1",
+      "bytes": 12207
+    },
+    {
+      "path": "docs/contracts/electrical-v2.md",
+      "sha256": "65312da3663f7969575b2e67769e76000ab83d247b943b5c6c9675070d0e4a12",
+      "bytes": 6025
+    },
+    {
+      "path": "docs/contracts/local-api.md",
+      "sha256": "5cfa7371b3c0f027a0d4aa3fa2df3f1ef80f20dcceaaa4bb7528418791a6db40",
+      "bytes": 3513
+    },
+    {
+      "path": "docs/contracts/scenario-v1.md",
+      "sha256": "02e75dd22c4edbf8a531573abebf9bfbccc3c7fc085019e445044f75aa62336d",
+      "bytes": 2920
+    },
+    {
+      "path": "docs/engineering/calculation-boundaries.md",
+      "sha256": "30ec31500357a9742f92c9f50c1a3e39ac07addf376272999016651bb2cbf142",
+      "bytes": 2807
+    },
+    {
+      "path": "docs/engineering/electrical-continuity.md",
+      "sha256": "4fc5a86fd066eae2bcfb35d32a667dd9690c0f77fa3330bdf1b7b1753139bd99",
+      "bytes": 4181
+    },
+    {
+      "path": "docs/images/overview.png",
+      "sha256": "40931bf2e2749a0ad218c65fb9e1762842fb4d5857433a216e957e7d12cc0584",
+      "bytes": 133065
+    },
+    {
+      "path": "docs/quickstart.md",
+      "sha256": "32ed2f0787a05a7a74ad0b4542b115d4fdc3f29ecb48e97f600813842c6d5d66",
+      "bytes": 5812
+    },
+    {
+      "path": "docs/tutorials/continuity-walkthrough.md",
+      "sha256": "be92f68adbabb76ee35a45f56e4bc97959bfd0db5c1902cf0794517860480a37",
+      "bytes": 7456
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358
+    },
+    {
+      "path": "NOTICE",
+      "sha256": "f7853fb39b8f894f950a6680a1c032a33db81a3c6ff10ec6eefee3e8374f011e",
+      "bytes": 937
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "f8c65225f0bdef7e7ea29de7e50790de74e6dfd42e53f1befaa09f158d8508b4",
+      "bytes": 1105
+    },
+    {
+      "path": "README.md",
+      "sha256": "d3890fbd9b0c39f04ef9bafead62203ff2c4dd809f7e800531c39b122c4bd1f0",
+      "bytes": 3465
+    },
+    {
+      "path": "requirements-api.lock",
+      "sha256": "0edfaf823fab428fd8cc512e013abdb9f4f9702f14c9ded9838588e53473540c",
+      "bytes": 283
+    },
+    {
+      "path": "scripts/benchmark_continuity.py",
+      "sha256": "f1743b521429b202187fd9707cb0b1ee518981e05c0c23fc854d51a1a5ca29e9",
+      "bytes": 1595
+    },
+    {
+      "path": "scripts/verify_distribution.py",
+      "sha256": "43d7dd0977444bc23edaf9a9b47e14a00f19bc5abb5ddbd2fbb4063105109f4d",
+      "bytes": 5161
+    },
+    {
+      "path": "SECURITY.md",
+      "sha256": "7d7ee8c47c429d0373c83e2783a1b6f442e8516cd03886dbf99bf043de9a2ecc",
+      "bytes": 2313
+    },
+    {
+      "path": "tests/test_api.py",
+      "sha256": "aedefb62adf423aff76330407ef4df2a19f8ef57af3776a7ac3db67af6757726",
+      "bytes": 3807
+    },
+    {
+      "path": "tests/test_catalog.py",
+      "sha256": "7413de44d30c2ce15356b49b36b103e73c2f490d417c37cbca96ef55092a70af",
+      "bytes": 4994
+    },
+    {
+      "path": "tests/test_cli.py",
+      "sha256": "d4926fd13c94c4efbe20903ad8703b3f9954ea17d589f38c5afae26df2d0f348",
+      "bytes": 3856
+    },
+    {
+      "path": "tests/test_continuity.py",
+      "sha256": "c69b41d9089a6aa01d677cd408669c32d24aec9c432dc876cd8c561a91c7a3e5",
+      "bytes": 10408
+    },
+    {
+      "path": "tests/test_contracts.py",
+      "sha256": "3253692f2a9164d7a1ab8ebb2dc1062332706907a5065a239642ff6dc209df37",
+      "bytes": 3139
+    },
+    {
+      "path": "tests/test_numerical.py",
+      "sha256": "4a6e4011d551b750e7549ae5d33657e30bb57accc46676d068669ca5b18fc54c",
+      "bytes": 5954
+    },
+    {
+      "path": "tests/test_output.py",
+      "sha256": "d6d65ad3af4f920c1dccaf526b8f3edd58c4402573b8650e021c42cbb04d4f50",
+      "bytes": 4595
+    },
+    {
+      "path": "tests/test_review_regressions.py",
+      "sha256": "1c33fd3206fe6255768b6442a20804214a51ba626e7084fd5e6e65b70de27287",
+      "bytes": 6325
+    }
+  ],
+  "destination_repository": "mohammadrezwankhan/datacenter-twin-lab"
+}

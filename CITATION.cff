@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this synthetic research software, cite this repository and the exact commit or release used."
+type: software
+title: "Datacenter Twin Lab"
+authors:
+  - family-names: Khan
+    given-names: Mohammad Rezwan
+version: 0.2.0a0
+date-released: 2026-09-08
+repository-code: "https://github.com/mohammadrezwankhan/datacenter-twin-lab"
+license: Apache-2.0
+abstract: >-
+  Synthetic electrical-continuity and energy-planning research software with
+  a deterministic Python engine, local API, and dashboard. Not calibrated to
+  a real facility. Third-party references retain their separate rights notices.
+keywords:
+  - data center
+  - electrical continuity
+  - synthetic simulation
+  - energy planning
+  - Python

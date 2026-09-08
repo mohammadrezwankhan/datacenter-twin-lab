@@ -1,0 +1,16 @@
+Datacenter Twin Lab
+Copyright 2026 Mohammad Rezwan Khan
+
+Original code, original documentation, and synthetic example data in this software are provided under the Apache License, Version 2.0, except where noted.
+
+No model weights, vendor designs, standards text, hardware images, commercial
+datasets, measured facility telemetry, private planning brief, or private manual
+are bundled. Synthetic prices are not market quotations. References retain the
+rights of their respective owners. No company affiliation is claimed.
+
+The dated public Azure retail meter response and vendor specification facts are
+identified reference evidence, not original synthetic inputs or account quotations.
+
+The optional compiled dashboard contains React, React DOM, and Scheduler under the MIT
+License. Their copyright and permission notice is retained in
+apps/web/public/THIRD-PARTY-NOTICES.txt and copied into built dashboards and wheels.

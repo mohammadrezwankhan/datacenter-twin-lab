@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "id": "reference-1mw",
+  "name": "Synthetic 1 MW electrical site",
+  "currency": "USD",
+  "duration_s": 1800,
+  "step_s": 10,
+  "it_demand_kw": "1000",
+  "it_capacity_kw": "1000",
+  "distribution_efficiency": "0.95",
+  "tariff_per_kwh": "0.10",
+  "generator_cost_per_kwh": null,
+  "generator_start_delay_s": 30,
+  "battery_capacity_kwh": "100",
+  "battery_initial_kwh": "100",
+  "battery_charge_kw": "100",
+  "battery_charge_efficiency": "0.95",
+  "battery_discharge_efficiency": "0.90",
+  "source_ids": ["DEMO-ELECTRICAL-002"],
+  "assets": [
+    {"id":"utility","name":"Utility feed","kind":"utility","capacity_kw":"1500","failure_domains":["utility-feed"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"generator","name":"Standby generator","kind":"generator","capacity_kw":"1200","failure_domains":["generator-control"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"battery","name":"UPS battery","kind":"battery","capacity_kw":"1200","failure_domains":["ups-control"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"main-bus","name":"Main electrical bus","kind":"bus","capacity_kw":"1800","failure_domains":["switchroom"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"path-a","name":"Distribution A","kind":"distribution","capacity_kw":"700","failure_domains":["a-room","shared-controls"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"path-b","name":"Distribution B","kind":"distribution","capacity_kw":"700","failure_domains":["b-room","shared-controls"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"it-bus","name":"IT distribution bus","kind":"bus","capacity_kw":"1800","failure_domains":["it-bus"],"source_ids":["DEMO-ELECTRICAL-002"]},
+    {"id":"it-load","name":"Synthetic IT demand","kind":"load","capacity_kw":"2000","failure_domains":["it-hall"],"source_ids":["DEMO-ELECTRICAL-002"]}
+  ],
+  "dependencies": [
+    {"source":"utility","target":"main-bus","relation":"feeds"},
+    {"source":"generator","target":"main-bus","relation":"feeds"},
+    {"source":"battery","target":"main-bus","relation":"feeds"},
+    {"source":"main-bus","target":"path-a","relation":"feeds"},
+    {"source":"main-bus","target":"path-b","relation":"feeds"},
+    {"source":"path-a","target":"it-bus","relation":"feeds"},
+    {"source":"path-b","target":"it-bus","relation":"feeds"},
+    {"source":"it-bus","target":"it-load","relation":"feeds"},
+    {"source":"main-bus","target":"battery","relation":"charges"}
+  ],
+  "events": []
+}

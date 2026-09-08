@@ -1,0 +1,11 @@
+# Security
+
+The CLI reads local JSON and writes local JSON. Its optional `serve` command runs a stateless API and bundled dashboard, bound by the CLI to `127.0.0.1` only. The calculation core has no network access, cloud connector, credential requirement, database or physical-actuation route. Inputs must be regular files of at most 4 MiB; the API applies the same size limit to streamed request bodies. Malformed encoding, duplicate fields and excessive nesting produce input errors.
+
+Outputs preserve existing files unless `--force` is supplied. Direct paths, symbolic links and hard links to the input are protected; symbolic-link output paths are rejected. A complete temporary result is flushed before publication. Normal creation uses an atomic hard link and fails if another writer has claimed the destination; forced replacement uses `os.replace`. Unsupported filesystems return an error instead of falling back to truncating writes. This is local file protection, not a guarantee against a privileged attacker changing parent directories or power loss on every filesystem.
+
+The API validates loopback Host headers, limits CORS to the documented local Vite origins, serves a same-origin content policy and disables API caching. Two continuity requests execute concurrently, and additional requests wait. These are local application boundaries; they do not supply user authentication, multi-tenant isolation or abuse-resistant scheduling. Calculation POSTs do not persist data. The catalogue is bundled, and the backend does not fetch user URLs or provider services. Browser evidence links navigate only when selected by the user.
+
+Shared deployments, authentication, authorization, persistence, tenant isolation and telemetry ingestion remain outside this version. Importing the app into a differently bound ASGI server changes its trust boundary; do not expose that configuration without designing and testing those controls. No physical equipment interface is present. See [local API](docs/contracts/local-api.md) for the supported routes and input envelope.
+
+Report a suspected vulnerability privately to the repository owner through an available private GitHub channel. Avoid including secrets or exploitable customer details in an issue. No security certification or penetration-test claim is made.

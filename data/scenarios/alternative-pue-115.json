@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "alternative-pue-115",
+  "name": "Synthetic lower assumed PUE, same IT demand",
+  "currency": "USD",
+  "it_capacity_kw": "1000",
+  "tariff_per_kwh": "0.10",
+  "price_status": "illustrative",
+  "assumption_date": "2026-09-08",
+  "source_ids": [
+    "DEMO-001",
+    "PUBLIC-FIXTURE-001"
+  ],
+  "segments": [
+    {
+      "label": "Illustrative 8760-hour period",
+      "hours": "8760",
+      "it_load_kw": "1000",
+      "assumed_pue": "1.15"
+    }
+  ]
+}

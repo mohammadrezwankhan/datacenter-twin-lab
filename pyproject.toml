@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "datacenter-twin-lab"
+dynamic = ["version"]
+description = "Synthetic electrical continuity, energy and cost simulation with an optional local dashboard"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+authors = [{name = "Mohammad Rezwan Khan"}]
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/mohammadrezwankhan/datacenter-twin-lab"
+Documentation = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md"
+Issues = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues"
+
+[project.optional-dependencies]
+api = ["fastapi==0.141.1", "uvicorn==0.52.4"]
+test-api = ["httpx==0.28.1"]
+
+[project.scripts]
+datacenter-twin = "datacenter_twin.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["datacenter_twin*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "datacenter_twin.__version__"}
+
+[tool.setuptools.package-data]
+datacenter_twin = ["resources/*.json", "web/*", "web/assets/*"]
