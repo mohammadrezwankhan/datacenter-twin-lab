@@ -1,6 +1,48 @@
 # Quickstart
 
-Use Python 3.12 or later and open a terminal in the cloned repository root. The CLI and electrical engine use only the standard library. The optional API/dashboard setup follows below.
+Choose the released dashboard to explore the model with Python and a browser, or use the source checkout to edit code and run the full tests. Both routes require Python 3.12 or later. The CLI and electrical engine use only the standard library; the dashboard server needs the optional API dependencies.
+
+## Run the released dashboard (Python only)
+
+In an empty working folder, create an isolated environment and install the public `0.2.0a0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The URL pins the release asset and its SHA-256 hash; it does not rely on a PyPI publication of this project.
+
+Windows / PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.2.0a0/datacenter_twin_lab-0.2.0a0-py3-none-any.whl#sha256=0a6c56ce5fe5fd25d9886d35112eea56408450c8b7181e62b698b3c58a901261"
+.\.venv\Scripts\python.exe -m datacenter_twin serve
+```
+
+macOS / Linux:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.2.0a0/datacenter_twin_lab-0.2.0a0-py3-none-any.whl#sha256=0a6c56ce5fe5fd25d9886d35112eea56408450c8b7181e62b698b3c58a901261"
+.venv/bin/python -m datacenter_twin serve
+```
+
+Use a Python executable at version 3.12 or later; for example, replace the first Windows `python` with `py -3.12` if you use that launcher. Your Python installation must include pip and venv support. The initial installation needs network access to GitHub and the dependency package index. It installs the built interface and API dependencies; Git, Node, an API key and a cloud account are not required. The release pins FastAPI and Uvicorn; this convenient extra resolves their compatible transitive dependencies. Use the locked source workflow below when you need the repository's exact development dependency set.
+
+Open [127.0.0.1:8000](http://127.0.0.1:8000). Select **Generator failure / battery depletion**, run the scenario, and select the `607.8 s` battery-depleted event. Served IT power drops to zero until restoration at `900 s`. The source is synthetic and the tariff is fictional. Try **A-path maintenance / surviving overload** to see 665 kW served and 335 kW unserved during the outage interval. [The tutorial](tutorials/continuity-walkthrough.md) derives both results.
+
+Stop the server with Ctrl+C. If port 8000 is occupied, append `--port 8001` to the serve command and open port 8001. After stopping, you can run the bundled CLI preset in the same environment:
+
+```powershell
+# Windows / PowerShell
+.\.venv\Scripts\python.exe -m datacenter_twin simulate --preset generator_failure
+```
+
+```sh
+# macOS / Linux
+.venv/bin/python -m datacenter_twin simulate --preset generator_failure
+```
+
+The presets and catalogue ship in the wheel. Source-only files such as `data/scenarios/baseline-1mw.json` and the test suite require the checkout below. Avoid running the installed dashboard from inside an unbuilt source checkout, where Python can import that checkout instead of the installed package. The server binds to loopback; this is a local research tool with no physical controls or calibrated facility claims.
+
+## Run from source
+
+Clone the [public repository](https://github.com/mohammadrezwankhan/datacenter-twin-lab), then open a terminal in its root:
 
 ```sh
 python -m datacenter_twin --version

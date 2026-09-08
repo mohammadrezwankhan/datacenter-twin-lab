@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
-  "status": "validated_public_source",
+  "status": "validated_historical_release_snapshot",
+  "applies_to_public_revision": "42ede550e731619fefe4a4faef1ecbb6d87c304a",
+  "applies_to_release_tag": "v0.2.0a0",
+  "verification_scope": "The hashes and validation below describe the original tagged release, not later changes on main. The original manifest and release assets remain available at v0.2.0a0.",
   "source_repository": "mohammadrezwankhan/ai-datacenter-twin",
   "source_head": "426234da8686b6b142c07b4985b2353501fb2629",
   "source_method": "Allowlisted current working files, not a Git-object migration; file hashes are authoritative",
