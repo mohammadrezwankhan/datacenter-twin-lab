@@ -97,4 +97,3 @@ class BrowserHttpTests(unittest.TestCase):
                         {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": []},
                         {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": ["1", "1.0"]}):
             self.assertEqual(self.client.post("/api/v1/sweeps", json=payload).status_code, 422)
-
