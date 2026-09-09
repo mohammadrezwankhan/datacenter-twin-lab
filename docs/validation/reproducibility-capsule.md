@@ -7,9 +7,8 @@ physical equipment behavior.
 
 ## Re-run from source
 
-From the repository root, use Python 3.12 or newer. The commands are portable;
-the maintainer verification environment used the repository's
-
+From the repository root, use Python 3.12 or newer. Maintainer numerical
+verification used Python 3.12.14 on Windows.
 
 ```sh
 python -m unittest discover -s tests -v
