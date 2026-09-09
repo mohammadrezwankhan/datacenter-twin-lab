@@ -7,6 +7,7 @@ A reproducible, local-first power-continuity what-if simulator for engineers, re
 [**Open the zero-install demo →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Scenario catalog](docs/scenarios/index.md) · [Quickstart](docs/quickstart.md) · [Discuss a result](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions)
 
 [![Actual browser demo: change battery reserve, replay depletion and recovery, compare reserves, and export a report](docs/images/demo-walkthrough.gif)](https://mohammadrezwankhan.github.io/datacenter-twin-lab/)
+![Datacenter Twin Lab visual concept for the champion roadmap](docs/images/datacenter-twin-lab-cover-v1.png)
 
 21-second step recording of the actual Python browser demo. [Still image](docs/images/demo-preview.png) · [Transcript and capture recipe](docs/examples/demo-walkthrough.md). Waiting and pointer movement are omitted; this is not a speed benchmark.
 
