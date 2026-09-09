@@ -2,6 +2,24 @@
 
 For a zero-install first run, open the [browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/); it runs Python on your device and requires no account. See the [browser guide](engineering/browser-demo.md) for download size and privacy. For a local installation, choose the released dashboard to explore the model with Python and a browser, or use the source checkout to edit code and run the full tests. Both routes require Python 3.12 or later. The CLI and electrical engine use only the standard library; the dashboard server needs the optional API dependencies.
 
+## Run with uv
+
+If [uv is installed](https://docs.astral.sh/uv/getting-started/installation/), run the released CLI from an empty working folder with one command. `uvx` creates a cached, isolated environment; it downloads Python 3.12 if needed. Git, Node, and a source checkout are unnecessary.
+
+```sh
+uvx --python 3.12 --from "datacenter-twin-lab @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.3.0a0/datacenter_twin_lab-0.3.0a0-py3-none-any.whl#sha256=b951f6877fb323c8ff3a064558054383d4d1582e753e52c0a0c35b06a42739db" datacenter-twin simulate --preset generator_failure --format markdown
+```
+
+For the local dashboard, use the same released wheel with its API extra:
+
+```sh
+uvx --python 3.12 --from "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.3.0a0/datacenter_twin_lab-0.3.0a0-py3-none-any.whl#sha256=b951f6877fb323c8ff3a064558054383d4d1582e753e52c0a0c35b06a42739db" datacenter-twin serve
+```
+
+Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8001` if that port is occupied. These commands work in PowerShell and POSIX shells. They pin the GitHub wheel and its digest; this project is **not published on PyPI**. The API extra resolves compatible transitive dependencies from the package index. Use the locked source workflow for the exact development dependency set.
+
+The route was exercised with uv 0.12.11 and Python 3.12.14 on Windows, outside the checkout, including a real CLI report and dashboard run. For an installed Python 3.12+, `--python` can also take its executable path. See [uv's tool isolation and source options](https://docs.astral.sh/uv/guides/tools/). If you prefer pip, use the following route.
+
 ## Run the released dashboard (Python only)
 
 In an empty working folder, create an isolated environment and install the public `0.3.0a0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The URL pins the release asset and its SHA-256 hash; it does not rely on a PyPI publication of this project.
@@ -103,4 +121,4 @@ python scripts/verify_distribution.py dist --require-web
 
 The verifier expects exactly one project wheel in the selected directory. Use a separate directory for each retained version. The build retrieves the pinned setuptools backend if uncached. The verifier creates a temporary environment, installs the local wheel with `--no-index --no-deps`, checks import/version identity and exercises both entry points plus continuity and catalogue resources. Schema-1 samples are copied from this repository. The schema-2 demo and catalogue are package resources. `--require-web` also checks that the compiled dashboard is included; omit it for an intentional CLI-only wheel. The installed core needs no network; an installed dashboard server still requires the optional API dependencies.
 
-CI runs the core and API tests, frontend type check/build, and installed-wheel verification on Windows/Ubuntu with Python 3.12/3.14. Browser journeys run on Ubuntu/Python 3.12. Package publication to PyPI, containers and shared deployment are outside this delivery.
+CI runs the core and API tests, frontend type check/build, and installed-wheel verification on Windows/Ubuntu with Python 3.12/3.14. Browser journeys run on Ubuntu/Python 3.12. PyPI publication remains pending a configured owner publishing identity; the verified GitHub wheel supports both pip and uv today. Containers and shared deployment are outside this delivery.

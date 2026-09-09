@@ -1,0 +1,75 @@
+{
+  "kind": "actual-browser-step-recording",
+  "note": "Unannotated screenshots of real UI states; each held for 3 seconds. Timing omits downloads, waiting and intermediate pointer movement. Not a performance measurement.",
+  "source_base_revision": "96fcf002f69ef53b2298330b9ad96ae89807e491",
+  "source_file_sha256_lf": {
+    "apps/web/src/App.tsx": "dbeb4387b55c017968bcda0596c3009ac5c6f97323360f091faedb5e2c6da3d4",
+    "apps/web/src/RunTools.tsx": "88c9de3f6fa6133504fe0d570e3f2ed6222099b7abc0183bf77c4102e02c15e6",
+    "apps/web/src/styles.css": "f7ee90dfd584d1a5f3cd7bf4b875e5e2bd992794f138b65ba09bf4220143eb4f",
+    "apps/web/src/tokens.css": "50193e895bf17bb104523f3780c981aa82619a60dcebefe49d3ac4629315373e",
+    "apps/web/src/browser-worker.ts": "112121f74411a494023315421692522f65cc9204331bb15790177e37f5493230",
+    "apps/web/index.html": "e58e12cd5d6571ddd1583ccc8e3f7f169605e644262dcb0c738ce3123cec73ba",
+    "apps/web/package-lock.json": "a3f41a5454fb11a9f13b5074883c8238f29134080796b5417c3234a9831a33a8",
+    "apps/web/scripts/record-demo.mjs": "5401358f5f5a0a5de72ab1c710f51b9bb9d34d57c21fdd6edcb514ed2a2f5099"
+  },
+  "viewport": {
+    "width": 1280,
+    "height": 960
+  },
+  "frames": [
+    {
+      "path": "01-opening.png",
+      "description": "100 kWh initial reserve; default generator-failure scenario",
+      "delay_ms": 3000,
+      "sha256": "3d70d1655626e30777302782ac2279542de5cf76a7a612dbcb3e8af4197e8a5b"
+    },
+    {
+      "path": "02-depleted-100.png",
+      "description": "100 kWh case: IT power is zero after depletion at 607.8 s",
+      "delay_ms": 3000,
+      "sha256": "1946105a6da4fc931c511e98a652bb9533dea344e957474863b6201cf6261bbd"
+    },
+    {
+      "path": "03-edit-reserve.png",
+      "description": "Change initial reserve to 50 kWh; completed result still belongs to the previous run",
+      "delay_ms": 3000,
+      "sha256": "f38c30af2902ff95e7cd1ed0798ddde21a223010947517fcece760ec5de524f5"
+    },
+    {
+      "path": "04-depleted-50.png",
+      "description": "50 kWh case: pre-outage charging shifts depletion to 478.2675 s",
+      "delay_ms": 3000,
+      "sha256": "7915a4f6bfec7ee486f19c5517879999922d3f1eb3a55df77d3763bd7602e642"
+    },
+    {
+      "path": "05-recovery.png",
+      "description": "Utility recovers at 900 s and serves 1,000 kW",
+      "delay_ms": 3000,
+      "sha256": "be17646dfe58ccd37965334eb7f587f1c8fb2ecb42b62e37f1843920d971b4a3"
+    },
+    {
+      "path": "06-sensitivity.png",
+      "description": "Compare 0, 50, and 100 kWh initial reserves with all other inputs fixed",
+      "delay_ms": 3000,
+      "sha256": "514dca30c4d4ad878d3997435139fe37995df75d71eee4111b036534443984ac"
+    },
+    {
+      "path": "07-report.png",
+      "description": "Open the actual exported HTML report with its assumptions and input hash",
+      "delay_ms": 3000,
+      "sha256": "908f81b208a4db1d61741062678f58c20dde4ad86a65c1a3a050bc45c8ac4767"
+    }
+  ],
+  "initial_input_sha256": "202d1950bc8762c95216904dd9bbc890c1e1cdb51fe3f824e6e3d98f76410195",
+  "changed_input_sha256": "7d6ba4e2919be3714c753ef7ba22f6d278cf57dbc8be8bf5efdfaf6375d48775",
+  "report_sha256": "f279b75e7eac40ad5b36959493a85f360a132a475956ce22a77aa9c690f7e4ff",
+  "full_native_equality": true,
+  "browser_errors": [],
+  "gif_sha256": "5f200d1b88b558b38c08df442dbff4784eb62cdd136d5a995a1e5d8ec2f36b17",
+  "gif_bytes": 353625,
+  "encoding": {
+    "gifenc": "1.0.3",
+    "pngjs": "7.0.0",
+    "colors_per_frame": 256
+  }
+}

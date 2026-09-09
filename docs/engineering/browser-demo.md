@@ -30,6 +30,8 @@ npm --prefix apps/web exec playwright install chromium
 npm --prefix apps/web run test:demo
 ```
 
-If Python is not on PATH, set `TWIN_PYTHON` to its executable before the browser tests. The build lives in `.local/browser-demo-site` and uses the `/datacenter-twin-lab/` base path. Preview it with `npm --prefix apps/web exec vite preview -- --mode demo --host 127.0.0.1 --port 4174` and open `http://127.0.0.1:4174/datacenter-twin-lab/`.
+If Python is not on PATH, set `TWIN_PYTHON` to its executable before the browser tests. The build lives in `.local/browser-demo-site` and uses the `/datacenter-twin-lab/` base path. From `apps/web`, run `npx vite preview --mode demo --host 127.0.0.1 --port 4174` and open `http://127.0.0.1:4174/datacenter-twin-lab/`. Stop that preview before running `test:demo`, which starts its own server on the same port.
+
+The HTML entry includes a readable example and Python/documentation links before scripts load. If JavaScript is disabled, it explicitly directs visitors to those alternatives; it does not claim the interactive simulation works without JavaScript. Phone-width and JavaScript-disabled journeys are checked alongside browser/native equality. The [recorded walkthrough](../examples/demo-walkthrough.md) provides a small visual preview and a text transcript.
 
 `npm run build` in `apps/web` still produces the small loopback dashboard for the Python wheel. It does not include the browser Python runtime. See [third-party notices](../third-party/README.md) and the pinned dependency lockfile. The static deployment workflow requires native tests, browser/native equality, and browser journeys before uploading an artifact.
