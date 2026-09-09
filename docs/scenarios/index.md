@@ -1,5 +1,7 @@
 # Scenario catalog
 
+New to the electrical terms? Start with the [unit-aware glossary and kW/kWh example](glossary.md).
+
 These five presets are the bundled schema-2 synthetic continuity cases. Run them from the repository root with Python 3.12 or later:
 
 ```sh
