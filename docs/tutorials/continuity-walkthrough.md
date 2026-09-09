@@ -1,6 +1,6 @@
 # Surviving-path overload and finite battery ride-through
 
-![Datacenter Twin Lab visual concept for the champion roadmap](docs/images/datacenter-twin-lab-cover-v1.png)
+![Datacenter Twin Lab visual concept for the champion roadmap](../images/datacenter-twin-lab-cover-v1.png)
 
 
 

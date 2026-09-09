@@ -1,6 +1,6 @@
 # Scenario catalog
 
-![Datacenter Twin Lab visual concept for the champion roadmap](docs/images/datacenter-twin-lab-cover-v1.png)
+![Datacenter Twin Lab visual concept for the champion roadmap](../images/datacenter-twin-lab-cover-v1.png)
 
 New to the electrical terms? Start with the [unit-aware glossary and kW/kWh example](glossary.md).
 
