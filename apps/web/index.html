@@ -6,12 +6,55 @@
     <meta name="theme-color" content="#0b1018" />
     <meta
       name="description"
-      content="Explore a synthetic data center's electrical continuity, energy balance, and evidence."
+      content="A local-first power-continuity simulator. Change a synthetic battery reserve, replay generator failure and recovery, and export reproducible results."
     />
     <title>Datacenter Twin Lab</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main
+        style="max-width: 48rem; margin: 3rem auto; padding: 0 1.25rem; font: 1rem/1.6 system-ui"
+      >
+        <h1>Datacenter Twin Lab</h1>
+        <p>A reproducible, local-first power-continuity what-if simulator.</p>
+        <h2>A generator fails. How long does the battery last?</h2>
+        <p>
+          In the opening synthetic example, a 100 kWh battery serves a 1 MW load for 307.8 seconds
+          after utility and generator fail. Utility returns at 900 seconds elapsed. Change the
+          battery reserve to compare depletion and recovery, then export the calculation.
+        </p>
+        <p>
+          The interactive interface starts automatically when its scripts load. The hosted demo
+          needs JavaScript and WebAssembly and downloads about 14 MB on its first visit.
+          Calculations run on your device; no account is required.
+        </p>
+        <noscript>
+          <p>
+            <strong>JavaScript is disabled.</strong> Use the Python quickstart or read the worked
+            example below.
+          </p>
+        </noscript>
+        <p>
+          <a
+            href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md"
+            >Python quickstart</a
+          >
+          ·
+          <a
+            href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/tutorials/continuity-walkthrough.md"
+            >Worked example</a
+          >
+          ·
+          <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab"
+            >Source and documentation</a
+          >
+        </p>
+        <p>
+          This is an uncalibrated synthetic electrical model. It does not establish facility safety,
+          cooling or workload performance, certified uptime, or live equipment control.
+        </p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

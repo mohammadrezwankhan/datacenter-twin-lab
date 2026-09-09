@@ -1,8 +1,14 @@
 # Datacenter Twin Lab
 
-**A reproducible, local-first power-continuity what-if simulator for data-center engineers, researchers, Python developers, and educators.**
+**Replay a power failure, change the battery reserve, and explain the result.**
+
+A reproducible, local-first power-continuity what-if simulator for engineers, researchers, Python developers, and educators.
 
 [**Open the zero-install demo →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Scenario catalog](docs/scenarios/index.md) · [Quickstart](docs/quickstart.md) · [Discuss a result](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions)
+
+[![Actual browser demo: change battery reserve, replay depletion and recovery, compare reserves, and export a report](docs/images/demo-walkthrough.gif)](https://mohammadrezwankhan.github.io/datacenter-twin-lab/)
+
+21-second step recording of the actual Python browser demo. [Still image](docs/images/demo-preview.png) · [Transcript and capture recipe](docs/examples/demo-walkthrough.md). Waiting and pointer movement are omitted; this is not a speed benchmark.
 
 Alpha 0.3.0a0 · Python 3.12+ · Apache-2.0
 
@@ -10,17 +16,25 @@ Alpha 0.3.0a0 · Python 3.12+ · Apache-2.0
 
 ## A generator fails. How long does the battery last?
 
-Start with a synthetic 1 MW load and 100 kWh battery. Utility and generator fail at 300 seconds. The battery supplies IT for **307.8 seconds**, depletes at **607.8 seconds elapsed**, and utility restores service at **900 seconds**. The run accounts for **81.1667 kWh of unserved IT energy** with zero energy-balance residual.
+Start with a synthetic 1 MW load and 100 kWh battery. Utility and generator fail at 300 seconds. The battery supplies IT for **307.8 seconds**, depletes at **607.8 seconds elapsed**, and utility restores service at **900 seconds**.
 
-In the [browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/), change initial battery energy to 50 kWh, run again, jump to depletion and recovery, then export JSON or a report. The same Python engine runs on your device through WebAssembly. No installation, account, or simulation server is required; the first load downloads about 14 MB. [How it works and privacy](docs/engineering/browser-demo.md).
+Try a short experiment after the [demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) loads:
 
-These are reproducible synthetic calculations. The model is uncalibrated and does not predict cooling, GPU/workload performance, AC transients, protection coordination, certified uptime, or facility safety. It has no live equipment controls.
+1. Change **Initial battery** from **100** to **50 kWh**, then select **Run scenario**.
+2. Select **Battery depleted 478.3 s**: delivered IT power is **0 kW**.
+3. Select **Utility recovers 900 s**: delivered IT power is **1,000 kW**. Export a report or compare reserves below.
 
-![Actual local dashboard showing the synthetic electrical model](docs/images/overview.png)
+The same Python engine runs on your device through WebAssembly. No installation or account is needed; the first load downloads about 14 MB. Pre-outage charging explains why the 50 kWh case lasts until 478.2675 s. [Calculation and privacy](docs/engineering/browser-demo.md) · [Teaching notebook](docs/examples/battery-ride-through.ipynb).
+
+| You can use it to | Model boundary |
+| --- | --- |
+| Compare synthetic utility, generator, battery, and path failures | Assumed equipment ratings and efficiencies; no facility calibration |
+| Reproduce event times, energy ledgers, and sensitivity reports | Electrical continuity only; no AC transients, protection, cooling, or workload prediction |
+| Learn, inspect, and share a calculation locally | No physical controls, certified uptime, or facility safety assessment |
 
 ## Reproduce the result in Python
 
-The core uses only the standard library. With Python 3.12+:
+The core uses only the standard library. [Run the released CLI or dashboard with one uv command](docs/quickstart.md#run-with-uv), or use Python 3.12+ and a source checkout:
 
 ```sh
 git clone https://github.com/mohammadrezwankhan/datacenter-twin-lab.git
@@ -46,24 +60,9 @@ The [worked tutorial](docs/tutorials/continuity-walkthrough.md) develops the bat
 
 ## Use the local dashboard
 
-The [Python-only released-wheel quickstart](docs/quickstart.md#run-the-released-dashboard-python-only) installs the 0.3.0a0 dashboard, including reports and sensitivity controls, without Node.
+The [released-wheel quickstart](docs/quickstart.md#run-the-released-dashboard-python-only) installs the dashboard with Python and pip. The [uv route](docs/quickstart.md#run-with-uv) creates its isolated environment automatically. Both include reports and sensitivity controls without Node.
 
-To build this version locally, install Node 24 and use an isolated Python environment:
-
-```sh
-python -m venv .venv
-```
-
-Activate it (`.venv\Scripts\Activate.ps1` in PowerShell; `source .venv/bin/activate` on POSIX), then:
-
-```sh
-python -m pip install -r requirements-api.lock
-npm --prefix apps/web ci --ignore-scripts
-npm --prefix apps/web run build
-python -m datacenter_twin serve
-```
-
-Open `http://127.0.0.1:8000`. Installation downloads dependencies; calculations use the local engine. The API remains bound to loopback. See the [security boundary](SECURITY.md).
+For development, follow the [locked source build](docs/quickstart.md#local-dashboard). Open `http://127.0.0.1:8000` after starting the server. Calculations use the local engine and the API binds to loopback. See the [security boundary](SECURITY.md).
 
 ## Validate or contribute
 

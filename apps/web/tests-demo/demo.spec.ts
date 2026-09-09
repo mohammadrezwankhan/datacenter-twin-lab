@@ -103,3 +103,30 @@ test('phone visitor can run and inspect a scenario without horizontal overflow',
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: 'test-results/browser-demo-phone.png', fullPage: true });
 });
+
+test('a visitor without JavaScript can read the example and find the Python route', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    viewport: { width: 390, height: 844 },
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto('http://127.0.0.1:4174/datacenter-twin-lab/');
+    await expect(
+      page.getByRole('heading', { name: 'Datacenter Twin Lab', exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText('JavaScript is disabled.', { exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Python quickstart' })).toHaveAttribute(
+      'href',
+      'https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md',
+    );
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({ path: 'test-results/browser-demo-no-javascript.png', fullPage: true });
+  } finally {
+    await context.close();
+  }
+});

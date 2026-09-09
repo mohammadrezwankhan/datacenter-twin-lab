@@ -12,6 +12,8 @@ python -m datacenter_twin simulate --preset shared_domain
 
 Each run reports a stable input hash, event log, interval energy ledger, units, warnings, and an explicit synthetic/uncalibrated boundary. The default fixture has a 1,000 kW IT request, 1,800 s duration, 0.95 distribution efficiency, 100 kWh initial battery energy, 0.90 discharge efficiency, and a 30 s generator start delay. The scenarios are teaching and regression fixtures; they do not represent equipment ratings, a facility, a workload, cooling, AC transients, certification, or physical controls.
 
+For a runnable first lesson, see the [battery ride-through teaching notebook](../examples/battery-ride-through.ipynb) and its [running instructions](../examples/battery-ride-through.md). It independently derives the default `generator_failure` result and contrasts the charging-enabled and charging-disabled 50 kWh inputs.
+
 | Preset | Event | Expected service result | Hand calculation / check |
 | --- | --- | --- | --- |
 | [`normal`](normal.md) | No outage events | 500 kWh served; 0 kWh unserved; battery ends at 100 kWh | `1,000 kW × 0.5 h = 500 kWh`; gross input is `1,000 / 0.95 = 1,052.631... kW` |
