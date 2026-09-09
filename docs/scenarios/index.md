@@ -1,5 +1,7 @@
 # Scenario catalog
 
+![Datacenter Twin Lab visual concept for the champion roadmap](docs/images/datacenter-twin-lab-cover-v1.png)
+
 New to the electrical terms? Start with the [unit-aware glossary and kW/kWh example](glossary.md).
 
 These five presets are the bundled schema-2 synthetic continuity cases. Run them from the repository root with Python 3.12 or later:

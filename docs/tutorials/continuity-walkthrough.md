@@ -1,5 +1,7 @@
 # Surviving-path overload and finite battery ride-through
 
+![Datacenter Twin Lab visual concept for the champion roadmap](docs/images/datacenter-twin-lab-cover-v1.png)
+
 
 
 Maintainer: **Mohammad Rezwan Khan, maintainer of `datacenter-twin-lab`.** This tutorial uses the repository's synthetic electrical example; it is not an engineering approval or a real-site calibration.

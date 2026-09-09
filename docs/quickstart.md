@@ -1,5 +1,7 @@
 # Quickstart
 
+![Datacenter Twin Lab visual concept for the champion roadmap](docs/images/datacenter-twin-lab-cover-v1.png)
+
 For a zero-install first run, open the [browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/); it runs Python on your device and requires no account. See the [browser guide](engineering/browser-demo.md) for download size and privacy. For a local installation, choose the released dashboard to explore the model with Python and a browser, or use the source checkout to edit code and run the full tests. Both routes require Python 3.12 or later. The CLI and electrical engine use only the standard library; the dashboard server needs the optional API dependencies.
 
 ## Run with uv
