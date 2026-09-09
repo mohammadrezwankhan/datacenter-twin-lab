@@ -69,3 +69,61 @@ jobs:
             apps/web/test-results
             apps/web/playwright-report
           retention-days: 14
+
+  browser-demo:
+    name: Browser Python demo
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm --prefix apps/web ci --ignore-scripts
+      - run: python scripts/prepare_browser_demo.py
+      - run: npm --prefix apps/web run build:demo
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+      - run: npm --prefix apps/web run test:demo
+      - name: Retain browser and engine evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-python-evidence
+          path: |
+            apps/web/test-results
+            apps/web/playwright-report-demo
+            .local/browser-demo-site/engine-manifest.json
+          include-hidden-files: true
+          retention-days: 14
+      - name: Upload tested static demo
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'mohammadrezwankhan/datacenter-twin-lab'
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: .local/browser-demo-site
+
+  deploy-demo:
+    name: Publish static demo
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'mohammadrezwankhan/datacenter-twin-lab'
+    needs: browser-demo
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Deploy verified artifact
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

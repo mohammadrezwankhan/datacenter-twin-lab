@@ -17,6 +17,7 @@ from .continuity import simulate_continuity
 from .demo import PRESETS, demo_scenario
 from .engine import simulate
 from .topology import SiteScenario
+from .browser import scenario_report, scenario_sweep
 
 
 def create_app() -> FastAPI:
@@ -78,6 +79,18 @@ def create_app() -> FastAPI:
     @app.get("/api/v1/catalog")
     def catalog():
         return load_catalog()
+
+    @app.post("/api/v1/reports", summary="Render a reproducible report from a validated scenario")
+    async def report(request: Request):
+        data = await payload(request)
+        async with slots:
+            return await run_in_threadpool(scenario_report, data)
+
+    @app.post("/api/v1/sweeps", summary="Run a bounded one-parameter sensitivity sweep")
+    async def sweep(request: Request):
+        data = await payload(request)
+        async with slots:
+            return await run_in_threadpool(scenario_sweep, data)
 
     @app.post("/api/v1/quotes/normalize", summary="Normalize an assumed rate using the selected offering's declared billing unit")
     async def quote(request: Request):

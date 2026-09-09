@@ -25,4 +25,5 @@ Thumbs.db
 node_modules/
 datacenter_twin/web/
 playwright-report/
+playwright-report-demo/
 test-results/

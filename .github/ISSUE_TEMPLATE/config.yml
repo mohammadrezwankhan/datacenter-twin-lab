@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and reproducibility discussion
+    url: https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions
+    about: Discuss synthetic assumptions, teaching use, and independent calculations.
+  - name: Security reporting
+    url: https://github.com/mohammadrezwankhan/datacenter-twin-lab/security/policy
+    about: Use the security policy for confidential vulnerabilities; keep sensitive inputs private.

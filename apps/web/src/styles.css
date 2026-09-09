@@ -1,4 +1,37 @@
 @import url('./tokens.css');
+.demo-intro,
+.run-tools {
+  padding: 22px;
+  margin-bottom: 18px;
+}
+.demo-intro {
+  border-color: #345970 !important;
+  background: linear-gradient(125deg, #132837, #13202d) !important;
+}
+.demo-intro h2 {
+  font-size: 23px;
+  margin-top: 6px;
+}
+.demo-intro p {
+  max-width: 1000px;
+}
+.tool-actions,
+.demo-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.demo-stages button {
+  flex: 1;
+  min-width: 155px;
+  text-align: left;
+}
+.demo-stages strong {
+  display: block;
+  color: var(--accent);
+  font-size: 21px;
+}
 * {
   box-sizing: border-box;
 }

@@ -4,6 +4,7 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 import unittest
+from datacenter_twin import __version__
 
 ROOT = Path(__file__).resolve().parents[1]
 BASE = "data/scenarios/baseline-1mw.json"
@@ -57,7 +58,7 @@ class CliTests(unittest.TestCase):
     def test_version(self):
         completed = self.command("--version")
         self.assertEqual(completed.returncode, 0)
-        self.assertEqual(completed.stdout.strip(), "0.2.0a0")
+        self.assertEqual(completed.stdout.strip(), __version__)
 
     def test_continuity_presets_and_input_protection(self):
         from datacenter_twin.demo import PRESETS

@@ -1,14 +1,16 @@
 {
   "name": "datacenter-twin-dashboard",
-  "version": "0.2.0-alpha.0",
+  "version": "0.3.0-alpha.0",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "test:e2e": "playwright test",
-    "format": "prettier --write src tests *.ts *.json index.html",
-    "format:check": "prettier --check src tests *.ts *.json index.html"
+    "format": "prettier --write src tests tests-demo *.ts *.json index.html",
+    "format:check": "prettier --check src tests tests-demo *.ts *.json index.html",
+    "build:demo": "tsc --noEmit && vite build --mode demo",
+    "test:demo": "playwright test --config playwright.demo.config.ts"
   },
   "dependencies": {
     "react": "19.2.8",
@@ -20,6 +22,7 @@
     "@types/react-dom": "19.2.7",
     "@vitejs/plugin-react": "6.1.1",
     "prettier": "3.9.6",
+    "pyodide": "314.0.6",
     "typescript": "7.0.2",
     "vite": "8.2.2"
   }

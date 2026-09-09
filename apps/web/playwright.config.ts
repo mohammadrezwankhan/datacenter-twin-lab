@@ -7,7 +7,7 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:8000',
+    baseURL: 'http://127.0.0.1:8123',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -18,10 +18,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `"${process.env.TWIN_PYTHON || 'python'}" -m datacenter_twin serve --port 8000`,
+    command: `"${process.env.TWIN_PYTHON || 'python'}" -m datacenter_twin serve --port 8123`,
     cwd: '../..',
-    url: 'http://127.0.0.1:8000/api/v1/health',
-    reuseExistingServer: !process.env.CI,
+    url: 'http://127.0.0.1:8123/api/v1/health',
+    reuseExistingServer: false,
     timeout: 30000,
   },
 });

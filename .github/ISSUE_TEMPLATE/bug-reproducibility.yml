@@ -1,0 +1,60 @@
+name: Bug or numerical mismatch
+description: Report a reproducible behavior difference or accounting mismatch
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please remove credentials, private manuals, customer data, and sensitive facility details. This project models synthetic scenarios and does not validate physical equipment.
+  - type: input
+    id: revision
+    attributes:
+      label: Release or commit
+      description: Exact tag, commit, or wheel version used.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Python version, operating system, and whether you used source or a wheel.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and preset
+      description: Include the exact command and preset, or attach a sanitized scenario.
+      render: shell
+    validations:
+      required: true
+  - type: input
+    id: input_hash
+    attributes:
+      label: Input SHA-256
+      description: Input hash from the run, if available. Do not upload a private input.
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+      description: Include exact values, units, and the independent equation or source of expectation.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed result
+      description: Include exact values, units, warnings, and relevant output excerpt.
+    validations:
+      required: true
+  - type: textarea
+    id: sanitized_export
+    attributes:
+      label: Sanitized export or reproduction
+      description: Paste or link only a sanitized, shareable reproduction.
+    validations:
+      required: false
