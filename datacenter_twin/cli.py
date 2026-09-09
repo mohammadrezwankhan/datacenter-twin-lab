@@ -10,6 +10,7 @@ from . import __version__
 from .contracts import InputError, load_json_document, load_scenario
 from .engine import compare, simulate
 from .output import write_result
+from .reporting import render_html, render_markdown
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,10 +26,19 @@ def main(argv: list[str] | None = None) -> int:
     source = continuity.add_mutually_exclusive_group()
     source.add_argument("--scenario", type=Path)
     source.add_argument("--preset", default="utility_loss", choices=["normal","utility_loss","generator_failure","path_maintenance","shared_domain"])
+    continuity.add_argument("--format", choices=["json", "markdown", "html"], default="json")
+    sweep = commands.add_parser("sweep", help="Sweep one field of a schema-v2 electrical continuity scenario")
+    sweep_source = sweep.add_mutually_exclusive_group()
+    sweep_source.add_argument("--scenario", type=Path)
+    sweep_source.add_argument("--preset", default="generator_failure", choices=["normal", "utility_loss", "generator_failure", "path_maintenance", "shared_domain"])
+    sweep.add_argument("--parameter", required=True, choices=["battery_initial_kwh", "it_demand_kw",
+                                                                "generator_start_delay_s", "distribution_efficiency"])
+    sweep.add_argument("--values", nargs="+", required=True, help="One to twenty decimal values in caller order")
+    sweep.add_argument("--format", choices=["json", "markdown", "html"], default="json")
     serve = commands.add_parser("serve", help="Serve the local API and built dashboard on loopback")
     serve.add_argument("--port", type=int, default=8000)
-    for command in (run, comparison, continuity):
-        command.add_argument("--output", type=Path, help="Write a JSON result to this path")
+    for command in (run, comparison, continuity, sweep):
+        command.add_argument("--output", type=Path, help="Write the selected result format to this path")
         command.add_argument("--force", action="store_true", help="Replace an existing result file")
     args = parser.parse_args(argv)
     if args.command == "serve":
@@ -50,15 +60,37 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "compare":
             input_paths = [args.baseline, args.alternative]
             result = compare(load_scenario(args.baseline), load_scenario(args.alternative))
-        else:
+        elif args.command == "simulate":
             from .continuity import simulate_continuity
             from .demo import demo_scenario
             from .topology import SiteScenario
             input_paths = [args.scenario] if args.scenario else []
             scenario = SiteScenario.from_dict(load_json_document(args.scenario)) if args.scenario else demo_scenario(args.preset)
             result = simulate_continuity(scenario).to_dict()
-        payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
-        content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
+            if args.format == "markdown":
+                content = render_markdown(result)
+            elif args.format == "html":
+                content = render_html(result)
+            else:
+                payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
+                content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
+        else:
+            from .demo import demo_scenario
+            from .sensitivity import sweep_continuity
+            from .topology import SiteScenario
+            input_paths = [args.scenario] if args.scenario else []
+            scenario = SiteScenario.from_dict(load_json_document(args.scenario)) if args.scenario else demo_scenario(args.preset)
+            result = sweep_continuity(scenario, args.parameter, args.values)
+            if args.format == "markdown":
+                content = render_markdown(result)
+            elif args.format == "html":
+                content = render_html(result)
+            else:
+                payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
+                content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
+        if args.command in ("run", "compare"):
+            payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
+            content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
         if args.output:
             write_result(args.output, content, protected_paths=input_paths, force=args.force)
             print(f"Saved synthetic planning result: {args.output}")

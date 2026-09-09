@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "datacenter-twin-lab"
 dynamic = ["version"]
-description = "Synthetic electrical continuity, energy and cost simulation with an optional local dashboard"
+description = "Reproducible local-first power-continuity what-if simulation and reports"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"

@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import type { Asset, Catalog, Interval, Run, SiteScenario } from './types';
 import { Evidence } from './Evidence';
 import { n, request } from './client';
+import { RunTools } from './RunTools';
+
+const browserDemo = import.meta.env.MODE === 'demo';
+const initialPreset = browserDemo ? 'generator_failure' : 'utility_loss';
 
 const clock = (seconds: string | number) =>
   `${Math.floor(Number(seconds) / 60)
@@ -313,7 +317,7 @@ export function App() {
     [run, setRun] = useState<Run | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null),
     [presets, setPresets] = useState<{ id: string; name: string }[]>([]);
-  const [preset, setPreset] = useState('utility_loss'),
+  const [preset, setPreset] = useState(initialPreset),
     [busy, setBusy] = useState(true),
     [error, setError] = useState('');
   const [cursor, setCursor] = useState(0),
@@ -331,7 +335,7 @@ export function App() {
         const [p, c, d] = await Promise.all([
           request<typeof presets>('presets', controller.signal),
           request<Catalog>('catalog', controller.signal),
-          request<SiteScenario>('demo', controller.signal),
+          request<SiteScenario>(`demo?preset=${initialPreset}`, controller.signal),
         ]);
         const r = await request<Run>('simulations', controller.signal, d);
         setPresets(p);
@@ -442,11 +446,11 @@ export function App() {
           ))}
         </nav>
         <div className="sidebar-bottom">
-          <span className="status-dot" /> Local workspace
+          <span className="status-dot" /> {browserDemo ? 'Browser workspace' : 'Local workspace'}
           <p>
             Synthetic reference site
             <br />
-            Engine {run?.engine_version || '0.2.0a0'}
+            Engine {run?.engine_version || 'loading'}
           </p>
           <span className="mini-tag">No live equipment</span>
         </div>
@@ -492,6 +496,58 @@ export function App() {
               </button>
             </div>
           </div>
+          {browserDemo && (
+            <section className="panel demo-intro" aria-label="Start here">
+              <div className="eyebrow">NO INSTALLATION · RUNS ON YOUR DEVICE</div>
+              <h2>Can the battery bridge a failed generator?</h2>
+              <p>
+                Start with a synthetic 1 MW site. Both utility and generator fail at 300 s; utility
+                returns at 900 s. Change the initial battery from 100 to 50 kWh, run again, and
+                export the result.
+              </p>
+              <p>
+                The original Python engine runs in this browser. Inputs stay on your device. This is
+                a synthetic electrical model; facility calibration, cooling and GPU performance are
+                outside its scope.
+              </p>
+              <div className="tool-actions">
+                <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/scenarios/index.md">
+                  Scenario catalog ↗
+                </a>
+                <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions">
+                  Share a reproducible finding ↗
+                </a>
+              </div>
+              {run && run.scenario.id === 'demo-generator_failure' && (
+                <div className="demo-stages">
+                  {[
+                    ['Supply fails', 300],
+                    [
+                      'Battery depleted',
+                      run.events.find((e) => e.action === 'battery_depleted')?.at_s,
+                    ],
+                    ['Utility recovers', 900],
+                  ].map(
+                    ([label, at]) =>
+                      at !== undefined && (
+                        <button
+                          key={label}
+                          onClick={() => {
+                            setPlaying(false);
+                            const index = run.intervals.findIndex(
+                              (interval) => Number(interval.start_s) >= Number(at),
+                            );
+                            setCursor(Math.max(0, index));
+                          }}
+                        >
+                          {label} <strong>{n(at, 1)} s</strong>
+                        </button>
+                      ),
+                  )}
+                </div>
+              )}
+            </section>
+          )}
           {error && (
             <div role="alert" className="error-banner">
               {error}
@@ -505,7 +561,9 @@ export function App() {
           )}
           {!run && !error && (
             <div className="panel loading" role="status">
-              Preparing the reference simulation…
+              {browserDemo
+                ? 'Loading browser Python (about 14 MB on first visit), then calculating the scenario…'
+                : 'Preparing the reference simulation…'}
             </div>
           )}
           {run && row && draft && (
@@ -834,6 +892,7 @@ export function App() {
                     </div>
                   </section>
                   {baseline && <Compare baseline={baseline} run={run} />}
+                  <RunTools run={run} />
                   <details className="panel assumptions">
                     <summary>
                       Model boundary & run evidence <span>Synthetic · uncalibrated</span>
@@ -857,6 +916,11 @@ export function App() {
           <footer className="footer">
             <span>Datacenter Twin Lab</span>
             <span>Synthetic planning · uncalibrated · electrical boundary only</span>
+            {browserDemo && (
+              <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/engineering/browser-demo.md">
+                Privacy, runtime & source
+              </a>
+            )}
           </footer>
         </main>
       </div>

@@ -1,0 +1,53 @@
+name: First-run reproducibility help
+description: Report a setup or first-run problem with enough context to reproduce it
+title: "[first-run] "
+labels:
+  - help wanted
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with the [quickstart](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md). Remove credentials and private data before posting.
+  - type: input
+    id: revision
+    attributes:
+      label: Release or commit
+      description: Exact tag, commit, or wheel version.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, pip version, and source or wheel path. Include Node/browser versions only if using the dashboard.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps and command
+      description: Include the commands from a clean or clearly described environment and the first failing step.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected first-run result
+      description: What did the quickstart say should happen? Include units or URL/port where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Observed result
+      description: Include the complete concise error and any sanitized output.
+    validations:
+      required: true
+  - type: textarea
+    id: input_hash
+    attributes:
+      label: Input hash or sanitized export
+      description: Add an input SHA-256 or sanitized export only when relevant; do not upload private inputs.
+    validations:
+      required: false

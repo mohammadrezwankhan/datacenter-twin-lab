@@ -1,0 +1,46 @@
+name: Synthetic scenario proposal
+description: Propose a bounded teaching or reproducibility scenario
+title: "[scenario] "
+labels:
+  - scenario
+  - good first issue
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Proposals must remain synthetic and local-first. Do not include private facility data, customer telemetry, credentials, licensed standards text, or claims of calibration, certification, uptime, cooling, workload, or physical safety.
+  - type: textarea
+    id: question
+    attributes:
+      label: User question
+      description: State the one continuity or energy question this scenario would answer.
+    validations:
+      required: true
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Synthetic assumptions and units
+      description: List topology, capacities, efficiencies, demand, event times, and source/provenance IDs. Mark unknowns explicitly.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Independently derived expected result
+      description: Give a hand calculation with units and the expected warning, event, served/unserved load, or energy balance.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-goals and boundary
+      description: State what the scenario does not model and why it must not be read as facility validation.
+    validations:
+      required: true
+  - type: textarea
+    id: contribution
+    attributes:
+      label: Proposed contribution shape
+      description: Identify the fixture/docs/test files you would change and how a clean run would verify them.
+    validations:
+      required: true

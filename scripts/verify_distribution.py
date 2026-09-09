@@ -24,6 +24,8 @@ def main() -> int:
         if any(name.endswith(".docx") or any(part in {"docs", "planning", "campaign"} for part in Path(name).parts) for name in archive.namelist()):
             raise RuntimeError("Private source material must not be included in the wheel")
         web_files = [name for name in archive.namelist() if name.startswith("datacenter_twin/web/")]
+        if web_files and "datacenter_twin/web/THIRD-PARTY-NOTICES.txt" not in web_files:
+            raise RuntimeError("Bundled dashboard must retain its React/React DOM/Scheduler notices")
         if args.require_web and ("datacenter_twin/web/index.html" not in web_files or
                 not any(name.endswith(".js") for name in web_files) or not any(name.endswith(".css") for name in web_files)):
             raise RuntimeError("Build apps/web before building a dashboard distribution")
@@ -65,6 +67,13 @@ def main() -> int:
             raise RuntimeError("Installed continuity engine failed its outage fixture")
         if not any(event["action"] == "battery_depleted" for event in result["events"]):
             raise RuntimeError("Installed preset failed to replay battery depletion")
+        report = execute(str(console), "simulate", "--preset", "generator_failure", "--format", "html")
+        if result["input_sha256"] not in report or "607.8" not in report:
+            raise RuntimeError("Installed report omitted result provenance or depletion evidence")
+        sweep = json.loads(execute(str(console), "sweep", "--preset", "generator_failure",
+                                  "--parameter", "battery_initial_kwh", "--values", "0", "50", "100"))["result"]
+        if len(sweep["runs"]) != 3 or sweep["runs"][2]["input_sha256"] != result["input_sha256"]:
+            raise RuntimeError("Installed sensitivity sweep diverged from the base preset")
         catalog = json.loads(execute(str(python), "-I", "-c",
             "import json; from datacenter_twin.catalog import load_catalog; print(json.dumps(load_catalog()))"))
         if {offer["provider"] for offer in catalog["cloud_offers"]} != {"AWS", "Azure", "OCI"}:

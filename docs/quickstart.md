@@ -1,16 +1,16 @@
 # Quickstart
 
-Choose the released dashboard to explore the model with Python and a browser, or use the source checkout to edit code and run the full tests. Both routes require Python 3.12 or later. The CLI and electrical engine use only the standard library; the dashboard server needs the optional API dependencies.
+For a zero-install first run, open the [browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/); it runs Python on your device and requires no account. See the [browser guide](engineering/browser-demo.md) for download size and privacy. For a local installation, choose the released dashboard to explore the model with Python and a browser, or use the source checkout to edit code and run the full tests. Both routes require Python 3.12 or later. The CLI and electrical engine use only the standard library; the dashboard server needs the optional API dependencies.
 
 ## Run the released dashboard (Python only)
 
-In an empty working folder, create an isolated environment and install the public `0.2.0a0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The URL pins the release asset and its SHA-256 hash; it does not rely on a PyPI publication of this project.
+In an empty working folder, create an isolated environment and install the public `0.3.0a0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The URL pins the release asset and its SHA-256 hash; it does not rely on a PyPI publication of this project.
 
 Windows / PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.2.0a0/datacenter_twin_lab-0.2.0a0-py3-none-any.whl#sha256=0a6c56ce5fe5fd25d9886d35112eea56408450c8b7181e62b698b3c58a901261"
+.\.venv\Scripts\python.exe -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.3.0a0/datacenter_twin_lab-0.3.0a0-py3-none-any.whl#sha256=b951f6877fb323c8ff3a064558054383d4d1582e753e52c0a0c35b06a42739db"
 .\.venv\Scripts\python.exe -m datacenter_twin serve
 ```
 
@@ -18,7 +18,7 @@ macOS / Linux:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.2.0a0/datacenter_twin_lab-0.2.0a0-py3-none-any.whl#sha256=0a6c56ce5fe5fd25d9886d35112eea56408450c8b7181e62b698b3c58a901261"
+.venv/bin/python -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.3.0a0/datacenter_twin_lab-0.3.0a0-py3-none-any.whl#sha256=b951f6877fb323c8ff3a064558054383d4d1582e753e52c0a0c35b06a42739db"
 .venv/bin/python -m datacenter_twin serve
 ```
 
