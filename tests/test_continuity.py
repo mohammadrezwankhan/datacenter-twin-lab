@@ -22,27 +22,42 @@ class TopologyTests(unittest.TestCase):
             data = deepcopy(self.data)
             if alteration == "duplicate": data["assets"][1]["id"] = "utility"
             elif alteration == "missing": data["dependencies"][0]["target"] = "missing"
-            elif alteration == "cycle": data["dependencies"].append({"source":"it-bus","target":"main-bus","relation":"feeds"})
-            elif alteration == "charges": data["dependencies"] = [edge for edge in data["dependencies"] if edge["relation"] != "charges"]
-            else: data["dependencies"] = [edge for edge in data["dependencies"] if edge["source"] != "generator"]
-            with self.subTest(alteration=alteration), self.assertRaises(InputError): SiteScenario.from_dict(data)
+            elif alteration == "cycle":
+                data["dependencies"].append(
+                    {"source": "it-bus", "target": "main-bus", "relation": "feeds"}
+                )
+            elif alteration == "charges":
+                data["dependencies"] = [
+                    edge for edge in data["dependencies"] if edge["relation"] != "charges"
+                ]
+            else:
+                data["dependencies"] = [
+                    edge for edge in data["dependencies"] if edge["source"] != "generator"
+                ]
+            with self.subTest(alteration=alteration), self.assertRaises(InputError):
+                SiteScenario.from_dict(data)
 
     def test_units_bounds_and_invalid_metadata(self):
         for values in ({"distribution_efficiency":"1.01"}, {"battery_initial_kwh":"101"},
                        {"duration_s":True}, {"duration_s":86400,"step_s":1}, {"schema_version":1},
                        {"tariff_per_kwh":"NaN"}, {"it_demand_kw":-1}, {"currency":"GBP"}):
-            with self.subTest(values=values), self.assertRaises(InputError): SiteScenario.from_dict({**self.data, **values})
+            with self.subTest(values=values), self.assertRaises(InputError):
+                SiteScenario.from_dict({**self.data, **values})
         self.data["assets"][0]["capacity_kva"] = 1500
         with self.assertRaises(InputError): SiteScenario.from_dict(self.data)
 
     def test_event_targets_and_end_boundary(self):
         for event in (Event(0,"asset_down","missing",None), Event(1800,"asset_down","utility",None),
                       Event(0,"set_demand","battery",10)):
-            with self.subTest(event=event), self.assertRaises(InputError): replace(demo_scenario(), events=(event,))
+            with self.subTest(event=event), self.assertRaises(InputError):
+                replace(demo_scenario(), events=(event,))
 
     def test_requires_cycle_is_rejected(self):
         base = demo_scenario()
-        edges = base.dependencies + (Dependency("path-a","path-b","requires"), Dependency("path-b","path-a","requires"))
+        edges = base.dependencies + (
+            Dependency("path-a", "path-b", "requires"),
+            Dependency("path-b", "path-a", "requires"),
+        )
         with self.assertRaisesRegex(InputError,"requires cycle"): replace(base, dependencies=edges)
 
     def test_charging_path_and_battery_power_limits(self):
@@ -50,7 +65,12 @@ class TopologyTests(unittest.TestCase):
         with self.assertRaisesRegex(InputError,"electrical power rating"):
             replace(base, battery_charge_kw=1201)
         bus = Asset("isolated", "Isolated bus", "bus", 100, ("isolated",), ("test",))
-        edges = tuple(Dependency("isolated","battery","charges") if e.relation == "charges" else e for e in base.dependencies)
+        edges = tuple(
+            Dependency("isolated", "battery", "charges")
+            if edge.relation == "charges"
+            else edge
+            for edge in base.dependencies
+        )
         with self.assertRaisesRegex(InputError,"charging bus"):
             replace(base, assets=base.assets+(bus,), dependencies=edges)
 
@@ -102,14 +122,27 @@ class ContinuityTests(unittest.TestCase):
 
     def test_requires_dependencies_propagate_unavailability(self):
         base = demo_scenario("normal")
-        run = simulate_continuity(replace(base, dependencies=base.dependencies+(Dependency("path-a","path-b","requires"),),
-                                         events=(Event(0,"asset_down","path-a",None),))).to_dict()
+        run = simulate_continuity(
+            replace(
+                base,
+                dependencies=base.dependencies
+                + (Dependency("path-a", "path-b", "requires"),),
+                events=(Event(0, "asset_down", "path-a", None),),
+            )
+        ).to_dict()
         self.assertEqual(run["intervals"][0]["served_it_kw"], "0")
 
     def test_charging_uses_only_spare_grid_power(self):
         base = demo_scenario("normal")
         assets = tuple(replace(a,capacity_kw=1000) if a.kind == "utility" else a for a in base.assets)
-        run = simulate_continuity(replace(base, assets=assets, distribution_efficiency=1, battery_initial_kwh=50)).to_dict()
+        run = simulate_continuity(
+            replace(
+                base,
+                assets=assets,
+                distribution_efficiency=1,
+                battery_initial_kwh=50,
+            )
+        ).to_dict()
         self.assertEqual(run["summary"]["battery_final_kwh"], "50")
         self.assertTrue(all(row["battery_charge_kw"] == "0" for row in run["intervals"]))
 
@@ -121,20 +154,93 @@ class ContinuityTests(unittest.TestCase):
 
     def test_energy_balance_all_presets_and_battery_bounds(self):
         for preset in PRESETS:
-            run = self.run_case(preset)
+            scenario = demo_scenario(preset)
+            run = simulate_continuity(scenario).to_dict()
             for row in run["intervals"]:
                 with self.subTest(preset=preset, at=row["start_s"]):
                     energy = {key:F(value) for key,value in row["energy"].items()}
-                    self.assertLess(abs(energy["requested_it_kwh"]-energy["served_it_kwh"]-energy["unserved_it_kwh"]), F(1,10**80))
+                    self.assertLess(
+                        abs(
+                            energy["requested_it_kwh"]
+                            - energy["served_it_kwh"]
+                            - energy["unserved_it_kwh"]
+                        ),
+                        F(1, 10**80),
+                    )
                     self.assertEqual(row["energy_balance_residual_kwh"], "0")
                     # Independently reconstruct the boundary from exported terms, not its residual field.
                     incoming = energy["grid_kwh"] + energy["generator_kwh"]
                     accounted = sum(energy[key] for key in ("served_it_kwh", "battery_stored_change_kwh",
                         "distribution_loss_kwh", "battery_charge_loss_kwh", "battery_discharge_loss_kwh"))
                     self.assertLess(abs(incoming-accounted), F(1,10**80))
-                    self.assertLess(abs(F(row["battery_end_kwh"])-F(row["battery_start_kwh"])-energy["battery_stored_change_kwh"]), F(1,10**80))
-                    self.assertTrue(0 <= F(row["battery_end_kwh"]) <= 100)
+                    self.assertLess(
+                        abs(
+                            F(row["battery_end_kwh"])
+                            - F(row["battery_start_kwh"])
+                            - energy["battery_stored_change_kwh"]
+                        ),
+                        F(1, 10**80),
+                    )
+                    self.assertTrue(
+                        0 <= F(row["battery_end_kwh"]) <= F(scenario.battery_capacity_kwh)
+                    )
             self.assertEqual(run["summary"]["energy_balance_residual_kwh"], "0")
+
+    def test_ai_cluster_presets_scale_aggregate_electrical_inputs(self):
+        base_cases = {
+            "ai_cluster_utility_loss": "utility_loss",
+            "ai_cluster_generator_failure": "generator_failure",
+        }
+        scaled_summary_fields = (
+            "requested_it_kwh",
+            "served_it_kwh",
+            "unserved_it_kwh",
+            "grid_kwh",
+            "generator_kwh",
+            "distribution_loss_kwh",
+            "battery_charge_loss_kwh",
+            "battery_discharge_loss_kwh",
+            "battery_stored_change_kwh",
+        )
+        for scaled_preset, base_preset in base_cases.items():
+            with self.subTest(preset=scaled_preset):
+                scenario = demo_scenario(scaled_preset)
+                base_run = self.run_case(base_preset)
+                scaled_run = simulate_continuity(scenario).to_dict()
+                self.assertEqual(scenario.it_demand_kw, 50000)
+                self.assertEqual(scenario.it_capacity_kw, 50000)
+                self.assertEqual(scenario.battery_initial_kwh, 5000)
+                self.assertEqual(scenario.battery_capacity_kwh, 5000)
+                self.assertEqual(scenario.battery_charge_kw, 5000)
+                self.assertIn("SYN-AI-50MW-001", scenario.source_ids)
+                for field in scaled_summary_fields:
+                    self.assertLess(
+                        abs(F(scaled_run["summary"][field]) - F(base_run["summary"][field]) * 50),
+                        F(1, 10**80),
+                    )
+                self.assertEqual(
+                    scaled_run["summary"]["unserved_duration_s"],
+                    base_run["summary"]["unserved_duration_s"],
+                )
+                self.assertEqual(scaled_run["summary"]["energy_balance_residual_kwh"], "0")
+
+    def test_ai_cluster_generator_pickup_bridges_thirty_seconds(self):
+        run = self.run_case("ai_cluster_utility_loss")
+        during_start = next(row for row in run["intervals"] if row["start_s"] == "320")
+        after_start = next(row for row in run["intervals"] if row["start_s"] == "330")
+        self.assertEqual(during_start["end_s"], "330")
+        self.assertEqual(during_start["served_it_kw"], "50000")
+        self.assertGreater(F(during_start["battery_discharge_kw"]), 0)
+        self.assertEqual(after_start["asset_states"]["generator"], "running")
+        self.assertEqual(after_start["battery_discharge_kw"], "0")
+
+    def test_ai_cluster_generator_failure_depletes_at_scaled_ride_through_boundary(self):
+        run = self.run_case("ai_cluster_generator_failure")
+        depletion = next(event for event in run["events"] if event["action"] == "battery_depleted")
+        self.assertEqual(depletion["at_s"], "607.8")
+        depleted = next(row for row in run["intervals"] if row["start_s"] == "607.8")
+        self.assertEqual(depleted["battery_start_kwh"], "0")
+        self.assertEqual(depleted["served_it_kw"], "0")
 
     def test_unknown_generator_cost_is_not_free(self):
         run = self.run_case("utility_loss")
@@ -165,7 +271,16 @@ class ContinuityTests(unittest.TestCase):
 
     def test_residual_network_reroutes_to_avoid_greedy_path_failure(self):
         network = FlowNetwork()
-        for a,b,capacity in [("SOURCE","a",1),("SOURCE","b",1),("a","c",1),("a","d",1),("b","c",1),("c","SINK",1),("d","SINK",1)]:
+        edges = [
+            ("SOURCE", "a", 1),
+            ("SOURCE", "b", 1),
+            ("a", "c", 1),
+            ("a", "d", 1),
+            ("b", "c", 1),
+            ("c", "SINK", 1),
+            ("d", "SINK", 1),
+        ]
+        for a, b, capacity in edges:
             network.add(a,b,F(capacity))
         network.augment()
         self.assertEqual(network.flow("c","SINK")+network.flow("d","SINK"),2)

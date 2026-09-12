@@ -12,7 +12,21 @@
       "id": "PUBLIC-FIXTURE-001",
       "source_type": "explicit_synthetic_fixture",
       "license": "Apache-2.0",
-      "notes": "1,000 kW \u00d7 8,760 h \u00d7 assumed PUE (1.25 or 1.15); tariff USD 0.10/kWh. Original mathematical examples, not a market quote or equipment validation."
+      "notes": "1,000 kW × 8,760 h × assumed PUE (1.25 or 1.15); tariff USD 0.10/kWh. Original mathematical examples, not a market quote or equipment validation."
+    },
+    {
+      "id": "SYN-AI-50MW-001",
+      "source_type": "original_synthetic_assumption",
+      "license": "Apache-2.0",
+      "assumption_date": "2026-09-12",
+      "notes": "The original 1 MW fixture is scaled by 50 in electrical demand, capacities and storage: 50 MW requested IT power, 5 MWh stored battery energy, 30-second generator delay and unchanged efficiencies/event times. An aggregate electrical load example, not measured GPU jobs, a server count, grid adequacy, equipment selection or a facility prediction."
+    },
+    {
+      "id": "EDU-POWER-001",
+      "source_type": "original_synthetic_assumption",
+      "license": "Apache-2.0",
+      "assumption_date": "2026-09-12",
+      "notes": "One-variable teaching exercises in power, energy, losses, finite storage, generator timing, path capacity, common failures, recovery and separate assumed-PUE annual energy. Worked answers apply to the stated default and challenge inputs. Path capacity is only one N+1 condition. PUE does not model cooling or supply continuity. No independent external review is claimed."
     }
   ]
 }

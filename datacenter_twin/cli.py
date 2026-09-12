@@ -8,6 +8,7 @@ import sys
 
 from . import __version__
 from .contracts import InputError, load_json_document, load_scenario
+from .demo import PRESETS
 from .engine import compare, simulate
 from .output import write_result
 from .reporting import render_html, render_markdown
@@ -25,15 +26,28 @@ def main(argv: list[str] | None = None) -> int:
     continuity = commands.add_parser("simulate", help="Run a schema-v2 electrical continuity scenario")
     source = continuity.add_mutually_exclusive_group()
     source.add_argument("--scenario", type=Path)
-    source.add_argument("--preset", default="utility_loss", choices=["normal","utility_loss","generator_failure","path_maintenance","shared_domain"])
+    source.add_argument("--preset", default="utility_loss", choices=tuple(PRESETS))
     continuity.add_argument("--format", choices=["json", "markdown", "html"], default="json")
     sweep = commands.add_parser("sweep", help="Sweep one field of a schema-v2 electrical continuity scenario")
     sweep_source = sweep.add_mutually_exclusive_group()
     sweep_source.add_argument("--scenario", type=Path)
-    sweep_source.add_argument("--preset", default="generator_failure", choices=["normal", "utility_loss", "generator_failure", "path_maintenance", "shared_domain"])
-    sweep.add_argument("--parameter", required=True, choices=["battery_initial_kwh", "it_demand_kw",
-                                                                "generator_start_delay_s", "distribution_efficiency"])
-    sweep.add_argument("--values", nargs="+", required=True, help="One to twenty decimal values in caller order")
+    sweep_source.add_argument("--preset", default="generator_failure", choices=tuple(PRESETS))
+    sweep.add_argument(
+        "--parameter",
+        required=True,
+        choices=[
+            "battery_initial_kwh",
+            "it_demand_kw",
+            "generator_start_delay_s",
+            "distribution_efficiency",
+        ],
+    )
+    sweep.add_argument(
+        "--values",
+        nargs="+",
+        required=True,
+        help="One to twenty decimal values in caller order",
+    )
     sweep.add_argument("--format", choices=["json", "markdown", "html"], default="json")
     serve = commands.add_parser("serve", help="Serve the local API and built dashboard on loopback")
     serve.add_argument("--port", type=int, default=8000)
@@ -65,7 +79,11 @@ def main(argv: list[str] | None = None) -> int:
             from .demo import demo_scenario
             from .topology import SiteScenario
             input_paths = [args.scenario] if args.scenario else []
-            scenario = SiteScenario.from_dict(load_json_document(args.scenario)) if args.scenario else demo_scenario(args.preset)
+            scenario = (
+                SiteScenario.from_dict(load_json_document(args.scenario))
+                if args.scenario
+                else demo_scenario(args.preset)
+            )
             result = simulate_continuity(scenario).to_dict()
             if args.format == "markdown":
                 content = render_markdown(result)
@@ -79,7 +97,11 @@ def main(argv: list[str] | None = None) -> int:
             from .sensitivity import sweep_continuity
             from .topology import SiteScenario
             input_paths = [args.scenario] if args.scenario else []
-            scenario = SiteScenario.from_dict(load_json_document(args.scenario)) if args.scenario else demo_scenario(args.preset)
+            scenario = (
+                SiteScenario.from_dict(load_json_document(args.scenario))
+                if args.scenario
+                else demo_scenario(args.preset)
+            )
             result = sweep_continuity(scenario, args.parameter, args.values)
             if args.format == "markdown":
                 content = render_markdown(result)

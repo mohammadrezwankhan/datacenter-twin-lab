@@ -1,10 +1,13 @@
-# Surviving-path overload and finite battery ride-through
+# Surviving-path capacity and finite-battery ride-through
 
-![Datacenter Twin Lab visual concept for the champion roadmap](../images/datacenter-twin-lab-cover-v1.png)
+Two continuity results answer the first engineering questions:
 
+| Question | Synthetic result |
+| --- | --- |
+| Can one surviving 700 kW gross path carry a 1,000 kW IT request? | `700 kW × 0.95 = 665 kW` served, leaving `335 kW` unserved during the outage interval. |
+| How long does the 100 kWh reference battery serve the 1,000 kW load? | `100 kWh × 0.90 × 0.95 / 1,000 kW = 307.8 s`; with the outage starting at `300 s`, depletion is at `607.8 s`. |
 
-
-Maintainer: **Mohammad Rezwan Khan, maintainer of `datacenter-twin-lab`.** This tutorial uses the repository's synthetic electrical example; it is not an engineering approval or a real-site calibration.
+The browser's aggregate AI-cluster teaching case scales the same ratios to **50,000 kW (50 MW)** and **5,000 kWh (5 MWh)**, so its synthetic ride-through duration and event times are also **307.8 s** and **607.8 s**. These calculations describe a teaching fixture; they do not predict GPU throughput, grid adequacy, equipment selection, or site behavior.
 
 ## What this teaches
 
@@ -98,14 +101,33 @@ After restoration, the model can charge the battery from spare utility capacity.
 
 The unit test also contains a deliberately separate unity-efficiency fixture. It asserts depletion at 660 s because `100 kWh / 1,000 kW = 0.1 h = 360 s`, added to the 300 s outage start. This isolates finite-energy arithmetic; it should not be substituted for the default fixture's 0.95 and 0.90 efficiencies.
 
-## What the engine proves, and what it does not
+## Scale the arithmetic to the AI-cluster teaching case
 
-The implementation uses exact rational arithmetic, deterministic residual max-flow dispatch, explicit event boundaries, and an energy ledger. The source code is [`datacenter_twin/continuity.py`](../../datacenter_twin/continuity.py); the tests reconstruct the exported energy terms and require a zero energy-balance residual for every preset.
+The browser AI-cluster case scales the default request and initial battery by 50×:
 
-This is an electrical-only, single aggregate-load, synthetic experiment. It excludes cooling, workload queues, battery aging, temperature, generator ramp/cooldown/fuel dynamics, transfer and switching transients, AC load flow, impedance-based load sharing, protection coordination, harmonics, short-circuit and arc-flash studies, physical controls, reliability probabilities, Tier claims, service-level claims, and real-site calibration. The 700 kW paths, 100 kWh battery, efficiencies, event times, and fictional tariff are fixture inputs. They are not selected-equipment ratings, live prices, a benchmark, a certification, or legal compliance evidence.
+```text
+IT demand = 1,000 kW × 50 = 50,000 kW = 50 MW
+stored battery energy = 100 kWh × 50 = 5,000 kWh = 5 MWh
+IT-boundary energy = 5,000 kWh × 0.90 × 0.95 = 4,275 kWh
+ride-through time = 4,275 kWh / 50,000 kW × 3,600 s/h = 307.8 s
+```
+
+The scale-up preserves the synthetic model ratios. It does not establish GPU performance, grid adequacy, equipment ratings, cooling behavior, workload throughput, or site calibration.
+
+## What the engine proves
+
+The implementation uses exact rational arithmetic, deterministic residual max-flow dispatch, explicit event boundaries, and an energy ledger. The source code is [`datacenter_twin/continuity.py`](../../datacenter_twin/continuity.py); the tests reconstruct the exported energy terms and require a zero energy-balance residual for every verified reference preset.
+
+## Assumptions and limits
+
+This is an electrical-only, single aggregate-load, synthetic experiment. It excludes cooling, workload queues, battery aging, temperature, generator ramp/cooldown/fuel dynamics, transfer and switching transients, AC load flow, impedance-based load sharing, protection coordination, harmonics, short-circuit and arc-flash studies, physical controls, reliability probabilities, Tier claims, service-level claims, certification, legal-compliance evidence, and real-site calibration. The 700 kW paths, 100 kWh battery, efficiencies, event times, and fictional tariff are fixture inputs. They are not selected-equipment ratings or live prices.
+
+The browser has no shared simulation backend or client analytics; the API binds to loopback. The default browser calculation uses exact JavaScript arithmetic, while **Verify against Python** is an optional on-demand Pyodide cross-check when supplied by the deployed build. Neither path establishes physical accuracy. Independent external technical review, formal security audit, facility measurements, validation data, FAT/SAT, and calibrated alarms are absent.
+
+The examples teach inspectable software behavior. They do not establish a facility's reliability or physical validation. Unknown costs and unavailable quantities remain explicit.
 
 ## Reproduce and contribute
 
-Run both presets, inspect the interval beginning at 300 s, and compare the battery-depleted event with the hand calculation. If a result differs, open a [focused issue](https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues) with the revision, command, input, expected value, and observed value. Contributions should preserve the synthetic assumptions and add an independently derived expectation.
+Run both reference presets, inspect the interval beginning at 300 s, and compare the battery-depleted event with the hand calculation. If a result differs, open a [focused issue](https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues) with the revision, command, input, expected value, and observed value. Contributions should preserve the synthetic assumptions and add an independently derived expectation.
 
-The examples teach inspectable software behavior. They do not establish a facility's reliability or physical validation.
+The maintainer of `datacenter-twin-lab` supplies this tutorial from the repository's synthetic electrical example. It is not an engineering approval or a real-site calibration.

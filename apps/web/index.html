@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0b1018" />
     <meta
       name="description"
-      content="A local-first power-continuity simulator. Change a synthetic battery reserve, replay generator failure and recovery, and export reproducible results."
+      content="A local-first power-continuity simulator. Change the battery reserve, replay generator failure and recovery, and export reproducible results."
     />
     <title>Datacenter Twin Lab</title>
   </head>
@@ -19,13 +19,13 @@
         <p>A reproducible, local-first power-continuity what-if simulator.</p>
         <h2>A generator fails. How long does the battery last?</h2>
         <p>
-          In the opening synthetic example, a 100 kWh battery serves a 1 MW load for 307.8 seconds
+          In the opening 50 MW example, a 5 MWh battery serves the requested load for 307.8 seconds
           after utility and generator fail. Utility returns at 900 seconds elapsed. Change the
           battery reserve to compare depletion and recovery, then export the calculation.
         </p>
         <p>
-          The interactive interface starts automatically when its scripts load. The hosted demo
-          needs JavaScript and WebAssembly and downloads about 14 MB on its first visit.
+          The interactive interface starts automatically when its scripts load. The hosted demo uses
+          JavaScript. Optional Python verification downloads its runtime only when you request it.
           Calculations run on your device; no account is required.
         </p>
         <noscript>

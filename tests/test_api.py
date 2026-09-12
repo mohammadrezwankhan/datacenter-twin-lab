@@ -2,7 +2,7 @@ import importlib.util
 import unittest
 from pathlib import Path
 
-from datacenter_twin.demo import demo_scenario
+from datacenter_twin.demo import PRESETS, demo_scenario
 from datacenter_twin.continuity import simulate_continuity
 
 HAS_API = importlib.util.find_spec("fastapi") is not None and importlib.util.find_spec("httpx") is not None
@@ -31,13 +31,26 @@ class ApiTests(unittest.TestCase):
         self.assertIn("missing asset", response.json()["error"])
 
     def test_host_and_cross_origin_boundaries(self):
-        self.assertEqual(self.client.get("/api/v1/health", headers={"host":"untrusted.example"}).status_code,400)
-        response = self.client.options("/api/v1/simulations", headers={"origin":"https://untrusted.example", "access-control-request-method":"POST"})
-        self.assertEqual(response.status_code,400)
+        response = self.client.get(
+            "/api/v1/health", headers={"host": "untrusted.example"}
+        )
+        self.assertEqual(response.status_code, 400)
+        response = self.client.options(
+            "/api/v1/simulations",
+            headers={
+                "origin": "https://untrusted.example",
+                "access-control-request-method": "POST",
+            },
+        )
+        self.assertEqual(response.status_code, 400)
 
     def test_duplicate_keys_and_large_inputs(self):
         for content in (b'{"schema_version":2,"schema_version":1}', b" "*(4*1024*1024+1)):
-            response = self.client.post("/api/v1/simulations", content=content, headers={"content-type":"application/json"})
+            response = self.client.post(
+                "/api/v1/simulations",
+                content=content,
+                headers={"content-type": "application/json"},
+            )
             self.assertEqual(response.status_code,422)
 
     def test_no_physical_actuation_routes(self):
@@ -46,7 +59,11 @@ class ApiTests(unittest.TestCase):
 
     def test_presets_and_security_headers(self):
         response = self.client.get("/api/v1/presets")
-        self.assertEqual(len(response.json()),5)
+        self.assertEqual(len(response.json()), 7)
+        self.assertEqual(
+            response.json(),
+            [{"id": key, "name": name} for key, name in PRESETS.items()],
+        )
         self.assertEqual(response.headers["x-content-type-options"],"nosniff")
         self.assertEqual(response.headers["cache-control"],"no-store")
 
@@ -61,10 +78,16 @@ class ApiTests(unittest.TestCase):
         from datacenter_twin.engine import simulate
         path = Path(__file__).resolve().parents[1]/"data/scenarios/baseline-1mw.json"
         scenario = load_scenario(path)
-        self.assertEqual(self.client.post("/api/v1/planning",json=scenario.to_dict()).json(),simulate(scenario))
+        response = self.client.post("/api/v1/planning", json=scenario.to_dict())
+        self.assertEqual(response.json(), simulate(scenario))
 
     def test_malformed_payloads_are_contract_errors(self):
         for content in (b"[]", b"null", b"\xff", b"["*20000+b"]"*20000):
-            response = self.client.post("/api/v1/simulations",content=content,headers={"content-type":"application/json"})
-            self.assertEqual(response.status_code,422,response.text)
-        self.assertEqual(self.client.post("/api/v1/simulations",content=b"{}").status_code,422)
+            response = self.client.post(
+                "/api/v1/simulations",
+                content=content,
+                headers={"content-type": "application/json"},
+            )
+            self.assertEqual(response.status_code, 422, response.text)
+        response = self.client.post("/api/v1/simulations", content=b"{}")
+        self.assertEqual(response.status_code, 422)

@@ -13,6 +13,8 @@ from zipfile import ZipFile, ZipInfo, ZIP_DEFLATED
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from datacenter_twin import __version__
+from datacenter_twin.demo import PRESETS, demo_scenario
+from datacenter_twin.catalog import load_catalog
 
 MODULES = ("__init__", "browser", "catalog", "contracts", "continuity", "demo",
            "engine", "reporting", "sensitivity", "topology")
@@ -55,6 +57,14 @@ def prepare() -> dict:
     for source in (ROOT / "docs/third-party").iterdir():
         if source.is_file():
             shutil.copyfile(source, output / "pyodide" / source.name)
+    # Small scenario inputs feed JavaScript; the Python archive stays optional.
+    demo_data = {"engine_version": __version__,
+                 "presets": [{"id": key, "name": name} for key, name in PRESETS.items()],
+                 "scenarios": {key: demo_scenario(key).to_dict() for key in PRESETS}}
+    (output / "demo-data.json").write_text(
+        json.dumps(demo_data, separators=(",", ":")) + "\n", encoding="utf-8")
+    (output / "catalog.json").write_text(
+        json.dumps(load_catalog(), separators=(",", ":")) + "\n", encoding="utf-8")
     (output / ".nojekyll").write_text("", encoding="utf-8")
     print(json.dumps({"engine_version": __version__, "archive_sha256": manifest["archive_sha256"],
                       "source_files": len(entries), "output": str(output)}))

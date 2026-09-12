@@ -78,10 +78,24 @@ def main() -> int:
             "import json; from datacenter_twin.catalog import load_catalog; print(json.dumps(load_catalog()))"))
         if {offer["provider"] for offer in catalog["cloud_offers"]} != {"AWS", "Azure", "OCI"}:
             raise RuntimeError("Installed catalogue is incomplete")
+        for preset in ("ai_cluster_utility_loss", "ai_cluster_generator_failure"):
+            ai_run = json.loads(execute(str(console), "simulate", "--preset", preset))["result"]
+            if ai_run["scenario"]["it_demand_kw"] != "50000":
+                raise RuntimeError("Installed AI preset lost the aggregate 50 MW demand")
+            if ai_run["summary"]["energy_balance_residual_kwh"] != "0":
+                raise RuntimeError("Installed AI preset failed exact energy accounting")
+            if preset.endswith("utility_loss") and ai_run["summary"]["unserved_it_kwh"] != "0":
+                raise RuntimeError("Installed 50 MW pickup case failed to bridge startup")
+            if preset.endswith("generator_failure") and not any(
+                event["action"] == "battery_depleted" and event["at_s"] == "607.8"
+                for event in ai_run["events"]
+            ):
+                raise RuntimeError("Installed 50 MW failure case has incorrect depletion")
         print(json.dumps({"wheel": wheel.name, "version": identity["runtime"],
                           "python": sys.version.split()[0], "installed_outside_checkout": True,
                           "network_free_install": True, "module_and_console": "passed",
-                          "continuity_and_catalogue": "passed", "dashboard_bundled": bool(web_files)}))
+                          "continuity_and_catalogue": "passed", "ai_presets": "passed",
+                          "dashboard_bundled": bool(web_files)}))
     return 0
 
 

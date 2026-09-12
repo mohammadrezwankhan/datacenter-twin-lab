@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 
 async function exported(page: Page) {
   const pending = page.waitForEvent('download');
@@ -38,13 +38,15 @@ test('all presets match native Python with external network blocked and no API',
   );
   page.on('request', (request) => requests.push(request.url()));
   await page.goto('./');
-  await expect(page.getByTestId('served-power')).toContainText('1,000');
+  await expect(page.getByTestId('served-power')).toContainText('50,000');
   for (const preset of [
     'generator_failure',
     'normal',
     'utility_loss',
     'path_maintenance',
     'shared_domain',
+    'ai_cluster_utility_loss',
+    'ai_cluster_generator_failure',
   ]) {
     await page.getByLabel('Scenario', { exact: true }).selectOption(preset);
     await expect(page.getByRole('button', { name: 'Run scenario' })).toBeEnabled();
@@ -52,13 +54,19 @@ test('all presets match native Python with external network blocked and no API',
     expect(run).toEqual(nativeRun(run.scenario));
     expect(run.summary.energy_balance_residual_kwh).toBe('0');
   }
-  expect(requests.filter((url) => url.includes('/api/'))).toEqual([]);
+  expect(requests.filter((url) => /\/api\/|pyodide|engine\.zip|engine-manifest/.test(url))).toEqual(
+    [],
+  );
+  await page.getByLabel('Verify against Python').check();
+  await expect(page.getByTestId('python-verification-status')).toContainText(
+    'Exact match with Python',
+  );
 });
 
 test('failure journey changes energy, replays recovery, and exports reports and a sweep', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./?preset=generator_failure');
   await expect(page.getByRole('button', { name: 'Battery depleted 607.8 s' })).toBeVisible();
   await page.getByLabel('Initial battery (kWh)').fill('50');
   await page.getByRole('button', { name: 'Run scenario' }).click();
@@ -81,14 +89,23 @@ test('failure journey changes energy, replays recovery, and exports reports and 
   await page.screenshot({ path: 'test-results/browser-demo-desktop.png', fullPage: true });
 });
 
-test('archive corruption fails visibly and phone layout stays within the viewport', async ({
+test('optional verifier rejects corrupt source while the JavaScript result stays usable', async ({
   page,
 }) => {
   await page.route('**/engine.zip', (route) => route.fulfill({ body: 'corrupted archive' }));
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./');
+  await expect(page.getByTestId('served-power')).toContainText('50,000');
+  await page.getByLabel('Verify against Python').check();
   await expect(page.getByRole('alert')).toContainText('integrity check failed');
-  await expect(page.getByRole('button', { name: 'Retry', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Retry Python verification' })).toBeVisible();
+  const run = await exported(page);
+  expect(run).toEqual(nativeRun(run.scenario));
+  await page.unroute('**/engine.zip');
+  await page.getByRole('button', { name: 'Retry Python verification' }).click();
+  await expect(page.getByTestId('python-verification-status')).toContainText(
+    'Exact match with Python',
+  );
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
@@ -97,11 +114,45 @@ test('phone visitor can run and inspect a scenario without horizontal overflow',
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./');
-  await expect(page.getByTestId('served-power')).toContainText('1,000');
+  await expect(page.getByTestId('served-power')).toContainText('50,000');
   await page.getByRole('button', { name: 'Battery depleted 607.8 s' }).click();
   await expect(page.getByTestId('served-power')).toHaveText('0 kW');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: 'test-results/browser-demo-phone.png', fullPage: true });
+});
+
+test('a Python mismatch is visible and cannot replace the completed JavaScript result', async ({
+  page,
+}) => {
+  await page.route('**/assets/browser-worker-*.js', (route) =>
+    route.fulfill({
+      contentType: 'application/javascript',
+      body: "self.addEventListener('message', ({data}) => self.postMessage({id:data.id,result:{run_id:'deliberate-test-mismatch'}}));",
+    }),
+  );
+  await page.goto('./');
+  await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
+  const original = await exported(page);
+  await page.getByLabel('Verify against Python').check();
+  await expect(page.getByRole('alert')).toContainText('JavaScript and Python results differ');
+  expect(await exported(page)).toEqual(original);
+  await expect(page.getByText('Exact match with Python', { exact: false })).toHaveCount(0);
+});
+
+test('turning off verification cancels the pending check and a new run stays JavaScript-only', async ({
+  page,
+}) => {
+  await page.goto('./');
+  await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
+  await page.getByLabel('Verify against Python').check();
+  await expect(page.getByTestId('python-verification-status')).toContainText('Loading Python');
+  await page.getByLabel('Verify against Python').uncheck();
+  await page.getByLabel('Initial battery (kWh)').fill('2500');
+  await page.getByRole('button', { name: 'Run scenario' }).click();
+  await expect(page.getByRole('button', { name: 'Battery depleted 478.3 s' })).toBeVisible();
+  await expect(page.getByTestId('python-verification-status')).toHaveCount(0);
+  const run = await exported(page);
+  expect(run).toEqual(nativeRun(run.scenario));
 });
 
 test('a visitor without JavaScript can read the example and find the Python route', async ({

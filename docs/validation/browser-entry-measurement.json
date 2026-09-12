@@ -1,0 +1,40 @@
+{
+  "measured_at": "2026-09-12T14:59:03.988Z",
+  "scenario": "ai_cluster_generator_failure",
+  "environment": "Fresh Playwright Chromium context; loopback Vite preview; no network or CPU throttle",
+  "first_result_ms": 605,
+  "decoded_response_bytes": 322816,
+  "assets": [
+    {
+      "path": "/datacenter-twin-lab/",
+      "bytes": 3092
+    },
+    {
+      "path": "/datacenter-twin-lab/assets/index-Bkc640OZ.css",
+      "bytes": 16202
+    },
+    {
+      "path": "/datacenter-twin-lab/assets/index-Bk7KTKQ4.js",
+      "bytes": 242037
+    },
+    {
+      "path": "/datacenter-twin-lab/assets/worker-request-0zjDmk1J.js",
+      "bytes": 1032
+    },
+    {
+      "path": "/datacenter-twin-lab/assets/browser-client--ZI9whge.js",
+      "bytes": 228
+    },
+    {
+      "path": "/datacenter-twin-lab/assets/javascript-worker-Bc9svszt.js",
+      "bytes": 42262
+    },
+    {
+      "path": "/datacenter-twin-lab/demo-data.json",
+      "bytes": 17963
+    }
+  ],
+  "limitations": "One local observation; decoded payload, not a global visitor latency benchmark or compressed transfer size.",
+  "browser": "Playwright Chromium 153.0.8010.12 / Windows",
+  "application_worker_bytes": 42262
+}

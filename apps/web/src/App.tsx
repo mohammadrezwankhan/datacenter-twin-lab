@@ -3,9 +3,13 @@ import type { Asset, Catalog, Interval, Run, SiteScenario } from './types';
 import { Evidence } from './Evidence';
 import { n, request } from './client';
 import { RunTools } from './RunTools';
+import { PythonVerification } from './PythonVerification';
+import { Course } from './Course';
 
 const browserDemo = import.meta.env.MODE === 'demo';
-const initialPreset = browserDemo ? 'generator_failure' : 'utility_loss';
+const initialPreset = browserDemo
+  ? new URLSearchParams(window.location.search).get('preset') || 'ai_cluster_generator_failure'
+  : 'utility_loss';
 
 const clock = (seconds: string | number) =>
   `${Math.floor(Number(seconds) / 60)
@@ -312,7 +316,9 @@ function Compare({ baseline, run }: { baseline: Run; run: Run }) {
 }
 
 export function App() {
-  const [page, setPage] = useState<'overview' | 'topology' | 'evidence'>('overview');
+  const [page, setPage] = useState<'overview' | 'topology' | 'evidence' | 'learn'>(
+    browserDemo && new URLSearchParams(window.location.search).has('lesson') ? 'learn' : 'overview',
+  );
   const [draft, setDraft] = useState<SiteScenario | null>(null),
     [run, setRun] = useState<Run | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null),
@@ -327,19 +333,25 @@ export function App() {
     [notice, setNotice] = useState('');
   const active = useRef<AbortController | null>(null);
   const dirty = !!draft && !!run && JSON.stringify(draft) !== JSON.stringify(run.scenario);
+  function navigate(next: typeof page) {
+    setPage(next);
+    if (next !== 'learn') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('lesson');
+      window.history.replaceState(null, '', url);
+    }
+  }
   useEffect(() => {
     const controller = new AbortController();
     active.current = controller;
     (async () => {
       try {
-        const [p, c, d] = await Promise.all([
+        const [p, d] = await Promise.all([
           request<typeof presets>('presets', controller.signal),
-          request<Catalog>('catalog', controller.signal),
           request<SiteScenario>(`demo?preset=${initialPreset}`, controller.signal),
         ]);
         const r = await request<Run>('simulations', controller.signal, d);
         setPresets(p);
-        setCatalog(c);
         setDraft(d);
         setRun(r);
         setBusy(false);
@@ -352,6 +364,16 @@ export function App() {
     })();
     return () => controller.abort();
   }, []);
+  useEffect(() => {
+    if (page !== 'evidence' || catalog) return;
+    const controller = new AbortController();
+    request<Catalog>('catalog', controller.signal)
+      .then(setCatalog)
+      .catch((cause) => {
+        if (!controller.signal.aborted) setError((cause as Error).message);
+      });
+    return () => controller.abort();
+  }, [page, catalog]);
   useEffect(() => {
     if (!playing || !run) return;
     const timer = window.setInterval(
@@ -416,7 +438,7 @@ export function App() {
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            setPage('overview');
+            navigate('overview');
           }}
           aria-label="Datacenter Twin Lab home"
         >
@@ -429,7 +451,8 @@ export function App() {
         <nav aria-label="Main navigation">
           {(
             [
-              ['overview', '◫', 'Overview'],
+              ['overview', '◫', browserDemo ? 'Simulator' : 'Overview'],
+              ...(browserDemo ? [['learn', '▹', '12 browser lessons'] as const] : []),
               ['topology', '⌘', 'Power topology'],
               ['evidence', '▤', 'Evidence & options'],
             ] as const
@@ -438,7 +461,7 @@ export function App() {
               key={id}
               className={page === id ? 'nav-item current' : 'nav-item'}
               aria-current={page === id ? 'page' : undefined}
-              onClick={() => setPage(id)}
+              onClick={() => navigate(id)}
             >
               <span aria-hidden="true">{icon}</span>
               {label}
@@ -448,17 +471,17 @@ export function App() {
         <div className="sidebar-bottom">
           <span className="status-dot" /> {browserDemo ? 'Browser workspace' : 'Local workspace'}
           <p>
-            Synthetic reference site
+            Power continuity scenarios
             <br />
             Engine {run?.engine_version || 'loading'}
           </p>
-          <span className="mini-tag">No live equipment</span>
+          <span className="mini-tag">Local calculations</span>
         </div>
       </aside>
       <div className="main-shell">
         <header className="topbar">
           <span className="breadcrumb">
-            Research workspace <span>/</span> <b>Reference site 01</b>
+            Power systems <span>/</span> <b>Datacenter engineers</b>
           </span>
           <span className="mode-badge">
             <i /> SIMULATED
@@ -469,48 +492,51 @@ export function App() {
             <div>
               <div className="eyebrow">ELECTRICAL CONTINUITY LAB</div>
               <h1>
-                {page === 'evidence'
-                  ? 'Evidence & options'
-                  : page === 'topology'
-                    ? 'Power topology'
-                    : 'Site overview'}
+                {page === 'learn'
+                  ? 'Power systems for datacenter engineers'
+                  : page === 'evidence'
+                    ? 'Evidence & options'
+                    : page === 'topology'
+                      ? 'Power topology'
+                      : 'Site overview'}
               </h1>
               <p>
-                {page === 'evidence'
-                  ? 'Trace each option to a source. Keep unknowns visible.'
-                  : 'Explore supply interruptions across a synthetic 1 MW site.'}
+                {page === 'learn'
+                  ? 'Twelve experiments. Change an input, predict the result, then test it.'
+                  : page === 'evidence'
+                    ? 'Trace the inputs and options behind each calculation.'
+                    : 'Change the load or reserve and see exactly when service is interrupted.'}
               </p>
             </div>
-            <div className="heading-actions">
-              <button
-                disabled={!run || busy}
-                onClick={() => {
-                  setBaseline(run);
-                  setNotice('Baseline saved for this session.');
-                }}
-              >
-                Save baseline
-              </button>
-              <button disabled={!run} onClick={exportRun}>
-                Export run <span aria-hidden="true">↗</span>
-              </button>
-            </div>
+            {page !== 'learn' && (
+              <div className="heading-actions">
+                <button
+                  disabled={!run || busy}
+                  onClick={() => {
+                    setBaseline(run);
+                    setNotice('Baseline saved for this session.');
+                  }}
+                >
+                  Save baseline
+                </button>
+                <button disabled={!run} onClick={exportRun}>
+                  Export run <span aria-hidden="true">↗</span>
+                </button>
+              </div>
+            )}
           </div>
-          {browserDemo && (
+          {browserDemo && page === 'overview' && (
             <section className="panel demo-intro" aria-label="Start here">
               <div className="eyebrow">NO INSTALLATION · RUNS ON YOUR DEVICE</div>
-              <h2>Can the battery bridge a failed generator?</h2>
+              <h2>What happens when a 50 MW AI cluster loses power?</h2>
               <p>
-                Start with a synthetic 1 MW site. Both utility and generator fail at 300 s; utility
-                returns at 900 s. Change the initial battery from 100 to 50 kWh, run again, and
-                export the result.
+                The opening 50 MW example has 5 MWh stored energy: with the stated losses, that is
+                307.8 seconds of battery support after both supplies fail. Select a case below,
+                change the reserve, and inspect how your result changes.
               </p>
-              <p>
-                The original Python engine runs in this browser. Inputs stay on your device. This is
-                a synthetic electrical model; facility calibration, cooling and GPU performance are
-                outside its scope.
-              </p>
+              <p>Runs locally in JavaScript. Python verification is available after the result.</p>
               <div className="tool-actions">
+                <button onClick={() => setPage('learn')}>Start the 12-lesson course</button>
                 <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/scenarios/index.md">
                   Scenario catalog ↗
                 </a>
@@ -518,34 +544,37 @@ export function App() {
                   Share a reproducible finding ↗
                 </a>
               </div>
-              {run && run.scenario.id === 'demo-generator_failure' && (
-                <div className="demo-stages">
-                  {[
-                    ['Supply fails', 300],
-                    [
-                      'Battery depleted',
-                      run.events.find((e) => e.action === 'battery_depleted')?.at_s,
-                    ],
-                    ['Utility recovers', 900],
-                  ].map(
-                    ([label, at]) =>
-                      at !== undefined && (
-                        <button
-                          key={label}
-                          onClick={() => {
-                            setPlaying(false);
-                            const index = run.intervals.findIndex(
-                              (interval) => Number(interval.start_s) >= Number(at),
-                            );
-                            setCursor(Math.max(0, index));
-                          }}
-                        >
-                          {label} <strong>{n(at, 1)} s</strong>
-                        </button>
-                      ),
-                  )}
-                </div>
-              )}
+              {run &&
+                ['demo-generator_failure', 'demo-ai_cluster_generator_failure'].includes(
+                  run.scenario.id,
+                ) && (
+                  <div className="demo-stages">
+                    {[
+                      ['Supply fails', 300],
+                      [
+                        'Battery depleted',
+                        run.events.find((e) => e.action === 'battery_depleted')?.at_s,
+                      ],
+                      ['Utility recovers', 900],
+                    ].map(
+                      ([label, at]) =>
+                        at !== undefined && (
+                          <button
+                            key={label}
+                            onClick={() => {
+                              setPlaying(false);
+                              const index = run.intervals.findIndex(
+                                (interval) => Number(interval.start_s) >= Number(at),
+                              );
+                              setCursor(Math.max(0, index));
+                            }}
+                          >
+                            {label} <strong>{n(at, 1)} s</strong>
+                          </button>
+                        ),
+                    )}
+                  </div>
+                )}
             </section>
           )}
           {error && (
@@ -562,14 +591,20 @@ export function App() {
           {!run && !error && (
             <div className="panel loading" role="status">
               {browserDemo
-                ? 'Loading browser Python (about 14 MB on first visit), then calculating the scenario…'
+                ? 'Calculating the opening scenario on your device…'
                 : 'Preparing the reference simulation…'}
             </div>
           )}
           {run && row && draft && (
             <>
-              {page === 'evidence' ? (
-                catalog && <Evidence catalog={catalog} run={run} />
+              {page === 'learn' ? (
+                <Course />
+              ) : page === 'evidence' ? (
+                catalog ? (
+                  <Evidence catalog={catalog} run={run} />
+                ) : (
+                  <p role="status">Loading reference options…</p>
+                )
               ) : (
                 <>
                   <form
@@ -893,11 +928,17 @@ export function App() {
                   </section>
                   {baseline && <Compare baseline={baseline} run={run} />}
                   <RunTools run={run} />
+                  {browserDemo && <PythonVerification run={run} />}
                   <details className="panel assumptions">
                     <summary>
                       Model boundary & run evidence <span>Synthetic · uncalibrated</span>
                     </summary>
                     <p>{run.boundary}</p>
+                    <p>
+                      The scenarios are synthetic and uncalibrated. Facility safety, cooling and GPU
+                      performance, certified uptime and live equipment control are not established.
+                      Independent external technical review has not yet been obtained.
+                    </p>
                     <ul>
                       {run.limitations.map((l) => (
                         <li key={l}>{l}</li>

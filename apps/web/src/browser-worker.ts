@@ -31,7 +31,10 @@ self.addEventListener('message', (event: MessageEvent) => {
   const { id, path, body } = event.data;
   queue = queue.then(async () => {
     try {
-      const py = await (runtime ??= initialize());
+      const py = await (runtime ??= initialize().catch((error) => {
+        runtime = undefined;
+        throw error;
+      }));
       py.globals.set('_request_path', path);
       py.globals.set('_request_json', body);
       const value = py.runPython('_bridge_dispatch(_request_path, _request_json)');

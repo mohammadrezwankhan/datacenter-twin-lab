@@ -119,7 +119,11 @@ class Scenario:
             raise InputError("segments: expected at most 10000 Segment instances")
         if any(not isinstance(segment, Segment) for segment in self.segments):
             raise InputError("segments: expected Segment instances; use from_dict for JSON objects")
-        object.__setattr__(self, "it_capacity_kw", number(self.it_capacity_kw, "it_capacity_kw", positive=True))
+        object.__setattr__(
+            self,
+            "it_capacity_kw",
+            number(self.it_capacity_kw, "it_capacity_kw", positive=True),
+        )
         object.__setattr__(self, "tariff_per_kwh", tariff)
         object.__setattr__(self, "source_ids", tuple(_text(s, "source_id") for s in sources))
         object.__setattr__(self, "segments", tuple(self.segments))

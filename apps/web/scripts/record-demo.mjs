@@ -7,7 +7,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
-const url = process.argv[2] || 'http://127.0.0.1:4175/datacenter-twin-lab/';
+const url = process.argv[2] || 'http://127.0.0.1:4175/datacenter-twin-lab/?preset=generator_failure';
 const output = resolve(root, process.argv[3] || '.local/demo-recording');
 await mkdir(dirname(output), { recursive: true });
 await mkdir(output); // A new output directory prevents overwriting earlier evidence.

@@ -1,10 +1,10 @@
-# Watch and reproduce the first experiment
+# Watch and reproduce the 1 MW experiment
 
-[Open the interactive demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) or [view a still frame](../images/demo-preview.png).
+[Open the current 1 MW experiment](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=generator_failure) or [view a still frame](../images/demo-preview.png).
 
 ![Actual browser walkthrough](../images/demo-walkthrough.gif)
 
-This 21-second animation contains seven unannotated screenshots from the actual application, held for three seconds each. It omits waiting, downloads, and pointer movement. It does not measure load or calculation speed. The fixture is synthetic and uncalibrated.
+This preserved 0.3.0a0 interface recording predates the JavaScript entry and 50 MW course. Its 21-second animation contains seven unannotated screenshots from the actual application, held for three seconds each. It omits waiting, downloads, and pointer movement. It does not measure load or calculation speed. The fixture is synthetic and uncalibrated.
 
 | Frame | What happens |
 | --- | --- |
