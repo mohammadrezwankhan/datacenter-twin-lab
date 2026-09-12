@@ -73,7 +73,7 @@ rounding and interval boundaries.
 
 The browser bridge is JSON-only and dispatches the existing pure engine inside
 a worker-compatible boundary. The bridge and loopback API tests compare all
-five presets, reject duplicate or oversized input, exercise report and sweep
+seven presets, reject duplicate or oversized input, exercise report and sweep
 contracts, verify deterministic hashes, and check HTML escaping. They do not
 establish browser-worker startup in every browser, physical electrical
 behavior, cooling behavior, workload prediction, or a shared deployment.

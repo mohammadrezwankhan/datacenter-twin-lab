@@ -7,10 +7,11 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "test:e2e": "playwright test",
-    "format": "prettier --write src tests tests-demo *.ts *.json index.html",
-    "format:check": "prettier --check src tests tests-demo *.ts *.json index.html",
+    "format": "prettier --write src tests tests-demo tests-engine *.ts *.json index.html",
+    "format:check": "prettier --check src tests tests-demo tests-engine *.ts *.json index.html",
     "build:demo": "tsc --noEmit && vite build --mode demo",
-    "test:demo": "playwright test --config playwright.demo.config.ts"
+    "test:demo": "playwright test --config playwright.demo.config.ts",
+    "test:engine": "node --experimental-strip-types --loader ./tests-engine/resolve-loader.mjs --test tests-engine/*.test.ts"
   },
   "dependencies": {
     "react": "19.2.8",

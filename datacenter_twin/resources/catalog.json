@@ -3,6 +3,26 @@
   "reviewed_on": "2026-09-08",
   "sources": [
     {
+      "id": "SYN-AI-50MW-001",
+      "title": "Original 50 MW aggregate AI-cluster electrical scenarios",
+      "url": null,
+      "locator": "docs/scenarios/ai-cluster-50mw.md",
+      "retrieved_on": "2026-09-12",
+      "evidence_type": "synthetic_assumption",
+      "claim": "The original 1 MW fixture is scaled by 50 in electrical demand, capacities and storage: 50 MW requested IT power, 5 MWh stored battery energy, 30-second generator delay and unchanged efficiencies/event times.",
+      "limitations": "An aggregate electrical load example, not measured GPU jobs, a server count, grid adequacy, equipment selection or a facility prediction."
+    },
+    {
+      "id": "EDU-POWER-001",
+      "title": "Power systems for datacenter engineers: twelve original exercises",
+      "url": null,
+      "locator": "docs/tutorials/power-systems-course.md",
+      "retrieved_on": "2026-09-12",
+      "evidence_type": "synthetic_assumption",
+      "claim": "One-variable teaching exercises in power, energy, losses, finite storage, generator timing, path capacity, common failures, recovery and separate assumed-PUE annual energy.",
+      "limitations": "Worked answers apply to the stated default and challenge inputs. Path capacity is only one N+1 condition. PUE does not model cooling or supply continuity. No independent external review is claimed."
+    },
+    {
       "id": "DEMO-ELECTRICAL-002", "title": "Synthetic electrical continuity reference", "url": null,
       "locator": "resources/reference-site-v2.json", "retrieved_on": "2026-09-08", "evidence_type": "synthetic_assumption",
       "claim": "Original 1 MW IT-demand fixture with two 700 kW gross distribution paths, shared control domain, a 100 kWh battery and a 30-second generator delay.",

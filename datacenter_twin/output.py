@@ -8,7 +8,13 @@ from typing import Iterable
 from .contracts import InputError
 
 
-def write_result(path: Path, content: str, *, protected_paths: Iterable[Path] = (), force: bool = False) -> None:
+def write_result(
+    path: Path,
+    content: str,
+    *,
+    protected_paths: Iterable[Path] = (),
+    force: bool = False,
+) -> None:
     path = Path(path)
     for protected in protected_paths:
         protected = Path(protected)
@@ -38,7 +44,9 @@ def write_result(path: Path, content: str, *, protected_paths: Iterable[Path] = 
                 # Same-filesystem link creation is atomic and fails if the destination exists.
                 os.link(temporary_path, path)
             except FileExistsError as exc:
-                raise InputError("Output already exists; choose another path or use --force to replace it") from exc
+                raise InputError(
+                    "Output already exists; choose another path or use --force to replace it"
+                ) from exc
     finally:
         if temporary_path is not None:
             temporary_path.unlink(missing_ok=True)

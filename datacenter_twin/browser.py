@@ -7,7 +7,8 @@ import json
 from urllib.parse import parse_qs, urlsplit
 
 from .catalog import load_catalog, normalize_quote
-from .contracts import InputError, MAX_SCENARIO_BYTES, parse_json_document
+from .contracts import InputError, MAX_SCENARIO_BYTES, Scenario, parse_json_document
+from .engine import simulate as simulate_planning
 from .continuity import simulate_continuity
 from .demo import PRESETS, demo_scenario
 from .topology import SiteScenario
@@ -44,10 +45,12 @@ def dispatch_json(path: str, body: str = "null") -> str:
         result = demo_scenario(preset).to_dict()
     elif route.path == "catalog":
         result = load_catalog()
-    elif route.path in ("simulations", "quotes/normalize", "reports", "sweeps"):
+    elif route.path in ("simulations", "quotes/normalize", "reports", "sweeps", "planning"):
         payload = parse_json_document(body.encode("utf-8"))
         if route.path == "simulations":
             result = simulate_continuity(SiteScenario.from_dict(payload)).to_dict()
+        elif route.path == "planning":
+            result = simulate_planning(Scenario.from_dict(payload))
         elif route.path == "quotes/normalize":
             result = normalize_quote(payload)
         elif route.path == "reports":

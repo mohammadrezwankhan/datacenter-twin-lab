@@ -106,7 +106,11 @@ class Event:
                 "value_kw": None if self.value_kw is None else decimal_text(self.value_kw)}
 
 
-def topological_order(assets: tuple[Asset, ...], dependencies: tuple[Dependency, ...], relation: str) -> list[str]:
+def topological_order(
+    assets: tuple[Asset, ...],
+    dependencies: tuple[Dependency, ...],
+    relation: str,
+) -> list[str]:
     ids = {asset.id for asset in assets}
     incoming = {asset_id: 0 for asset_id in ids}
     outgoing = {asset_id: [] for asset_id in ids}
@@ -174,9 +178,17 @@ class SiteScenario:
         if self.battery_initial_kwh > self.battery_capacity_kwh:
             raise InputError("battery_initial_kwh exceeds stored-energy capacity")
         object.__setattr__(self, "source_ids", string_list(self.source_ids, "source_ids"))
-        for field, kind, maximum in (("assets", Asset, 64), ("dependencies", Dependency, 256), ("events", Event, 128)):
+        for field, kind, maximum in (
+            ("assets", Asset, 64),
+            ("dependencies", Dependency, 256),
+            ("events", Event, 128),
+        ):
             values = getattr(self, field)
-            if not isinstance(values, (tuple, list)) or len(values) > maximum or any(not isinstance(v, kind) for v in values):
+            if (
+                not isinstance(values, (tuple, list))
+                or len(values) > maximum
+                or any(not isinstance(v, kind) for v in values)
+            ):
                 raise InputError(f"{field}: expected at most {maximum} {kind.__name__} records")
             object.__setattr__(self, field, tuple(values))
         by_id = {asset.id: asset for asset in self.assets}
@@ -198,9 +210,15 @@ class SiteScenario:
                 raise InputError("Duplicate dependency")
             seen.add(key)
             if edge.relation == "feeds":
-                if by_id[edge.target].kind in ("utility", "generator", "battery") or by_id[edge.source].kind == "load":
+                if (
+                    by_id[edge.target].kind in ("utility", "generator", "battery")
+                    or by_id[edge.source].kind == "load"
+                ):
                     raise InputError("Feeds must lead from sources toward the load")
-            if edge.relation == "charges" and (by_id[edge.target].kind != "battery" or by_id[edge.source].kind != "bus"):
+            if edge.relation == "charges" and (
+                by_id[edge.target].kind != "battery"
+                or by_id[edge.source].kind != "bus"
+            ):
                 raise InputError("Charging connections must lead from a bus to the battery")
         if sum(edge.relation == "charges" for edge in self.dependencies) != 1:
             raise InputError("Provide exactly one explicit bus-to-battery charging connection")
@@ -209,11 +227,20 @@ class SiteScenario:
         # Disconnected source paths are configuration errors; outage disconnections are simulated events.
         load = next(asset.id for asset in self.assets if asset.kind == "load")
         charging_bus = next(edge.source for edge in self.dependencies if edge.relation == "charges")
-        for source in (asset.id for asset in self.assets if asset.kind in ("utility", "generator", "battery")):
+        source_ids = (
+            asset.id
+            for asset in self.assets
+            if asset.kind in ("utility", "generator", "battery")
+        )
+        for source in source_ids:
             reachable = {source}
             for item in topological_order(self.assets, self.dependencies, "feeds"):
                 if item in reachable:
-                    reachable.update(edge.target for edge in self.dependencies if edge.source == item and edge.relation == "feeds")
+                    reachable.update(
+                        edge.target
+                        for edge in self.dependencies
+                        if edge.source == item and edge.relation == "feeds"
+                    )
             if load not in reachable:
                 raise InputError(f"Source {source} has no feed path to the load")
             if by_id[source].kind == "utility" and charging_bus not in reachable:
@@ -232,9 +259,16 @@ class SiteScenario:
         fields = set(cls.__dataclass_fields__)
         _keys(data, fields | {"schema_version"}, "continuity scenario")
         if type(data["schema_version"]) is not int or data["schema_version"] != 2:
-            raise InputError("Electrical continuity requires schema_version 2; v1 PUE scenarios cannot infer topology")
+            raise InputError(
+                "Electrical continuity requires schema_version 2; "
+                "v1 PUE scenarios cannot infer topology"
+            )
         values = {key: value for key, value in data.items() if key != "schema_version"}
-        for field, kind, maximum in (("assets", Asset, 64), ("dependencies", Dependency, 256), ("events", Event, 128)):
+        for field, kind, maximum in (
+            ("assets", Asset, 64),
+            ("dependencies", Dependency, 256),
+            ("events", Event, 128),
+        ):
             if not isinstance(values[field], list) or len(values[field]) > maximum:
                 raise InputError(f"{field}: expected a bounded JSON array")
             values[field] = tuple(kind.from_dict(item) for item in values[field])

@@ -61,10 +61,20 @@ def _single_summary(result: dict) -> dict:
     summary.setdefault("served_kwh", summary.get("served_it_kwh", "unknown"))
     summary.setdefault("unserved_kwh", summary.get("unserved_it_kwh", "unknown"))
     summary.setdefault("unserved_seconds", summary.get("unserved_duration_s", "unknown"))
-    summary.setdefault("first_battery_depletion_s", next(
-        (event.get("at_s") for event in result.get("events", []) if event.get("action") == "battery_depleted"), None))
-    summary.setdefault("cost_unknowns", [key for key in ("generator_energy_charge", "total_incremental_energy_charge")
-                                          if summary.get(key) is None])
+    first_depletion = next(
+        (
+            event.get("at_s")
+            for event in result.get("events", [])
+            if event.get("action") == "battery_depleted"
+        ),
+        None,
+    )
+    summary.setdefault("first_battery_depletion_s", first_depletion)
+    cost_keys = ("generator_energy_charge", "total_incremental_energy_charge")
+    summary.setdefault(
+        "cost_unknowns",
+        [key for key in cost_keys if summary.get(key) is None],
+    )
     return summary
 
 
@@ -104,7 +114,11 @@ def _sweep_rows(result: dict) -> tuple[list[tuple[str, ...]], list[str]]:
             summary.get("served_kwh", summary.get("served_it_kwh", "unknown")),
             summary.get("unserved_kwh", summary.get("unserved_it_kwh", "unknown")),
             summary.get("unserved_seconds", summary.get("unserved_duration_s", "unknown")),
-            "none" if summary.get("first_battery_depletion_s") is None else summary.get("first_battery_depletion_s"),
+            (
+                "none"
+                if summary.get("first_battery_depletion_s") is None
+                else summary.get("first_battery_depletion_s")
+            ),
             summary.get("service_status", "unknown"),
             ", ".join(summary.get("cost_unknowns", [])) or "none",
             entry.get("run_id", "unknown"),
@@ -114,7 +128,11 @@ def _sweep_rows(result: dict) -> tuple[list[tuple[str, ...]], list[str]]:
         if detail:
             warnings.update(_warnings(detail))
         else:
-            warnings.update({str(name): int(count) for name, count in summary.get("warning_counts", {}).items()})
+            warning_counts = {
+                str(name): int(count)
+                for name, count in summary.get("warning_counts", {}).items()
+            }
+            warnings.update(warning_counts)
     return rows, [f"{name}: {count} interval(s)" for name, count in sorted(warnings.items())]
 
 
@@ -142,26 +160,54 @@ def render_markdown(result: dict) -> str:
             "", "## Sensitivity outcomes", "",
         ])
         rows, warning_lines = _sweep_rows(result)
-        lines.extend(_markdown_table(("Value", "Requested (kWh)", "Served (kWh)", "Unserved (kWh)",
-                                      "Unserved (s)", "Battery depletion (s)", "Service", "Cost unknowns",
-                                      "Run ID", "Input SHA-256"), rows))
+        lines.extend(
+            _markdown_table(
+                (
+                    "Value",
+                    "Requested (kWh)",
+                    "Served (kWh)",
+                    "Unserved (kWh)",
+                    "Unserved (s)",
+                    "Battery depletion (s)",
+                    "Service",
+                    "Cost unknowns",
+                    "Run ID",
+                    "Input SHA-256",
+                ),
+                rows,
+            )
+        )
     else:
         lines.extend([f"Run ID: {_md(result.get('run_id', 'unknown'))}",
                       f"Input SHA-256: {_md(result.get('input_sha256', 'unknown'))}",
                       "", "## Outcome", ""])
         lines.extend(_markdown_table(("Measure", "Value", "Unit"), _summary_rows(_single_summary(result))))
         lines.extend(["", "## Event timeline", ""])
-        lines.extend(_markdown_table(("At (s)", "Action", "Target", "Origin", "Ready at (s)"), _event_rows(result))
-                      if _event_rows(result) else ["No events were emitted."])
+        event_rows = _event_rows(result)
+        lines.extend(
+            _markdown_table(
+                ("At (s)", "Action", "Target", "Origin", "Ready at (s)"),
+                event_rows,
+            )
+            if event_rows
+            else ["No events were emitted."]
+        )
         warning_counts = _warnings(result)
         warning_lines = [f"{name}: {count} interval(s)" for name, count in sorted(warning_counts.items())]
     lines.extend(["", "## Scenario assumptions", ""])
     lines.extend(_markdown_table(("Field", "Value", "Unit"), _scenario_rows(scenario)))
     lines.extend(["", "## Warning summary", ""])
-    lines.extend(_markdown_table(("Warning", "Count"), [tuple(item.rsplit(": ", 1)) for item in warning_lines])
-                  if warning_lines else ["No interval warnings were emitted."])
+    lines.extend(
+        _markdown_table(
+            ("Warning", "Count"),
+            [tuple(item.rsplit(": ", 1)) for item in warning_lines],
+        )
+        if warning_lines
+        else ["No interval warnings were emitted."]
+    )
     if is_sweep:
-        lines.extend(["", f"Full per-run results included: {_md(result.get('full_results_included', False))}"])
+        full_results = _md(result.get("full_results_included", False))
+        lines.extend(["", f"Full per-run results included: {full_results}"])
     lines.extend(["", "## Assumptions", ""])
     lines.extend(f"- {_md(item)}" for item in result.get("assumptions", []))
     lines.extend(["", "## Limitations", ""])
@@ -171,7 +217,15 @@ def render_markdown(result: dict) -> str:
 
 def _html_table(headers: tuple[str, ...], rows: list[tuple[Any, ...]]) -> str:
     head = "".join(f"<th>{escape(str(value), quote=True)}</th>" for value in headers)
-    body = "".join("<tr>" + "".join(f"<td>{escape(str(value), quote=True)}</td>" for value in row) + "</tr>" for row in rows)
+    body = "".join(
+        "<tr>"
+        + "".join(
+            f"<td>{escape(str(value), quote=True)}</td>"
+            for value in row
+        )
+        + "</tr>"
+        for row in rows
+    )
     return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
@@ -182,26 +236,99 @@ def render_html(result: dict) -> str:
     is_sweep = "runs" in result and "parameter" in result
     scenario = _scenario(result)
     title = "Datacenter Twin Lab continuity report"
-    parts = ["<!doctype html>", '<html lang="en">', "<head><meta charset=\"utf-8\"><title>"
-             + escape(title, quote=True) + "</title><style>body{font-family:system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem}table{border-collapse:collapse;margin:1rem 0;width:100%}th,td{border:1px solid #ccc;padding:.35rem;text-align:left}th{background:#f2f2f2}code{word-break:break-all}</style></head><body>",
-             f"<h1>{escape(title)}</h1>",
-             f"<p>Model: <code>{escape(str(result.get('model', 'unknown')), quote=True)}</code><br>Engine version: <code>{escape(str(result.get('engine_version', 'unknown')), quote=True)}</code></p>"]
+    style = (
+        "<head><meta charset=\"utf-8\"><title>"
+        + escape(title, quote=True)
+        + "</title><style>"
+        "body{font-family:system-ui,sans-serif;max-width:1100px;margin:2rem auto;"
+        "padding:0 1rem}table{border-collapse:collapse;margin:1rem 0;width:100%}"
+        "th,td{border:1px solid #ccc;padding:.35rem;text-align:left}"
+        "th{background:#f2f2f2}code{word-break:break-all}"
+        "</style></head><body>"
+    )
+    model_details = (
+        f"<p>Model: <code>{escape(str(result.get('model', 'unknown')), quote=True)}"
+        f"</code><br>Engine version: <code>"
+        f"{escape(str(result.get('engine_version', 'unknown')), quote=True)}</code></p>"
+    )
+    parts = [
+        "<!doctype html>",
+        '<html lang="en">',
+        style,
+        f"<h1>{escape(title)}</h1>",
+        model_details,
+    ]
     if is_sweep:
-        parts.append(f"<p>Base input SHA-256: <code>{escape(str(result.get('base_input_sha256', 'unknown')), quote=True)}</code><br>Parameter: <code>{escape(str(result.get('parameter', 'unknown')), quote=True)}</code> ({escape(str(result.get('parameter_unit', '')), quote=True)})</p>")
+        base_details = (
+            f"<p>Base input SHA-256: <code>"
+            f"{escape(str(result.get('base_input_sha256', 'unknown')), quote=True)}</code>"
+            f"<br>Parameter: <code>"
+            f"{escape(str(result.get('parameter', 'unknown')), quote=True)}</code> ("
+            f"{escape(str(result.get('parameter_unit', '')), quote=True)})</p>"
+        )
+        parts.append(base_details)
         rows, warning_lines = _sweep_rows(result)
-        parts.extend(["<h2>Sensitivity outcomes</h2>", _html_table(("Value", "Requested (kWh)", "Served (kWh)", "Unserved (kWh)", "Unserved (s)", "Battery depletion (s)", "Service", "Cost unknowns", "Run ID", "Input SHA-256"), rows)])
+        sweep_headers = (
+            "Value",
+            "Requested (kWh)",
+            "Served (kWh)",
+            "Unserved (kWh)",
+            "Unserved (s)",
+            "Battery depletion (s)",
+            "Service",
+            "Cost unknowns",
+            "Run ID",
+            "Input SHA-256",
+        )
+        parts.extend(["<h2>Sensitivity outcomes</h2>", _html_table(sweep_headers, rows)])
     else:
-        parts.append(f"<p>Run ID: <code>{escape(str(result.get('run_id', 'unknown')), quote=True)}</code><br>Input SHA-256: <code>{escape(str(result.get('input_sha256', 'unknown')), quote=True)}</code></p>")
+        run_details = (
+            f"<p>Run ID: <code>{escape(str(result.get('run_id', 'unknown')), quote=True)}"
+            f"</code><br>Input SHA-256: <code>"
+            f"{escape(str(result.get('input_sha256', 'unknown')), quote=True)}</code></p>"
+        )
+        parts.append(run_details)
         warning_counts = _warnings(result)
         warning_lines = [f"{name}: {count} interval(s)" for name, count in sorted(warning_counts.items())]
-        parts.extend(["<h2>Outcome</h2>", _html_table(("Measure", "Value", "Unit"), _summary_rows(_single_summary(result))), "<h2>Event timeline</h2>"])
+        outcome_rows = _summary_rows(_single_summary(result))
+        parts.extend(
+            [
+                "<h2>Outcome</h2>",
+                _html_table(("Measure", "Value", "Unit"), outcome_rows),
+                "<h2>Event timeline</h2>",
+            ]
+        )
         event_rows = _event_rows(result)
-        parts.append(_html_table(("At (s)", "Action", "Target", "Origin", "Ready at (s)"), event_rows)
-                     if event_rows else "<p>No events were emitted.</p>")
-    parts.extend(["<h2>Scenario assumptions</h2>", _html_table(("Field", "Value", "Unit"), _scenario_rows(scenario)), "<h2>Warning summary</h2>"])
-    parts.append(_html_table(("Warning", "Count"), [tuple(item.rsplit(": ", 1)) for item in warning_lines]) if warning_lines else "<p>No interval warnings were emitted.</p>")
+        parts.append(
+            _html_table(
+                ("At (s)", "Action", "Target", "Origin", "Ready at (s)"),
+                event_rows,
+            )
+            if event_rows
+            else "<p>No events were emitted.</p>"
+        )
+    scenario_rows = _scenario_rows(scenario)
+    parts.extend(
+        [
+            "<h2>Scenario assumptions</h2>",
+            _html_table(("Field", "Value", "Unit"), scenario_rows),
+            "<h2>Warning summary</h2>",
+        ]
+    )
+    parts.append(
+        _html_table(
+            ("Warning", "Count"),
+            [tuple(item.rsplit(": ", 1)) for item in warning_lines],
+        )
+        if warning_lines
+        else "<p>No interval warnings were emitted.</p>"
+    )
     if is_sweep:
-        parts.append(f"<p>Full per-run results included: {escape(str(result.get('full_results_included', False)), quote=True)}</p>")
+        full_results = escape(
+            str(result.get("full_results_included", False)),
+            quote=True,
+        )
+        parts.append(f"<p>Full per-run results included: {full_results}</p>")
     for heading, key in (("Assumptions", "assumptions"), ("Limitations", "limitations")):
         items = "".join(f"<li>{escape(str(item), quote=True)}</li>" for item in result.get(key, []))
         parts.extend([f"<h2>{heading}</h2>", f"<ul>{items}</ul>"])

@@ -71,7 +71,7 @@ jobs:
           retention-days: 14
 
   browser-demo:
-    name: Browser Python demo
+    name: Browser demo and Python parity
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -87,6 +87,7 @@ jobs:
           cache-dependency-path: apps/web/package-lock.json
       - run: npm --prefix apps/web ci --ignore-scripts
       - run: python scripts/prepare_browser_demo.py
+      - run: npm --prefix apps/web run test:engine
       - run: npm --prefix apps/web run build:demo
       - name: Install browser
         run: npx playwright install --with-deps chromium

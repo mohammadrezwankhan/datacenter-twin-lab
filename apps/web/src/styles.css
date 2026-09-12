@@ -1210,3 +1210,60 @@ tr:last-child td {
     scroll-behavior: auto !important;
   }
 }
+
+/* Course controls keep one question, one changed input and one result together. */
+.course {
+  display: grid;
+  gap: 20px;
+}
+.course-navigation label,
+.course-experiment label {
+  display: grid;
+  gap: 8px;
+  max-width: 560px;
+}
+.course-navigation select,
+.course-experiment input {
+  padding: 10px;
+  width: 100%;
+}
+.course-navigation progress {
+  width: min(360px, 80%);
+  margin-right: 12px;
+  accent-color: var(--accent);
+}
+.course-question {
+  font-size: 1.2rem;
+}
+.course-experiment form {
+  margin: 20px 0;
+}
+.course-result {
+  display: grid;
+  gap: 10px;
+  padding: 20px 0;
+}
+.course-result strong {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  overflow-wrap: anywhere;
+}
+.worked-answer {
+  padding: 16px;
+  border-left: 3px solid #30c7ad;
+  line-height: 1.7;
+}
+.lesson-paging {
+  margin-top: 24px;
+}
+.python-verification label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-weight: 600;
+}
+.python-verification input {
+  width: auto;
+}
+.python-verification p {
+  overflow-wrap: anywhere;
+}

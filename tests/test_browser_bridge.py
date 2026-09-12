@@ -1,16 +1,25 @@
 import importlib.util
 import json
 from dataclasses import replace
+from pathlib import Path
 import unittest
 
 from datacenter_twin.browser import dispatch_json, scenario_report, scenario_sweep
 from datacenter_twin.continuity import simulate_continuity
-from datacenter_twin.contracts import InputError, MAX_SCENARIO_BYTES
+from datacenter_twin.contracts import InputError, MAX_SCENARIO_BYTES, load_scenario
 from datacenter_twin.demo import PRESETS, demo_scenario
+from datacenter_twin.engine import simulate
 from datacenter_twin.sensitivity import sweep_continuity
 
 
 class BrowserBridgeTests(unittest.TestCase):
+    def test_planning_dispatch_matches_native_engine(self):
+        scenario_path = Path(__file__).resolve().parents[1] / "data/scenarios/baseline-1mw.json"
+        scenario = load_scenario(scenario_path)
+        expected = simulate(scenario)
+        adapted = json.loads(dispatch_json("planning", json.dumps(scenario.to_dict())))
+        self.assertEqual(adapted, expected)
+
     def test_native_and_json_adapter_match_for_every_preset(self):
         for preset in PRESETS:
             with self.subTest(preset=preset):
@@ -40,7 +49,11 @@ class BrowserBridgeTests(unittest.TestCase):
         self.assertIn("&lt;script&gt;", report["text"])
         self.assertNotIn("<script>", report["text"])
 
-        sweep_payload = {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": [0, 50, 100]}
+        sweep_payload = {
+            "scenario": scenario.to_dict(),
+            "parameter": "battery_initial_kwh",
+            "values": [0, 50, 100],
+        }
         expected = sweep_continuity(scenario, "battery_initial_kwh", [0, 50, 100])
         adapted_sweep = json.loads(dispatch_json("sweeps", json.dumps(sweep_payload)))
         self.assertEqual(adapted_sweep, expected)
@@ -54,8 +67,12 @@ class BrowserBridgeTests(unittest.TestCase):
         for payload in invalid_reports:
             with self.subTest(payload=payload), self.assertRaises(InputError):
                 scenario_report(payload)
-        for payload in ({"scenario": scenario}, {"scenario": scenario, "parameter": "battery_initial_kwh", "values": []},
-                        {"scenario": scenario, "parameter": [], "values": [1]}):
+        invalid_sweeps = (
+            {"scenario": scenario},
+            {"scenario": scenario, "parameter": "battery_initial_kwh", "values": []},
+            {"scenario": scenario, "parameter": [], "values": [1]},
+        )
+        for payload in invalid_sweeps:
             with self.subTest(payload=payload), self.assertRaises(InputError):
                 scenario_sweep(payload)
 
@@ -84,16 +101,31 @@ class BrowserHttpTests(unittest.TestCase):
         self.assertNotIn("<img", report["text"])
         self.assertEqual(report["run_id"], simulate_continuity(scenario).run_id)
 
-        sweep_payload = {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": [0, 50, 100]}
+        sweep_payload = {
+            "scenario": scenario.to_dict(),
+            "parameter": "battery_initial_kwh",
+            "values": [0, 50, 100],
+        }
         response = self.client.post("/api/v1/sweeps", json=sweep_payload)
         self.assertEqual(response.status_code, 200, response.text)
         result = response.json()
         self.assertEqual(result, scenario_sweep(sweep_payload))
         self.assertEqual(result["base_input_sha256"], simulate_continuity(scenario).input_sha256)
 
-        for payload in ({"scenario": scenario.to_dict()}, {"scenario": scenario.to_dict(), "format": "xml"}):
+        invalid_reports = (
+            {"scenario": scenario.to_dict()},
+            {"scenario": scenario.to_dict(), "format": "xml"},
+        )
+        for payload in invalid_reports:
             self.assertEqual(self.client.post("/api/v1/reports", json=payload).status_code, 422)
-        for payload in ({"scenario": scenario.to_dict()},
-                        {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": []},
-                        {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": ["1", "1.0"]}):
+        invalid_sweeps = (
+            {"scenario": scenario.to_dict()},
+            {"scenario": scenario.to_dict(), "parameter": "battery_initial_kwh", "values": []},
+            {
+                "scenario": scenario.to_dict(),
+                "parameter": "battery_initial_kwh",
+                "values": ["1", "1.0"],
+            },
+        )
+        for payload in invalid_sweeps:
             self.assertEqual(self.client.post("/api/v1/sweeps", json=payload).status_code, 422)

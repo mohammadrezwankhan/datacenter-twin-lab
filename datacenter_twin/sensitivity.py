@@ -30,7 +30,9 @@ def _value(value: Any, parameter: str, index: int) -> tuple[Decimal, str]:
     parsed = number(value, f"values[{index}]")
     if parameter == "generator_start_delay_s":
         if parsed != parsed.to_integral_value():
-            raise InputError(f"values[{index}]: generator_start_delay_s must be an integer number of seconds")
+            raise InputError(
+                f"values[{index}]: generator_start_delay_s must be an integer number of seconds"
+            )
         parsed = parsed.to_integral_value()
     return parsed, decimal_text(parsed)
 
@@ -97,7 +99,10 @@ def sweep_continuity(scenario: SiteScenario, parameter: str, values: list[str | 
     full_size = 0
     include_full = True
     for parsed, label in parsed_values:
-        candidate = replace(scenario, **{parameter: int(parsed) if parameter == "generator_start_delay_s" else parsed})
+        candidate_value = (
+            int(parsed) if parameter == "generator_start_delay_s" else parsed
+        )
+        candidate = replace(scenario, **{parameter: candidate_value})
         run = simulate_continuity(candidate)
         run_result = run.to_dict()
         if include_full:
@@ -142,7 +147,13 @@ def sweep_continuity(scenario: SiteScenario, parameter: str, values: list[str | 
         ],
         "limitations": [
             "This is a deterministic sensitivity sweep, not calibration or a forecast.",
-            "Cooling, workload queues, switching transients, protection studies and physical controls are outside the model.",
-            "Costs remain illustrative or unknown according to the scenario tariff and generator cost inputs.",
+            (
+                "Cooling, workload queues, switching transients, protection studies "
+                "and physical controls are outside the model."
+            ),
+            (
+                "Costs remain illustrative or unknown according to the scenario tariff "
+                "and generator cost inputs."
+            ),
         ],
     }
