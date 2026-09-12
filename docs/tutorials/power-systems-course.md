@@ -36,6 +36,9 @@ The browser course needs no installation or account. The default calculation use
 
 ## Lesson map
 
+For lesson 3, use the [printable battery ride-through worksheet](battery-ride-through-worksheet.md)
+to write a prediction before checking the worked answer on a separate page.
+
 | # | Lesson and link | Question | Default → challenge | Expected check |
 | ---: | --- | --- | --- | --- |
 | 1 | [Power becomes energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) | How much energy does a constant load request in half an hour? | 1,000 → 500 kW | `1,000 × 0.5 = 500 kWh`; the challenge gives 250 kWh. |
