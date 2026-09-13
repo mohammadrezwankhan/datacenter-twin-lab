@@ -7,6 +7,7 @@ Use the smallest public channel that fits the question:
 - For a new synthetic scenario or teaching idea, use the [scenario proposal form](https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues/new?template=scenario-proposal.yml).
 - For questions, model-design discussion, and reproducibility notes, use [GitHub Discussions](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions) when enabled.
 - For confidential security concerns, follow [SECURITY.md](SECURITY.md). Do not publish credentials, private manuals, customer traces, or sensitive infrastructure details in issues or Discussions.
+- To support continued open development, you can [sponsor or contribute on Ko-fi](https://ko-fi.com/N7V826XG89).
 
 Include the exact release or commit, Python version, operating system, command, preset or sanitized input hash, expected result, observed result, and relevant units. Attach a sanitized export when it helps. A question about a synthetic result is not evidence of a real-site defect; state the model boundary that applies.
 

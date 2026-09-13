@@ -69,6 +69,10 @@ CI checks Python 3.12 and 3.14 on Windows and Linux, the installed wheel, local 
 
 Start with [contribution guidance](CONTRIBUTING.md), [beginner contribution ideas](docs/scenarios/contribution-ideas.md), the [roadmap](ROADMAP.md), or [support](SUPPORT.md). Participants follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+If you find this project useful, you can support continued open development on [Ko-fi](https://ko-fi.com/N7V826XG89):
+
+[![Support me on Ko-fi](https://storage.ko-fi.com/cdn/kofi2.png?v=3)](https://ko-fi.com/N7V826XG89)
+
 For a task-based comparison with OpenDC and PyPSA, see [Choosing a simulator](docs/choosing-a-simulator.md).
 
 ## Assumptions and limits
@@ -98,3 +102,4 @@ Original code and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOT
 Alpha 0.3.0a0 · Python 3.12+ · Apache-2.0
 
 [![Tests](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml)
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
