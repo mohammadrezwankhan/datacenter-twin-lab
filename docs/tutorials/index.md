@@ -10,6 +10,7 @@ The browser teaching case uses **50,000 kW (50 MW)** of synthetic IT demand and 
 | Surviving path | Can one 700 kW gross path carry a 1 MW IT request? | 665 kW served; 335 kW unserved during the 600 s maintenance interval | [Continuity walkthrough](continuity-walkthrough.md) · [path_maintenance](../scenarios/path_maintenance.md) |
 | Finite battery | How long does the 1 MW / 100 kWh reference battery last? | 307.8 s ride-through; depletion at 607.8 s; recovery at 900 s | [Continuity walkthrough](continuity-walkthrough.md) · [generator_failure](../scenarios/generator_failure.md) |
 | Browser lesson | How do power, energy, and event boundaries relate? | Follow the first lesson, inspect the result, and optionally verify against Python | [Start power and energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) · [course notes](power-systems-course.md) |
+| Battery ride-through worksheet | Predict how halving stored energy changes ride-through | Charging disabled; compare 100 and 50 kWh | [Prediction and separate worked-answer section](battery-ride-through-worksheet.md) |
 
 ## Begin the runnable journey
 
