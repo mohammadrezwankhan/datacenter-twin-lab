@@ -6,10 +6,11 @@ The browser teaching case uses **50,000 kW (50 MW)** of synthetic IT demand and 
 
 | Runnable case | Question | Expected result | Where to run it |
 | --- | --- | --- | --- |
-| AI-cluster outage | How long does a 5 MWh reserve support a 50 MW aggregate load? | 307.8 s ride-through; depletion at 607.8 s; utility restoration at 900 s | [Browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [AI-cluster scenario note](../scenarios/ai-cluster-50mw.md) |
-| Surviving path | Can one 700 kW gross path carry a 1 MW IT request? | 665 kW served; 335 kW unserved during the 600 s maintenance interval | [Continuity walkthrough](continuity-walkthrough.md) · [path_maintenance](../scenarios/path_maintenance.md) |
-| Finite battery | How long does the 1 MW / 100 kWh reference battery last? | 307.8 s ride-through; depletion at 607.8 s; recovery at 900 s | [Continuity walkthrough](continuity-walkthrough.md) · [generator_failure](../scenarios/generator_failure.md) |
-| Browser lesson | How do power, energy, and event boundaries relate? | Follow the first lesson, inspect the result, and optionally verify against Python | [Start power and energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) · [course notes](power-systems-course.md) |
+| AI-cluster outage | How long does a 5 MWh reserve support a 50 MW aggregate load? | 307.8 s ride-through; depletion at 607.8 s; utility restoration at 900 s | [Browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) Â· [AI-cluster scenario note](../scenarios/ai-cluster-50mw.md) |
+| Surviving path | Can one 700 kW gross path carry a 1 MW IT request? | 665 kW served; 335 kW unserved during the 600 s maintenance interval | [Continuity walkthrough](continuity-walkthrough.md) Â· [path_maintenance](../scenarios/path_maintenance.md) |
+| Finite battery | How long does the 1 MW / 100 kWh reference battery last? | 307.8 s ride-through; depletion at 607.8 s; recovery at 900 s | [Continuity walkthrough](continuity-walkthrough.md) Â· [generator_failure](../scenarios/generator_failure.md) |
+| Browser lesson | How do power, energy, and event boundaries relate? | Follow the first lesson, inspect the result, and optionally verify against Python | [Start power and energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) Â· [course notes](power-systems-course.md) |
+| Battery ride-through worksheet | Predict how halving stored energy changes ride-through | Charging disabled; compare 100 and 50 kWh | [Prediction and separate worked-answer section](battery-ride-through-worksheet.md) |
 
 ## Begin the runnable journey
 
@@ -26,7 +27,7 @@ Use the [unit-aware glossary](../scenarios/glossary.md) after the first run to d
 
 ## Assumptions and limits
 
-The 50 MW case is a synthetic 50× scale-up of the verified 1 MW / 100 kWh fixture. The current model covers one aggregate IT load, explicit topology, finite stored energy, conversion losses, path limits, shared-domain events, event boundaries, deterministic replay, and exact energy accounting. It does not establish GPU throughput, grid adequacy, equipment selection, facility calibration, cooling, workload queues, battery aging, generator ramp/cooldown/fuel dynamics, transfer and switching transients, AC load flow, impedance-based sharing, protection coordination, harmonics, short-circuit or arc-flash studies, reliability probabilities, Tier claims, service-level claims, certification, physical controls, or physical safety.
+The 50 MW case is a synthetic 50Ã— scale-up of the verified 1 MW / 100 kWh fixture. The current model covers one aggregate IT load, explicit topology, finite stored energy, conversion losses, path limits, shared-domain events, event boundaries, deterministic replay, and exact energy accounting. It does not establish GPU throughput, grid adequacy, equipment selection, facility calibration, cooling, workload queues, battery aging, generator ramp/cooldown/fuel dynamics, transfer and switching transients, AC load flow, impedance-based sharing, protection coordination, harmonics, short-circuit or arc-flash studies, reliability probabilities, Tier claims, service-level claims, certification, physical controls, or physical safety.
 
 The 1 MW reference fixture uses 1,000 kW IT demand, 1,800 s duration, 0.95 distribution efficiency, 100 kWh initial and maximum battery energy, 0.90 discharge efficiency, a 30 s generator start delay, 700 kW path capacities, and a fictional USD 0.10/kWh tariff. The 50 MW case scales demand and battery energy to 50,000 kW and 5,000 kWh with the same ratios. All ratings, demand, efficiency, event times, and tariff values are synthetic assumptions; they are not selected-equipment ratings, live prices, a benchmark, a certification, legal-compliance evidence, or a real-site calibration.
 
