@@ -150,3 +150,7 @@ The 1 MW source fixture remains the reproducible CLI reference: 1,000 kW IT requ
 The browser demo has no shared simulation backend or client analytics. The API binds to loopback. No shared deployment, database, login, tenant isolation, persistent audit, live telemetry, FAT/SAT, independent external review, formal security audit, or validation dataset is included. Reference-case timing measures one local machine and does not establish scale targets or physical accuracy.
 
 The public source tree excludes private manuals, planning references and the private repository history. Do not add private manuals, extracted private text, credentials, customer traces, or licensed standards text. Original code and synthetic fixtures use [Apache-2.0](../LICENSE); see [NOTICE](../NOTICE) and [browser runtime licenses](third-party/README.md).
+
+## Facility configurations
+
+The energy workspace adds four illustrative profiles (50 MW AI, 200 MW hyperscale, 30 MW crypto mining and 5 MW traditional IT), each with outage, load-step and extended-reserve cases. Select an asset in the animated campus, change storage/loss/asset-limit assumptions, and export the result. See the [energy scenario guide](engineering/energy-scenario-workspace.md) for exact assumptions and hand calculations. New presets are in current source; older alpha assets keep their original contents.

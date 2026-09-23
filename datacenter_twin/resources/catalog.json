@@ -3,6 +3,46 @@
   "reviewed_on": "2026-09-08",
   "sources": [
     {
+      "id": "SYN-FACILITY-HYPERSCALE-200MW-001",
+      "title": "Original 200 MW hyperscale electrical profile",
+      "url": null,
+      "locator": "docs/engineering/energy-scenario-workspace.md",
+      "retrieved_on": "2026-09-23",
+      "evidence_type": "synthetic_assumption",
+      "claim": "The original 1 MW fixture is scaled by 200 in electrical demand, asset capacities and storage. Nominal aggregate IT demand is 200 MW; the outage case starts with 20 MWh stored energy. Efficiencies and generator delay are unchanged.",
+      "limitations": "An original teaching assumption, not an industry average, measured workload, selected equipment or calibrated facility. Profile names do not introduce workload behavior."
+    },
+    {
+      "id": "SYN-FACILITY-CRYPTO-30MW-001",
+      "title": "Original 30 MW crypto mining electrical profile",
+      "url": null,
+      "locator": "docs/engineering/energy-scenario-workspace.md",
+      "retrieved_on": "2026-09-23",
+      "evidence_type": "synthetic_assumption",
+      "claim": "The original 1 MW fixture is scaled by 30 in electrical demand, asset capacities and storage. Nominal aggregate IT demand is 30 MW; the outage case starts with 3 MWh stored energy. Efficiencies and generator delay are unchanged.",
+      "limitations": "An original teaching assumption, not an industry average, measured workload, selected equipment or calibrated facility. Profile names do not introduce workload behavior."
+    },
+    {
+      "id": "SYN-FACILITY-TRADITIONAL-5MW-001",
+      "title": "Original 5 MW traditional electrical profile",
+      "url": null,
+      "locator": "docs/engineering/energy-scenario-workspace.md",
+      "retrieved_on": "2026-09-23",
+      "evidence_type": "synthetic_assumption",
+      "claim": "The original 1 MW fixture is scaled by 5 in electrical demand, asset capacities and storage. Nominal aggregate IT demand is 5 MW; the outage case starts with 0.5 MWh stored energy. Efficiencies and generator delay are unchanged.",
+      "limitations": "An original teaching assumption, not an industry average, measured workload, selected equipment or calibrated facility. Profile names do not introduce workload behavior."
+    },
+    {
+      "id": "SYN-ENERGY-WORKSPACE-001",
+      "title": "Original load-step and extended-reserve experiment assumptions",
+      "url": null,
+      "locator": "docs/engineering/energy-scenario-workspace.md",
+      "retrieved_on": "2026-09-23",
+      "evidence_type": "synthetic_assumption",
+      "claim": "Four profiles use nominal IT loads of 50, 200, 30 and 5 MW. Load-step cases change demand to 80%, 110% and 100% at 300, 600 and 900 seconds. Extended-reserve cases replace the baseline storage with four hours of gross initial energy, disable charging, run four hours and remove utility/generator supply from 300 to 11100 seconds. Added outage cases retain the baseline event schedule.",
+      "limitations": "Overrides are explicit synthetic inputs, not GPU transients, renewable dispatch, grid-forming controls, black start or equipment response. Energy coverage does not establish uptime."
+    },
+    {
       "id": "SYN-AI-50MW-001",
       "title": "Original 50 MW aggregate AI-cluster electrical scenarios",
       "url": null,

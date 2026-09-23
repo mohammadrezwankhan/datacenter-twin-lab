@@ -8,6 +8,14 @@ The browser demo's synthetic AI-cluster case requests **50,000 kW (50 MW)** and 
 
 After the result appears, continue with the [tutorials](docs/tutorials/index.md), [scenario catalog](docs/scenarios/index.md), or [quickstart](docs/quickstart.md). Use [Discussions](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions) to share a reproducible result.
 
+## Explore your facility profile
+
+![The energy workspace with four facility profiles, an interactive isometric power scene and run-level energy coverage](docs/images/energy-workspace.png)
+
+Start with **AI (50 MW), hyperscale (200 MW), crypto (30 MW), or traditional (5 MW)**. Switch between a grid outage, stepped demand and extended battery reserve, then inspect the energy flows, adjust equipment limits, replay the events and export the result. The original twelve-lesson course remains one click away.
+
+[**Open the energy workspace**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Profile assumptions and worked examples](docs/engineering/energy-scenario-workspace.md)
+
 ## Try the result now
 
 1. Open the [zero-install browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/).
