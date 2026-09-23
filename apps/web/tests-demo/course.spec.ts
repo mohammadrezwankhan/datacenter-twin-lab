@@ -1,36 +1,9 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { lessons } from '../src/course-lessons';
 
-async function exported(page: Page, planning = false) {
-  const pending = page.waitForEvent('download');
-  await page
-    .getByRole('button', { name: planning ? 'Export PUE calculation' : 'Export lesson run' })
-    .click();
-  return JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
-}
-
-function nativeRun(run: { schema_version: number; scenario: unknown; assumptions: unknown }) {
-  const planning = run.schema_version === 1;
-  return JSON.parse(
-    execFileSync(
-      process.env.TWIN_PYTHON || 'python',
-      [
-        '-c',
-        planning
-          ? 'import json,sys;from datacenter_twin.contracts import Scenario;from datacenter_twin.engine import simulate;print(json.dumps(simulate(Scenario.from_dict(json.load(sys.stdin)))))'
-          : 'import json,sys;from datacenter_twin.topology import SiteScenario;from datacenter_twin.continuity import simulate_continuity;print(json.dumps(simulate_continuity(SiteScenario.from_dict(json.load(sys.stdin))).to_dict()))',
-      ],
-      {
-        cwd: '../..',
-        input: JSON.stringify(planning ? run.assumptions : run.scenario),
-        encoding: 'utf8',
-        maxBuffer: 16 * 1024 * 1024,
-      },
-    ),
-  );
-}
+import { exported, nativeRun, expectSceneLabelsVisible } from './course-test-helpers';
 
 // These expectations come from power × time, efficiency products and the
 // stated event times. Native equality additionally covers every exported field.
@@ -70,6 +43,7 @@ test('all twelve lessons run both exercises and export complete native-equal res
       }
       const run = await exported(page, lesson.id === 'pue');
       expect(run).toEqual(nativeRun(run));
+      await expectSceneLabelsVisible(page);
       const actual =
         lesson.id === 'pue'
           ? run.facility_energy_kwh

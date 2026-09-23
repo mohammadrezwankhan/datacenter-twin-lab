@@ -10,7 +10,7 @@ The browser teaching case uses a synthetic **50,000 kW (50 MW)** IT request and 
 2. Run **AI-cluster generator failure** with the default values.
 3. Select **Battery depleted 607.8 s** and inspect the interval with **0 kW served IT power** until utility restoration at **900 s**.
 
-The [12-lesson course starts with power and energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy). The topical AI-outage lesson is available at [`?lesson=ai-outage`](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage) after the course route is present. Supporting [course notes](tutorials/power-systems-course.md) and the [AI-cluster scenario note](scenarios/ai-cluster-50mw.md) are supplied with the course update.
+The [12-lesson course starts with power and energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy). Open its color-coded atlas, change a bounded input, predict a result and inspect the selectable isometric scene. Jump directly to the [50 MW AI-outage lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage), or follow the [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md).
 
 The default browser journey uses exact JavaScript arithmetic locally. Select **Verify against Python** only when you want the optional Pyodide cross-check; it loads the Python runtime on demand rather than downloading it for the initial result. Runtime and measurement details are documented in the [browser guide](engineering/browser-demo.md).
 

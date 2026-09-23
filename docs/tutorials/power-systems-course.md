@@ -4,6 +4,20 @@
 
 Start with the [power and energy lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), then use the lesson selector or **Next lesson**. Each lesson has one input, a challenge value, a worked answer, and a result you can inspect in the browser.
 
+![The interactive course studio with a 50 MW lesson, selectable isometric objects, event replay, and a prediction-and-result workspace](../images/course-studio.png)
+
+## Explore, predict, explain
+
+Open **Explore all 12 lessons** to see four chapters: energy and reserve, continuity systems, shared risks and reserve, and planning at scale. Each lesson has its own accent color and scene. Numbers, titles, units and asset-state labels carry the meaning as well as color.
+
+1. **Configure:** use the slider or numeric field, or choose the starting or challenge input. A changed input stays a draft until you select **Run lesson**.
+2. **Predict:** optionally enter the expected result in the displayed units. Run the lesson to compare your prediction and the starting result with the completed calculation.
+3. **Inspect:** select an object for its quantities, drag **Lesson replay interval**, or jump to an event. A boundary event selects the interval in which the event takes effect. The PUE lesson instead partitions annual IT and non-IT energy.
+4. **Explain:** reveal the worked answer after making a prediction. It explains the starting and challenge inputs; other inputs can produce different event sequences.
+5. **Keep the evidence:** export JSON, or a Markdown/HTML continuity report, and optionally verify the complete result against Python. **Mark as reviewed** is a temporary self-mark for this visit, not a saved score or certificate.
+
+Objects are original vector illustrations of the returned values. **Pause motion** and your device's reduced-motion preference stop decorative animation; the replay controls remain usable. See the [course studio guide](../engineering/course-studio.md) for keyboard controls, event edge cases and reproduction.
+
 ## The headline result
 
 The AI-outage lesson uses a synthetic aggregate **50,000 kW (50 MW)** IT request and **5,000 kWh (5 MWh)** initial stored battery energy. Utility and generator supply fail at 300 s. With 0.90 battery discharge efficiency and 0.95 distribution efficiency:

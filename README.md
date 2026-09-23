@@ -12,9 +12,17 @@ After the result appears, continue with the [tutorials](docs/tutorials/index.md)
 
 ![The energy workspace with four facility profiles, an interactive isometric power scene and run-level energy coverage](docs/images/energy-workspace.png)
 
-Start with **AI (50 MW), hyperscale (200 MW), crypto (30 MW), or traditional (5 MW)**. Switch between a grid outage, stepped demand and extended battery reserve, then inspect the energy flows, adjust equipment limits, replay the events and export the result. The original twelve-lesson course remains one click away.
+Start with **AI (50 MW), hyperscale (200 MW), crypto (30 MW), or traditional (5 MW)**. Switch between a grid outage, stepped demand and extended battery reserve, then inspect the energy flows, adjust equipment limits, replay the events and export the result.
 
 [**Open the energy workspace**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Profile assumptions and worked examples](docs/engineering/energy-scenario-workspace.md)
+
+## Learn by changing one assumption
+
+![The course studio: a 50 MW power lesson with an interactive scene and a prediction-and-result workspace](docs/images/course-studio.png)
+
+**Twelve lessons, four chapters, one experiment at a time.** Explore power and energy, battery reserve, generator timing, redundant paths, shared failures and PUE. Each lesson pairs a distinct color theme with selectable isometric objects, a bounded input slider, event replay and a worked answer. Predict an outcome, change the assumption, and export the calculation behind the result. Motion can be paused, and keyboard and reduced-motion controls are supported.
+
+[**Start the interactive course →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) · [Jump to the 50 MW lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage) · [Course guide](docs/engineering/course-studio.md)
 
 ## Try the result now
 

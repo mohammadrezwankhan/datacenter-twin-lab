@@ -37,6 +37,8 @@ New to the electrical terms? Use the [unit-aware glossary and kW/kWh example](gl
 
 ## Read the diagrams
 
+For an interactive view, the [twelve-lesson course studio](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) adds selectable isometric objects, interval replay and optional prediction checks. Its [guide](../engineering/course-studio.md) connects the illustrations to the exported quantities.
+
 The diagrams show the same synthetic topology used by the reference presets. Events change asset or domain availability at explicit boundaries; they do not model switching transients or protection behavior.
 
 ## Propose a new case

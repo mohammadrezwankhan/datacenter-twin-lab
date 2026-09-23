@@ -14,6 +14,10 @@ The browser teaching case uses **50,000 kW (50 MW)** of synthetic IT demand and 
 
 ## Begin the runnable journey
 
+![An actual AI-outage lesson in the interactive course studio](../images/course-studio.png)
+
+The course pairs twelve color-coded lessons with selectable isometric scenes, bounded input sliders, optional predictions, event replay and worked answers. Open the course atlas to choose a question, or follow the four chapters in order. Read the [course studio guide](../engineering/course-studio.md) for a first experiment.
+
 - [Open the zero-install browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) with the AI-cluster case.
 - [Start the 12-lesson browser course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) or read the [course guide](power-systems-course.md).
 - [Use the quickstart](../quickstart.md) when you need the optional Python, uv, released-wheel, or source workflow.

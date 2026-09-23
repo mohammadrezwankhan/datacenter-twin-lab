@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { Asset, Catalog, Interval, Run, SiteScenario } from './types';
 import { Evidence } from './Evidence';
 import { n, request } from './client';
 import { RunTools } from './RunTools';
 import { PythonVerification } from './PythonVerification';
-import { Course } from './Course';
 import { PowerScene } from './PowerScene';
 import {
   FacilitySelector,
@@ -17,6 +16,7 @@ import { facilityProfiles } from './facility-profiles';
 import './energy-workspace.css';
 
 const browserDemo = import.meta.env.MODE === 'demo';
+const Course = lazy(() => import('./Course').then((module) => ({ default: module.Course })));
 const initialPreset = browserDemo
   ? new URLSearchParams(window.location.search).get('preset') || 'ai_cluster_generator_failure'
   : 'utility_loss';
@@ -531,7 +531,7 @@ export function App() {
               <div className="eyebrow">DATACENTER TWIN LAB / ENERGY EXPLORER</div>
               <h1>
                 {page === 'learn'
-                  ? 'Power systems for datacenter engineers'
+                  ? 'Power systems, made visible.'
                   : page === 'evidence'
                     ? 'Evidence & options'
                     : page === 'topology'
@@ -542,7 +542,7 @@ export function App() {
               </h1>
               <p>
                 {page === 'learn'
-                  ? 'Twelve experiments. Change an input, predict the result, then test it.'
+                  ? 'Twelve interactive lessons for datacenter engineers. Predict, experiment and explain.'
                   : page === 'evidence'
                     ? 'Trace the inputs and options behind each calculation.'
                     : page === 'energy'
@@ -588,7 +588,9 @@ export function App() {
           {run && row && draft && (
             <>
               {page === 'learn' ? (
-                <Course />
+                <Suspense fallback={<p role="status">Opening the course studio…</p>}>
+                  <Course />
+                </Suspense>
               ) : page === 'energy' ? (
                 <EnergyGuide
                   onScenario={(mode) => {
