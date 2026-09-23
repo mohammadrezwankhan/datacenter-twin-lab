@@ -83,7 +83,7 @@ test('cold first result requests no Python runtime or cover and records observed
       );
   });
   const started = performance.now();
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
   const firstResultMs = performance.now() - started;
   const assets = await Promise.all(responses);
@@ -121,7 +121,7 @@ test('course works at phone width and navigation returns to the simulator', asyn
   await expect(page.getByTestId('lesson-result')).toContainText('478.2675');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: 'test-results/course-phone.png', fullPage: true });
-  await page.getByRole('button', { name: 'Simulator', exact: true }).click();
+  await page.getByRole('button', { name: 'Advanced workspace', exact: true }).click();
   await expect(page.getByTestId('served-power')).toBeVisible();
   expect(new URL(page.url()).searchParams.has('lesson')).toBe(false);
 });

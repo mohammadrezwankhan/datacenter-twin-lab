@@ -1,0 +1,17 @@
+# Scenario comparison
+
+The dashboard's advanced comparison varies one field from the completed schema-v2 run and runs each candidate against the existing deterministic electrical engine. The result table reports requested, served and unserved IT energy (kWh), interruption time (s), and the first battery-depletion event. It also shows the source run ID and source input SHA-256; downloadable JSON retains each candidate's input hash and full result where the underlying route returns it.
+
+The controls offer finite, bounded choices derived from the source scenario:
+
+| Comparison                           | Values offered                                                                                                      | Calculation route                                                                                                                                                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Initial battery reserve              | 0, half of configured energy capacity, and full capacity (kWh)                                                      | Existing validated `battery_initial_kwh` sensitivity sweep; values are within the scenario's stored-energy capacity.                                                                                                |
+| Generator start delay                | 0 s, the configured delay, and 86,400 s; duplicate choices are removed and a 43,200 s option fills a duplicate slot | Existing validated `generator_start_delay_s` sensitivity sweep; integer values stay within the contract's 0–86,400 s range.                                                                                         |
+| Surviving distribution path capacity | Half of the selected asset rating, its configured rating, and 1.5 times that rating (kW)                            | Separate calls to the existing validated simulation route, each changing only the selected distribution asset's `capacity_kw`. The sensitivity sweep contract does not include asset capacity as a sweep parameter. |
+
+The existing “Compare battery reserves” action remains available and keeps its `battery-sweep` test hook and JSON export. Advanced parameter, path, or value changes clear displayed comparison results; a new completed run clears them as well. Requests are cancelled when their source run changes, and stale completions are ignored.
+
+Interpret results as sensitivity output, not as evidence that a changed input caused a physical outcome. A generator delay can be irrelevant when the generator is unavailable or another supply constraint dominates. A distribution-path rating can be irrelevant when that path is unavailable or a source/IT limit dominates. The table does not compare costs. A zero initial reserve is shown separately from an absent depletion event; null results remain explicit.
+
+The browser comparison uses the existing on-demand JavaScript engine in the static demo and the local API's existing simulation/sweep routes in the installed dashboard. It does not start Python in the browser by default and does not change the simulation engine or sweep contract.

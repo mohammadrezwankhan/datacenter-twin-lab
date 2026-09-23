@@ -1,0 +1,40 @@
+{
+  "version": "0.4.0rc1",
+  "manifest_path": "data/evidence/v0.4.0rc1/manifest.json",
+  "receipt_path": "data/evidence/v0.4.0rc1/receipt.md",
+  "cases": [
+    {
+      "id": "canonical-1mw-100kwh",
+      "title": "100 kWh at 1 MW",
+      "input_sha256": "a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0",
+      "run_id": "d179c72e4b72afdb8b9d",
+      "run_path": "data/evidence/v0.4.0rc1/run-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json",
+      "scenario_path": "data/evidence/v0.4.0rc1/scenario-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json",
+      "report_path": "data/evidence/v0.4.0rc1/report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.html",
+      "equation": "100 × 0.90 × 0.95 ÷ 1,000 × 3,600",
+      "outcome": "307.8 seconds of battery ride-through"
+    },
+    {
+      "id": "canonical-1mw-50kwh",
+      "title": "50 kWh at 1 MW",
+      "input_sha256": "0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9",
+      "run_id": "21cd49da247b309f2b45",
+      "run_path": "data/evidence/v0.4.0rc1/run-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json",
+      "scenario_path": "data/evidence/v0.4.0rc1/scenario-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json",
+      "report_path": "data/evidence/v0.4.0rc1/report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.html",
+      "equation": "50 × 0.90 × 0.95 ÷ 1,000 × 3,600",
+      "outcome": "153.9 seconds of battery ride-through"
+    },
+    {
+      "id": "path-maintenance-700kw",
+      "title": "One 700 kW surviving path",
+      "input_sha256": "6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd",
+      "run_id": "ad6fc2898ce61f96406c",
+      "run_path": "data/evidence/v0.4.0rc1/run-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json",
+      "scenario_path": "data/evidence/v0.4.0rc1/scenario-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json",
+      "report_path": "data/evidence/v0.4.0rc1/report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.html",
+      "equation": "700 × 0.95 = 665 kW served; 1,000 − 665 = 335 kW unserved",
+      "outcome": "55.833 kWh unserved over ten minutes"
+    }
+  ]
+}

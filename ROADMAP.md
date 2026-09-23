@@ -1,45 +1,53 @@
 # Roadmap
 
-Build from a reproducible outage calculation to experiments an engineer can adapt and teach.
+## Current status: v0.4.0rc1 candidate
 
-## Available in the source and browser demo
+The current source is a **release candidate, not a stable release**. It focuses on reproducible teaching experiments for datacenter power continuity. It does not claim production reliability analysis, site validation, or independent review. Review candidate status and the release conditions in [release readiness](docs/engineering/release-readiness.md).
 
-| Capability | What you can do |
-| --- | --- |
-| Seven electrical presets | Compare the five 1 MW reference cases and two 50 MW AI-cluster outage cases. |
-| Twelve interactive lessons | Change one input, predict the result, check a worked answer and export the calculation. |
-| Fast browser calculation | Run locally with exact JavaScript arithmetic; request the Python cross-check when wanted. |
-| Reports and sensitivity | Export JSON, Markdown and HTML; compare bounded reserve, efficiency, demand and delay sweeps. |
-| Python and local dashboard | Reproduce calculations with the standard-library CLI, loopback API and React dashboard. The tagged 0.3.0a0 wheel preserves the earlier five-preset release; use a current source checkout for the AI presets. |
-| Contribution material | Use the glossary, notebook, reproducibility capsule, issue forms and small contribution ideas. |
+## Available in the current source and browser demo
 
-[Start the course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) or [inspect the 50 MW case](docs/scenarios/ai-cluster-50mw.md).
+| Capability                         | What is available                                                                                                                                                                                          |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Five-minute guided start           | Default first-visit route: predict, explicitly run, and explain a 1 MW / 100 kWh synthetic case. Compare the charging-disabled 50 kWh challenge.                                                           |
+| Scenario catalog                   | Eighteen named cases, including five reference cases and facility-profile outage, demand-step, and extended-reserve cases for 50 MW, 200 MW, 30 MW, and 5 MW aggregate IT loads. All inputs are synthetic. |
+| Advanced energy workspace          | Inspect an interactive isometric electrical scene, run and replay events, edit bounded assumptions, and export the completed result.                                                                       |
+| Twelve browser lessons             | Four course chapters with predictions, challenge values, selectable scenes, event replay, worked answers, and result exports.                                                                              |
+| Deterministic calculation          | Standard-library Python engine and exact JavaScript browser engine, with a Python comparison available on request. Full-result checks cover values, assumptions, and hashes.                               |
+| Reports and sensitivity            | Export JSON, Markdown, and HTML; compare bounded reserve, efficiency, demand, and delay cases. Unknown values remain explicit.                                                                             |
+| Evidence and contribution material | Reproducibility packet, independent-review protocol, source register, tutorials, notebook, scenario guidance, and contribution ideas.                                                                      |
+| Local use                          | CLI and loopback dashboard. The browser demo runs its first result locally and has no shared simulation backend or client analytics.                                                                       |
 
-## Next capabilities — planned
+Open the [guided experiment](https://mohammadrezwankhan.github.io/datacenter-twin-lab/), the [advanced workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), the [50 MW outage case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss), or the [12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy). The [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence) and [tutorial index](docs/tutorials/index.md) provide the supporting material.
 
-1. **Bring your own scenario JSON into the browser.** Validate an imported file, identify the changed assumptions and export a reproducible result.
-2. **Edit a demand timeline visually.** Use the existing demand-event contract to explore ramps represented as explicit steps, without hand-editing JSON.
-3. **Export a lesson worksheet.** Bundle a learner's inputs, prediction, worked calculation and run hash in a printable exercise.
+## Planned capabilities
 
-Prioritize these against reproducible first-run problems and learner feedback. They are planned work, not controls already available in the demo.
+These are not controls in the current demo:
 
-## Validation methodology
+1. **Import a scenario JSON file in the browser.** Validate its schema, show which assumptions differ, and let a visitor export a reproducible result.
+2. **Edit a demand timeline visually.** Compose explicit demand steps using the existing scenario contract; do not imply transient, workload, or GPU-job prediction.
+3. **Export a lesson worksheet.** Provide a printable record of a learner's prediction, inputs, worked calculation, result, and hash.
 
-The core and API suites, frontend format/type/build checks, installed-wheel checks, local dashboard journeys, browser/Python journeys, and browser/native equality checks establish software behavior for synthetic fixtures. Numerical expectations use deterministic inputs, explicit units, independent hand calculations, stable input hashes, event logs, interval energy ledgers, and zero energy-balance residuals where the scenario contract requires it. Reference-case timing measures software execution on one local machine; it does not establish a performance benchmark, a scale target, or physical accuracy.
+Prioritize these against reproducible first-run problems and learner feedback. Do not describe planned work as implemented behavior.
 
-Independent external technical review has not yet been obtained. There is no formal security audit, shared deployment, facility calibration, FAT/SAT, live telemetry, validation dataset, calibrated alarm model, cooling model, workload-throughput model, or physical-control integration. The API remains loopback-only, the browser has no shared simulation backend or client analytics, and unknown costs and unavailable quantities remain explicit. See the [review protocol](docs/validation/review-protocol.md), [reproducibility capsule](docs/validation/reproducibility-capsule.md), and [synthetic provenance manifest](data/provenance/manifest.json).
+## Evidence and stable-release conditions
 
-## Next evidence to obtain
+Current automated checks target Python 3.12 and 3.14 on Windows and Linux. Chromium Playwright journeys run on Ubuntu with Python 3.12. Workflow configuration describes the per-commit matrix; inspect the exact commit's CI result before claiming it passed. Numerical and browser checks establish software behavior for synthetic fixtures only. The [benchmark method](docs/engineering/benchmark-method.md) explains environment-specific observations; timings are not a cross-system performance benchmark or equipment response measurement.
 
-1. Independent checks of the [reproducibility capsule](docs/validation/reproducibility-capsule.md), with review scope, corrections, and unresolved limitations recorded publicly.
-2. First-run feedback and scenario reuse by people outside the maintainer workflow; distinguish voluntary reports from automated test activity.
-3. Educator and engineer feedback on the battery ride-through material and the 12-lesson course with reproducible lesson results.
-4. Repeat use, release downloads, forks, Discussions, and contributions measured with explicit sources and denominators. Demo completion remains unknown without voluntary reports; no tracking pixels or client telemetry are installed.
+Before choosing a stable release:
 
-## Later and deferred work
+1. Obtain an attributed, independent technical reconstruction through the [review protocol](docs/validation/review-protocol.md) and existing [review discussion](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions/5). Preserve the reviewer's scope and any corrections; do not substitute maintainer testing or automated agent output.
+2. Resolve reproduced mismatches or publish their disposition and limitation.
+3. Confirm the exact source, wheel, and browser asset hashes, commands, supported environments, and migration notes for the selected stable revision.
+4. Publish a new stable tag and release only after the review and artifact checks are recorded. Keep `0.4.0rc1` and earlier alpha assets as historical versions.
 
-The released GitHub wheel supports [uvx](docs/quickstart.md#run-with-uv). Publishing on PyPI needs a configured owner publishing identity. Additional sweep parameters, optional public-data adapters, a stable extension API, and carefully bounded synthetic GPU/rack examples need separate contracts and provenance. 3D scenes, operational integrations, and a new fluent API do not take priority over reproducibility and first-run feedback.
+Calibrated facility examples are conditional on data rights, measurement provenance, uncertainty, a named validation owner, and an agreed acceptance boundary. None is included today. A DOI or archive citation is conditional on a stable artifact, approved deposit metadata, and an authorized archive account; no DOI or archive endorsement is available to cite now.
 
-A shared multi-user service, live facility telemetry, cooling/workload prediction, calibrated alarms, physical controls, and certification claims remain outside the current project scope. No star target is a validated schedule or evidence of model accuracy or adoption.
+## Deferred boundaries
 
-Original code and synthetic fixtures use [Apache-2.0](LICENSE); see [NOTICE](NOTICE) and the [browser runtime licenses](docs/third-party/README.md).
+The existing isometric workspace and course scenes are teaching views of completed synthetic calculations. No broader 3D scene system or operational controller is promised. Live telemetry, shared multi-user service, cooling/workload prediction, calibrated alarms, protection studies, physical controls, and reliability or certification claims need separate contracts, evidence, security, and acceptance decisions; they are outside this candidate.
+
+The loopback API remains local. There is no shared deployment, database, login, tenant isolation, persistent audit, facility telemetry, FAT/SAT, or real-time control. Do not use synthetic results as equipment selection, grid-adequacy, facility-safety, legal-compliance, uptime, or service-level evidence.
+
+Outside adoption and repeat demo use remain unknown without voluntary, sourced reports. A 5,000-star aspiration has no validated timeline and is not evidence of accuracy, award readiness, or adoption. Maintainer delivery and CI do not count as outside review or endorsement.
+
+Original code and synthetic fixtures use [Apache-2.0](LICENSE); see [NOTICE](NOTICE) and [browser runtime licenses](docs/third-party/README.md).

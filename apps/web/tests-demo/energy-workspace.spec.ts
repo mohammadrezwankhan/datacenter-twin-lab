@@ -29,7 +29,7 @@ function nativeRun(scenario: unknown) {
 
 test('all facility and pressure selections export native-equal runs', async ({ page }) => {
   test.setTimeout(180000);
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   for (const profile of facilityProfiles) {
     await page.getByRole('button', { name: `${profile.name} profile`, exact: true }).click();
     await expect(page.getByRole('button', { name: 'Run scenario' })).toBeEnabled();
@@ -106,7 +106,7 @@ test('scene is visible and keyboard operable at desktop, tablet and phone widths
 }, testInfo) => {
   for (const width of [1440, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 1080 });
-    await page.goto('./');
+    await page.goto('./?mode=advanced');
     await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
     const scene = page.getByRole('region', { name: 'Power flow scene' });
     await expect(scene.locator('svg')).toBeVisible();
@@ -129,7 +129,7 @@ test('reduced motion is honored and the opening screen has no runtime errors', a
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
   await expect(page.getByRole('button', { name: 'Resume animation' })).toBeVisible();
   expect(

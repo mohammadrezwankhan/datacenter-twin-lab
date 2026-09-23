@@ -1,34 +1,45 @@
 # Quickstart
 
-**Question:** how long can a finite battery support a large aggregate AI-cluster load after utility and generator power fail?
+**Start here:** predict the ride-through of a synthetic **1,000 kW (1 MW)** IT load with **100 kWh** of stored battery energy, run the case, and explain its energy ledger.
 
-The browser teaching case uses a synthetic **50,000 kW (50 MW)** IT request and **5,000 kWh (5 MWh)** initial battery energy. With the modeled 0.90 discharge and 0.95 distribution efficiencies, it supplies IT for **307.8 s** and records battery depletion at **607.8 s elapsed**. This is the first useful result; installation options follow it.
+The default browser route opens the five-minute guided experiment. It derives from course lesson 3 and uses the exact `generator_failure` fixture with charging set to **0 kW**, the generator failed, and utility outage/recovery at **300/900 s**. The 100 kWh reserve delivers `100 × 0.90 × 0.95 = 85.5 kWh` to IT. At 1,000 kW, ride-through is **307.8 s from the 300 s outage** and depletion is **607.8 s elapsed**. With the **50 kWh challenge**, the corresponding values are **153.9 s from outage** and **453.9 s elapsed**. Those are separate durations/timestamps.
 
-## Run the browser case first
+## Run the guided browser experiment
 
 1. Open the [zero-install browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/).
-2. Run **AI-cluster generator failure** with the default values.
-3. Select **Battery depleted 607.8 s** and inspect the interval with **0 kW served IT power** until utility restoration at **900 s**.
+2. Enter your estimate in seconds **from the outage event**, choose the default 100 kWh reserve or the 50 kWh challenge, then deliberately select **Run 1 MW scenario**.
+3. Compare ride-through with the elapsed depletion timestamp, inspect requested/served/unserved energy in the outage ledger, and export JSON if you want to retain the exact assumptions and hash.
 
-The [12-lesson course starts with power and energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy). Open its color-coded atlas, change a bounded input, predict a result and inspect the selectable isometric scene. Jump directly to the [50 MW AI-outage lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage), or follow the [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md).
+No result is presented before the deliberate run. The equation applies both efficiency losses before dividing IT energy by the requested IT power. After the result, use the optional Python comparison or expand the report and sensitivity tools. The default JavaScript run does not load the Python runtime; it is loaded only when requested. See the [browser guide](engineering/browser-demo.md) for runtime and privacy details.
 
-The default browser journey uses exact JavaScript arithmetic locally. Select **Verify against Python** only when you want the optional Pyodide cross-check; it loads the Python runtime on demand rather than downloading it for the initial result. Runtime and measurement details are documented in the [browser guide](engineering/browser-demo.md).
+Open the [advanced simulator](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), the existing [50 MW outage case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss), the [12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), or the [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence#demo). The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the lesson atlas.
 
-## Reproduce the original 1 MW reference case
+The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. The current source describes a v0.4.0rc1 **release candidate**, not a stable release. Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
 
-The original `generator_failure` preset remains available at [`?preset=generator_failure`](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=generator_failure). It uses a synthetic **1,000 kW IT request** and **100 kWh battery**, so the same ratio gives 307.8 s of battery ride-through and depletion at 607.8 s. Change **Initial battery** from **100** to **50 kWh**, run the scenario, and inspect the battery-depleted event; pre-outage charging explains the **478.2675 s** result.
+The original `generator_failure` preset remains available for CLI reproduction. Its default 100 kWh battery starts full, so pre-outage charging cannot increase that opening balance. In that preset, changing the starting reserve to 50 kWh allows pre-outage charging and yields **478.2675 s elapsed**, rather than the guide challenge's **453.9 s** with charging disabled. The exact lesson recipe and independent hand calculation are in the [canonical case](canonical-case.md).
 
-For a recorded 1 MW walkthrough, use the optional [still image](images/demo-preview.png) and [transcript/capture recipe](examples/demo-walkthrough.md). The recording omits waiting and pointer movement and is not a speed benchmark. Refresh it if the current browser controls or labels differ.
+For a preserved recording of the earlier interface, see the optional [still image](images/demo-preview.png) and [transcript/capture recipe](examples/demo-walkthrough.md). That older capture omits waiting and pointer movement and is not a speed benchmark. Refresh it if current browser controls or labels differ.
+
+## Evidence and candidate links
+
+- [Independent reproduction packet](evidence.md) and [canonical case](canonical-case.md)
+- [Release readiness and review status](engineering/release-readiness.md)
+- [Benchmark method and interpretation](engineering/benchmark-method.md)
+- [Add a scenario](engineering/adding-a-scenario.md)
+
+Automated checks establish software behavior for these synthetic fixtures. Check each commit's CI result; workflow configuration alone does not show that the candidate passed. Candidate status and independent review are separate.
 
 ## Run with uv
 
 If [uv is installed](https://docs.astral.sh/uv/getting-started/installation/), run the released CLI from an empty working folder with one command. `uvx` creates a cached, isolated environment; it downloads Python 3.12 if needed. Git, Node, and a source checkout are unnecessary.
 
+The pinned wheel below is the historical `0.3.0a0` release, not the current `0.4.0rc1` candidate. It preserves its published contents and provides the earlier CLI/dashboard workflow; it does not include later candidate-only browser entry and evidence features. Use a source checkout for the candidate. This repository is not published on PyPI.
+
 ```sh
 uvx --python 3.12 --from "datacenter-twin-lab @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.3.0a0/datacenter_twin_lab-0.3.0a0-py3-none-any.whl#sha256=b951f6877fb323c8ff3a064558054383d4d1582e753e52c0a0c35b06a42739db" datacenter-twin simulate --preset generator_failure --format markdown
 ```
 
-This command intentionally reproduces the original 1 MW / 100 kWh reference fixture. For the local dashboard, use the same released wheel with its API extra:
+This command intentionally reproduces the original 1 MW / 100 kWh reference fixture. The release asset, pinned URL, and SHA-256 identify the historical wheel; earlier alpha assets remain unchanged. For its local dashboard, use the same released wheel with its API extra:
 
 ```sh
 uvx --python 3.12 --from "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v0.3.0a0/datacenter_twin_lab-0.3.0a0-py3-none-any.whl#sha256=b951f6877fb323c8ff3a064558054383d4d1582e753e52c0a0c35b06a42739db" datacenter-twin serve
@@ -38,9 +49,9 @@ Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8
 
 The route was exercised with uv 0.12.11 and Python 3.12.14 on Windows, outside the checkout, including a real CLI report and dashboard run. For an installed Python 3.12+, `--python` can also take its executable path. See [uv's tool isolation and source options](https://docs.astral.sh/uv/guides/tools/). If you prefer pip, use the following route.
 
-## Run the released dashboard (Python only)
+## Run the historical released dashboard (Python only)
 
-In an empty working folder, create an isolated environment and install the public `0.3.0a0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The URL pins the release asset and its SHA-256 hash; it does not rely on a PyPI publication of this project.
+In an empty working folder, create an isolated environment and install the historical public `0.3.0a0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The URL pins that release asset and its SHA-256 hash; it does not rely on a PyPI publication of this project. This tagged alpha predates the `0.4.0rc1` guided route and evidence packet. Its assets are retained as published and are not the candidate build.
 
 Windows / PowerShell:
 
@@ -60,7 +71,7 @@ python3 -m venv .venv
 
 Use a Python executable at version 3.12 or later; for example, replace the first Windows `python` with `py -3.12` if you use that launcher. Your Python installation must include pip and venv support. The initial installation needs network access to GitHub and the dependency package index. It installs the built interface and API dependencies; Git, Node, an API key, and a cloud account are not required. The release pins FastAPI and Uvicorn; this convenient extra resolves their compatible transitive dependencies. Use the locked source workflow below when you need the repository's exact development dependency set.
 
-Open [127.0.0.1:8000](http://127.0.0.1:8000). Select **Generator failure / battery depletion**, run the original 1 MW scenario, and select the `607.8 s` battery-depleted event. Served IT power drops to zero until restoration at `900 s`. Try **A-path maintenance / surviving overload** to see 665 kW served and 335 kW unserved during the outage interval. [The tutorial](tutorials/continuity-walkthrough.md) derives both results.
+Open [127.0.0.1:8000](http://127.0.0.1:8000). Select **Generator failure / battery depletion**, run the original 1 MW scenario, and select the `607.8 s` battery-depleted event. Served IT power drops to zero until restoration at `900 s`. Try **A-path maintenance / surviving overload** to see 665 kW served and 335 kW unserved during the outage interval. [The tutorial](tutorials/continuity-walkthrough.md) derives both results. The 50 kWh CLI sweep value uses the preset's charging behavior; it is not the charging-disabled guided lesson challenge.
 
 Stop the server with Ctrl+C. If port 8000 is occupied, append `--port 8001` to the serve command and open port 8001. After stopping, you can run the bundled CLI preset in the same environment:
 
@@ -124,6 +135,9 @@ Browser verification from `apps/web`:
 npx playwright install chromium
 npm run build
 npm run test:e2e
+npm run test:engine
+npm run build:demo
+npm run test:demo
 ```
 
 Playwright starts a local Python server. If your virtual environment is not activated, set `TWIN_PYTHON` to its Python executable. In PowerShell use `$env:TWIN_PYTHON = 'C:\path\to\venv\Scripts\python.exe'`. No browser provider or external API account is used.
@@ -139,7 +153,7 @@ python scripts/verify_distribution.py dist --require-web
 
 The verifier expects exactly one project wheel in the selected directory. Use a separate directory for each retained version. The verifier creates a temporary environment, installs the local wheel with `--no-index --no-deps`, checks import/version identity, and exercises both entry points plus continuity and catalogue resources. Schema-1 samples are copied from this repository. The schema-2 demo and catalogue are package resources. `--require-web` also checks that the compiled dashboard is included; omit it for an intentional CLI-only wheel. The installed core needs no network; an installed dashboard server still requires the optional API dependencies.
 
-CI runs the core and API tests, frontend type check/build, and installed-wheel verification on Windows/Ubuntu with Python 3.12/3.14. Browser journeys run on Ubuntu/Python 3.12. PyPI publication remains pending a configured owner publishing identity; the verified GitHub wheel supports both pip and uv today. Containers and shared deployment are outside this delivery.
+The workflow is configured to run on each push to `main` and each pull request. It targets Python 3.12 and 3.14 on Windows and Ubuntu for the core/API, frontend type/build, and installed-wheel checks. Playwright Chromium journeys run on Ubuntu/Python 3.12. This describes the per-commit matrix; check the exact commit to establish which jobs passed. PyPI publication remains pending a configured owner publishing identity; the pinned GitHub wheel commands above use the historical 0.3.0a0 alpha. Containers and shared deployment are outside this delivery.
 
 ## Assumptions and limits
 
@@ -147,10 +161,10 @@ The 50 MW browser case is a synthetic 50× scale-up of the verified 1 MW / 100 k
 
 The 1 MW source fixture remains the reproducible CLI reference: 1,000 kW IT request, 1,800 s duration, 100 kWh initial and maximum battery energy, 30 s generator start delay, 700 kW path capacities, and a fictional USD 0.10/kWh tariff. These are synthetic assumptions, not live prices, account quotes, equipment ratings, a benchmark, a legal-compliance result, or a real-site calibration. Unknown costs and unavailable quantities remain explicit.
 
-The browser demo has no shared simulation backend or client analytics. The API binds to loopback. No shared deployment, database, login, tenant isolation, persistent audit, live telemetry, FAT/SAT, independent external review, formal security audit, or validation dataset is included. Reference-case timing measures one local machine and does not establish scale targets or physical accuracy.
+The browser demo has no shared simulation backend or client analytics. The API binds to loopback. No shared deployment, database, login, tenant isolation, persistent audit, live telemetry, FAT/SAT, independent external review, formal security audit, or validation dataset is included. Reference-case timing measures one local machine and does not establish scale targets or physical accuracy. Maintainer tests and generated evidence do not substitute for the external review required before a stable release.
 
 The public source tree excludes private manuals, planning references and the private repository history. Do not add private manuals, extracted private text, credentials, customer traces, or licensed standards text. Original code and synthetic fixtures use [Apache-2.0](../LICENSE); see [NOTICE](../NOTICE) and [browser runtime licenses](third-party/README.md).
 
 ## Facility configurations
 
-The energy workspace adds four illustrative profiles (50 MW AI, 200 MW hyperscale, 30 MW crypto mining and 5 MW traditional IT), each with outage, load-step and extended-reserve cases. Select an asset in the animated campus, change storage/loss/asset-limit assumptions, and export the result. See the [energy scenario guide](engineering/energy-scenario-workspace.md) for exact assumptions and hand calculations. New presets are in current source; older alpha assets keep their original contents.
+The energy workspace adds four illustrative profiles (50 MW AI, 200 MW hyperscale, 30 MW crypto mining and 5 MW traditional IT), each with outage, load-step and extended-reserve cases. Select an asset in the animated campus, change storage/loss/asset-limit assumptions, and export the result. See the [energy scenario guide](engineering/energy-scenario-workspace.md) for exact assumptions and hand calculations. The current source adds named cases while earlier alpha release assets keep their original contents; the `0.3.0a0` wheel above remains its historical tagged build.

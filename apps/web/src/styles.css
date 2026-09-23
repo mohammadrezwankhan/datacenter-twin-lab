@@ -1,4 +1,25 @@
 @import url('./tokens.css');
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 18px;
+  color: #081b14;
+  background: #a4efce;
+  border-radius: 8px;
+  transform: translateY(-180%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+:is(button, a, input, select, summary):focus-visible {
+  outline: 3px solid #b4eaff;
+  outline-offset: 4px;
+}
+#workspace-main:focus {
+  outline: none;
+}
 .demo-intro,
 .run-tools {
   padding: 22px;
