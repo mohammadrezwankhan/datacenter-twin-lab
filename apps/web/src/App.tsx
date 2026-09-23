@@ -503,7 +503,7 @@ export function App() {
               ...(browserDemo ? [['start', '◉', 'Start here'] as const] : []),
               ...(browserDemo ? [['learn', '▹', '12 browser lessons'] as const] : []),
               ['overview', '◫', browserDemo ? 'Advanced workspace' : 'Overview'],
-              ...(browserDemo ? [['assurance', '✓', 'Research evidence'] as const] : []),
+              ['assurance', '✓', 'Research evidence'],
               ...(!browserDemo || needsWorkspace
                 ? ([
                     ['topology', '⌘', 'Power topology'],

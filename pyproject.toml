@@ -31,4 +31,4 @@ include = ["datacenter_twin*"]
 version = {attr = "datacenter_twin.__version__"}
 
 [tool.setuptools.package-data]
-datacenter_twin = ["resources/*.json", "web/*", "web/assets/*"]
+datacenter_twin = ["resources/*.json", "web/*", "web/assets/*", "web/data/evidence/*/*"]
