@@ -91,10 +91,29 @@ def main() -> int:
                 for event in ai_run["events"]
             ):
                 raise RuntimeError("Installed 50 MW failure case has incorrect depletion")
+        # Exercise every new profile from the installed console, not the checkout.
+        # Multi-hour reserves and discrete demand changes must ship with their
+        # source records as well as the original outage fixtures.
+        source_ids = {source["id"] for source in catalog["sources"]}
+        for profile, demand_kw in (
+            ("ai_cluster_50mw", "50000"), ("hyperscale_200mw", "200000"),
+            ("crypto_30mw", "30000"), ("traditional_5mw", "5000"),
+        ):
+            for mode in ("ramp", "reserve"):
+                run = json.loads(execute(str(console), "simulate", "--preset", f"{profile}_{mode}"))["result"]
+                if run["scenario"]["it_demand_kw"] != demand_kw:
+                    raise RuntimeError("Installed facility profile changed demand units")
+                if run["summary"]["energy_balance_residual_kwh"] != "0":
+                    raise RuntimeError("Installed facility profile failed energy accounting")
+                if run["summary"]["unserved_it_kwh"] != "0":
+                    raise RuntimeError("Installed default load-step or reserve case has a shortfall")
+                if not set(run["scenario"]["source_ids"]).issubset(source_ids):
+                    raise RuntimeError("Installed facility profile has an unregistered source")
         print(json.dumps({"wheel": wheel.name, "version": identity["runtime"],
                           "python": sys.version.split()[0], "installed_outside_checkout": True,
                           "network_free_install": True, "module_and_console": "passed",
                           "continuity_and_catalogue": "passed", "ai_presets": "passed",
+                          "facility_presets": "passed",
                           "dashboard_bundled": bool(web_files)}))
     return 0
 

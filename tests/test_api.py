@@ -59,7 +59,7 @@ class ApiTests(unittest.TestCase):
 
     def test_presets_and_security_headers(self):
         response = self.client.get("/api/v1/presets")
-        self.assertEqual(len(response.json()), 7)
+        self.assertEqual(len(response.json()), 18)
         self.assertEqual(
             response.json(),
             [{"id": key, "name": name} for key, name in PRESETS.items()],

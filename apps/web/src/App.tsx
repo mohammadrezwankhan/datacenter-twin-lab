@@ -5,6 +5,16 @@ import { n, request } from './client';
 import { RunTools } from './RunTools';
 import { PythonVerification } from './PythonVerification';
 import { Course } from './Course';
+import { PowerScene } from './PowerScene';
+import {
+  FacilitySelector,
+  RunInsight,
+  EnergyGuide,
+  ScenarioSettings,
+  ScenarioMilestones,
+} from './EnergyWorkspace';
+import { facilityProfiles } from './facility-profiles';
+import './energy-workspace.css';
 
 const browserDemo = import.meta.env.MODE === 'demo';
 const initialPreset = browserDemo
@@ -316,7 +326,7 @@ function Compare({ baseline, run }: { baseline: Run; run: Run }) {
 }
 
 export function App() {
-  const [page, setPage] = useState<'overview' | 'topology' | 'evidence' | 'learn'>(
+  const [page, setPage] = useState<'overview' | 'topology' | 'evidence' | 'learn' | 'energy'>(
     browserDemo && new URLSearchParams(window.location.search).has('lesson') ? 'learn' : 'overview',
   );
   const [draft, setDraft] = useState<SiteScenario | null>(null),
@@ -331,6 +341,9 @@ export function App() {
     [selected, setSelected] = useState('it-load');
   const [baseline, setBaseline] = useState<Run | null>(null),
     [notice, setNotice] = useState('');
+  const [motion, setMotion] = useState(
+    () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
   const active = useRef<AbortController | null>(null);
   const dirty = !!draft && !!run && JSON.stringify(draft) !== JSON.stringify(run.scenario);
   function navigate(next: typeof page) {
@@ -405,11 +418,17 @@ export function App() {
           )
         : draft!;
       const result = await request<Run>('simulations', controller.signal, scenario);
+      if (controller.signal.aborted) return;
       setRun(result);
       setDraft(result.scenario);
       setCursor(0);
       setSelected('it-load');
-      if (nextPreset) setPreset(nextPreset);
+      if (nextPreset) {
+        setPreset(nextPreset);
+        const url = new URL(window.location.href);
+        url.searchParams.set('preset', nextPreset);
+        window.history.replaceState(null, '', url);
+      }
     } catch (e) {
       if (!controller.signal.aborted) setError((e as Error).message);
     } finally {
@@ -431,7 +450,7 @@ export function App() {
   const row = run?.intervals[cursor];
   const asset = run?.scenario.assets.find((a) => a.id === selected) || run?.scenario.assets[0];
   return (
-    <div className="app-shell">
+    <div className={`app-shell energy-app ${motion ? 'motion-enabled' : 'motion-paused'}`}>
       <aside className="sidebar">
         <a
           className="brand"
@@ -454,6 +473,7 @@ export function App() {
               ['overview', '◫', browserDemo ? 'Simulator' : 'Overview'],
               ...(browserDemo ? [['learn', '▹', '12 browser lessons'] as const] : []),
               ['topology', '⌘', 'Power topology'],
+              ['energy', 'ϟ', 'Energy systems'],
               ['evidence', '▤', 'Evidence & options'],
             ] as const
           ).map(([id, icon, label]) => (
@@ -468,6 +488,24 @@ export function App() {
             </button>
           ))}
         </nav>
+        <div className="sidebar-feature">
+          <span className="eyebrow">THE POWER PLAYBOOK</span>
+          <strong>
+            Explore. Predict.
+            <br />
+            Understand.
+          </strong>
+          <p>Twelve interactive lessons, from kW to continuity.</p>
+          {browserDemo ? (
+            <button onClick={() => navigate('learn')}>
+              Open the course <span aria-hidden="true">↗</span>
+            </button>
+          ) : (
+            <a href="https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy">
+              Open the browser course <span aria-hidden="true">↗</span>
+            </a>
+          )}
+        </div>
         <div className="sidebar-bottom">
           <span className="status-dot" /> {browserDemo ? 'Browser workspace' : 'Local workspace'}
           <p>
@@ -481,7 +519,7 @@ export function App() {
       <div className="main-shell">
         <header className="topbar">
           <span className="breadcrumb">
-            Power systems <span>/</span> <b>Datacenter engineers</b>
+            WORKSPACE <span>/</span> <b>Power continuity</b>
           </span>
           <span className="mode-badge">
             <i /> SIMULATED
@@ -490,7 +528,7 @@ export function App() {
         <main>
           <div className="page-heading">
             <div>
-              <div className="eyebrow">ELECTRICAL CONTINUITY LAB</div>
+              <div className="eyebrow">DATACENTER TWIN LAB / ENERGY EXPLORER</div>
               <h1>
                 {page === 'learn'
                   ? 'Power systems for datacenter engineers'
@@ -498,17 +536,21 @@ export function App() {
                     ? 'Evidence & options'
                     : page === 'topology'
                       ? 'Power topology'
-                      : 'Site overview'}
+                      : page === 'energy'
+                        ? 'The energy systems playbook'
+                        : 'Power, under pressure.'}
               </h1>
               <p>
                 {page === 'learn'
                   ? 'Twelve experiments. Change an input, predict the result, then test it.'
                   : page === 'evidence'
                     ? 'Trace the inputs and options behind each calculation.'
-                    : 'Change the load or reserve and see exactly when service is interrupted.'}
+                    : page === 'energy'
+                      ? 'Turn infrastructure questions into transparent engineering experiments.'
+                      : 'Configure your facility. Stress the supply. See what keeps running.'}
               </p>
             </div>
-            {page !== 'learn' && (
+            {page !== 'learn' && page !== 'energy' && (
               <div className="heading-actions">
                 <button
                   disabled={!run || busy}
@@ -525,58 +567,6 @@ export function App() {
               </div>
             )}
           </div>
-          {browserDemo && page === 'overview' && (
-            <section className="panel demo-intro" aria-label="Start here">
-              <div className="eyebrow">NO INSTALLATION · RUNS ON YOUR DEVICE</div>
-              <h2>What happens when a 50 MW AI cluster loses power?</h2>
-              <p>
-                The opening 50 MW example has 5 MWh stored energy: with the stated losses, that is
-                307.8 seconds of battery support after both supplies fail. Select a case below,
-                change the reserve, and inspect how your result changes.
-              </p>
-              <p>Runs locally in JavaScript. Python verification is available after the result.</p>
-              <div className="tool-actions">
-                <button onClick={() => setPage('learn')}>Start the 12-lesson course</button>
-                <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/scenarios/index.md">
-                  Scenario catalog ↗
-                </a>
-                <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions">
-                  Share a reproducible finding ↗
-                </a>
-              </div>
-              {run &&
-                ['demo-generator_failure', 'demo-ai_cluster_generator_failure'].includes(
-                  run.scenario.id,
-                ) && (
-                  <div className="demo-stages">
-                    {[
-                      ['Supply fails', 300],
-                      [
-                        'Battery depleted',
-                        run.events.find((e) => e.action === 'battery_depleted')?.at_s,
-                      ],
-                      ['Utility recovers', 900],
-                    ].map(
-                      ([label, at]) =>
-                        at !== undefined && (
-                          <button
-                            key={label}
-                            onClick={() => {
-                              setPlaying(false);
-                              const index = run.intervals.findIndex(
-                                (interval) => Number(interval.start_s) >= Number(at),
-                              );
-                              setCursor(Math.max(0, index));
-                            }}
-                          >
-                            {label} <strong>{n(at, 1)} s</strong>
-                          </button>
-                        ),
-                    )}
-                  </div>
-                )}
-            </section>
-          )}
           {error && (
             <div role="alert" className="error-banner">
               {error}
@@ -599,6 +589,17 @@ export function App() {
             <>
               {page === 'learn' ? (
                 <Course />
+              ) : page === 'energy' ? (
+                <EnergyGuide
+                  onScenario={(mode) => {
+                    const profile =
+                      facilityProfiles.find((item) =>
+                        Object.values(item.presets).includes(preset),
+                      ) ?? facilityProfiles[0];
+                    navigate('overview');
+                    void calculate(profile.presets[mode]);
+                  }}
+                />
               ) : page === 'evidence' ? (
                 catalog ? (
                   <Evidence catalog={catalog} run={run} />
@@ -607,6 +608,49 @@ export function App() {
                 )
               ) : (
                 <>
+                  {page === 'overview' && (
+                    <>
+                      <FacilitySelector
+                        preset={preset}
+                        busy={busy}
+                        onSelect={(value) => void calculate(value)}
+                      />
+                      <div className="energy-stage">
+                        <div className="scene-container">
+                          <div className="scene-heading">
+                            <div>
+                              <span className="eyebrow">02 / EXPLORE THE POWER FLOW</span>
+                              <h2>Inside your energy system</h2>
+                            </div>
+                            <span className="pill">
+                              {clock(row.start_s)} / {clock(run.scenario.duration_s)}
+                            </span>
+                          </div>
+                          <PowerScene
+                            run={run}
+                            row={row}
+                            motion={motion}
+                            onMotionChange={setMotion}
+                          />
+                        </div>
+                        <RunInsight run={run} />
+                      </div>
+                      <ScenarioMilestones
+                        run={run}
+                        onSelect={(at) => {
+                          setPlaying(false);
+                          setCursor(
+                            Math.max(
+                              0,
+                              run.intervals.findLastIndex(
+                                (interval) => Number(interval.start_s) <= at,
+                              ),
+                            ),
+                          );
+                        }}
+                      />
+                    </>
+                  )}
                   <form
                     className="panel scenario-controls"
                     onSubmit={(e) => {
@@ -692,6 +736,7 @@ export function App() {
                     <button className="primary" type="submit" disabled={busy}>
                       {busy ? 'Calculating…' : 'Run scenario'} <span aria-hidden="true">→</span>
                     </button>
+                    <ScenarioSettings draft={draft} busy={busy} onChange={setDraft} />
                   </form>
                   <div className="run-context" role="status">
                     <span>
@@ -748,7 +793,13 @@ export function App() {
                       </span>
                     </div>
                   </div>
-                  <section className="panel power-panel">
+                  <details
+                    className="panel power-panel topology-disclosure"
+                    open={page === 'topology'}
+                  >
+                    <summary>
+                      Electrical supply paths <span>Inspect the complete feed graph</span>
+                    </summary>
                     <div className="section-title">
                       <div>
                         <h2>Supply paths</h2>
@@ -796,7 +847,7 @@ export function App() {
                         </div>
                       </div>
                     )}
-                  </section>
+                  </details>
                   <div className="analysis-grid">
                     <section className="panel timeline-panel">
                       <div className="section-title">
@@ -926,6 +977,21 @@ export function App() {
                       <strong>{n(run.summary.energy_balance_residual_kwh, 5)} kWh</strong>
                     </div>
                   </section>
+                  {page === 'overview' && (
+                    <div className="energy-next-step">
+                      <div>
+                        <span className="eyebrow">GO BEYOND THE FIRST SCENARIO</span>
+                        <h2>Speed to power. Load steps. Longer reserves.</h2>
+                        <p>
+                          Explore five energy-system pressures and the questions each experiment can
+                          answer.
+                        </p>
+                      </div>
+                      <button onClick={() => navigate('energy')}>
+                        Explore energy systems <span aria-hidden="true">↗</span>
+                      </button>
+                    </div>
+                  )}
                   {baseline && <Compare baseline={baseline} run={run} />}
                   <RunTools run={run} />
                   {browserDemo && <PythonVerification run={run} />}

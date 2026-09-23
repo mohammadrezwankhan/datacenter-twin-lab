@@ -49,6 +49,10 @@ The scenario catalog models one synthetic aggregate IT load, explicit electrical
 
 The 50 MW AI-cluster case scales the 1 MW / 100 kWh teaching fixture by 50× to 50,000 kW / 5,000 kWh and keeps the same ratios. All demand, capacity, efficiency, event-time, and fictional tariff values are synthetic assumptions. They are not live prices, account quotes, equipment ratings, a performance benchmark, or a real-site calibration. Unknown costs and unavailable quantities remain explicit.
 
-The browser default is exact JavaScript arithmetic; **Verify against Python** is an optional on-demand Pyodide cross-check when supplied by the deployed build. The browser has no shared simulation backend or client analytics, and the API binds to loopback. Independent external review, formal security audit, shared deployment, facility measurements, and validation data remain absent. The verified reference runs report `energy_balance_residual_kwh: "0"`; the AI-cluster row awaits the parent browser proof.
+The browser default is exact JavaScript arithmetic; **Verify against Python** is an optional on-demand Pyodide cross-check when supplied by the deployed build. The browser has no shared simulation backend or client analytics, and the API binds to loopback. Independent external review, formal security audit, shared deployment, facility measurements, and validation data remain absent. The verified reference and facility-profile runs report `energy_balance_residual_kwh: "0"`; complete browser results are checked against native Python.
 
 Original code and synthetic fixtures use [Apache-2.0](../../LICENSE). See [NOTICE](../../NOTICE), [synthetic provenance](../../data/provenance/manifest.json), and [browser runtime licenses](../third-party/README.md).
+
+## Facility profiles and longer reserves
+
+The energy workspace adds four illustrative profiles (50 MW AI, 200 MW hyperscale, 30 MW crypto mining and 5 MW traditional IT), each with outage, load-step and extended-reserve cases. Select an asset in the animated campus, change storage/loss/asset-limit assumptions, and export the result. See the [energy scenario guide](../engineering/energy-scenario-workspace.md) for exact assumptions and hand calculations. New presets are in current source; older alpha assets keep their original contents.
