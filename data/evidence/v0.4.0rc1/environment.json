@@ -1,0 +1,8 @@
+{
+  "engine_version": "0.4.0rc1",
+  "machine_architecture": "AMD64",
+  "operating_system": "Windows",
+  "operating_system_release": "11",
+  "python_implementation": "CPython",
+  "python_version": "3.12.14"
+}

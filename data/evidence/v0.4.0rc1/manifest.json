@@ -1,0 +1,304 @@
+{
+  "artifact_classification": {
+    "environment.json": "environment_metadata",
+    "receipt.md": "deterministic_numerical_artifact",
+    "report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.html": "deterministic_numerical_artifact",
+    "report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.md": "deterministic_numerical_artifact",
+    "report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.html": "deterministic_numerical_artifact",
+    "report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.md": "deterministic_numerical_artifact",
+    "report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.html": "deterministic_numerical_artifact",
+    "report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.md": "deterministic_numerical_artifact",
+    "run-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json": "deterministic_numerical_artifact",
+    "run-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json": "deterministic_numerical_artifact",
+    "run-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json": "deterministic_numerical_artifact",
+    "scenario-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json": "deterministic_numerical_artifact",
+    "scenario-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json": "deterministic_numerical_artifact",
+    "scenario-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json": "deterministic_numerical_artifact"
+  },
+  "artifacts": {
+    "environment.json": {
+      "classification": "environment_metadata",
+      "sha256": "dce0e4c90026d4091465fd680d8f89fb354d825d80cfbd20d17b4bb9db4257dd"
+    },
+    "receipt.md": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "b2b26f35ee50876bfcfa1dad70aaafe3f236f95adc4abe2f34a2e225069ed5dd"
+    },
+    "report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.html": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "3950e59197362936e9fe1765bf6cb93add4807bbd6a2964eb83f0bd73bc110af"
+    },
+    "report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.md": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "bcebdce518656636a088e7023a13cfa22af3e9a0b26a83369fc36258205e7c8c"
+    },
+    "report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.html": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "a9a1a7af415fc4db4e146d5ea424b2f4d731a50ea39ebb0f9da2f250a72d62fb"
+    },
+    "report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.md": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "00c01ae1fb131d53c6ab828122df2e9c64b52c1489a2919becbae4f284ebe6fc"
+    },
+    "report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.html": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "4b8d7fedc4cd120d51c89d6056c3a081a5822c5fcc0f55956169ad52097f9dd2"
+    },
+    "report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.md": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "22a7ac57e732282249a789ab8609196439bbbfdabf0d5bc59e939e4ac38841e0"
+    },
+    "run-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "d6206f4782882581c4d0285a0a31f7c0ed7269304a33e22a0852752d50e21036"
+    },
+    "run-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "970061eda53c9ecc75e4996b3c3e30cd0495406ad4c1aa912e4b0657ea89d10d"
+    },
+    "run-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "80e429e0161f6b8c5b59a0a9dadc6be816fac429920518b0ca802378df78eea0"
+    },
+    "scenario-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "49a5e41c298b33b6821af2cbf2e3317f916cae40bd95f1b8866f87d8524e9751"
+    },
+    "scenario-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "854f2a9f7886bbbc7588c6f8b242a273709cc421e85467ba9ebdfd56d7f5b58b"
+    },
+    "scenario-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json": {
+      "classification": "deterministic_numerical_artifact",
+      "sha256": "24a51ab64523a2c0db6c1c88f61c53a5e4883c62df840334126e9a4723ec5a99"
+    }
+  },
+  "cases": [
+    {
+      "case_id": "canonical-1mw-100kwh",
+      "checks": [
+        {
+          "difference": "0",
+          "equation": "1000 kW \u00d7 1800 s \u00f7 3,600",
+          "expected": "500",
+          "metric": "requested_it_kwh",
+          "observed": "500",
+          "status": "match",
+          "unit": "kWh"
+        },
+        {
+          "difference": "0",
+          "equation": "(100 kWh \u00d7 0.9 \u00d7 0.95) \u00f7 1000 kW \u00d7 3,600",
+          "expected": "307.8",
+          "metric": "ride_through_s",
+          "observed": "307.8",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0",
+          "equation": "300 s outage start + ride-through",
+          "expected": "607.8",
+          "metric": "depletion_elapsed_s",
+          "observed": "607.8",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0",
+          "equation": "900 s recovery \u2212 depletion elapsed",
+          "expected": "292.2",
+          "metric": "unserved_duration_s",
+          "observed": "292.2",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "equation": "1000 kW \u00d7 unserved seconds \u00f7 3,600",
+          "expected": "81.16666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666667",
+          "metric": "unserved_it_kwh",
+          "observed": "81.16666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666667",
+          "status": "match",
+          "unit": "kWh"
+        }
+      ],
+      "html_report_file": "report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.html",
+      "input_sha256": "a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0",
+      "ledger": {
+        "checks": {
+          "maximum_interval_battery_balance_kwh": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008",
+          "maximum_interval_requested_partition_kwh": "0",
+          "maximum_interval_source_balance_kwh": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000007",
+          "whole_run_battery_balance_kwh": "0",
+          "whole_run_requested_partition_kwh": "0",
+          "whole_run_source_balance_kwh": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000547"
+        },
+        "method": "Exact Fraction sums of exported interval energy terms; the run's energy_balance_residual_kwh fields are ignored.",
+        "status": "pass",
+        "tolerance_kwh": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "markdown_report_file": "report-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.md",
+      "run_file": "run-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json",
+      "run_id": "d179c72e4b72afdb8b9d",
+      "scenario_file": "scenario-canonical-1mw-100kwh-a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0.json",
+      "scenario_id": "course-ride-through"
+    },
+    {
+      "case_id": "canonical-1mw-50kwh",
+      "checks": [
+        {
+          "difference": "0",
+          "equation": "1000 kW \u00d7 1800 s \u00f7 3,600",
+          "expected": "500",
+          "metric": "requested_it_kwh",
+          "observed": "500",
+          "status": "match",
+          "unit": "kWh"
+        },
+        {
+          "difference": "0",
+          "equation": "(50 kWh \u00d7 0.9 \u00d7 0.95) \u00f7 1000 kW \u00d7 3,600",
+          "expected": "153.9",
+          "metric": "ride_through_s",
+          "observed": "153.9",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0",
+          "equation": "300 s outage start + ride-through",
+          "expected": "453.9",
+          "metric": "depletion_elapsed_s",
+          "observed": "453.9",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0",
+          "equation": "900 s recovery \u2212 depletion elapsed",
+          "expected": "446.1",
+          "metric": "unserved_duration_s",
+          "observed": "446.1",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "equation": "1000 kW \u00d7 unserved seconds \u00f7 3,600",
+          "expected": "123.9166666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666667",
+          "metric": "unserved_it_kwh",
+          "observed": "123.9166666666666666666666666666666666666666666666666666666666666666666666666666666666666666666666667",
+          "status": "match",
+          "unit": "kWh"
+        }
+      ],
+      "html_report_file": "report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.html",
+      "input_sha256": "0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9",
+      "ledger": {
+        "checks": {
+          "maximum_interval_battery_balance_kwh": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008",
+          "maximum_interval_requested_partition_kwh": "0",
+          "maximum_interval_source_balance_kwh": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004",
+          "whole_run_battery_balance_kwh": "0",
+          "whole_run_requested_partition_kwh": "0",
+          "whole_run_source_balance_kwh": "0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005086"
+        },
+        "method": "Exact Fraction sums of exported interval energy terms; the run's energy_balance_residual_kwh fields are ignored.",
+        "status": "pass",
+        "tolerance_kwh": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "markdown_report_file": "report-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.md",
+      "run_file": "run-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json",
+      "run_id": "21cd49da247b309f2b45",
+      "scenario_file": "scenario-canonical-1mw-50kwh-0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9.json",
+      "scenario_id": "course-ride-through"
+    },
+    {
+      "case_id": "path-maintenance-700kw",
+      "checks": [
+        {
+          "difference": "0",
+          "equation": "1000 kW \u00d7 1800 s \u00f7 3,600",
+          "expected": "500",
+          "metric": "requested_it_kwh",
+          "observed": "500",
+          "status": "match",
+          "unit": "kWh"
+        },
+        {
+          "difference": "0",
+          "equation": "700 gross kW \u00d7 0.95 distribution efficiency",
+          "expected": "665",
+          "metric": "served_kw_during_maintenance",
+          "observed": "665",
+          "status": "match",
+          "unit": "kW"
+        },
+        {
+          "difference": "0",
+          "equation": "1000 kW requested \u2212 served kW",
+          "expected": "335",
+          "metric": "unserved_kw_during_maintenance",
+          "observed": "335",
+          "status": "match",
+          "unit": "kW"
+        },
+        {
+          "difference": "0",
+          "equation": "900 s recovery \u2212 300 s outage start",
+          "expected": "600",
+          "metric": "unserved_duration_s",
+          "observed": "600",
+          "status": "match",
+          "unit": "s"
+        },
+        {
+          "difference": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "equation": "unserved kW \u00d7 unserved seconds \u00f7 3,600",
+          "expected": "55.83333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "metric": "unserved_it_kwh",
+          "observed": "55.83333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333",
+          "status": "match",
+          "unit": "kWh"
+        }
+      ],
+      "html_report_file": "report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.html",
+      "input_sha256": "6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd",
+      "ledger": {
+        "checks": {
+          "maximum_interval_battery_balance_kwh": "0",
+          "maximum_interval_requested_partition_kwh": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004",
+          "maximum_interval_source_balance_kwh": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000004",
+          "whole_run_battery_balance_kwh": "0",
+          "whole_run_requested_partition_kwh": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000024",
+          "whole_run_source_balance_kwh": "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000612"
+        },
+        "method": "Exact Fraction sums of exported interval energy terms; the run's energy_balance_residual_kwh fields are ignored.",
+        "status": "pass",
+        "tolerance_kwh": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "markdown_report_file": "report-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.md",
+      "run_file": "run-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json",
+      "run_id": "ad6fc2898ce61f96406c",
+      "scenario_file": "scenario-path-maintenance-700kw-6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd.json",
+      "scenario_id": "demo-path_maintenance"
+    }
+  ],
+  "engine_version": "0.4.0rc1",
+  "independent_review": {
+    "reviewer": null,
+    "status": "not_obtained"
+  },
+  "manifest_hash_scope": "Artifacts map covers every packet file except manifest.json itself. Record the builder-printed manifest digest separately when pinning a packet.",
+  "packet_type": "datacenter-twin-lab-independent-reproduction",
+  "public_context": {
+    "repository": "mohammadrezwankhan/datacenter-twin-lab"
+  },
+  "rounding": {
+    "comparison_absolute_tolerance": "0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+    "engine_decimal_context": "100 significant digits, ROUND_HALF_EVEN",
+    "tolerance_unit_for_energy_ledger": "kWh"
+  },
+  "schema_version": 1
+}

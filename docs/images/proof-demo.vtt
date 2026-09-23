@@ -1,0 +1,33 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:07.462
+A 1 MW IT load loses utility power. How long can 100 kWh bridge the outage?
+
+2
+00:00:07.462 --> 00:00:14.269
+Predict 300 seconds FROM the outage. Charging is disabled and the generator is failed.
+
+3
+00:00:14.269 --> 00:00:22.398
+Run: 100 × 0.90 × 0.95 = 85.5 kWh delivered to IT. At 1 MW, this lasts 307.8 seconds.
+
+4
+00:00:22.398 --> 00:00:30.679
+Outage begins at 300 s; the battery empties at 607.8 s. Utility returns at 900 s.
+
+5
+00:00:30.679 --> 00:00:34.720
+Export the complete JSON: exact inputs, input hash, events and interval energy ledger.
+
+6
+00:00:34.720 --> 00:00:37.591
+Optional Python verification downloads the reference runtime only when selected.
+
+7
+00:00:37.591 --> 00:00:45.082
+Exact match: all inputs, hashes and calculated values agree with the reference Python engine.
+
+8
+00:00:45.082 --> 00:01:01.994
+Follow three reproducible cases, reports and review instructions. Teaching evidence, not a facility reliability rating.

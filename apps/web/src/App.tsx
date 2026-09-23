@@ -13,10 +13,25 @@ import {
   ScenarioMilestones,
 } from './EnergyWorkspace';
 import { facilityProfiles } from './facility-profiles';
+import { ENGINE_VERSION } from './js-engine/version';
 import './energy-workspace.css';
 
 const browserDemo = import.meta.env.MODE === 'demo';
 const Course = lazy(() => import('./Course').then((module) => ({ default: module.Course })));
+const GuidedStart = lazy(() =>
+  import('./GuidedStart').then((module) => ({ default: module.GuidedStart })),
+);
+const EvidenceHub = lazy(() =>
+  import('./EvidenceHub').then((module) => ({ default: module.EvidenceHub })),
+);
+type Page = 'start' | 'overview' | 'topology' | 'evidence' | 'learn' | 'energy' | 'assurance';
+function initialPage(): Page {
+  if (!browserDemo) return 'overview';
+  const query = new URLSearchParams(window.location.search);
+  if (query.has('lesson')) return 'learn';
+  if (query.get('mode') === 'evidence') return 'assurance';
+  return query.has('preset') || query.get('mode') === 'advanced' ? 'overview' : 'start';
+}
 const initialPreset = browserDemo
   ? new URLSearchParams(window.location.search).get('preset') || 'ai_cluster_generator_failure'
   : 'utility_loss';
@@ -260,8 +275,13 @@ function AssetDetail({
         <span className="detail-label">Failure domains</span>
         <span>{asset.failure_domains.join(' · ')}</span>
       </div>
-      <button className="text-button" onClick={onEvidence}>
-        View source ↗
+      <button
+        className="text-button"
+        type="button"
+        aria-label={`View source for ${asset.name}`}
+        onClick={onEvidence}
+      >
+        View source <span aria-hidden="true">↗</span>
       </button>
     </div>
   );
@@ -326,15 +346,14 @@ function Compare({ baseline, run }: { baseline: Run; run: Run }) {
 }
 
 export function App() {
-  const [page, setPage] = useState<'overview' | 'topology' | 'evidence' | 'learn' | 'energy'>(
-    browserDemo && new URLSearchParams(window.location.search).has('lesson') ? 'learn' : 'overview',
-  );
+  const [page, setPage] = useState<Page>(initialPage);
+  const needsWorkspace = !['start', 'learn', 'assurance'].includes(page);
   const [draft, setDraft] = useState<SiteScenario | null>(null),
     [run, setRun] = useState<Run | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null),
     [presets, setPresets] = useState<{ id: string; name: string }[]>([]);
   const [preset, setPreset] = useState(initialPreset),
-    [busy, setBusy] = useState(true),
+    [busy, setBusy] = useState(needsWorkspace),
     [error, setError] = useState('');
   const [cursor, setCursor] = useState(0),
     [playing, setPlaying] = useState(false),
@@ -348,15 +367,23 @@ export function App() {
   const dirty = !!draft && !!run && JSON.stringify(draft) !== JSON.stringify(run.scenario);
   function navigate(next: typeof page) {
     setPage(next);
-    if (next !== 'learn') {
+    if (browserDemo) {
       const url = new URL(window.location.href);
-      url.searchParams.delete('lesson');
+      if (next !== 'learn') url.searchParams.delete('lesson');
+      if (next === 'start' || next === 'learn') url.searchParams.delete('mode');
+      else url.searchParams.set('mode', next === 'assurance' ? 'evidence' : 'advanced');
+      if (next === 'start') url.searchParams.delete('preset');
+      if (next === 'learn' && !url.searchParams.has('lesson'))
+        url.searchParams.set('lesson', 'power-energy');
       window.history.replaceState(null, '', url);
     }
+    window.requestAnimationFrame(() => document.getElementById('workspace-main')?.focus());
   }
   useEffect(() => {
+    if (!needsWorkspace || run) return;
     const controller = new AbortController();
     active.current = controller;
+    setBusy(true);
     (async () => {
       try {
         const [p, d] = await Promise.all([
@@ -376,7 +403,7 @@ export function App() {
       }
     })();
     return () => controller.abort();
-  }, []);
+  }, [needsWorkspace]);
   useEffect(() => {
     if (page !== 'evidence' || catalog) return;
     const controller = new AbortController();
@@ -451,13 +478,16 @@ export function App() {
   const asset = run?.scenario.assets.find((a) => a.id === selected) || run?.scenario.assets[0];
   return (
     <div className={`app-shell energy-app ${motion ? 'motion-enabled' : 'motion-paused'}`}>
+      <a className="skip-link" href="#workspace-main">
+        Skip to experiment
+      </a>
       <aside className="sidebar">
         <a
           className="brand"
           href="#"
           onClick={(e) => {
             e.preventDefault();
-            navigate('overview');
+            navigate(browserDemo ? 'start' : 'overview');
           }}
           aria-label="Datacenter Twin Lab home"
         >
@@ -470,11 +500,17 @@ export function App() {
         <nav aria-label="Main navigation">
           {(
             [
-              ['overview', '◫', browserDemo ? 'Simulator' : 'Overview'],
+              ...(browserDemo ? [['start', '◉', 'Start here'] as const] : []),
               ...(browserDemo ? [['learn', '▹', '12 browser lessons'] as const] : []),
-              ['topology', '⌘', 'Power topology'],
-              ['energy', 'ϟ', 'Energy systems'],
-              ['evidence', '▤', 'Evidence & options'],
+              ['overview', '◫', browserDemo ? 'Advanced workspace' : 'Overview'],
+              ...(browserDemo ? [['assurance', '✓', 'Research evidence'] as const] : []),
+              ...(!browserDemo || needsWorkspace
+                ? ([
+                    ['topology', '⌘', 'Power topology'],
+                    ['energy', 'ϟ', 'Energy systems'],
+                    ['evidence', '▤', 'Evidence & options'],
+                  ] as const)
+                : []),
             ] as const
           ).map(([id, icon, label]) => (
             <button
@@ -511,7 +547,7 @@ export function App() {
           <p>
             Power continuity scenarios
             <br />
-            Engine {run?.engine_version || 'loading'}
+            Engine {run?.engine_version || ENGINE_VERSION}
           </p>
           <span className="mini-tag">Local calculations</span>
         </div>
@@ -525,32 +561,40 @@ export function App() {
             <i /> SIMULATED
           </span>
         </header>
-        <main>
+        <main id="workspace-main" tabIndex={-1}>
           <div className="page-heading">
             <div>
               <div className="eyebrow">DATACENTER TWIN LAB / ENERGY EXPLORER</div>
               <h1>
-                {page === 'learn'
-                  ? 'Power systems, made visible.'
-                  : page === 'evidence'
-                    ? 'Evidence & options'
-                    : page === 'topology'
-                      ? 'Power topology'
-                      : page === 'energy'
-                        ? 'The energy systems playbook'
-                        : 'Power, under pressure.'}
+                {page === 'start'
+                  ? 'How long will the battery last?'
+                  : page === 'assurance'
+                    ? 'A result you can reproduce.'
+                    : page === 'learn'
+                      ? 'Power systems, made visible.'
+                      : page === 'evidence'
+                        ? 'Evidence & options'
+                        : page === 'topology'
+                          ? 'Power topology'
+                          : page === 'energy'
+                            ? 'The energy systems playbook'
+                            : 'Power, under pressure.'}
               </h1>
               <p>
-                {page === 'learn'
-                  ? 'Twelve interactive lessons for datacenter engineers. Predict, experiment and explain.'
-                  : page === 'evidence'
-                    ? 'Trace the inputs and options behind each calculation.'
-                    : page === 'energy'
-                      ? 'Turn infrastructure questions into transparent engineering experiments.'
-                      : 'Configure your facility. Stress the supply. See what keeps running.'}
+                {page === 'start'
+                  ? 'A five-minute power-continuity experiment for datacenter engineers. Predict, run, explain.'
+                  : page === 'assurance'
+                    ? 'Equations, inputs and outputs, together in one research assurance packet.'
+                    : page === 'learn'
+                      ? 'Twelve interactive lessons for datacenter engineers. Predict, experiment and explain.'
+                      : page === 'evidence'
+                        ? 'Trace the inputs and options behind each calculation.'
+                        : page === 'energy'
+                          ? 'Turn infrastructure questions into transparent engineering experiments.'
+                          : 'Configure your facility. Stress the supply. See what keeps running.'}
               </p>
             </div>
-            {page !== 'learn' && page !== 'energy' && (
+            {needsWorkspace && page !== 'energy' && (
               <div className="heading-actions">
                 <button
                   disabled={!run || busy}
@@ -578,20 +622,35 @@ export function App() {
               {notice}
             </div>
           )}
-          {!run && !error && (
+          {page === 'start' && (
+            <Suspense fallback={<p role="status">Opening the five-minute experiment…</p>}>
+              <GuidedStart
+                onExplore={() => navigate('overview')}
+                onLearn={() => navigate('learn')}
+                onEvidence={() => navigate('assurance')}
+              />
+            </Suspense>
+          )}
+          {page === 'assurance' && (
+            <Suspense fallback={<p role="status">Opening the evidence packet…</p>}>
+              <EvidenceHub />
+            </Suspense>
+          )}
+          {page === 'learn' && (
+            <Suspense fallback={<p role="status">Opening the course studio…</p>}>
+              <Course />
+            </Suspense>
+          )}
+          {needsWorkspace && !run && !error && (
             <div className="panel loading" role="status">
               {browserDemo
                 ? 'Calculating the opening scenario on your device…'
                 : 'Preparing the reference simulation…'}
             </div>
           )}
-          {run && row && draft && (
+          {needsWorkspace && run && row && draft && (
             <>
-              {page === 'learn' ? (
-                <Suspense fallback={<p role="status">Opening the course studio…</p>}>
-                  <Course />
-                </Suspense>
-              ) : page === 'energy' ? (
+              {page === 'energy' ? (
                 <EnergyGuide
                   onScenario={(mode) => {
                     const profile =
@@ -817,7 +876,11 @@ export function App() {
                     </div>
                     <Topology run={run} row={row} selected={selected} onSelect={setSelected} />
                     {asset && (
-                      <AssetDetail asset={asset} row={row} onEvidence={() => setPage('evidence')} />
+                      <AssetDetail
+                        asset={asset}
+                        row={row}
+                        onEvidence={() => navigate('evidence')}
+                      />
                     )}
                     {page === 'topology' && (
                       <div className="dependency-list">
@@ -1016,7 +1079,13 @@ export function App() {
                       Source IDs: {run.scenario.source_ids.join(', ')}. Input SHA-256:{' '}
                       <code>{run.input_sha256}</code>
                     </p>
-                    <button onClick={() => setPage('evidence')}>Open evidence register ↗</button>
+                    <button
+                      type="button"
+                      aria-label="Open evidence register"
+                      onClick={() => navigate('evidence')}
+                    >
+                      Open evidence register <span aria-hidden="true">↗</span>
+                    </button>
                   </details>
                 </>
               )}

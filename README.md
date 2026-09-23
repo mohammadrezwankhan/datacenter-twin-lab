@@ -1,89 +1,106 @@
 # Datacenter Twin Lab
 
-**How long can a 5 MWh battery keep a 50 MW aggregate AI-cluster load supplied when utility and generator power fail?**
+_A reproducible synthetic continuity laboratory for datacenter power systems._
 
-The browser demo's synthetic AI-cluster case requests **50,000 kW (50 MW)** and starts with **5,000 kWh (5 MWh)** of stored battery energy. When utility and generator supply fail at 300 s, the battery supplies IT for **307.8 s** and depletes at **607.8 s elapsed**. That gives a datacenter engineer a concrete continuity question to run, inspect, and reproduce.
+## Start with one battery question
 
-[**Open the browser demo and run the AI-cluster scenario →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Start the 12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) · [Course notes](docs/tutorials/power-systems-course.md)
+**How long can a 1 MW IT load ride through a utility outage on 100 kWh of stored battery energy?**
 
-After the result appears, continue with the [tutorials](docs/tutorials/index.md), [scenario catalog](docs/scenarios/index.md), or [quickstart](docs/quickstart.md). Use [Discussions](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions) to share a reproducible result.
+In the five-minute walkthrough, predict the battery's ride-through, deliberately run the scenario, then explain the result from its energy ledger. The example uses `100 kWh × 0.90` battery-discharge efficiency `× 0.95` distribution efficiency = **85.5 kWh delivered to IT**. At **1,000 kW**, that is **307.8 seconds from the outage**, which starts at **300 s elapsed**. Battery depletion is therefore recorded at **607.8 s elapsed**. Charging is disabled and the generator is failed.
 
-## Explore your facility profile
+[**Open the five-minute guided experiment →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Challenge yourself with 50 kWh](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Read the exact inputs and equations](docs/canonical-case.md)
 
-![The energy workspace with four facility profiles, an interactive isometric power scene and run-level energy coverage](docs/images/energy-workspace.png)
+Halving the opening reserve to **50 kWh** gives **42.75 kWh** delivered to IT: **153.9 s from the outage** and depletion at **453.9 s elapsed**. Ride-through is a duration counted from the 300 s outage boundary; depletion is an elapsed event timestamp.
 
-Start with **AI (50 MW), hyperscale (200 MW), crypto (30 MW), or traditional (5 MW)**. Switch between a grid outage, stepped demand and extended battery reserve, then inspect the energy flows, adjust equipment limits, replay the events and export the result.
+> This is a teaching and research tool for datacenter engineers learning electrical continuity. It is a narrow, synthetic, uncalibrated model—not a production reliability analysis. Detailed model boundaries and validation status are below.
 
-[**Open the energy workspace**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Profile assumptions and worked examples](docs/engineering/energy-scenario-workspace.md)
+[![v0.4.0rc1 candidate](https://img.shields.io/badge/release-v0.4.0rc1%20candidate-orange)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
 
-## Learn by changing one assumption
+**v0.4.0rc1 is a release candidate, not a stable release.** No independent external technical review has been obtained. The CI badge follows `main`; check the exact candidate commit's results before relying on them. See [release readiness](docs/engineering/release-readiness.md).
 
-![The course studio: a 50 MW power lesson with an interactive scene and a prediction-and-result workspace](docs/images/course-studio.png)
+## The three steps
 
-**Twelve lessons, four chapters, one experiment at a time.** Explore power and energy, battery reserve, generator timing, redundant paths, shared failures and PUE. Each lesson pairs a distinct color theme with selectable isometric objects, a bounded input slider, event replay and a worked answer. Predict an outcome, change the assumption, and export the calculation behind the result. Motion can be paused, and keyboard and reduced-motion controls are supported.
+The pictures below are screenshots of the actual guided interface. Their numbered captions name the corresponding action in the walkthrough.
 
-[**Start the interactive course →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) · [Jump to the 50 MW lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage) · [Course guide](docs/engineering/course-studio.md)
+[![Screenshot 01: predict an outage-relative ride-through and inspect the before, outage, and recovery setup](docs/images/guide-predict.png)](docs/images/guide-predict.png)
 
-## Try the result now
+**01 · Predict.** Choose the 100 kWh starting example or 50 kWh challenge. Enter seconds from the outage at 300 s—not an elapsed timestamp. No result is shown until you choose **Run 1 MW scenario**.
 
-1. Open the [zero-install browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/).
-2. Run **AI-cluster generator failure** with the default synthetic fixture.
-3. Select the **Battery depleted 607.8 s** event. Served IT power is **0 kW** until utility restoration at **900 s**.
+[![Screenshot 02: compare predicted and calculated ride-through, elapsed depletion time, and the energy ledger](docs/images/guide-result.png)](docs/images/guide-result.png)
 
-The AI-cluster values are a 50× scale-up of the verified 1 MW / 100 kWh teaching fixture. The ratios preserve the same modeled 0.90 discharge efficiency and 0.95 distribution efficiency, so the ride-through duration and event times stay the same.
+**02 · Run.** The result reports ride-through separately from depletion time, shows the equation, and breaks out requested, served, and unserved IT energy during the outage window.
 
-The default browser journey calculates locally with exact JavaScript arithmetic. Use **Verify against Python** for an optional Pyodide cross-check; the Python runtime is loaded on demand for that check rather than for the initial result.
+[![Screenshot 03: inspect the completed run's source references, assumptions, hash, and reproducible output](docs/images/guide-evidence.png)](docs/images/guide-evidence.png)
 
-No installation or account is needed for the browser result. See [calculation and privacy](docs/engineering/browser-demo.md) for the browser boundary and the [teaching notebook](docs/examples/battery-ride-through.ipynb) for an independently calculated reference case.
+**03 · Explain.** Export the complete JSON run, inspect its inputs and hash, or optionally request a Python comparison. Report and reserve-sensitivity tools are available after the completed result.
 
-## A short 1 MW experiment
+[Watch the captioned 60-second tour in the evidence hub →](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence#demo) · [Tour transcript and reproduction notes](docs/examples/proof-demo.md)
 
-The original `generator_failure` preset remains available for the small fixture. Open it with [`?preset=generator_failure`](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=generator_failure), change **Initial battery** from **100** to **50 kWh**, run the scenario, and inspect the battery-depleted event. Pre-outage charging explains why the charging-enabled 50 kWh case lasts until **478.2675 s**. Export a report or compare reserves after the run.
+## Continue with another part of the lab
 
-The [1 MW recorded walkthrough](docs/examples/demo-walkthrough.md) preserves an earlier interface capture, with a text transcript and reproduction recipe. The live demo above contains the current controls.
+- [Open the advanced energy workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced) to inspect the full topology, replay events, change bounded assumptions, and export runs.
+- [Open the existing 50 MW outage case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss). It is a synthetic aggregate electrical case, not a GPU-throughput or grid-adequacy model.
+- [Start the 12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), or read its [course notes](docs/tutorials/power-systems-course.md).
+- Visit the [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence) for source records and reproducibility material.
+- Browse the [tutorials](docs/tutorials/index.md), [scenario catalog](docs/scenarios/index.md), [unit-aware glossary](docs/scenarios/glossary.md), and [contribution ideas](docs/scenarios/contribution-ideas.md).
 
-## Choose a question
+The current source includes 18 named scenarios, four illustrative facility profiles, the twelve lessons, and on-demand reports and sensitivity tools. Ratings, demand, event timing, rates, and efficiencies are explicit synthetic inputs. [The roadmap](ROADMAP.md) separates capabilities in the release candidate from work still planned or conditional.
 
-| Question | Preset | Expected result |
-| --- | --- | --- |
-| What happens with a 50 MW aggregate AI-cluster load? | [ai_cluster_generator_failure](docs/scenarios/ai-cluster-50mw.md) | Battery supplies IT for 307.8 s; depletion at 607.8 s; utility restoration at 900 s |
-| What happens with healthy 1 MW supply? | [normal](docs/scenarios/normal.md) | 500 kWh served over 30 minutes |
-| Can the 1 MW battery bridge generator startup? | [utility_loss](docs/scenarios/utility_loss.md) | 30-second startup bridged; no unserved load |
-| What if the 1 MW generator also fails? | [generator_failure](docs/scenarios/generator_failure.md) | Battery depletion at 607.8 s; recovery at 900 s |
-| Can one surviving path carry the 1 MW load? | [path_maintenance](docs/scenarios/path_maintenance.md) | 700 kW gross × 0.95 = 665 kW IT; 335 kW unserved |
-| What if both paths share a failed control domain? | [shared_domain](docs/scenarios/shared_domain.md) | Both paths unavailable for 600 s |
+## Reproduce the canonical case
 
-The [worked tutorial](docs/tutorials/continuity-walkthrough.md) develops the surviving-path and finite-battery calculations. The [AI-cluster scenario note](docs/scenarios/ai-cluster-50mw.md) documents the scaled case. Schema-1 PUE/energy planning is a separate calculation from schema-2 continuity; see the [electrical contract](docs/contracts/electrical-v2.md).
+The guide follows lesson 3's exact scenario recipe: it starts from the reference-site inputs, then assigns lesson ID/name and source metadata, disables charging, and sets the initial reserve to `100` or `50` kWh. The [canonical case](docs/canonical-case.md) records those inputs and derives the results independently. A direct `generator_failure` preset run happens to produce the same 100 kWh numeric event time because the battery starts full, but its scenario ID, metadata, charging limit, input hash, and run ID are different.
 
-## Reproduce the 1 MW result in Python
+### Reproduce the candidate evidence packet
 
-The core uses only the standard library. [Run the released CLI or dashboard with one uv command](docs/quickstart.md#run-with-uv), or use Python 3.12+ and a source checkout. These commands intentionally reproduce the original **1,000 kW / 100 kWh** fixture:
+The tracked [candidate evidence index](data/evidence/index-v0.4.0rc1.json) links the canonical scenario/run JSON, reports, manifest, and receipt. To regenerate and verify the packet from the tagged candidate source:
 
 ```sh
 git clone https://github.com/mohammadrezwankhan/datacenter-twin-lab.git
 cd datacenter-twin-lab
+git checkout v0.4.0rc1
+python scripts/build_evidence.py --output outputs/evidence
+python scripts/build_evidence.py --verify outputs/evidence
+```
+
+The script requires a fresh output directory under `outputs/` and prints the manifest digest. For an inspectable checked-in result, use the [tracked evidence index](data/evidence/index-v0.4.0rc1.json) and [receipt](data/evidence/v0.4.0rc1/receipt.md).
+
+### Also run the original CLI preset
+
+If you want the separate base-preset example, these commands run it directly:
+
+```sh
 python -m datacenter_twin simulate --preset generator_failure
 python -m datacenter_twin simulate --preset generator_failure --format html --output outputs/failure.html
 python -m datacenter_twin sweep --preset generator_failure --parameter battery_initial_kwh --values 0 50 100 --format markdown
 ```
 
-Outputs preserve assumptions, units, stable input hashes, warnings, and exact energy ledgers. Unknown costs remain unknown. Existing output files are protected; choose a new path or explicitly use `--force`. The [sensitivity guide](docs/engineering/sensitivity.md) explains the parameters and pre-outage charging. The [example report and reproducibility capsule](docs/validation/reproducibility-capsule.md) include independent equations and artifact hashes.
+Choose a new output path if it already exists, or explicitly add `--force`. The preset allows charging; at 50 kWh it gives **478.2675 s elapsed**, rather than the guided lesson's **453.9 s elapsed** with charging disabled. The [sensitivity guide](docs/engineering/sensitivity.md) explains the distinction.
 
-## Use the local dashboard
+The standard-library core can also run from an existing Python 3.12+ checkout. See the [quickstart](docs/quickstart.md) for the source build, loopback dashboard, testing, and the historical released-wheel route. The original v0.3.0a0 wheel preserves its historical files; it does not become the v0.4.0rc1 candidate. Use the current source tree and the candidate's actual published artifacts for candidate verification.
 
-The [released-wheel quickstart](docs/quickstart.md#run-the-released-dashboard-python-only) installs the dashboard with Python and pip. The [uv route](docs/quickstart.md#run-with-uv) creates its isolated environment automatically. Both include reports and sensitivity controls without Node.
+## Checks and evidence
 
-For development, follow the [locked source build](docs/quickstart.md#local-dashboard). Open `http://127.0.0.1:8000` after starting the server. Calculations use the local engine and the API binds to loopback. See the [security boundary](SECURITY.md).
+The workflow is configured to test each push to `main` and each pull request. Its matrix targets Python **3.12 and 3.14 on Windows and Linux**; the Playwright Chromium browser journeys run on **Ubuntu with Python 3.12**. These are per-commit checks, not a blanket claim that every commit or this release candidate has passed. Read the [candidate readiness page](docs/engineering/release-readiness.md), [evidence packet instructions](docs/evidence.md), and [benchmark method](docs/engineering/benchmark-method.md) for what is measured and how to reproduce it.
 
-## Validate or contribute
+The project uses deterministic quantities, unit-labelled outputs, explicit unknowns, stable input hashes, event logs, and energy ledgers. CI and local reproductions establish software behavior for these synthetic fixtures; they do not establish engineering performance or physical accuracy.
+
+For local verification from the repository root:
 
 ```sh
 python -m unittest discover -s tests -v
+npm --prefix apps/web ci --ignore-scripts
+npm --prefix apps/web run build
+npm --prefix apps/web run test:engine
+python scripts/prepare_browser_demo.py
+npm --prefix apps/web run build:demo
+npm --prefix apps/web run test:demo
 ```
 
-CI checks Python 3.12 and 3.14 on Windows and Linux, the installed wheel, local dashboard journeys, and browser/native equality. These checks establish software behavior for the fixtures. **Independent external technical review has not yet been obtained.** The [review protocol](docs/validation/review-protocol.md) provides a bounded worksheet for checking results and reporting mismatches.
+Browser and wheel verification details are in the [quickstart](docs/quickstart.md). The [adding-a-scenario guide](docs/engineering/adding-a-scenario.md) describes how to propose a small, independently checkable case. No test, benchmark run, automated audit, or maintainer-produced evidence packet counts as an independent external review.
 
-Start with [contribution guidance](CONTRIBUTING.md), [beginner contribution ideas](docs/scenarios/contribution-ideas.md), the [roadmap](ROADMAP.md), or [support](SUPPORT.md). Participants follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+## Support and project references
+
+Start with [contribution guidance](CONTRIBUTING.md), [beginner contribution ideas](docs/scenarios/contribution-ideas.md), [support](SUPPORT.md), or the [roadmap](ROADMAP.md). Participants follow the [Code of Conduct](CODE_OF_CONDUCT.md). Use [GitHub Discussions](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions) to share a reproducible result or review.
 
 If you find this project useful, you can support continued open development on [Ko-fi](https://ko-fi.com/N7V826XG89):
 
@@ -93,29 +110,26 @@ For a task-based comparison with OpenDC and PyPSA, see [Choosing a simulator](do
 
 ## Assumptions and limits
 
-This is a deterministic, local-first teaching simulator for a single aggregate IT load. The 50 MW example does not predict GPU throughput, grid adequacy, equipment selection or measured site behavior. The current model covers synthetic utility, generator, finite stored energy, conversion losses, path limits, shared-domain events, deterministic recovery, replay, and exact energy accounting. It does not establish facility calibration, protection coordination, AC transients, cooling behavior, workload queues or throughput, generator ramp/cooldown/fuel dynamics, transfer and switching transients, impedance-based load sharing, harmonics, short-circuit or arc-flash studies, reliability probabilities, Tier claims, service-level claims, certification, physical controls, or physical safety.
+This is a deterministic, local-first teaching simulator for one aggregate IT load. The current model covers synthetic utility and generator availability, finite stored energy, conversion losses, distribution-path limits, shared-domain events, deterministic recovery, replay, and exact energy accounting. The 50 MW example scales electrical demand and battery energy; it does not predict GPU throughput, grid adequacy, equipment selection, or measured site behavior.
 
-| You can use it to | Model boundary |
-| --- | --- |
-| Compare synthetic utility, generator, battery, and path failures | Assumed equipment ratings and efficiencies; no facility calibration |
-| Reproduce event times, energy ledgers, and sensitivity reports | Electrical continuity only; no AC transients, protection, cooling, or workload prediction |
-| Learn, inspect, and share a calculation locally | No physical controls, certified uptime, or facility safety assessment |
+The model does not establish facility calibration, protection coordination, AC transients, cooling behavior, workload queues or throughput, generator ramp/cooldown/fuel dynamics, transfer and switching transients, impedance-based load sharing, harmonics, short-circuit or arc-flash studies, reliability probabilities, Tier or service-level claims, certification, physical controls, or physical safety. No facility measurements or validation dataset were used.
 
-The original fixture uses a 1,000 kW IT request, 1,800 s duration, 0.95 distribution efficiency, 100 kWh initial and maximum battery energy, 0.90 discharge efficiency, a 30 s generator start delay, 700 kW path capacities, and a fictional USD 0.10/kWh tariff. The AI-cluster fixture scales demand and battery energy to 50,000 kW and 5,000 kWh while preserving those ratios. These are synthetic inputs. They are not selected-equipment ratings, live prices, a benchmark, a certification, a legal-compliance result, or a real-site calibration.
+| You can use it to                                                | Model boundary                                                                            |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Compare synthetic utility, generator, battery, and path failures | Assumed ratings and efficiencies; no facility calibration                                 |
+| Reproduce event times, energy ledgers, and sensitivity reports   | Electrical continuity only; no AC transients, protection, cooling, or workload prediction |
+| Learn, inspect, and share a calculation locally                  | No physical controls, certified uptime, or facility safety assessment                     |
 
-Schema-1 PUE and energy planning remains separate from schema-2 electrical topology. Neither model silently infers the other. Unknown costs and unavailable quantities stay explicit in reports. The catalogue's dated NVIDIA/model/AWS/Azure/OCI identifiers and one dated Azure East US retail meter are source-backed assumptions, not live feeds, account quotes, capacity allocations, or performance equivalence. Germany, Virginia, and India links are screening pointers, not complete jurisdiction packs or legal advice; India screening must consider the CEA's listed 2026 amendment.
+The 1 MW reference fixture uses 1,000 kW IT demand, 1,800 s duration, 0.95 distribution efficiency, 100 kWh initial and maximum battery energy, 0.90 discharge efficiency, a 30 s generator start delay, 700 kW path capacities, and a fictional USD 0.10/kWh tariff. The 50 MW case scales demand and battery energy to 50,000 kW and 5,000 kWh while preserving those ratios. These are synthetic inputs, not selected-equipment ratings, live prices, a benchmark, a certification, legal-compliance evidence, or real-site calibration.
 
-The browser demo has no shared simulation backend or client analytics. The API binds to loopback. No account, GPU, cloud resource, physical control, shared deployment, database, login, tenant isolation, persistent audit, FAT/SAT, or facility telemetry is introduced. Cooling, workload throughput, calibrated alarms, live telemetry, and predictive models remain planned or unvalidated. A 5,000-star aspiration has no validated timeline and is not evidence of model accuracy or adoption.
+Schema-1 PUE and energy planning is separate from schema-2 electrical topology; neither model silently infers the other. Unknown costs and unavailable quantities remain explicit. The dated NVIDIA/model/AWS/Azure/OCI identifiers and one dated Azure East US retail meter are source-backed assumptions, not live feeds, account quotes, capacity allocations, or performance equivalence. Germany, Virginia, and India references are screening pointers, not complete jurisdiction packs or legal advice; India screening must consider the CEA's listed 2026 amendment.
 
-Local and CI checks cover the core/API suite, frontend format/type/build, installed-wheel verification, local dashboard journeys, browser/Python journeys, and browser/native equality for the synthetic presets. Reference-case timing measures software execution on one local machine; it does not establish scale targets or physical accuracy. These checks are not an independent external review or formal security audit. No facility measurements or validation dataset were used.
+The browser demo has no shared simulation backend or client analytics; its optional Python comparison loads on request. The API binds to loopback. No account, GPU, cloud resource, physical control, shared deployment, database, login, tenant isolation, persistent audit, FAT/SAT, or facility telemetry is introduced. Cooling, workload throughput, calibrated alarms, live telemetry, and predictive models remain planned or unvalidated. A 5,000-star aspiration has no validated timeline and is not evidence of model accuracy or adoption.
 
-The public source tree excludes private manuals, planning references and the private repository history. Do not add private manuals, extracted private text, credentials, customer traces, or licensed standards text.
+Local and CI checks cover the core/API suite, frontend format/type/build, installed-wheel verification, local dashboard journeys, browser/Python journeys, and browser/native equality for synthetic presets. Reference-case timing measures software execution on one local machine; it does not establish scale targets or physical accuracy. These checks are not an independent external review or formal security audit. See [the external review protocol](docs/validation/review-protocol.md) for the requested independent reconstruction.
 
-Original code and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [synthetic provenance](data/provenance/manifest.json), and [browser runtime licenses](docs/third-party/README.md). [SOURCE-MANIFEST.json](SOURCE-MANIFEST.json) identifies the original v0.2.0a0 snapshot, not subsequent versions. [Citation metadata](CITATION.cff) accompanies the project; cite the exact release or commit used.
+The public source tree excludes private manuals, planning references, and private repository history. Do not add private manuals, extracted private text, credentials, customer traces, or licensed standards text.
 
-[Optional full-size visual concept](docs/images/datacenter-twin-lab-cover-v1.png) (a large artwork asset; it is not part of the initial demo path).
+Original code and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [synthetic provenance](data/provenance/manifest.json), and [browser runtime licenses](docs/third-party/README.md). [SOURCE-MANIFEST.json](SOURCE-MANIFEST.json) identifies the original v0.2.0a0 snapshot, not later versions. [Citation metadata](CITATION.cff) accompanies the project; cite the exact release or commit used.
 
-Alpha 0.3.0a0 · Python 3.12+ · Apache-2.0
-
-[![Tests](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml)
-[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
+Alpha release assets remain historical and unchanged. The v0.4.0rc1 candidate is not a stable release, no independent external review has been obtained, and no award or outside endorsement is claimed.

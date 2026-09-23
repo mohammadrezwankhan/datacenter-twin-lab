@@ -6,9 +6,19 @@
     <meta name="theme-color" content="#0b1018" />
     <meta
       name="description"
-      content="A local-first power-continuity simulator. Change the battery reserve, replay generator failure and recovery, and export reproducible results."
+      content="A reproducible synthetic continuity laboratory for datacenter power systems. Predict how long 100 kWh can supply a 1 MW load, run the experiment, and inspect the evidence."
     />
-    <title>Datacenter Twin Lab</title>
+    <meta property="og:title" content="Datacenter Twin Lab — predict, run, explain" />
+    <meta
+      property="og:description"
+      content="One 1 MW load. A finite battery. A five-minute experiment with equations, twelve lessons, and reproducible evidence."
+    />
+    <meta
+      property="og:image"
+      content="https://mohammadrezwankhan.github.io/datacenter-twin-lab/guide-preview.png"
+    />
+    <meta property="og:type" content="website" />
+    <title>Datacenter Twin Lab — power continuity, explained</title>
   </head>
   <body>
     <div id="root">
@@ -16,12 +26,13 @@
         style="max-width: 48rem; margin: 3rem auto; padding: 0 1.25rem; font: 1rem/1.6 system-ui"
       >
         <h1>Datacenter Twin Lab</h1>
-        <p>A reproducible, local-first power-continuity what-if simulator.</p>
+        <p>A reproducible synthetic continuity laboratory for datacenter power systems.</p>
         <h2>A generator fails. How long does the battery last?</h2>
         <p>
-          In the opening 50 MW example, a 5 MWh battery serves the requested load for 307.8 seconds
-          after utility and generator fail. Utility returns at 900 seconds elapsed. Change the
-          battery reserve to compare depletion and recovery, then export the calculation.
+          In the canonical 1 MW example, a 100 kWh battery delivers 85.5 kWh after discharge and
+          distribution losses. That supplies the load for 307.8 seconds after utility and generator
+          fail at 300 seconds, with depletion at 607.8 seconds elapsed. Charging is disabled.
+          Predict the result, run the experiment, then explain the energy balance.
         </p>
         <p>
           The interactive interface starts automatically when its scripts load. The hosted demo uses

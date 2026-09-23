@@ -1,0 +1,170 @@
+{
+  "measured_at": "2026-09-23T11:18:40.770Z",
+  "engine_version": "0.4.0rc1",
+  "environment": {
+    "browser": "153.0.8010.12",
+    "platform": "win32",
+    "architecture": "x64",
+    "viewport": "1280x900",
+    "origin": "loopback Vite preview",
+    "throttling": "none"
+  },
+  "method": "Three isolated browser contexts; cold browser cache, potentially warm OS cache. Stopwatch includes Playwright navigation/click/assertion overhead. Bytes are decoded response bodies, including worker requests, not compressed wire bytes. Replay traverses precomputed intervals and is not simulation runtime.",
+  "guide_samples": [
+    {
+      "sample": 1,
+      "interactive_ms": 829.8191000000006,
+      "click_to_result_ms": 150.71489999999903,
+      "decoded_response_bytes": 462718,
+      "resources": [
+        {
+          "path": "/datacenter-twin-lab/",
+          "decoded_bytes": 3711
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/index-B0_qvZI0.css",
+          "decoded_bytes": 42865
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/index-Qe-AG4lc.js",
+          "decoded_bytes": 283437
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/GuidedStart-oNEaPOD3.css",
+          "decoded_bytes": 15454
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/GuidedStart-DYorZoOL.js",
+          "decoded_bytes": 17672
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/course-lessons-BpO2VAgX.js",
+          "decoded_bytes": 7688
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/worker-request-0zjDmk1J.js",
+          "decoded_bytes": 1032
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/browser-client-YZzL4EYf.js",
+          "decoded_bytes": 228
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/javascript-worker-Cyj8Y1WR.js",
+          "decoded_bytes": 42264
+        },
+        {
+          "path": "/datacenter-twin-lab/demo-data.json",
+          "decoded_bytes": 48367
+        }
+      ],
+      "input_sha256": "a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0"
+    },
+    {
+      "sample": 2,
+      "interactive_ms": 797.6157999999996,
+      "click_to_result_ms": 172.84969999999885,
+      "decoded_response_bytes": 462718,
+      "resources": [
+        {
+          "path": "/datacenter-twin-lab/",
+          "decoded_bytes": 3711
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/index-B0_qvZI0.css",
+          "decoded_bytes": 42865
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/index-Qe-AG4lc.js",
+          "decoded_bytes": 283437
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/GuidedStart-oNEaPOD3.css",
+          "decoded_bytes": 15454
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/GuidedStart-DYorZoOL.js",
+          "decoded_bytes": 17672
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/course-lessons-BpO2VAgX.js",
+          "decoded_bytes": 7688
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/worker-request-0zjDmk1J.js",
+          "decoded_bytes": 1032
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/browser-client-YZzL4EYf.js",
+          "decoded_bytes": 228
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/javascript-worker-Cyj8Y1WR.js",
+          "decoded_bytes": 42264
+        },
+        {
+          "path": "/datacenter-twin-lab/demo-data.json",
+          "decoded_bytes": 48367
+        }
+      ],
+      "input_sha256": "a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0"
+    },
+    {
+      "sample": 3,
+      "interactive_ms": 823.2108000000007,
+      "click_to_result_ms": 165.3611000000019,
+      "decoded_response_bytes": 462718,
+      "resources": [
+        {
+          "path": "/datacenter-twin-lab/",
+          "decoded_bytes": 3711
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/index-B0_qvZI0.css",
+          "decoded_bytes": 42865
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/index-Qe-AG4lc.js",
+          "decoded_bytes": 283437
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/GuidedStart-oNEaPOD3.css",
+          "decoded_bytes": 15454
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/GuidedStart-DYorZoOL.js",
+          "decoded_bytes": 17672
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/course-lessons-BpO2VAgX.js",
+          "decoded_bytes": 7688
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/browser-client-YZzL4EYf.js",
+          "decoded_bytes": 228
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/worker-request-0zjDmk1J.js",
+          "decoded_bytes": 1032
+        },
+        {
+          "path": "/datacenter-twin-lab/assets/javascript-worker-Cyj8Y1WR.js",
+          "decoded_bytes": 42264
+        },
+        {
+          "path": "/datacenter-twin-lab/demo-data.json",
+          "decoded_bytes": 48367
+        }
+      ],
+      "input_sha256": "a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0"
+    }
+  ],
+  "replay": {
+    "preset": "generator_failure",
+    "intervals": 181,
+    "programmed_interval_ms": 120,
+    "programmed_total_ms_including_stop_tick": 21720,
+    "observed_ms_including_automation": 21886.501699999997
+  },
+  "claims": "Local observations only; no internet/mobile latency, scalability or physical controller response guarantee."
+}

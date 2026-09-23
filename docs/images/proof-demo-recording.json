@@ -1,0 +1,76 @@
+{
+  "kind": "actual-continuous-browser-recording",
+  "engine_version": "0.4.0rc1",
+  "recorded_at": "2026-09-23T11:18:34.454Z",
+  "approximate_duration_s": 61.9941562,
+  "note": "Continuous browser recording. Reading pauses are deliberate; this is not a performance measurement. No audio. Captions follow measured step times. Source files identify the working build, not a released revision.",
+  "full_native_equality": true,
+  "optional_python_exact_match": true,
+  "input_sha256": "a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0",
+  "run_id": "d179c72e4b72afdb8b9d",
+  "source_file_sha256_lf": {
+    "apps/web/src/App.tsx": "e0ebb489da6eba81e4702e33c74e8f3dcdb84b2e9e5a88957d9018be2e99dca4",
+    "apps/web/src/GuidedStart.tsx": "737d5a86011dbc3eb970aad91690bde218a6fe8437e137029bf0473fb5f5d24a",
+    "apps/web/src/guided-start.css": "5ffb696382127485867b42c746747b38c0e0e2521202aef94420d23d8852f2d0",
+    "apps/web/scripts/record-proof-demo.mjs": "4b29df034eb04b6670bb2dc4d5ddc45e6920f1775d39b47a0114de7a8ff792f7"
+  },
+  "screenshots": [
+    {
+      "path": "guide-preview.png",
+      "annotation": "The canonical question, three-step route and actual prediction controls.",
+      "sha256": "b77eff7de7404f9f9e677076044d6b9f0aef94effd7557a83089c13b58d2f4e0"
+    },
+    {
+      "path": "guide-predict.png",
+      "annotation": "01 Predict: 100 kWh selected; 300-second estimate; no result calculated yet.",
+      "sha256": "d0fa0233c5ad59a4d8629353b4d780ba913e24f6bac36e585346390c849560e6"
+    },
+    {
+      "path": "guide-result.png",
+      "annotation": "02 Explain: 307.8 seconds of ride-through; depletion at 607.8 elapsed seconds; the outage ledger.",
+      "sha256": "6aa1db2f0271ec9a08fbdf86246d36b1d7d6c7442dc1c929210e93777f7ea337"
+    },
+    {
+      "path": "guide-evidence.png",
+      "annotation": "03 Verify: exported input identity and an actual complete-result Python match.",
+      "sha256": "f985d583cce7ff709f4283eb4143ec9dee1db7246c5a9fa1066c5e2f2febe4e9"
+    }
+  ],
+  "cues": [
+    {
+      "at_s": 0.00002440000000001419,
+      "text": "A 1 MW IT load loses utility power. How long can 100 kWh bridge the outage?"
+    },
+    {
+      "at_s": 7.462181,
+      "text": "Predict 300 seconds FROM the outage. Charging is disabled and the generator is failed."
+    },
+    {
+      "at_s": 14.268767,
+      "text": "Run: 100 × 0.90 × 0.95 = 85.5 kWh delivered to IT. At 1 MW, this lasts 307.8 seconds."
+    },
+    {
+      "at_s": 22.398109200000004,
+      "text": "Outage begins at 300 s; the battery empties at 607.8 s. Utility returns at 900 s."
+    },
+    {
+      "at_s": 30.679440300000003,
+      "text": "Export the complete JSON: exact inputs, input hash, events and interval energy ledger."
+    },
+    {
+      "at_s": 34.7201501,
+      "text": "Optional Python verification downloads the reference runtime only when selected."
+    },
+    {
+      "at_s": 37.591372199999995,
+      "text": "Exact match: all inputs, hashes and calculated values agree with the reference Python engine."
+    },
+    {
+      "at_s": 45.0816874,
+      "text": "Follow three reproducible cases, reports and review instructions. Teaching evidence, not a facility reliability rating."
+    }
+  ],
+  "errors": [],
+  "video_sha256": "a121e495be71c873c2a1fd8465b876891a8f272bad54b820242830d023b94f14",
+  "captions_sha256": "ccb8cd28a90766e3477435ee2d6b264510ed043b239333acaf908393dae87e7f"
+}

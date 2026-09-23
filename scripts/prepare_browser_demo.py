@@ -41,6 +41,7 @@ def prepare() -> dict:
                 raise SystemExit(f"Refusing nonlocal archive source: {name}")
             data = source.read_bytes().replace(b"\r\n", b"\n")
             info = ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
+            info.create_system = 3
             info.compress_type = ZIP_DEFLATED
             info.external_attr = 0o644 << 16
             archive.writestr(info, data)
@@ -66,6 +67,29 @@ def prepare() -> dict:
     (output / "catalog.json").write_text(
         json.dumps(load_catalog(), separators=(",", ":")) + "\n", encoding="utf-8")
     (output / ".nojekyll").write_text("", encoding="utf-8")
+    # Only the versioned, explicitly hashed public proof packet joins the site.
+    evidence = ROOT / "data/evidence" / f"v{__version__}"
+    evidence_manifest = json.loads((evidence / "manifest.json").read_text(encoding="utf-8"))
+    if evidence_manifest["engine_version"] != __version__:
+        raise SystemExit("Evidence packet version does not match the engine")
+    evidence_target = output / "data/evidence" / f"v{__version__}"
+    evidence_target.mkdir(parents=True, exist_ok=True)
+    for name, entry in evidence_manifest["artifacts"].items():
+        source = evidence / name
+        if Path(name).name != name or source.is_symlink() or not source.resolve().is_relative_to(evidence.resolve()):
+            raise SystemExit(f"Unsafe evidence source: {name}")
+        data = source.read_bytes().replace(b"\r\n", b"\n")
+        if sha256(data).hexdigest() != entry["sha256"]:
+            raise SystemExit(f"Evidence hash mismatch: {name}")
+        (evidence_target / name).write_bytes(data)
+    shutil.copyfile(evidence / "manifest.json", evidence_target / "manifest.json")
+    shutil.copyfile(ROOT / "data/evidence" / f"index-v{__version__}.json", output / "evidence-index.json")
+    # Original, on-demand evidence media is never requested by the first experiment.
+    for name in ("guide-preview.png", "guide-predict.png", "guide-result.png", "guide-evidence.png",
+                 "proof-demo.webm", "proof-demo.vtt"):
+        source = ROOT / "docs/images" / name
+        if source.is_file():
+            shutil.copyfile(source, output / name)
     print(json.dumps({"engine_version": __version__, "archive_sha256": manifest["archive_sha256"],
                       "source_files": len(entries), "output": str(output)}))
     return manifest

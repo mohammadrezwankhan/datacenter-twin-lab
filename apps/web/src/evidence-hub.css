@@ -1,0 +1,162 @@
+.evidence-hub {
+  display: grid;
+  gap: 28px;
+  max-width: 1380px;
+}
+.proof-intro {
+  padding: clamp(22px, 4vw, 42px);
+  background: linear-gradient(125deg, #17352f, #101d2b);
+  border-top: 3px solid #83d7b1;
+}
+.proof-intro h2 {
+  font-size: clamp(24px, 3vw, 36px);
+  margin: 10px 0;
+}
+.proof-intro > p {
+  max-width: 850px;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.proof-chain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 0;
+  margin: 28px 0;
+  list-style: none;
+}
+.proof-chain li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.proof-chain b {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid #619987;
+  border-radius: 50%;
+  color: #a4efce;
+}
+.proof-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-top: 16px;
+}
+.proof-links a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.proof-section-heading {
+  margin: 0 0 18px;
+}
+.proof-section-heading h2 {
+  margin-top: 8px;
+  font-size: 24px;
+}
+.proof-cases {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.proof-case {
+  padding: 24px;
+  min-width: 0;
+  border-top: 2px solid #83d7b1;
+}
+.proof-case:nth-child(2) {
+  border-top-color: #c0a5ff;
+}
+.proof-case:nth-child(3) {
+  border-top-color: #ffd17e;
+}
+.proof-case-number {
+  font:
+    600 28px/1.1 ui-monospace,
+    monospace;
+  color: #a4efce;
+}
+.proof-case h3 {
+  font-size: 19px;
+  margin: 16px 0 12px;
+}
+.proof-case .proof-outcome {
+  color: var(--text);
+  font-size: 18px;
+  min-height: 54px;
+}
+.proof-equation {
+  padding: 14px 0;
+  font-family: ui-monospace, monospace;
+  border-bottom: 1px solid var(--line);
+}
+.proof-case details {
+  margin-top: 20px;
+}
+.proof-case code,
+.proof-build-note {
+  overflow-wrap: anywhere;
+}
+.proof-build-note {
+  margin-top: 18px;
+}
+.proof-video {
+  padding: clamp(18px, 3vw, 32px);
+  display: grid;
+  gap: 18px;
+}
+.proof-video h2,
+.proof-assurance-grid h2 {
+  font-size: 23px;
+  margin: 8px 0;
+}
+.proof-video video {
+  width: 100%;
+  max-height: 720px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #0b1018;
+}
+.proof-assurance-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 18px;
+}
+.proof-assurance-grid > article {
+  padding: clamp(18px, 3vw, 30px);
+  min-width: 0;
+}
+.proof-assurance-grid pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 16px;
+  background: #0b1018;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.proof-limits {
+  padding: 20px;
+}
+.proof-limits p {
+  max-width: 1000px;
+  margin-top: 14px;
+}
+@media (max-width: 1050px) {
+  .proof-cases {
+    grid-template-columns: 1fr;
+  }
+  .proof-case .proof-outcome {
+    min-height: 0;
+  }
+}
+@media (max-width: 760px) {
+  .proof-assurance-grid {
+    grid-template-columns: 1fr;
+  }
+  .proof-chain {
+    display: grid;
+    gap: 14px;
+  }
+}

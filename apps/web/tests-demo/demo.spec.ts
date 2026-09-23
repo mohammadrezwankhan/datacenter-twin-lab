@@ -37,7 +37,7 @@ test('all presets match native Python with external network blocked and no API',
     route.request().url().startsWith('http://127.0.0.1:4174/') ? route.continue() : route.abort(),
   );
   page.on('request', (request) => requests.push(request.url()));
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toContainText('50,000');
   for (const preset of [
     'generator_failure',
@@ -94,7 +94,7 @@ test('optional verifier rejects corrupt source while the JavaScript result stays
 }) => {
   await page.route('**/engine.zip', (route) => route.fulfill({ body: 'corrupted archive' }));
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toContainText('50,000');
   await page.getByLabel('Verify against Python').check();
   await expect(page.getByRole('alert')).toContainText('integrity check failed');
@@ -113,7 +113,7 @@ test('phone visitor can run and inspect a scenario without horizontal overflow',
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toContainText('50,000');
   await page.getByRole('button', { name: 'Battery depleted 607.8 s' }).click();
   await expect(page.getByTestId('served-power')).toHaveText('0 kW');
@@ -130,7 +130,7 @@ test('a Python mismatch is visible and cannot replace the completed JavaScript r
       body: "self.addEventListener('message', ({data}) => self.postMessage({id:data.id,result:{run_id:'deliberate-test-mismatch'}}));",
     }),
   );
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
   const original = await exported(page);
   await page.getByLabel('Verify against Python').check();
@@ -142,7 +142,7 @@ test('a Python mismatch is visible and cannot replace the completed JavaScript r
 test('turning off verification cancels the pending check and a new run stays JavaScript-only', async ({
   page,
 }) => {
-  await page.goto('./');
+  await page.goto('./?mode=advanced');
   await expect(page.getByTestId('served-power')).toHaveText('50,000 kW');
   await page.getByLabel('Verify against Python').check();
   await expect(page.getByTestId('python-verification-status')).toContainText('Loading Python');

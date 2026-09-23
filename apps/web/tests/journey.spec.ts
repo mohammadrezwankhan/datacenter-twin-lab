@@ -12,7 +12,7 @@ test('demand changes power, cost, warnings and exported provenance in the same r
   await page.getByLabel('Scenario', { exact: true }).selectOption('normal');
   await expect(page.getByRole('button', { name: 'Run scenario' })).toBeEnabled();
   await page.getByLabel('IT demand (kW)').fill('1200');
-  await expect(page.getByRole('status')).toContainText('Unapplied edits');
+  await expect(page.locator('.run-context[role="status"]')).toContainText('Unapplied edits');
   await expect(page.getByTestId('served-power')).toHaveText('1,000 kW');
   const response = page.waitForResponse(
     (r) => r.url().endsWith('/api/v1/simulations') && r.request().method() === 'POST',
