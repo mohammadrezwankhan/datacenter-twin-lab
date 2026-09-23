@@ -8,9 +8,9 @@ The two ride-through cases follow browser lesson 3: starting from `demo_scenario
 
 | Synthetic case | Independent equation | Expected result |
 | --- | --- | --- |
-| 1 MW, 100 kWh | `100 Ã— 0.90 Ã— 0.95 Ã· 1,000 Ã— 3,600` | `307.8 s` ride-through; depletion at `607.8 s` elapsed; `81.166666â€¦ kWh` unserved |
-| 1 MW, 50 kWh | `50 Ã— 0.90 Ã— 0.95 Ã· 1,000 Ã— 3,600` | `153.9 s` ride-through; depletion at `453.9 s` elapsed; `123.916666â€¦ kWh` unserved |
-| Path maintenance | `700 Ã— 0.95 = 665 kW`; `1,000 âˆ’ 665 = 335 kW`; `335 Ã— 600 Ã· 3,600` | `665 kW` served, `335 kW` unserved for `600 s`; `55.833333â€¦ kWh` unserved |
+| 1 MW, 100 kWh | `100 × 0.90 × 0.95 ÷ 1,000 × 3,600` | `307.8 s` ride-through; depletion at `607.8 s` elapsed; `81.166666… kWh` unserved |
+| 1 MW, 50 kWh | `50 × 0.90 × 0.95 ÷ 1,000 × 3,600` | `153.9 s` ride-through; depletion at `453.9 s` elapsed; `123.916666… kWh` unserved |
+| Path maintenance | `700 × 0.95 = 665 kW`; `1,000 − 665 = 335 kW`; `335 × 600 ÷ 3,600` | `665 kW` served, `335 kW` unserved for `600 s`; `55.833333… kWh` unserved |
 
 Ride-through is measured from the `300 s` outage boundary; depletion time is the elapsed event timestamp. The path case uses the existing [`path_maintenance` scenario](scenarios/path_maintenance.md). Inputs and event schedules are original synthetic assumptions. Their provenance is listed in [`data/provenance/manifest.json`](../data/provenance/manifest.json); the private manual and its extracted text are excluded. The project citation and license references are [`CITATION.cff`](../CITATION.cff), [`LICENSE`](../LICENSE), and [`NOTICE`](../NOTICE).
 
