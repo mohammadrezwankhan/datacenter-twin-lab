@@ -87,6 +87,29 @@ test('evidence links and billing units preserve unknown prices', async ({ page }
   );
 });
 
+test('local dashboard serves the complete research evidence', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Research evidence', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '100 kWh at 1 MW', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '50 kWh at 1 MW', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'One 700 kW surviving path' })).toBeVisible();
+  const indexResponse = await page.request.get('/evidence-index.json');
+  expect(indexResponse.headers()['content-type']).toContain('application/json');
+  const index = await indexResponse.json();
+  for (const item of index.cases) {
+    const result = await page.request.get(`/${item.run_path}`);
+    expect(result.ok()).toBe(true);
+    expect((await result.json()).input_sha256).toBe(item.input_sha256);
+    expect((await page.request.get(`/${item.report_path}`)).ok()).toBe(true);
+  }
+  const video = page.locator('video');
+  expect((await page.request.get((await video.locator('source').getAttribute('src'))!)).ok()).toBe(
+    true,
+  );
+  const captions = await page.request.get((await video.locator('track').getAttribute('src'))!);
+  expect(await captions.text()).toContain('WEBVTT');
+});
+
 test('request errors retain the previous run and allow correction', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('served-power')).toBeVisible();

@@ -1,6 +1,7 @@
 """Install a built wheel into a fresh environment and exercise it outside the checkout."""
 
 import argparse
+from hashlib import sha256
 import json
 import os
 from pathlib import Path
@@ -29,6 +30,18 @@ def main() -> int:
         if args.require_web and ("datacenter_twin/web/index.html" not in web_files or
                 not any(name.endswith(".js") for name in web_files) or not any(name.endswith(".css") for name in web_files)):
             raise RuntimeError("Build apps/web before building a dashboard distribution")
+        if args.require_web:
+            index = json.loads(archive.read("datacenter_twin/web/evidence-index.json"))
+            manifest = json.loads(archive.read("datacenter_twin/web/" + index["manifest_path"]))
+            if index["version"] != manifest["engine_version"] or len(index["cases"]) != 3:
+                raise RuntimeError("Bundled research evidence is inconsistent")
+            prefix = "datacenter_twin/web/" + Path(index["manifest_path"]).parent.as_posix()
+            for name, entry in manifest["artifacts"].items():
+                if sha256(archive.read(prefix + "/" + name)).hexdigest() != entry["sha256"]:
+                    raise RuntimeError(f"Bundled evidence hash mismatch: {name}")
+            for name in ("guide-preview.png", "proof-demo.webm", "proof-demo.vtt"):
+                if "datacenter_twin/web/" + name not in web_files:
+                    raise RuntimeError(f"Bundled evidence media missing: {name}")
     root = Path(__file__).resolve().parents[1]
     with TemporaryDirectory(prefix="datacenter-twin-install-") as directory:
         workspace = Path(directory)
