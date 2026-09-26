@@ -1,6 +1,6 @@
 # Roadmap
 
-## Current status: v0.4.0rc1 candidate
+## Current status: v0.4.0rc2 candidate
 
 The current source is a **release candidate, not a stable release**. It focuses on reproducible teaching experiments for datacenter power continuity. It does not claim production reliability analysis, site validation, or independent review. Review candidate status and the release conditions in [release readiness](docs/engineering/release-readiness.md).
 
@@ -38,7 +38,7 @@ Before choosing a stable release:
 1. Obtain an attributed, independent technical reconstruction through the [review protocol](docs/validation/review-protocol.md) and existing [review discussion](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions/5). Preserve the reviewer's scope and any corrections; do not substitute maintainer testing or automated agent output.
 2. Resolve reproduced mismatches or publish their disposition and limitation.
 3. Confirm the exact source, wheel, and browser asset hashes, commands, supported environments, and migration notes for the selected stable revision.
-4. Publish a new stable tag and release only after the review and artifact checks are recorded. Keep `0.4.0rc1` and earlier alpha assets as historical versions.
+4. Publish a new stable tag and release only after the review and artifact checks are recorded. Keep `0.4.0rc2` and earlier alpha assets as historical versions.
 
 Calibrated facility examples are conditional on data rights, measurement provenance, uncertainty, a named validation owner, and an agreed acceptance boundary. None is included today. A DOI or archive citation is conditional on a stable artifact, approved deposit metadata, and an authorized archive account; no DOI or archive endorsement is available to cite now.
 
