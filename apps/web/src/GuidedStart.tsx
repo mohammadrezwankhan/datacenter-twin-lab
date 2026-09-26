@@ -10,6 +10,12 @@ const lesson = lessons.find((item) => item.id === 'ride-through')!;
 const outageAt = 300;
 const recoveryAt = 900;
 
+// Apply the sign after display rounding so a matching prediction never reads "-0".
+const predictionDifferenceFormat = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 1,
+  signDisplay: 'exceptZero',
+});
+
 type GuidedStartProps = {
   onExplore: () => void;
   onLearn: () => void;
@@ -471,8 +477,8 @@ export function GuidedStart({ onExplore, onLearn, onEvidence }: GuidedStartProps
                 {predictionDifference !== null && (
                   <>
                     {' '}
-                    Difference: {predictionDifference > 0 ? '+' : ''}
-                    {format(predictionDifference, 1)} s (calculated minus predicted).
+                    Difference: {predictionDifferenceFormat.format(predictionDifference)} s
+                    (calculated minus predicted; rounded to 0.1 s).
                   </>
                 )}
               </p>

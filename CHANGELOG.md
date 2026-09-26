@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Correct the guided prediction feedback so a difference that rounds to zero displays `0 s`, while positive and negative differences retain their signs. State the 0.1-second display precision. Simulation values, exports and published release assets are unchanged.
+
 ## 0.4.0rc2 — Windows evidence installation fix
 
 - Include the correction for serving bundled reports from deeply nested Windows installations. No operating-system settings change; requests outside the dashboard directory remain rejected.
