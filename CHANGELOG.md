@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Serve bundled evidence reports from deeply nested Windows installations without changing operating-system settings. The static server still rejects paths outside the dashboard directory.
+- Point the README, quickstart and tutorial index to the published, hash-pinned `0.4.0rc1` wheel. That existing asset is unchanged; use a shorter installation/cache path for its evidence reports until installing a source build with the fix.
+
 ## 0.4.0rc1 — a result you can reproduce
 
 This release candidate brings the current browser experience and its proof material into one versioned artifact. It is a candidate for external reproduction, not a claim of independent review or facility reliability.

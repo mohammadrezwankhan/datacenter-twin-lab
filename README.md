@@ -76,7 +76,7 @@ python -m datacenter_twin sweep --preset generator_failure --parameter battery_i
 
 Choose a new output path if it already exists, or explicitly add `--force`. The preset allows charging; at 50 kWh it gives **478.2675 s elapsed**, rather than the guided lesson's **453.9 s elapsed** with charging disabled. The [sensitivity guide](docs/engineering/sensitivity.md) explains the distinction.
 
-The standard-library core can also run from an existing Python 3.12+ checkout. See the [quickstart](docs/quickstart.md) for the source build, loopback dashboard, testing, and the historical released-wheel route. The original v0.3.0a0 wheel preserves its historical files; it does not become the v0.4.0rc1 candidate. Use the current source tree and the candidate's actual published artifacts for candidate verification.
+The [quickstart](docs/quickstart.md#run-with-uv) installs the published v0.4.0rc1 candidate wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, eighteen presets and research evidence, so no Git or Node setup is needed for that route. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier alpha assets retain their original contents.
 
 ## Checks and evidence
 

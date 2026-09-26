@@ -1,6 +1,7 @@
 """Loopback-only application surface for pure simulation and bundled evidence."""
 
 import asyncio
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -18,6 +19,19 @@ from .demo import PRESETS, demo_scenario
 from .engine import simulate
 from .topology import SiteScenario
 from .browser import scenario_report, scenario_sweep
+
+
+def _web_directory() -> Path:
+    """Keep bundled evidence reachable in deeply nested Windows environments."""
+    directory = os.path.abspath(Path(__file__).parent / "web")
+    if os.name == "nt" and not directory.startswith("\\\\?\\"):
+        # Evidence filenames include full input hashes. Prefix the trusted,
+        # normalized installation root, never a path received from a client.
+        if directory.startswith("\\\\"):
+            directory = "\\\\?\\UNC\\" + directory[2:]
+        else:
+            directory = "\\\\?\\" + directory
+    return Path(directory)
 
 
 def create_app() -> FastAPI:
@@ -123,7 +137,7 @@ def create_app() -> FastAPI:
     async def quote(request: Request):
         return normalize_quote(await payload(request))
 
-    web = Path(__file__).parent / "web"
+    web = _web_directory()
     if (web / "index.html").is_file():
         app.mount("/", StaticFiles(directory=web, html=True), name="dashboard")
     else:
