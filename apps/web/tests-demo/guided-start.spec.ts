@@ -81,6 +81,34 @@ test('the five-minute guide requires a prediction and matches native results for
   }
 });
 
+test('prediction feedback hides rounded zero signs and retains meaningful differences', async ({
+  page,
+}) => {
+  await page.goto('./');
+  const cases = [
+    { reserve: '100', prediction: '307.8', difference: '0' },
+    { reserve: '100', prediction: '307.79', difference: '0' },
+    { reserve: '100', prediction: '307.81', difference: '0' },
+    { reserve: '100', prediction: '300', difference: '+7.8' },
+    { reserve: '100', prediction: '320', difference: '-12.2' },
+    { reserve: '50', prediction: '153.9', difference: '0' },
+  ];
+  for (const item of cases) {
+    if (item.reserve === '50')
+      await page.getByRole('button', { name: /50 kWh.*Half-reserve challenge/ }).click();
+    await page.getByTestId('guide-prediction').fill(item.prediction);
+    await page.getByTestId('guide-run').click();
+    await expect(page.getByTestId('guide-result')).toContainText(
+      `Difference: ${item.difference} s`,
+      { timeout: 5000 },
+    );
+    await expect(page.getByTestId('guide-result')).toContainText('rounded to 0.1 s');
+    // Predictions affect feedback only; the complete exported run stays reproducible.
+    const result = await exportResult(page);
+    expect(result).toEqual(nativeRun(result));
+  }
+});
+
 test('guide controls are keyboard reachable and fit a 320 px viewport with reduced motion', async ({
   page,
 }) => {
