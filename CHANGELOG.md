@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.4.0rc2 — Windows evidence installation fix
 
-- Serve bundled evidence reports from deeply nested Windows installations without changing operating-system settings. The static server still rejects paths outside the dashboard directory.
-- Point the README, quickstart and tutorial index to the published, hash-pinned `0.4.0rc1` wheel. That existing asset is unchanged; use a shorter installation/cache path for its evidence reports until installing a source build with the fix.
+- Include the correction for serving bundled reports from deeply nested Windows installations. No operating-system settings change; requests outside the dashboard directory remain rejected.
+- Update the installation entry points to the new candidate wheel with its SHA-256 and retain the earlier candidate's shorter-path workaround.
+- Regenerate the three canonical evidence cases for the new version. Numerical algorithms, inputs and results are unchanged; engine version and deterministic run identifiers advance to `0.4.0rc2`.
+
+Earlier candidate and alpha tags, assets, evidence and measurement records remain unchanged. This candidate does not establish independent external reproduction or stable maturity.
 
 ## 0.4.0rc1 — a result you can reproduce
 
