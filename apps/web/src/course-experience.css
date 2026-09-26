@@ -595,3 +595,14 @@
     margin-bottom: 16px;
   }
 }
+.lesson-worksheet-action {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--lesson-accent);
+  border-radius: 12px;
+}
+
+.lesson-worksheet-action p {
+  max-width: 76ch;
+  margin: 0.65rem 0 0;
+}

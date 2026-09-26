@@ -18,6 +18,22 @@ Open **Explore all 12 lessons** to see four chapters: energy and reserve, contin
 
 Objects are original vector illustrations of the returned values. **Pause motion** and your device's reduced-motion preference stop decorative animation; the replay controls remain usable. See the [course studio guide](../engineering/course-studio.md) for keyboard controls, event edge cases and reproduction.
 
+## Print a lesson worksheet
+
+In any lesson, enter an optional prediction, select **Run lesson**, then select **Download lesson worksheet** under **Reproduce this lesson**. Open the downloaded HTML in a browser to read it offline or use **Print / Save as PDF**. Choose A4 or US Letter, 100% scale, with browser headers and footers off; check print preview before sharing.
+
+The three sections start on separate printed pages:
+
+1. **Prediction and exercise:** the completed input, scheduled events and the estimate submitted with that run, plus space for reasoning.
+2. **Result and worked calculation:** the actual result, unit-labelled steps, a power or annual-energy chart, and space to explain the difference.
+3. **Assumptions and reproduction:** asset capacities and connections where applicable, input hash, engine version, source revision when known, and model limits.
+
+The export keeps the last completed calculation. Editing a draft input or estimate afterwards does not rewrite that record; run the lesson again to include the edits. An automatically opened lesson has no submitted estimate. Estimates are self-reported, not evidence that a learner predicted the answer before seeing a result.
+
+The HTML embeds the complete result under **Embedded calculation**, without scripts, external resources or telemetry. Displayed quantities use up to six decimal places; embedded JSON preserves the full engine output. Unknown costs and absent events remain explicit. Save the ordinary JSON export as well when comparing calculations. Local builds without a recorded public revision say **Unknown for this build** rather than inventing one.
+
+The existing [lesson 3 battery worksheet](battery-ride-through-worksheet.md) remains a ready-made 100/50 kWh exercise. This new export covers all twelve configured lessons in current source and Pages; the historical `0.4.0rc2` release assets do not include it.
+
 ## The headline result
 
 The AI-outage lesson uses a synthetic aggregate **50,000 kW (50 MW)** IT request and **5,000 kWh (5 MWh)** initial stored battery energy. Utility and generator supply fail at 300 s. With 0.90 battery discharge efficiency and 0.95 distribution efficiency:

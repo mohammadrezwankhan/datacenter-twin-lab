@@ -1,26 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { lessons, lessonScenario, type Lesson } from './course-lessons';
+import { lessons, lessonScenario } from './course-lessons';
 import { n, request } from './client';
-import type { Run, SiteScenario } from './types';
+import type { PlanningRun as Planning, Run, SiteScenario } from './types';
 import { RunTools } from './RunTools';
 import { PythonVerification } from './PythonVerification';
 import { CourseMap } from './CourseMap';
 import { courseThemes } from './course-themes';
 import { LessonScene } from './LessonScene';
+import { lessonValue, type LessonValue } from './lesson-results';
 import './course-experience.css';
-
-type Planning = {
-  schema_version: 1;
-  run_id: string;
-  input_sha256: string;
-  assumptions: Record<string, unknown>;
-  facility_energy_kwh: string;
-  it_energy_kwh: string;
-  non_it_energy_kwh: string;
-  limitations: string[];
-};
-type LessonValue = string | number | null | undefined;
 
 const equations: Record<string, { formula: string; note: string }> = {
   'power-energy': {
@@ -73,19 +62,6 @@ const equations: Record<string, { formula: string; note: string }> = {
   },
 };
 
-function lessonValue(lesson: Lesson, run: Run | null, planning: Planning | null): LessonValue {
-  if (planning) return planning.facility_energy_kwh;
-  if (!run) return undefined;
-  if (lesson.resultKey === 'depletion')
-    return run.events.find((event) => event.action === 'battery_depleted')?.at_s;
-  if (lesson.resultKey === 'generator_ready') {
-    const generator = run.scenario.assets.find((asset) => asset.kind === 'generator')?.id;
-    return run.intervals.find((row) => generator && row.asset_states[generator] === 'running')
-      ?.start_s;
-  }
-  return run.summary[lesson.resultKey];
-}
-
 function shown(value: LessonValue) {
   return value === undefined || value === null ? 'No event in this run' : n(value, 6);
 }
@@ -116,6 +92,14 @@ export function Course() {
   const [error, setError] = useState('');
   const [answer, setAnswer] = useState(false);
   const [prediction, setPrediction] = useState('');
+  const [worksheet, setWorksheet] = useState<{
+    lessonId: string;
+    runId: string;
+    input: string;
+    prediction: string;
+  } | null>(null);
+  const [worksheetBusy, setWorksheetBusy] = useState(false);
+  const [worksheetError, setWorksheetError] = useState('');
   const [reviewedIds, setReviewedIds] = useState<string[]>([]);
   const [intervalIndex, setIntervalIndex] = useState(0);
   const [motion, setMotion] = useState(
@@ -131,7 +115,7 @@ export function Course() {
     setId(nextId);
   }
 
-  async function calculate(input: string) {
+  async function calculate(input: string, submittedPrediction = '') {
     active.current?.abort();
     const controller = new AbortController();
     active.current = controller;
@@ -169,6 +153,12 @@ export function Course() {
       setRun(nextRun);
       setPlanning(nextPlanning);
       setUsedValue(input);
+      setWorksheet({
+        lessonId: lesson.id,
+        runId: (nextRun ?? nextPlanning)!.run_id,
+        input,
+        prediction: submittedPrediction,
+      });
       setIntervalIndex(0);
       if (input === lesson.initial)
         setReference({ result: lessonValue(lesson, nextRun, nextPlanning) });
@@ -187,6 +177,8 @@ export function Course() {
     setReference(null);
     setAnswer(false);
     setPrediction('');
+    setWorksheet(null);
+    setWorksheetError('');
     setIntervalIndex(0);
     void calculate(lesson.initial);
     const url = new URL(window.location.href);
@@ -207,6 +199,30 @@ export function Course() {
   const completed = !!run || !!planning;
   const noDepletion = completed && lesson.resultKey === 'depletion' && result === undefined;
   const noGeneration = completed && lesson.resultKey === 'generator_ready' && result === undefined;
+
+  async function exportWorksheet() {
+    const calculation = run ?? planning;
+    if (!calculation || worksheet?.lessonId !== id || worksheet.runId !== calculation.run_id)
+      return;
+    setWorksheetBusy(true);
+    setWorksheetError('');
+    try {
+      // Keep the printable document out of the initial course download.
+      const { downloadLessonWorksheet } = await import('./lesson-worksheet');
+      downloadLessonWorksheet({
+        lesson,
+        input: worksheet.input,
+        prediction: worksheet.prediction,
+        equation: equations[id],
+        calculation,
+        sourceRevision: import.meta.env.VITE_PUBLIC_SOURCE_REVISION || null,
+      });
+    } catch (cause) {
+      setWorksheetError(`Could not create the worksheet: ${(cause as Error).message}`);
+    } finally {
+      setWorksheetBusy(false);
+    }
+  }
 
   return (
     <div
@@ -263,7 +279,7 @@ export function Course() {
           <form
             onSubmit={(event) => {
               event.preventDefault();
-              void calculate(value);
+              void calculate(value, prediction);
             }}
           >
             <div className="lesson-step-heading">
@@ -515,6 +531,20 @@ export function Course() {
                 Export PUE calculation <span aria-hidden="true">↗</span>
               </button>
             )}
+          </div>
+          <div className="lesson-worksheet-action">
+            <button
+              disabled={busy || worksheetBusy || worksheet?.lessonId !== id}
+              onClick={() => void exportWorksheet()}
+            >
+              {worksheetBusy ? 'Preparing worksheet…' : 'Download lesson worksheet'}
+            </button>
+            <p>
+              A printable HTML file with separate prediction, answer and evidence pages. It keeps
+              the inputs and estimate submitted with the last completed run; later edits stay
+              separate. Open the file and print or save as PDF.
+            </p>
+            {worksheetError && <p role="alert">{worksheetError}</p>}
           </div>
           {run && <RunTools run={run} />}
           <PythonVerification run={(run ?? planning)!} />
