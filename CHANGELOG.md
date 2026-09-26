@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Export a standalone HTML worksheet from each of the twelve lessons. Preserve the prediction submitted with the completed run, its inputs and exact result; separate the printed exercise, worked answer and reproduction record. Include a power or energy chart, source revision when available, explicit unknowns and embedded full-result JSON. Calculation engines and published release assets are unchanged.
+
 - Reopen electrical scenario JSON and browser/CLI run exports in the advanced workspace. Validate and preview changed assumptions before recalculating; preserve the current experiment on invalid or cancelled imports. Download validated draft inputs separately from completed results. Calculation engines and published release assets are unchanged.
 
 - Correct the guided prediction feedback so a difference that rounds to zero displays `0 s`, while positive and negative differences retain their signs. State the 0.1-second display precision. Simulation values, exports and published release assets are unchanged.

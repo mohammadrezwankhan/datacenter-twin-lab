@@ -21,12 +21,13 @@ Open the [guided experiment](https://mohammadrezwankhan.github.io/datacenter-twi
 
 Current source and Pages also [reopen scenario JSON and electrical run exports](docs/engineering/energy-scenario-workspace.md#reopen-a-saved-experiment): validate inputs, preview changed assumptions, calculate a fresh result and compare it with Python. This addition is not included in the unchanged `0.4.0rc2` release assets.
 
+All twelve lessons also [export a printable worksheet](docs/tutorials/power-systems-course.md#print-a-lesson-worksheet) with a submitted prediction, completed inputs, worked calculation, graph and reproducibility record. The standalone HTML keeps the prediction and answer on separate printed pages. This addition is available in current source and Pages; the historical `0.4.0rc2` assets are unchanged.
+
 ## Planned capabilities
 
 These are not controls in the current demo:
 
 1. **Edit a demand timeline visually.** Compose explicit demand steps using the existing scenario contract; do not imply transient, workload, or GPU-job prediction.
-2. **Export a lesson worksheet.** Provide a printable record of a learner's prediction, inputs, worked calculation, result, and hash.
 
 Prioritize these against reproducible first-run problems and learner feedback. Do not describe planned work as implemented behavior.
 

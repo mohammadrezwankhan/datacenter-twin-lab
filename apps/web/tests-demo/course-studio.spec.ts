@@ -220,7 +220,9 @@ test('cold course result loads original vectors without fetching the optional Py
   const assets = await Promise.all(responses);
   const bytes = assets.reduce((sum, asset) => sum + asset.bytes, 0);
   expect(
-    assets.some((asset) => /pyodide|engine\.zip|engine-manifest|cover|\.png/i.test(asset.path)),
+    assets.some((asset) =>
+      /pyodide|engine\.zip|engine-manifest|cover|\.png|lesson-worksheet/i.test(asset.path),
+    ),
   ).toBe(false);
   expect(bytes).toBeLessThan(750000);
   await writeFile(

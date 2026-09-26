@@ -71,6 +71,26 @@ export interface Run {
   events: { at_s: string; action: string; target?: string; ready_at_s?: string }[];
   summary: Record<string, string | number | null>;
 }
+export interface PlanningRun {
+  schema_version: 1;
+  engine_version: string;
+  run_id: string;
+  input_sha256: string;
+  assumptions: {
+    id: string;
+    name: string;
+    currency: string;
+    tariff_per_kwh: string | null;
+    source_ids: string[];
+    segments: { label: string; hours: string; it_load_kw: string; assumed_pue: string }[];
+    [key: string]: unknown;
+  };
+  facility_energy_kwh: string;
+  it_energy_kwh: string;
+  non_it_energy_kwh: string;
+  energy_only_cost: string | null;
+  limitations: string[];
+}
 export interface Source {
   id: string;
   title: string;
