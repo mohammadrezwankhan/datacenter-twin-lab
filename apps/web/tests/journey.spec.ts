@@ -1,6 +1,38 @@
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs/promises';
 
+test('a saved scenario is recalculated by the local Python dashboard after preview', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.getByTestId('served-power')).toBeVisible();
+  const scenario = await (await page.request.get('/api/v1/demo?preset=generator_failure')).json();
+  scenario.battery_initial_kwh = '50';
+  scenario.battery_charge_kw = '0';
+  await page.getByRole('button', { name: 'Import scenario', exact: true }).click();
+  const previous = await page.getByTestId('run-id').textContent();
+  await page.getByLabel('Scenario JSON file (up to 10 MiB)').setInputFiles({
+    name: 'local-half-reserve.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(scenario)),
+  });
+  await expect(page.getByTestId('scenario-file-preview')).toContainText('Ready to run');
+  await expect(page.getByTestId('run-id')).toHaveText(previous!);
+  const response = page.waitForResponse(
+    (value) => value.url().endsWith('/api/v1/simulations') && value.request().method() === 'POST',
+  );
+  await page.getByRole('button', { name: 'Run imported scenario', exact: true }).click();
+  const run = await (await response).json();
+  expect(run.scenario).toEqual(scenario);
+  expect(
+    run.events.find((event: { action: string }) => event.action === 'battery_depleted').at_s,
+  ).toBe('453.9');
+  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${run.run_id.slice(0, 12)}`);
+  const pending = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export run', exact: true }).click();
+  expect(JSON.parse(await fs.readFile((await (await pending).path())!, 'utf8'))).toEqual(run);
+});
+
 test('demand changes power, cost, warnings and exported provenance in the same run', async ({
   page,
 }) => {

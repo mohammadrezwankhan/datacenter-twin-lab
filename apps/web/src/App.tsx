@@ -24,6 +24,9 @@ const GuidedStart = lazy(() =>
 const EvidenceHub = lazy(() =>
   import('./EvidenceHub').then((module) => ({ default: module.EvidenceHub })),
 );
+const ScenarioFiles = lazy(() =>
+  import('./ScenarioFiles').then((module) => ({ default: module.ScenarioFiles })),
+);
 type Page = 'start' | 'overview' | 'topology' | 'evidence' | 'learn' | 'energy' | 'assurance';
 function initialPage(): Page {
   if (!browserDemo) return 'overview';
@@ -360,6 +363,7 @@ export function App() {
     [selected, setSelected] = useState('it-load');
   const [baseline, setBaseline] = useState<Run | null>(null),
     [notice, setNotice] = useState('');
+  const [filesOpen, setFilesOpen] = useState(false);
   const [motion, setMotion] = useState(
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
@@ -429,7 +433,7 @@ export function App() {
     );
     return () => window.clearInterval(timer);
   }, [playing, run]);
-  async function calculate(nextPreset?: string) {
+  async function calculate(nextPreset?: string, importedScenario?: SiteScenario) {
     active.current?.abort();
     const controller = new AbortController();
     active.current = controller;
@@ -438,22 +442,31 @@ export function App() {
     setNotice('');
     setPlaying(false);
     try {
-      const scenario = nextPreset
-        ? await request<SiteScenario>(
-            `demo?preset=${encodeURIComponent(nextPreset)}`,
-            controller.signal,
-          )
-        : draft!;
+      const scenario =
+        importedScenario ??
+        (nextPreset
+          ? await request<SiteScenario>(
+              `demo?preset=${encodeURIComponent(nextPreset)}`,
+              controller.signal,
+            )
+          : draft!);
       const result = await request<Run>('simulations', controller.signal, scenario);
       if (controller.signal.aborted) return;
       setRun(result);
       setDraft(result.scenario);
       setCursor(0);
-      setSelected('it-load');
+      setSelected(result.scenario.assets.find((item) => item.kind === 'load')!.id);
       if (nextPreset) {
         setPreset(nextPreset);
         const url = new URL(window.location.href);
         url.searchParams.set('preset', nextPreset);
+        window.history.replaceState(null, '', url);
+      } else if (importedScenario) {
+        setPreset('');
+        setNotice('Imported inputs calculated. Results and hashes come from this engine.');
+        const url = new URL(window.location.href);
+        url.searchParams.delete('preset');
+        url.searchParams.set('mode', 'advanced');
         window.history.replaceState(null, '', url);
       }
     } catch (e) {
@@ -598,6 +611,14 @@ export function App() {
               <div className="heading-actions">
                 <button
                   disabled={!run || busy}
+                  aria-expanded={filesOpen}
+                  aria-controls="scenario-files"
+                  onClick={() => setFilesOpen(!filesOpen)}
+                >
+                  Import scenario
+                </button>
+                <button
+                  disabled={!run || busy}
                   onClick={() => {
                     setBaseline(run);
                     setNotice('Baseline saved for this session.');
@@ -621,6 +642,15 @@ export function App() {
             <div role="status" className="notice">
               {notice}
             </div>
+          )}
+          {needsWorkspace && page !== 'energy' && draft && filesOpen && (
+            <Suspense fallback={<p role="status">Opening scenario files…</p>}>
+              <ScenarioFiles
+                current={draft}
+                busy={busy}
+                onRun={(scenario) => void calculate(undefined, scenario)}
+              />
+            </Suspense>
           )}
           {page === 'start' && (
             <Suspense fallback={<p role="status">Opening the five-minute experiment…</p>}>
@@ -727,6 +757,11 @@ export function App() {
                         onChange={(e) => void calculate(e.target.value)}
                         disabled={busy}
                       >
+                        {preset === '' && (
+                          <option value="" disabled>
+                            Imported scenario
+                          </option>
+                        )}
                         {presets.map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.name}

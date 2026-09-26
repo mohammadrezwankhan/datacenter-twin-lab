@@ -19,13 +19,14 @@ The current source is a **release candidate, not a stable release**. It focuses 
 
 Open the [guided experiment](https://mohammadrezwankhan.github.io/datacenter-twin-lab/), the [advanced workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), the [50 MW outage case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss), or the [12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy). The [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence) and [tutorial index](docs/tutorials/index.md) provide the supporting material.
 
+Current source and Pages also [reopen scenario JSON and electrical run exports](docs/engineering/energy-scenario-workspace.md#reopen-a-saved-experiment): validate inputs, preview changed assumptions, calculate a fresh result and compare it with Python. This addition is not included in the unchanged `0.4.0rc2` release assets.
+
 ## Planned capabilities
 
 These are not controls in the current demo:
 
-1. **Import a scenario JSON file in the browser.** Validate its schema, show which assumptions differ, and let a visitor export a reproducible result.
-2. **Edit a demand timeline visually.** Compose explicit demand steps using the existing scenario contract; do not imply transient, workload, or GPU-job prediction.
-3. **Export a lesson worksheet.** Provide a printable record of a learner's prediction, inputs, worked calculation, result, and hash.
+1. **Edit a demand timeline visually.** Compose explicit demand steps using the existing scenario contract; do not imply transient, workload, or GPU-job prediction.
+2. **Export a lesson worksheet.** Provide a printable record of a learner's prediction, inputs, worked calculation, result, and hash.
 
 Prioritize these against reproducible first-run problems and learner feedback. Do not describe planned work as implemented behavior.
 

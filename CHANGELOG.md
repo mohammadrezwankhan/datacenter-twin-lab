@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Reopen electrical scenario JSON and browser/CLI run exports in the advanced workspace. Validate and preview changed assumptions before recalculating; preserve the current experiment on invalid or cancelled imports. Download validated draft inputs separately from completed results. Calculation engines and published release assets are unchanged.
+
 - Correct the guided prediction feedback so a difference that rounds to zero displays `0 s`, while positive and negative differences retain their signs. State the 0.1-second display precision. Simulation values, exports and published release assets are unchanged.
 
 ## 0.4.0rc2 — Windows evidence installation fix
