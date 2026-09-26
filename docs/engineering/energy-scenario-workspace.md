@@ -1,6 +1,6 @@
 # Explore power continuity across facility profiles
 
-Choose a facility, stress its supply, and trace what reaches the IT load. The [energy workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) combines an interactive isometric campus, interval power flows, editable equipment limits, a complete event replay and reproducible reports.
+Choose a facility, stress its supply, and trace what reaches the IT load. The [energy workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced) combines an interactive isometric campus, interval power flows, editable equipment limits, a complete event replay and reproducible reports.
 
 ## Four starting points
 
@@ -43,6 +43,24 @@ These added presets are in current source and the browser workspace. Historical 
 - Pause animation or use your operating system's reduced-motion preference. Source selection and replay also support keyboard operation.
 
 The campus is a schematic illustration. The detailed **Electrical supply paths** graph is the authoritative view of declared connections. No customer telemetry is sent to a server, and the public demo has no shared simulation backend.
+
+## Reopen a saved experiment
+
+In the current source and live browser workspace, select **Import scenario**. Choose a schema-2 scenario JSON, a browser **Export run** file, or a JSON export from the Python `simulate` command. Files up to 10 MiB are read locally; the static demo sends no scenario data to a server.
+
+The preview validates the existing electrical contract before showing differences from your current draft. Review unit-labelled values and expand changed assets, connections, source identifiers or events. **Run imported scenario** replaces the draft only after a successful calculation. **Discard import** retains your edits and completed result. Changing the draft or choosing another preset clears a pending import.
+
+For a run file, only its scenario inputs are used. Saved result rows, claimed hashes and old engine versions are not treated as verified output: the active engine calculates a new complete result. Select **Verify against Python** to compare that result with Python on your device. Reproducing an older engine version requires that version's pinned release.
+
+**Download current scenario** saves validated draft inputs, including edits not yet run. This is different from **Export run**, which saves the last completed calculation. Keep either file to reopen it after a page reload; no custom scenario is stored in the URL or a shared database. Source identifiers remain as supplied and require their own provenance review.
+
+To reproduce downloaded inputs with the matching Python source:
+
+```sh
+python -m datacenter_twin simulate --scenario twin-scenario.json --output reopened-run.json
+```
+
+Schema-1 PUE planning, sensitivity/comparison collections, Markdown and HTML reports are not electrical scenario imports. Invalid JSON, unsupported fields, missing assets, cycles and contract bounds are rejected without replacing the current experiment. This import feature is a source/Pages addition after `0.4.0rc2`; that historical wheel and browser archive are unchanged.
 
 ## Energy-system questions and evidence
 

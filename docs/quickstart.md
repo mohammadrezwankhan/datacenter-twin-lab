@@ -20,6 +20,12 @@ The original `generator_failure` preset remains available for CLI reproduction. 
 
 For a preserved recording of the earlier interface, see the optional [still image](images/demo-preview.png) and [transcript/capture recipe](examples/demo-walkthrough.md). That older capture omits waiting and pointer movement and is not a speed benchmark. Refresh it if current browser controls or labels differ.
 
+## Reopen your own scenario in the browser
+
+Open the [advanced workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), select **Import scenario**, and choose a schema-2 scenario JSON or exported electrical run. Review the changed assumptions, then choose **Run imported scenario**. The demo calculates locally and can verify the complete result against Python. **Download current scenario** saves draft inputs; **Export run** saves the completed result. See [file formats, bounds and reproduction instructions](engineering/energy-scenario-workspace.md#reopen-a-saved-experiment).
+
+This feature is available in current source and Pages; the pinned `0.4.0rc2` assets below retain their original contents.
+
 ## Evidence and candidate links
 
 - [Independent reproduction packet](evidence.md) and [canonical case](canonical-case.md)

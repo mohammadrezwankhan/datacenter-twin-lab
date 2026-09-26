@@ -1,0 +1,65 @@
+.scenario-files {
+  margin-block: 1rem;
+  border-color: #3d7567;
+  min-width: 0;
+}
+.scenario-files h2 {
+  margin-top: 0;
+}
+.scenario-files p {
+  line-height: 1.6;
+}
+.scenario-file-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: end;
+  margin-block: 1rem;
+}
+.scenario-file-actions label {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+.scenario-file-actions input {
+  max-width: 100%;
+}
+.scenario-file-preview {
+  overflow-wrap: anywhere;
+}
+.scenario-file-table {
+  overflow: auto;
+  max-width: 100%;
+}
+.scenario-file-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.scenario-file-table caption {
+  text-align: left;
+  padding-block: 0.75rem;
+}
+.scenario-file-table th,
+.scenario-file-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.75rem;
+  border-bottom: 1px solid #35454b;
+}
+.scenario-file-table td {
+  min-width: 9rem;
+}
+.scenario-file-table pre {
+  max-width: 30rem;
+  max-height: 16rem;
+  white-space: pre-wrap;
+  overflow: auto;
+  font-size: 0.8rem;
+}
+.scenario-file-table summary {
+  cursor: pointer;
+}
+.scenario-file-note {
+  color: #bdccd2;
+  font-size: 0.875rem;
+}
