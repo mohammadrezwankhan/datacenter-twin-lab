@@ -2,7 +2,8 @@ import type { PyodideInterface } from 'pyodide';
 
 let runtime: Promise<PyodideInterface> | undefined;
 async function initialize() {
-  const base = new URL(import.meta.env.BASE_URL, self.location.origin);
+  // Vite emits workers in assets/; runtime files sit beside that directory.
+  const base = new URL('../', self.location.href);
   const runtimeURL = new URL('pyodide/', base).href;
   const { loadPyodide } = await import(/* @vite-ignore */ `${runtimeURL}pyodide.mjs`);
   const py: PyodideInterface = await loadPyodide({ indexURL: runtimeURL });

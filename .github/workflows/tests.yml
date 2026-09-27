@@ -110,6 +110,10 @@ jobs:
         run: npx playwright install --with-deps chromium
         working-directory: apps/web
       - run: npm --prefix apps/web run test:demo
+      - name: Verify the same artifact at a custom-domain root
+        run: npm --prefix apps/web run test:demo -- --grep "all presets match native Python|evidence hub exposes|five-minute guide requires"
+        env:
+          TWIN_DEMO_BASE: /
       - name: Retain browser and engine evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -118,6 +122,8 @@ jobs:
           path: |
             apps/web/test-results
             apps/web/playwright-report-demo
+            apps/web/test-results-root
+            apps/web/playwright-report-root
             .local/browser-demo-site/engine-manifest.json
           include-hidden-files: true
           retention-days: 14

@@ -29,7 +29,8 @@ async function fetchJson(url: URL): Promise<any> {
 }
 
 async function loadDemoData(): Promise<DemoData> {
-  const base = new URL(import.meta.env.BASE_URL, self.location.origin);
+  // Resolve from the deployed worker, preserving a repository subpath if present.
+  const base = new URL('../', self.location.href);
   const demoData = await fetchJson(new URL('demo-data.json', base));
   if (
     !demoData ||
@@ -42,7 +43,7 @@ async function loadDemoData(): Promise<DemoData> {
 }
 
 async function loadCatalog(): Promise<Catalog> {
-  const base = new URL(import.meta.env.BASE_URL, self.location.origin);
+  const base = new URL('../', self.location.href);
   return fetchJson(new URL('catalog.json', base));
 }
 
