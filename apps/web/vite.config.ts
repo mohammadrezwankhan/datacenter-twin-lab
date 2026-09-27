@@ -45,7 +45,8 @@ function localEvidenceAssets(): string {
 
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
-  base: mode === 'demo' ? '/datacenter-twin-lab/' : '/',
+  // One static artifact can live at a custom-domain root or a repository subpath.
+  base: mode === 'demo' ? './' : '/',
   publicDir: mode === 'demo' ? '../../.local/browser-demo-assets' : localEvidenceAssets(),
   server: { host: '127.0.0.1', proxy: { '/api': 'http://127.0.0.1:8000' } },
   worker: { format: 'es' },

@@ -4,6 +4,7 @@ import { ENGINE_VERSION } from '../src/js-engine/version';
 
 test('measure cold guide entry, first result and precomputed replay without claiming a service SLA', async ({
   browser,
+  baseURL,
 }, testInfo) => {
   const samples = [];
   for (let index = 0; index < 3; index++) {
@@ -20,7 +21,7 @@ test('measure cold guide entry, first result and precomputed replay without clai
         );
     });
     const started = performance.now();
-    await page.goto('http://127.0.0.1:4174/datacenter-twin-lab/');
+    await page.goto(baseURL!);
     await expect(page.getByTestId('guide-run')).toBeVisible();
     const interactiveMs = performance.now() - started;
     await page.getByTestId('guide-prediction').fill('300');
@@ -47,7 +48,7 @@ test('measure cold guide entry, first result and precomputed replay without clai
   }
   const context = await browser.newContext();
   const page = await context.newPage();
-  await page.goto('http://127.0.0.1:4174/datacenter-twin-lab/?preset=generator_failure');
+  await page.goto(`${baseURL}?preset=generator_failure`);
   const slider = page.getByLabel('Replay interval', { exact: true });
   await expect(slider).toBeVisible();
   await slider.fill('0');

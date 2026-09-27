@@ -157,6 +157,7 @@ test('turning off verification cancels the pending check and a new run stays Jav
 
 test('a visitor without JavaScript can read the example and find the Python route', async ({
   browser,
+  baseURL,
 }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
@@ -164,7 +165,7 @@ test('a visitor without JavaScript can read the example and find the Python rout
   });
   try {
     const page = await context.newPage();
-    await page.goto('http://127.0.0.1:4174/datacenter-twin-lab/');
+    await page.goto(baseURL!);
     await expect(
       page.getByRole('heading', { name: 'Datacenter Twin Lab', exact: true }),
     ).toBeVisible();
