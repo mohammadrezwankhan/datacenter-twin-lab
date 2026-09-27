@@ -75,9 +75,7 @@ export function EvidenceHub() {
         </ol>
         <div className="proof-links">
           <a href={source('docs/evidence.md')}>Read the evidence page ↗</a>
-          <a href={`${repository}/releases/tag/v${ENGINE_VERSION}`}>
-            Versioned release candidate ↗
-          </a>
+          <a href={`${repository}/releases/tag/v${ENGINE_VERSION}`}>Versioned software release ↗</a>
           <a href={`${repository}/actions/workflows/tests.yml`}>Inspect actual CI runs ↗</a>
         </div>
       </section>
@@ -212,13 +210,13 @@ export function EvidenceHub() {
         <p>
           Original software and synthetic examples use Apache-2.0. Runtime and reference sources
           retain their notices. Cite the exact version and source revision; there is no DOI or
-          external endorsement attached to this candidate.
+          external endorsement attached to this release.
         </p>
         <div className="proof-links">
           <a href={source('CITATION.cff')}>Citation metadata</a>
           <a href={source('data/provenance/manifest.json')}>Provenance</a>
           <a href={source('docs/third-party/README.md')}>Runtime notices</a>
-          <a href={source('docs/engineering/release-readiness.md')}>Stable-release criteria</a>
+          <a href={source('docs/engineering/release-readiness.md')}>Release scope and checks</a>
         </div>
       </details>
     </div>

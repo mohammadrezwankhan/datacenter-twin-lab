@@ -60,7 +60,7 @@ To reproduce downloaded inputs with the matching Python source:
 python -m datacenter_twin simulate --scenario twin-scenario.json --output reopened-run.json
 ```
 
-Schema-1 PUE planning, sensitivity/comparison collections, Markdown and HTML reports are not electrical scenario imports. Invalid JSON, unsupported fields, missing assets, cycles and contract bounds are rejected without replacing the current experiment. The `0.4.0rc3` wheel and browser archive include this import workflow. The earlier `0.4.0rc2` assets remain unchanged.
+Schema-1 PUE planning, sensitivity/comparison collections, Markdown and HTML reports are not electrical scenario imports. Invalid JSON, unsupported fields, missing assets, cycles and contract bounds are rejected without replacing the current experiment. The `1.0.0` wheel and browser archive include this import workflow. The earlier `0.4.0rc2` assets remain unchanged.
 
 ## Compose a demand timeline
 
@@ -79,7 +79,7 @@ Times are whole seconds from zero through one second before the simulation ends.
 
 **Remove selected step** and **Reset timeline edits** affect the preview until the next run. Changing another scenario setting, choosing a preset, importing a scenario or closing the editor resets its local draft; run or export the desired completed configuration first. Invalid input leaves the previous result intact. Reloading the page does not retain a custom timeline: export JSON to keep it.
 
-This feature uses the existing piecewise electrical model. It does not add measured workload traces, GPU-job predictions, voltage/frequency response or subsecond transients. The editor loads on demand; the canonical guide and twelve lessons retain their existing entry paths. The `0.4.0rc3` candidate includes this editor in the wheel and browser archive. Earlier release assets remain unchanged.
+This feature uses the existing piecewise electrical model. It does not add measured workload traces, GPU-job predictions, voltage/frequency response or subsecond transients. The editor loads on demand; the canonical guide and twelve lessons retain their existing entry paths. The `1.0.0` release includes this editor in the wheel and browser archive. Earlier release assets remain unchanged.
 
 ## Energy-system questions and evidence
 

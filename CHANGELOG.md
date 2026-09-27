@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.0 — the complete power-continuity teaching lab
+
+- Package the guided 1 MW experiment, twelve interactive lessons, eighteen presets, visual demand editor, scenario imports, reports, comparisons and printable worksheets as a full teaching-software release.
+- Add twelve searchable lesson notes, a course index and an author/evidence page with no-JavaScript worked answers, accessible layouts, canonical URLs, structured data, social previews and a sitemap.
+- Support the same static browser bundle at a domain root and a repository subpath, including optional Python verification and evidence links.
+- Preserve numerical algorithms and preset inputs from 0.4.0rc3. Version-derived run identifiers advance; input hashes and calculated values remain unchanged.
+- Publish a new versioned evidence packet, installable wheel, source archive and tested static browser bundle with checksums. Earlier candidates and their measurements remain historical and unchanged.
+
+The owner selected v1.0.0 for the bounded teaching application. Independent external reproduction remains outstanding; software release status does not establish facility calibration, operational safety, certified uptime or external endorsement. See [release scope and compatibility](docs/engineering/release-readiness.md).
+
 ## 0.4.0rc3 — save, teach and compare experiments
 
 - Reopen electrical scenario JSON and browser/CLI run exports with an assumption preview and current-engine recalculation. Invalid or cancelled inputs preserve the completed experiment.

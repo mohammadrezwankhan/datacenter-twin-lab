@@ -562,7 +562,7 @@ export function App() {
               Open the course <span aria-hidden="true">↗</span>
             </button>
           ) : (
-            <a href="https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy">
+            <a href="https://khanlab.co.technology/?lesson=power-energy">
               Open the browser course <span aria-hidden="true">↗</span>
             </a>
           )}
@@ -574,6 +574,7 @@ export function App() {
             <br />
             Engine {run?.engine_version || ENGINE_VERSION}
           </p>
+          {browserDemo && <a href="./learn/">Course notes &amp; worked answers →</a>}
           <span className="mini-tag">Local calculations</span>
         </div>
       </aside>

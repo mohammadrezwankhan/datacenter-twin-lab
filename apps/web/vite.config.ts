@@ -5,6 +5,7 @@ import { copyFileSync, lstatSync, mkdirSync, readFileSync, writeFileSync } from 
 import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENGINE_VERSION } from './src/js-engine/version.ts';
+import { searchPages } from './seo.ts';
 
 function localEvidenceAssets(): string {
   const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -44,7 +45,7 @@ function localEvidenceAssets(): string {
 }
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+  plugins: [react(), ...(mode === 'demo' ? [searchPages()] : [])],
   // One static artifact can live at a custom-domain root or a repository subpath.
   base: mode === 'demo' ? './' : '/',
   publicDir: mode === 'demo' ? '../../.local/browser-demo-assets' : localEvidenceAssets(),

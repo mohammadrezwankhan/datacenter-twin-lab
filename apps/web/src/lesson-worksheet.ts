@@ -13,7 +13,7 @@ export type LessonWorksheet = {
 };
 
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
-const courseUrl = 'https://mohammadrezwankhan.github.io/datacenter-twin-lab/';
+const courseUrl = 'https://khanlab.co.technology/';
 const numberFormat = new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 });
 
 function escapeHtml(value: unknown): string {
