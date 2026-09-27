@@ -4,11 +4,13 @@ _A reproducible synthetic continuity laboratory for datacenter power systems._
 
 ## Start with one battery question
 
+[Read the twelve course lessons](https://khanlab.co.technology/learn/) · [Author and reproducibility](https://khanlab.co.technology/about/)
+
 **How long can a 1 MW IT load ride through a utility outage on 100 kWh of stored battery energy?**
 
 In the five-minute walkthrough, predict the battery's ride-through, deliberately run the scenario, then explain the result from its energy ledger. The example uses `100 kWh × 0.90` battery-discharge efficiency `× 0.95` distribution efficiency = **85.5 kWh delivered to IT**. At **1,000 kW**, that is **307.8 seconds from the outage**, which starts at **300 s elapsed**. Battery depletion is therefore recorded at **607.8 s elapsed**. Charging is disabled and the generator is failed.
 
-[**Open the five-minute guided experiment →**](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Challenge yourself with 50 kWh](https://mohammadrezwankhan.github.io/datacenter-twin-lab/) · [Read the exact inputs and equations](docs/canonical-case.md)
+[**Open the five-minute guided experiment →**](https://khanlab.co.technology/) · [Challenge yourself with 50 kWh](https://khanlab.co.technology/) · [Read the exact inputs and equations](docs/canonical-case.md)
 
 Halving the opening reserve to **50 kWh** gives **42.75 kWh** delivered to IT: **153.9 s from the outage** and depletion at **453.9 s elapsed**. Ride-through is a duration counted from the 300 s outage boundary; depletion is an elapsed event timestamp.
 
@@ -34,14 +36,14 @@ The pictures below are screenshots of the actual guided interface. Their numbere
 
 **03 · Explain.** Export the complete JSON run, inspect its inputs and hash, or optionally request a Python comparison. Report and reserve-sensitivity tools are available after the completed result.
 
-[Watch the captioned 60-second tour in the evidence hub →](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence#demo) · [Tour transcript and reproduction notes](docs/examples/proof-demo.md)
+[Watch the captioned 60-second tour in the evidence hub →](https://khanlab.co.technology/?mode=evidence#demo) · [Tour transcript and reproduction notes](docs/examples/proof-demo.md)
 
 ## Continue with another part of the lab
 
-- [Open the advanced energy workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced) to inspect the full topology, replay events, change bounded assumptions, and export runs.
-- [Open the existing 50 MW outage case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss). It is a synthetic aggregate electrical case, not a GPU-throughput or grid-adequacy model.
-- [Start the 12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), or read its [course notes](docs/tutorials/power-systems-course.md).
-- Visit the [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence) for source records and reproducibility material.
+- [Open the advanced energy workspace](https://khanlab.co.technology/?mode=advanced) to inspect the full topology, replay events, change bounded assumptions, and export runs.
+- [Open the existing 50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss). It is a synthetic aggregate electrical case, not a GPU-throughput or grid-adequacy model.
+- [Start the 12-lesson course](https://khanlab.co.technology/?lesson=power-energy), or read its [course notes](docs/tutorials/power-systems-course.md).
+- Visit the [evidence hub](https://khanlab.co.technology/?mode=evidence) for source records and reproducibility material.
 - Browse the [tutorials](docs/tutorials/index.md), [scenario catalog](docs/scenarios/index.md), [unit-aware glossary](docs/scenarios/glossary.md), and [contribution ideas](docs/scenarios/contribution-ideas.md).
 
 The current source includes 18 named scenarios, four illustrative facility profiles, the twelve lessons, and on-demand reports and sensitivity tools. Ratings, demand, event timing, rates, and efficiencies are explicit synthetic inputs. [The roadmap](ROADMAP.md) separates capabilities in the release from work still planned or conditional.

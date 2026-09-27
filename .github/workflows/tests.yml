@@ -109,9 +109,11 @@ jobs:
       - name: Install browser
         run: npx playwright install --with-deps chromium
         working-directory: apps/web
+      - name: Prepare legacy GitHub Pages forwarding
+        run: python scripts/build_pages_redirect.py --site .local/browser-demo-site --output .local/github-pages-redirect
       - run: npm --prefix apps/web run test:demo
       - name: Verify the same artifact at a custom-domain root
-        run: npm --prefix apps/web run test:demo -- --grep "all presets match native Python|evidence hub exposes|five-minute guide requires"
+        run: npm --prefix apps/web run test:demo -- --grep "all presets match native Python|evidence hub exposes|five-minute guide requires|search pages"
         env:
           TWIN_DEMO_BASE: /
       - name: Retain browser and engine evidence
@@ -129,9 +131,17 @@ jobs:
           retention-days: 14
       - name: Upload tested static demo
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'mohammadrezwankhan/datacenter-twin-lab'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: public-browser-bundle
+          path: .local/browser-demo-site
+          include-hidden-files: true
+          retention-days: 90
+      - name: Upload legacy GitHub Pages forwarding
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && github.repository == 'mohammadrezwankhan/datacenter-twin-lab'
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
-          path: .local/browser-demo-site
+          path: .local/github-pages-redirect
 
   deploy-demo:
     name: Publish static demo

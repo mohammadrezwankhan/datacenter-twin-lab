@@ -6,13 +6,13 @@ The default browser route opens the five-minute guided experiment. It derives fr
 
 ## Run the guided browser experiment
 
-1. Open the [zero-install browser demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/).
+1. Open the [zero-install browser demo](https://khanlab.co.technology/).
 2. Enter your estimate in seconds **from the outage event**, choose the default 100 kWh reserve or the 50 kWh challenge, then deliberately select **Run 1 MW scenario**.
 3. Compare ride-through with the elapsed depletion timestamp, inspect requested/served/unserved energy in the outage ledger, and export JSON if you want to retain the exact assumptions and hash.
 
 No result is presented before the deliberate run. The equation applies both efficiency losses before dividing IT energy by the requested IT power. After the result, use the optional Python comparison or expand the report and sensitivity tools. The default JavaScript run does not load the Python runtime; it is loaded only when requested. See the [browser guide](engineering/browser-demo.md) for runtime and privacy details.
 
-Open the [advanced simulator](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), the existing [50 MW outage case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss), the [12-lesson course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), or the [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence#demo). The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the lesson atlas.
+Open the [advanced simulator](https://khanlab.co.technology/?mode=advanced), the existing [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), the [12-lesson course](https://khanlab.co.technology/?lesson=power-energy), or the [evidence hub](https://khanlab.co.technology/?mode=evidence#demo). The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the lesson atlas.
 
 The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. Version 1.0.0 is the teaching-software release. Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
 
@@ -22,7 +22,7 @@ For a preserved recording of the earlier interface, see the optional [still imag
 
 ## Reopen your own scenario in the browser
 
-Open the [advanced workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), select **Import scenario**, and choose a schema-2 scenario JSON or exported electrical run. Review the changed assumptions, then choose **Run imported scenario**. The demo calculates locally and can verify the complete result against Python. **Download current scenario** saves draft inputs; **Export run** saves the completed result. See [file formats, bounds and reproduction instructions](engineering/energy-scenario-workspace.md#reopen-a-saved-experiment).
+Open the [advanced workspace](https://khanlab.co.technology/?mode=advanced), select **Import scenario**, and choose a schema-2 scenario JSON or exported electrical run. Review the changed assumptions, then choose **Run imported scenario**. The demo calculates locally and can verify the complete result against Python. **Download current scenario** saves draft inputs; **Export run** saves the completed result. See [file formats, bounds and reproduction instructions](engineering/energy-scenario-workspace.md#reopen-a-saved-experiment).
 
 This workflow is included in the pinned `1.0.0` release below and current Pages.
 
@@ -42,13 +42,13 @@ If [uv is installed](https://docs.astral.sh/uv/getting-started/installation/), r
 The commands below install the published [v1.0.0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v1.0.0). Its wheel includes the CLI, compiled local dashboard, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. This repository is not published on PyPI.
 
 ```sh
-uvx --python 3.12 --from "datacenter-twin-lab @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=2b26279f4768eda05499cc275953e546e2a87335d963c3fa0c6b53268ebab3d0" datacenter-twin simulate --preset generator_failure --format markdown
+uvx --python 3.12 --from "datacenter-twin-lab @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650" datacenter-twin simulate --preset generator_failure --format markdown
 ```
 
 This command runs the original 1 MW / 100 kWh reference fixture and reports battery depletion at **607.8 s elapsed**. For the local dashboard, use the same wheel with its API extra:
 
 ```sh
-uvx --python 3.12 --from "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=2b26279f4768eda05499cc275953e546e2a87335d963c3fa0c6b53268ebab3d0" datacenter-twin serve
+uvx --python 3.12 --from "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650" datacenter-twin serve
 ```
 
 Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8001` if that port is occupied. These commands work in PowerShell and POSIX shells. They pin the GitHub wheel and its digest; this project is **not published on PyPI**. The API extra resolves compatible transitive dependencies from the package index. Use the locked source workflow for the exact development dependency set.
@@ -63,7 +63,7 @@ Windows / PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=2b26279f4768eda05499cc275953e546e2a87335d963c3fa0c6b53268ebab3d0"
+.\.venv\Scripts\python.exe -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650"
 .\.venv\Scripts\python.exe -m datacenter_twin --version
 .\.venv\Scripts\python.exe -m datacenter_twin serve
 ```
@@ -72,7 +72,7 @@ macOS / Linux:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=2b26279f4768eda05499cc275953e546e2a87335d963c3fa0c6b53268ebab3d0"
+.venv/bin/python -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650"
 .venv/bin/python -m datacenter_twin --version
 .venv/bin/python -m datacenter_twin serve
 ```

@@ -1,8 +1,10 @@
 # Power systems continuity course
 
+[Read all twelve searchable lesson notes](https://khanlab.co.technology/learn/) with worked answers, configuration tables and source links, even with JavaScript disabled.
+
 **Twelve short browser lessons for datacenter engineers learning how power, energy, storage, and continuity events fit together.**
 
-Start with the [power and energy lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), then use the lesson selector or **Next lesson**. Each lesson has one input, a challenge value, a worked answer, and a result you can inspect in the browser.
+Start with the [power and energy lesson](https://khanlab.co.technology/?lesson=power-energy), then use the lesson selector or **Next lesson**. Each lesson has one input, a challenge value, a worked answer, and a result you can inspect in the browser.
 
 After power/energy and ride-through, try [same 375 kWh, different outage outcomes](demand-timing.md): compare three demand schedules with identical total energy, peak power and storage, then explain the effect of outage overlap.
 
@@ -59,10 +61,10 @@ The calculation is a scaled teaching fixture. It answers how the declared reserv
 
 ## Run the lessons
 
-1. Open the [course at lesson 1](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy).
+1. Open the [course at lesson 1](https://khanlab.co.technology/?lesson=power-energy).
 2. Predict the challenge value shown by the lesson, then select **Try the challenge value** and **Run lesson**.
 3. Open **Show worked answer**, compare the displayed result and energy-balance residual, and move to the next lesson.
-4. Jump directly to [the 50 MW AI-outage lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage).
+4. Jump directly to [the 50 MW AI-outage lesson](https://khanlab.co.technology/?lesson=ai-outage).
 
 The browser course needs no installation or account. The default calculation uses exact JavaScript arithmetic. **Verify against Python** is an optional action on a completed run; it loads the Python runtime only when selected.
 
@@ -73,18 +75,18 @@ to write a prediction before checking the worked answer on a separate page.
 
 | # | Lesson and link | Question | Default → challenge | Expected check |
 | ---: | --- | --- | --- | --- |
-| 1 | [Power becomes energy](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) | How much energy does a constant load request in half an hour? | 1,000 → 500 kW | `1,000 × 0.5 = 500 kWh`; the challenge gives 250 kWh. |
-| 2 | [Account for distribution losses](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=distribution-loss) | How much source power is needed to deliver 1,000 kW? | 0.95 → 0.90 ratio | `1,000 / 0.95 = 1,052.631... kW`; at 0.90 it is `1,111.111... kW`. |
-| 3 | [Calculate battery ride-through](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ride-through) | Does half the stored energy give half the ride-through duration? | 100 → 50 kWh | Charging is disabled for this lesson: depletion is 607.8 s → 453.9 s. |
-| 4 | [Bridge generator startup](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=generator-delay) | What changes when startup takes 60 seconds instead of 30? | 30 → 60 s | Generator-ready event moves from 330 s to 360 s; the battery bridges both inputs. |
-| 5 | [Add a failed generator](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=generator-failure) | What changes if the generator cannot start? | Failed → available | Failed case depletes at 607.8 s with 292.2 s unserved; available generation starts at 330 s. |
-| 6 | [Check a surviving path](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=n-plus-one) | Can either path carry the whole 1 MW load? | 700 → 1,100 kW gross path | `700 × 0.95 = 665 kW`, leaving 335 kW; 1,100 kW gross supplies the full request after loss. |
-| 7 | [Expose shared control failures](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=shared-controls) | Can a shared control fault defeat both paths? | Shared → removed from Path B | Both paths unavailable gives 1,000 kW unmet; removing the dependency leaves 665 kW served. |
-| 8 | [Find a single point of failure](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=single-point) | What happens when the common main bus fails? | Failed → available | A 600 s outage gives `1,000 × 600/3,600 = 166.666... kWh` unserved. |
-| 9 | [Track energy before the outage](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=precharge) | Why can a 50 kWh case last longer when it charges first? | 100 → 0 kW charging | Pre-outage charging adds `100 × 300/3,600 × 0.95 = 7.9166... kWh`; depletion is 478.2675 s → 453.9 s. |
-| 10 | [Interrupt a 50 MW AI cluster](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage) | How long can 5 MWh bridge a 50 MW load? | 5,000 → 2,500 kWh | Full reserve depletes at 607.8 s; the half-reserve challenge, with pre-outage charging, depletes at 478.2675 s. |
-| 11 | [Catch a sub-second service gap](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=recovery-deadline) | Does 57 kWh bridge recovery at 500 s? Does 58 kWh? | 57 → 58 kWh | 57 kWh depletes at 499.8135 s, leaving 0.1865 s unserved; 58 kWh bridges the event. |
-| 12 | [Separate PUE from continuity](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=pue) | How does assumed PUE change annual energy for the same 50 MW IT load? | 1.25 → 1.15 ratio | `50,000 × 8,760 × 1.25 = 547,500,000 kWh`; at 1.15 it is 503,700,000 kWh. |
+| 1 | [Power becomes energy](https://khanlab.co.technology/?lesson=power-energy) | How much energy does a constant load request in half an hour? | 1,000 → 500 kW | `1,000 × 0.5 = 500 kWh`; the challenge gives 250 kWh. |
+| 2 | [Account for distribution losses](https://khanlab.co.technology/?lesson=distribution-loss) | How much source power is needed to deliver 1,000 kW? | 0.95 → 0.90 ratio | `1,000 / 0.95 = 1,052.631... kW`; at 0.90 it is `1,111.111... kW`. |
+| 3 | [Calculate battery ride-through](https://khanlab.co.technology/?lesson=ride-through) | Does half the stored energy give half the ride-through duration? | 100 → 50 kWh | Charging is disabled for this lesson: depletion is 607.8 s → 453.9 s. |
+| 4 | [Bridge generator startup](https://khanlab.co.technology/?lesson=generator-delay) | What changes when startup takes 60 seconds instead of 30? | 30 → 60 s | Generator-ready event moves from 330 s to 360 s; the battery bridges both inputs. |
+| 5 | [Add a failed generator](https://khanlab.co.technology/?lesson=generator-failure) | What changes if the generator cannot start? | Failed → available | Failed case depletes at 607.8 s with 292.2 s unserved; available generation starts at 330 s. |
+| 6 | [Check a surviving path](https://khanlab.co.technology/?lesson=n-plus-one) | Can either path carry the whole 1 MW load? | 700 → 1,100 kW gross path | `700 × 0.95 = 665 kW`, leaving 335 kW; 1,100 kW gross supplies the full request after loss. |
+| 7 | [Expose shared control failures](https://khanlab.co.technology/?lesson=shared-controls) | Can a shared control fault defeat both paths? | Shared → removed from Path B | Both paths unavailable gives 1,000 kW unmet; removing the dependency leaves 665 kW served. |
+| 8 | [Find a single point of failure](https://khanlab.co.technology/?lesson=single-point) | What happens when the common main bus fails? | Failed → available | A 600 s outage gives `1,000 × 600/3,600 = 166.666... kWh` unserved. |
+| 9 | [Track energy before the outage](https://khanlab.co.technology/?lesson=precharge) | Why can a 50 kWh case last longer when it charges first? | 100 → 0 kW charging | Pre-outage charging adds `100 × 300/3,600 × 0.95 = 7.9166... kWh`; depletion is 478.2675 s → 453.9 s. |
+| 10 | [Interrupt a 50 MW AI cluster](https://khanlab.co.technology/?lesson=ai-outage) | How long can 5 MWh bridge a 50 MW load? | 5,000 → 2,500 kWh | Full reserve depletes at 607.8 s; the half-reserve challenge, with pre-outage charging, depletes at 478.2675 s. |
+| 11 | [Catch a sub-second service gap](https://khanlab.co.technology/?lesson=recovery-deadline) | Does 57 kWh bridge recovery at 500 s? Does 58 kWh? | 57 → 58 kWh | 57 kWh depletes at 499.8135 s, leaving 0.1865 s unserved; 58 kWh bridges the event. |
+| 12 | [Separate PUE from continuity](https://khanlab.co.technology/?lesson=pue) | How does assumed PUE change annual energy for the same 50 MW IT load? | 1.25 → 1.15 ratio | `50,000 × 8,760 × 1.25 = 547,500,000 kWh`; at 1.15 it is 503,700,000 kWh. |
 
 The lesson values above are the course defaults and challenge values. Other values can change event order, service gaps, and the reported ledger; read the result's assumptions and input hash with the number.
 
@@ -102,7 +104,7 @@ python -m unittest discover -s tests -p test_continuity.py -v
 
 The first report reproduces the 1 MW / 100 kWh calculation: 307.8 s of battery ride-through and depletion at 607.8 s. The second checks `700 kW × 0.95 = 665 kW` served and `335 kW` unserved during the 600 s maintenance interval. Choose new output paths or add `--force` when replacing an existing report.
 
-For the 50 MW case, use the browser's [AI-outage lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage) or either AI-cluster CLI command above. The lesson selects the implemented `ai_cluster_generator_failure` scenario and exposes the inputs and result without requiring a source checkout.
+For the 50 MW case, use the browser's [AI-outage lesson](https://khanlab.co.technology/?lesson=ai-outage) or either AI-cluster CLI command above. The lesson selects the implemented `ai_cluster_generator_failure` scenario and exposes the inputs and result without requiring a source checkout.
 
 ## Assumptions and limits
 
