@@ -14,9 +14,9 @@ Halving the opening reserve to **50 kWh** gives **42.75 kWh** delivered to IT: *
 
 > This is a teaching and research tool for datacenter engineers learning electrical continuity. It is a narrow, synthetic, uncalibrated model—not a production reliability analysis. Detailed model boundaries and validation status are below.
 
-[![v0.4.0rc3 candidate](https://img.shields.io/badge/release-v0.4.0rc3%20candidate-orange)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
+[![v1.0.0](https://img.shields.io/badge/release-v1.0.0-blue)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
 
-**v0.4.0rc3 is a release candidate, not a stable release.** No independent external technical review has been obtained. The CI badge follows `main`; check the exact candidate commit's results before relying on them. See [release readiness](docs/engineering/release-readiness.md).
+**v1.0.0 packages the complete teaching workflow:** guide, twelve lessons, eighteen presets, reports and reproducibility evidence. The CI badge follows `main`; check the exact released commit's results before relying on them. See [release readiness](docs/engineering/release-readiness.md).
 
 ## The three steps
 
@@ -44,25 +44,25 @@ The pictures below are screenshots of the actual guided interface. Their numbere
 - Visit the [evidence hub](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence) for source records and reproducibility material.
 - Browse the [tutorials](docs/tutorials/index.md), [scenario catalog](docs/scenarios/index.md), [unit-aware glossary](docs/scenarios/glossary.md), and [contribution ideas](docs/scenarios/contribution-ideas.md).
 
-The current source includes 18 named scenarios, four illustrative facility profiles, the twelve lessons, and on-demand reports and sensitivity tools. Ratings, demand, event timing, rates, and efficiencies are explicit synthetic inputs. [The roadmap](ROADMAP.md) separates capabilities in the release candidate from work still planned or conditional.
+The current source includes 18 named scenarios, four illustrative facility profiles, the twelve lessons, and on-demand reports and sensitivity tools. Ratings, demand, event timing, rates, and efficiencies are explicit synthetic inputs. [The roadmap](ROADMAP.md) separates capabilities in the release from work still planned or conditional.
 
 ## Reproduce the canonical case
 
 The guide follows lesson 3's exact scenario recipe: it starts from the reference-site inputs, then assigns lesson ID/name and source metadata, disables charging, and sets the initial reserve to `100` or `50` kWh. The [canonical case](docs/canonical-case.md) records those inputs and derives the results independently. A direct `generator_failure` preset run happens to produce the same 100 kWh numeric event time because the battery starts full, but its scenario ID, metadata, charging limit, input hash, and run ID are different.
 
-### Reproduce the candidate evidence packet
+### Reproduce the release evidence packet
 
-The tracked [candidate evidence index](data/evidence/index-v0.4.0rc3.json) links the canonical scenario/run JSON, reports, manifest, and receipt. To regenerate and verify the packet from the tagged candidate source:
+The tracked [release evidence index](data/evidence/index-v1.0.0.json) links the canonical scenario/run JSON, reports, manifest, and receipt. To regenerate and verify the packet from the tagged release source:
 
 ```sh
 git clone https://github.com/mohammadrezwankhan/datacenter-twin-lab.git
 cd datacenter-twin-lab
-git checkout v0.4.0rc3
+git checkout v1.0.0
 python scripts/build_evidence.py --output outputs/evidence
 python scripts/build_evidence.py --verify outputs/evidence
 ```
 
-The script requires a fresh output directory under `outputs/` and prints the manifest digest. For an inspectable checked-in result, use the [tracked evidence index](data/evidence/index-v0.4.0rc3.json) and [receipt](data/evidence/v0.4.0rc3/receipt.md).
+The script requires a fresh output directory under `outputs/` and prints the manifest digest. For an inspectable checked-in result, use the [tracked evidence index](data/evidence/index-v1.0.0.json) and [receipt](data/evidence/v1.0.0/receipt.md).
 
 ### Also run the original CLI preset
 
@@ -76,11 +76,11 @@ python -m datacenter_twin sweep --preset generator_failure --parameter battery_i
 
 Choose a new output path if it already exists, or explicitly add `--force`. The preset allows charging; at 50 kWh it gives **478.2675 s elapsed**, rather than the guided lesson's **453.9 s elapsed** with charging disabled. The [sensitivity guide](docs/engineering/sensitivity.md) explains the distinction.
 
-The [quickstart](docs/quickstart.md#run-with-uv) installs the published v0.4.0rc3 candidate wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, eighteen presets and research evidence, so no Git or Node setup is needed for that route. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier alpha assets retain their original contents.
+The [quickstart](docs/quickstart.md#run-with-uv) installs the published v1.0.0 wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, eighteen presets and research evidence, so no Git or Node setup is needed for that route. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier alpha assets retain their original contents.
 
 ## Checks and evidence
 
-The workflow is configured to test each push to `main` and each pull request. Its matrix targets Python **3.12 and 3.14 on Windows and Linux**; the Playwright Chromium browser journeys run on **Ubuntu with Python 3.12**. These are per-commit checks, not a blanket claim that every commit or this release candidate has passed. Read the [candidate readiness page](docs/engineering/release-readiness.md), [evidence packet instructions](docs/evidence.md), and [benchmark method](docs/engineering/benchmark-method.md) for what is measured and how to reproduce it.
+The workflow is configured to test each push to `main` and each pull request. Its matrix targets Python **3.12 and 3.14 on Windows and Linux**; the Playwright Chromium browser journeys run on **Ubuntu with Python 3.12**. These are per-commit checks, not a blanket claim that every commit or this release has passed. Read the [release scope page](docs/engineering/release-readiness.md), [evidence packet instructions](docs/evidence.md), and [benchmark method](docs/engineering/benchmark-method.md) for what is measured and how to reproduce it.
 
 The project uses deterministic quantities, unit-labelled outputs, explicit unknowns, stable input hashes, event logs, and energy ledgers. CI and local reproductions establish software behavior for these synthetic fixtures; they do not establish engineering performance or physical accuracy.
 
@@ -90,8 +90,8 @@ For local verification from the repository root:
 python -m unittest discover -s tests -v
 npm --prefix apps/web ci --ignore-scripts
 npm --prefix apps/web run build
-npm --prefix apps/web run test:engine
 python scripts/prepare_browser_demo.py
+npm --prefix apps/web run test:engine
 npm --prefix apps/web run build:demo
 npm --prefix apps/web run test:demo
 ```
@@ -132,4 +132,4 @@ The public source tree excludes private manuals, planning references, and privat
 
 Original code and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [synthetic provenance](data/provenance/manifest.json), and [browser runtime licenses](docs/third-party/README.md). [SOURCE-MANIFEST.json](SOURCE-MANIFEST.json) identifies the original v0.2.0a0 snapshot, not later versions. [Citation metadata](CITATION.cff) accompanies the project; cite the exact release or commit used.
 
-Alpha release assets remain historical and unchanged. The v0.4.0rc3 candidate is not a stable release, no independent external review has been obtained, and no award or outside endorsement is claimed.
+Earlier alpha and candidate assets remain historical and unchanged. Version 1.0.0 identifies the teaching-software release. Independent external reproduction remains outstanding; no facility validation, award or outside endorsement is claimed.

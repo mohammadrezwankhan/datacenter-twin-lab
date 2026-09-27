@@ -30,7 +30,7 @@ Download a scenario through its **Raw** file view:
 
 Open the [advanced workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), select **Import scenario**, choose the saved JSON and select **Run imported scenario**. Files are read on your device. Use **Edit demand timeline** to inspect the schedule, and **Export run** to keep the completed calculation. **Verify against Python** compares the entire result with the reference Python engine on your device.
 
-Use one downloaded case at a time. A draft edit takes effect only after running it. Changing the initial IT demand does not rescale later demand events. The `0.4.0rc3` browser archive includes the import and timeline controls, and its source archive includes these inputs and reproduction scripts. The unchanged `0.4.0rc2` assets predate these additions.
+Use one downloaded case at a time. A draft edit takes effect only after running it. Changing the initial IT demand does not rescale later demand events. The `1.0.0` browser archive includes the import and timeline controls, and its source archive includes these inputs and reproduction scripts. The unchanged `0.4.0rc2` assets predate these additions.
 
 ## Reproduce it with Python
 

@@ -34,7 +34,7 @@ The export keeps the last completed calculation. Editing a draft input or estima
 
 The HTML embeds the complete result under **Embedded calculation**, without scripts, external resources or telemetry. Displayed quantities use up to six decimal places; embedded JSON preserves the full engine output. Unknown costs and absent events remain explicit. Save the ordinary JSON export as well when comparing calculations. Local builds without a recorded public revision say **Unknown for this build** rather than inventing one.
 
-The existing [lesson 3 battery worksheet](battery-ride-through-worksheet.md) remains a ready-made 100/50 kWh exercise. The `0.4.0rc3` candidate includes this export for all twelve configured lessons. The historical `0.4.0rc2` assets remain unchanged.
+The existing [lesson 3 battery worksheet](battery-ride-through-worksheet.md) remains a ready-made 100/50 kWh exercise. The `1.0.0` release includes this export for all twelve configured lessons. The historical `0.4.0rc2` assets remain unchanged.
 
 ## The headline result
 
