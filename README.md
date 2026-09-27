@@ -14,9 +14,9 @@ Halving the opening reserve to **50 kWh** gives **42.75 kWh** delivered to IT: *
 
 > This is a teaching and research tool for datacenter engineers learning electrical continuity. It is a narrow, synthetic, uncalibrated model—not a production reliability analysis. Detailed model boundaries and validation status are below.
 
-[![v0.4.0rc2 candidate](https://img.shields.io/badge/release-v0.4.0rc2%20candidate-orange)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
+[![v0.4.0rc3 candidate](https://img.shields.io/badge/release-v0.4.0rc3%20candidate-orange)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
 
-**v0.4.0rc2 is a release candidate, not a stable release.** No independent external technical review has been obtained. The CI badge follows `main`; check the exact candidate commit's results before relying on them. See [release readiness](docs/engineering/release-readiness.md).
+**v0.4.0rc3 is a release candidate, not a stable release.** No independent external technical review has been obtained. The CI badge follows `main`; check the exact candidate commit's results before relying on them. See [release readiness](docs/engineering/release-readiness.md).
 
 ## The three steps
 
@@ -52,17 +52,17 @@ The guide follows lesson 3's exact scenario recipe: it starts from the reference
 
 ### Reproduce the candidate evidence packet
 
-The tracked [candidate evidence index](data/evidence/index-v0.4.0rc2.json) links the canonical scenario/run JSON, reports, manifest, and receipt. To regenerate and verify the packet from the tagged candidate source:
+The tracked [candidate evidence index](data/evidence/index-v0.4.0rc3.json) links the canonical scenario/run JSON, reports, manifest, and receipt. To regenerate and verify the packet from the tagged candidate source:
 
 ```sh
 git clone https://github.com/mohammadrezwankhan/datacenter-twin-lab.git
 cd datacenter-twin-lab
-git checkout v0.4.0rc2
+git checkout v0.4.0rc3
 python scripts/build_evidence.py --output outputs/evidence
 python scripts/build_evidence.py --verify outputs/evidence
 ```
 
-The script requires a fresh output directory under `outputs/` and prints the manifest digest. For an inspectable checked-in result, use the [tracked evidence index](data/evidence/index-v0.4.0rc2.json) and [receipt](data/evidence/v0.4.0rc2/receipt.md).
+The script requires a fresh output directory under `outputs/` and prints the manifest digest. For an inspectable checked-in result, use the [tracked evidence index](data/evidence/index-v0.4.0rc3.json) and [receipt](data/evidence/v0.4.0rc3/receipt.md).
 
 ### Also run the original CLI preset
 
@@ -76,7 +76,7 @@ python -m datacenter_twin sweep --preset generator_failure --parameter battery_i
 
 Choose a new output path if it already exists, or explicitly add `--force`. The preset allows charging; at 50 kWh it gives **478.2675 s elapsed**, rather than the guided lesson's **453.9 s elapsed** with charging disabled. The [sensitivity guide](docs/engineering/sensitivity.md) explains the distinction.
 
-The [quickstart](docs/quickstart.md#run-with-uv) installs the published v0.4.0rc2 candidate wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, eighteen presets and research evidence, so no Git or Node setup is needed for that route. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier alpha assets retain their original contents.
+The [quickstart](docs/quickstart.md#run-with-uv) installs the published v0.4.0rc3 candidate wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, eighteen presets and research evidence, so no Git or Node setup is needed for that route. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier alpha assets retain their original contents.
 
 ## Checks and evidence
 
@@ -132,4 +132,4 @@ The public source tree excludes private manuals, planning references, and privat
 
 Original code and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOTICE), [synthetic provenance](data/provenance/manifest.json), and [browser runtime licenses](docs/third-party/README.md). [SOURCE-MANIFEST.json](SOURCE-MANIFEST.json) identifies the original v0.2.0a0 snapshot, not later versions. [Citation metadata](CITATION.cff) accompanies the project; cite the exact release or commit used.
 
-Alpha release assets remain historical and unchanged. The v0.4.0rc2 candidate is not a stable release, no independent external review has been obtained, and no award or outside endorsement is claimed.
+Alpha release assets remain historical and unchanged. The v0.4.0rc3 candidate is not a stable release, no independent external review has been obtained, and no award or outside endorsement is claimed.
