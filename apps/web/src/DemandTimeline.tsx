@@ -32,9 +32,19 @@ type DemandTimelineProps = {
 };
 
 export function DemandTimeline(props: DemandTimelineProps) {
+  const container = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const heading = container.current?.querySelector('h2');
+    heading?.focus({ preventScroll: true });
+    container.current?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, []);
   // A preset/import can replace event slots before an effect runs. Start a new
   // editor atomically so old step identifiers never touch a different scenario.
-  return <TimelineEditor key={JSON.stringify(props.current)} {...props} />;
+  return (
+    <div ref={container}>
+      <TimelineEditor key={JSON.stringify(props.current)} {...props} />
+    </div>
+  );
 }
 
 function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
@@ -146,7 +156,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
       <div className="demand-editor-heading">
         <div>
           <span className="eyebrow">COMPOSE / COMPARE / EXPLAIN</span>
-          <h2 id={titleId}>Demand timeline</h2>
+          <h2 id={titleId} tabIndex={-1}>
+            Demand timeline
+          </h2>
           <p>Shape a load profile, then see whether the supply can follow it.</p>
         </div>
         <div className="demand-preview-total">

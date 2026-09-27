@@ -13,6 +13,7 @@ async function openEditor(page: Page, preset = 'normal') {
   await expect(page.getByTestId('served-power')).toBeVisible();
   await page.getByRole('button', { name: 'Edit demand timeline', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Demand timeline', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Demand timeline', exact: true })).toBeFocused();
 }
 async function runEdited(page: Page) {
   await page.getByRole('button', { name: 'Run edited timeline', exact: true }).click();
