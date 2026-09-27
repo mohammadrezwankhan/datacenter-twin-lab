@@ -1,0 +1,196 @@
+{
+  "assets": [
+    {
+      "capacity_kw": "1500",
+      "failure_domains": [
+        "utility-feed"
+      ],
+      "id": "utility",
+      "kind": "utility",
+      "name": "Utility feed",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "1200",
+      "failure_domains": [
+        "generator-control"
+      ],
+      "id": "generator",
+      "kind": "generator",
+      "name": "Standby generator",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "1200",
+      "failure_domains": [
+        "ups-control"
+      ],
+      "id": "battery",
+      "kind": "battery",
+      "name": "UPS battery",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "1800",
+      "failure_domains": [
+        "switchroom"
+      ],
+      "id": "main-bus",
+      "kind": "bus",
+      "name": "Main electrical bus",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "700",
+      "failure_domains": [
+        "a-room",
+        "shared-controls"
+      ],
+      "id": "path-a",
+      "kind": "distribution",
+      "name": "Distribution A",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "700",
+      "failure_domains": [
+        "b-room",
+        "shared-controls"
+      ],
+      "id": "path-b",
+      "kind": "distribution",
+      "name": "Distribution B",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "1800",
+      "failure_domains": [
+        "it-bus"
+      ],
+      "id": "it-bus",
+      "kind": "bus",
+      "name": "IT distribution bus",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    },
+    {
+      "capacity_kw": "2000",
+      "failure_domains": [
+        "it-hall"
+      ],
+      "id": "it-load",
+      "kind": "load",
+      "name": "Synthetic IT demand",
+      "source_ids": [
+        "DEMO-ELECTRICAL-002"
+      ]
+    }
+  ],
+  "battery_capacity_kwh": "100",
+  "battery_charge_efficiency": "0.95",
+  "battery_charge_kw": "0",
+  "battery_discharge_efficiency": "0.9",
+  "battery_initial_kwh": "100",
+  "currency": "USD",
+  "dependencies": [
+    {
+      "relation": "feeds",
+      "source": "utility",
+      "target": "main-bus"
+    },
+    {
+      "relation": "feeds",
+      "source": "generator",
+      "target": "main-bus"
+    },
+    {
+      "relation": "feeds",
+      "source": "battery",
+      "target": "main-bus"
+    },
+    {
+      "relation": "feeds",
+      "source": "main-bus",
+      "target": "path-a"
+    },
+    {
+      "relation": "feeds",
+      "source": "main-bus",
+      "target": "path-b"
+    },
+    {
+      "relation": "feeds",
+      "source": "path-a",
+      "target": "it-bus"
+    },
+    {
+      "relation": "feeds",
+      "source": "path-b",
+      "target": "it-bus"
+    },
+    {
+      "relation": "feeds",
+      "source": "it-bus",
+      "target": "it-load"
+    },
+    {
+      "relation": "charges",
+      "source": "main-bus",
+      "target": "battery"
+    }
+  ],
+  "distribution_efficiency": "0.95",
+  "duration_s": 1800,
+  "events": [
+    {
+      "action": "asset_down",
+      "at_s": 300,
+      "target": "utility",
+      "value_kw": null
+    },
+    {
+      "action": "asset_down",
+      "at_s": 300,
+      "target": "generator",
+      "value_kw": null
+    },
+    {
+      "action": "asset_up",
+      "at_s": 900,
+      "target": "utility",
+      "value_kw": null
+    },
+    {
+      "action": "asset_up",
+      "at_s": 900,
+      "target": "generator",
+      "value_kw": null
+    }
+  ],
+  "generator_cost_per_kwh": null,
+  "generator_start_delay_s": 30,
+  "id": "course-ride-through",
+  "it_capacity_kw": "1000",
+  "it_demand_kw": "1000",
+  "name": "3. Calculate battery ride-through",
+  "schema_version": 2,
+  "source_ids": [
+    "DEMO-ELECTRICAL-002",
+    "EDU-POWER-001"
+  ],
+  "step_s": 10,
+  "tariff_per_kwh": "0.1"
+}

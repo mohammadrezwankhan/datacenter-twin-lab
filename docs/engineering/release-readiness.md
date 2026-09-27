@@ -1,6 +1,6 @@
 # Release readiness and independent reproduction
 
-Version **0.4.0rc2** is a versioned candidate for the teaching and research workflow. Its supported boundary is a deterministic synthetic electrical-continuity calculation. A stable software label would not establish facility calibration or operational reliability.
+Version **0.4.0rc3** is a versioned candidate for the teaching and research workflow. Its supported boundary is a deterministic synthetic electrical-continuity calculation. A stable software label would not establish facility calibration or operational reliability.
 
 The current release keeps the candidate label while the public reproduction request remains unanswered. A passing CI job, maintainer calculation, automated browser journey or coding-agent audit is internal engineering evidence. None can fill in a reviewer's identity or endorsement.
 

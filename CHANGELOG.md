@@ -1,14 +1,15 @@
 # Changelog
 
-## Unreleased
+## 0.4.0rc3 — save, teach and compare experiments
 
-- Compose demand timelines visually in the advanced workspace and local dashboard: selectable chart points, keyboard sliders, exact decimal fields, add/remove/reset, and a requested-energy preview. Run edits explicitly, preserve failure/recovery events and validate the existing contract. Calculation engines and published release assets are unchanged.
+- Reopen electrical scenario JSON and browser/CLI run exports with an assumption preview and current-engine recalculation. Invalid or cancelled inputs preserve the completed experiment.
+- Export standalone worksheets for all twelve lessons, preserving the submitted prediction, completed inputs, worked answer, graph and reproduction record on separate printed pages.
+- Compose explicit demand schedules with the visual editor, exact decimal fields, keyboard sliders and requested-energy preview; retain the original failures and recovery events.
+- Include the three 375 kWh timing cases, original vector figure and standard-library reproduction script in the source archive.
+- Preserve meaningful prediction-feedback signs and display precision. Package these source improvements in the downloadable wheel and browser archive.
+- Advance version-derived run identifiers and regenerate the canonical evidence packet. Numerical algorithms and the eighteen preset inputs are unchanged; earlier candidate/alpha assets and benchmark observations remain intact.
 
-- Export a standalone HTML worksheet from each of the twelve lessons. Preserve the prediction submitted with the completed run, its inputs and exact result; separate the printed exercise, worked answer and reproduction record. Include a power or energy chart, source revision when available, explicit unknowns and embedded full-result JSON. Calculation engines and published release assets are unchanged.
-
-- Reopen electrical scenario JSON and browser/CLI run exports in the advanced workspace. Validate and preview changed assumptions before recalculating; preserve the current experiment on invalid or cancelled imports. Download validated draft inputs separately from completed results. Calculation engines and published release assets are unchanged.
-
-- Correct the guided prediction feedback so a difference that rounds to zero displays `0 s`, while positive and negative differences retain their signs. State the 0.1-second display precision. Simulation values, exports and published release assets are unchanged.
+This is a candidate for reproducible teaching and review, not a stable release, independent validation or facility reliability claim.
 
 ## 0.4.0rc2 — Windows evidence installation fix
 

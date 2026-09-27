@@ -19,13 +19,13 @@ The exact lesson uses charging disabled, a failed generator, a utility outage at
 | Battery worksheet           | What changes when the available stored energy is halved?           | Compare the charging-disabled 100 and 50 kWh lesson cases                 | [Prediction and separate worked answer](battery-ride-through-worksheet.md)                                                                                      |
 | Demand timing              | Can equal total energy produce different outage outcomes?          | Three 375 kWh schedules give 81.1667, 0 and 11.7222 kWh unserved          | [Worked comparison, downloadable inputs and graph](demand-timing.md)                                                                                           |
 
-The guided route has three actions. **01 · Predict:** enter an estimate in seconds measured from the outage at `300 s`. **02 · Run:** explicitly request the calculation; no result appears beforehand. **03 · Explain:** compare ride-through with elapsed depletion, inspect requested/served/unserved outage energy, export the complete JSON result, or request optional Python verification. The current v0.4.0rc2 source is a **release candidate**, not a stable release; [independent external technical review has not been obtained](../engineering/release-readiness.md).
+The guided route has three actions. **01 · Predict:** enter an estimate in seconds measured from the outage at `300 s`. **02 · Run:** explicitly request the calculation; no result appears beforehand. **03 · Explain:** compare ride-through with elapsed depletion, inspect requested/served/unserved outage energy, export the complete JSON result, or request optional Python verification. The current v0.4.0rc3 source is a **release candidate**, not a stable release; [independent external technical review has not been obtained](../engineering/release-readiness.md).
 
 ## Browser and local workflows
 
 - [Open the advanced energy workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced) to inspect the full electrical topology, replay events, change bounded assumptions, and export a run.
 - [Open the evidence hub's captioned 60-second demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence#demo) or read its [transcript and reproduction notes](../examples/proof-demo.md).
-- Follow the [quickstart](../quickstart.md) to install the published, hash-pinned v0.4.0rc2 CLI/dashboard wheel, or use its source-build and verification commands.
+- Follow the [quickstart](../quickstart.md) to install the published, hash-pinned v0.4.0rc3 CLI/dashboard wheel, or use its source-build and verification commands.
 - Use the [course studio guide](../engineering/course-studio.md) to navigate the four-chapter course and its interactive scenes.
 - Use the [evidence packet](../evidence.md) and [benchmark method](../engineering/benchmark-method.md) to reproduce the candidate's numerical artifacts and interpret timing observations.
 - Start a small contribution with [adding a scenario](../engineering/adding-a-scenario.md).

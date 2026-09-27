@@ -21,10 +21,10 @@ The third packet case is the existing `path_maintenance` preset. Path A is down 
 Predict before running, then compare both canonical variants and the path case:
 
 ```sh
-python scripts/build_evidence.py --output outputs/reproduction-0.4.0rc2 \
+python scripts/build_evidence.py --output outputs/reproduction-0.4.0rc3 \
   --revision <public-commit-or-tag> \
   --repository mohammadrezwankhan/datacenter-twin-lab
-python scripts/build_evidence.py --verify outputs/reproduction-0.4.0rc2
+python scripts/build_evidence.py --verify outputs/reproduction-0.4.0rc3
 ```
 
 The receipt prints equations beside expected and observed values. The packet includes the complete interval records so a reviewer can independently sum the ledger terms. The validator deliberately ignores each reported residual field. For each interval and for the whole run, reconstruct:
