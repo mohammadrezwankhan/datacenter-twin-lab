@@ -3,6 +3,7 @@
 import argparse
 import html
 import json
+import os
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -17,6 +18,13 @@ def build(site: Path, output: Path) -> None:
         raise ValueError("Destination must end in / and have no credentials")
     if not (site / "index.html").is_file():
         raise ValueError("Build the complete browser site first")
+    # Hashed evidence names can exceed MAX_PATH in a nested Windows checkout.
+    # Use extended filesystem syntax without changing operating-system policy.
+    if os.name == "nt":
+        absolute = os.path.abspath(output)
+        if not absolute.startswith("\\\\?\\"):
+            absolute = "\\\\?\\UNC\\" + absolute[2:] if absolute.startswith("\\\\") else "\\\\?\\" + absolute
+        output = Path(absolute)
     output.mkdir(parents=True, exist_ok=False)
     # Keep public media/download URLs usable in older posts and cached clients.
     # Only HTML entry points change; the input is the already allowlisted build.
