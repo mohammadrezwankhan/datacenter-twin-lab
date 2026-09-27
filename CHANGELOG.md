@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Compose demand timelines visually in the advanced workspace and local dashboard: selectable chart points, keyboard sliders, exact decimal fields, add/remove/reset, and a requested-energy preview. Run edits explicitly, preserve failure/recovery events and validate the existing contract. Calculation engines and published release assets are unchanged.
+
 - Export a standalone HTML worksheet from each of the twelve lessons. Preserve the prediction submitted with the completed run, its inputs and exact result; separate the printed exercise, worked answer and reproduction record. Include a power or energy chart, source revision when available, explicit unknowns and embedded full-result JSON. Calculation engines and published release assets are unchanged.
 
 - Reopen electrical scenario JSON and browser/CLI run exports in the advanced workspace. Validate and preview changed assumptions before recalculating; preserve the current experiment on invalid or cancelled imports. Download validated draft inputs separately from completed results. Calculation engines and published release assets are unchanged.
