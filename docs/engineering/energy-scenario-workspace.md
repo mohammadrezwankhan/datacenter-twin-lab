@@ -4,12 +4,12 @@ Choose a facility, stress its supply, and trace what reaches the IT load. The [e
 
 ## Four starting points
 
-| Profile | Initial aggregate IT demand | Outage-case battery energy | Extended-reserve battery energy |
-| --- | ---: | ---: | ---: |
-| AI cluster | 50 MW | 5 MWh | 200 MWh |
-| Hyperscale | 200 MW | 20 MWh | 800 MWh |
-| Crypto mining | 30 MW | 3 MWh | 120 MWh |
-| Traditional | 5 MW | 0.5 MWh | 20 MWh |
+| Profile       | Initial aggregate IT demand | Outage-case battery energy | Extended-reserve battery energy |
+| ------------- | --------------------------: | -------------------------: | ------------------------------: |
+| AI cluster    |                       50 MW |                      5 MWh |                         200 MWh |
+| Hyperscale    |                      200 MW |                     20 MWh |                         800 MWh |
+| Crypto mining |                       30 MW |                      3 MWh |                         120 MWh |
+| Traditional   |                        5 MW |                    0.5 MWh |                          20 MWh |
 
 These are original illustrative scaling assumptions, not industry averages or equipment specifications. Each profile scales the same one-load electrical topology. The profile names do not add GPU scheduling, cloud demand or mining behavior to the model.
 
@@ -62,17 +62,34 @@ python -m datacenter_twin simulate --scenario twin-scenario.json --output reopen
 
 Schema-1 PUE planning, sensitivity/comparison collections, Markdown and HTML reports are not electrical scenario imports. Invalid JSON, unsupported fields, missing assets, cycles and contract bounds are rejected without replacing the current experiment. This import feature is a source/Pages addition after `0.4.0rc2`; that historical wheel and browser archive are unchanged.
 
+## Compose a demand timeline
+
+In the advanced workspace or the local dashboard, select **Edit demand timeline**. The chart shows requested IT power in kW against elapsed seconds. Numbered points select a step; the same selection is available through the **Point** list and labelled step buttons. The **Initial** point sets the demand before the first scheduled change.
+
+1. Select **Add demand step**. The editor places it in the largest time gap; set its time and power with the fields or keyboard-accessible sliders.
+2. Compare the requested-energy preview with a hand calculation. In the **Normal supply** preset, retain the initial 1,000 kW and add 500 kW at 900 s. Over 1,800 s, requested energy is `(1000 × 900 + 500 × 900) / 3600 = 375 kWh`.
+3. Select **Run edited timeline**. Supply constraints, storage and losses are then calculated. Results and exports remain attached to the last completed run while the editor contains unsubmitted changes.
+4. Export the completed run or its Markdown/HTML report. The optional **Verify against Python** compares the complete browser result, including the edited schedule and input hash.
+
+The preview is requested energy, not delivered energy. Dashed amber markers show existing availability events; expanding **Schedule rules** lists their exact times and targets. Demand edits preserve asset/domain failures, recoveries, source identifiers, capacities and other assumptions. A custom topology uses its actual load identifier. Source identifiers describe the base inputs; edits and their hash travel in the exported scenario and require their own interpretation.
+
+Times are whole seconds from zero through one second before the simulation ends. Demand is a nonnegative decimal kW quantity under the existing contract (at most nine decimal places and `10^12 kW`). Sliders use whole kW for convenience; typing a decimal preserves its exact value. A step holds until the next step. At coincident times, demand changes follow their listed event order and the last one wins. A step at zero takes effect immediately. Up to 128 total events are allowed, including failure and recovery events.
+
+**Remove selected step** and **Reset timeline edits** affect the preview until the next run. Changing another scenario setting, choosing a preset, importing a scenario or closing the editor resets its local draft; run or export the desired completed configuration first. Invalid input leaves the previous result intact. Reloading the page does not retain a custom timeline: export JSON to keep it.
+
+This feature uses the existing piecewise electrical model. It does not add measured workload traces, GPU-job predictions, voltage/frequency response or subsecond transients. The editor loads on demand; the canonical guide and twelve lessons retain their existing entry paths. Current source and Pages contain this addition; the historical `0.4.0rc2` wheel and browser archive are unchanged.
+
 ## Energy-system questions and evidence
 
 Grid access, variable demand, renewable supply, longer reserves and island operation are useful engineering questions. They require different evidence:
 
-| Question | What can be explored here | What requires another model or evidence |
-| --- | --- | --- |
-| Speed to power | Supply outages, startup delays and finite reserve | A utility connection study, permits and actual firm capacity |
-| AI power changes | Piecewise aggregate demand, feed constraints and energy shortfall | Converter response, voltage/frequency and workload traces |
-| Renewable integration | Electrical continuity assumptions | Weather, generation and dispatch time series; renewable-share and emissions calculations |
-| Longer battery support | Stored energy, charge/discharge limits and losses | Selected equipment, degradation, thermal limits and protection |
-| Grid independence | Declared asset availability and recovery | Grid-forming controls, black start and island-transition tests |
+| Question               | What can be explored here                                         | What requires another model or evidence                                                  |
+| ---------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Speed to power         | Supply outages, startup delays and finite reserve                 | A utility connection study, permits and actual firm capacity                             |
+| AI power changes       | Piecewise aggregate demand, feed constraints and energy shortfall | Converter response, voltage/frequency and workload traces                                |
+| Renewable integration  | Electrical continuity assumptions                                 | Weather, generation and dispatch time series; renewable-share and emissions calculations |
+| Longer battery support | Stored energy, charge/discharge limits and losses                 | Selected equipment, degradation, thermal limits and protection                           |
+| Grid independence      | Declared asset availability and recovery                          | Grid-forming controls, black start and island-transition tests                           |
 
 The model remains synthetic and uncalibrated. It does not establish facility safety, certified uptime, controller response time, CapEx savings, MTBF, cybersecurity certification, grid-service revenue or zero-transfer backup. It controls no physical equipment. See the [electrical model](electrical-continuity.md) and [contracts](../contracts/electrical-v2.md).
 

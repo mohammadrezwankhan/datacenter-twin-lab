@@ -23,13 +23,11 @@ Current source and Pages also [reopen scenario JSON and electrical run exports](
 
 All twelve lessons also [export a printable worksheet](docs/tutorials/power-systems-course.md#print-a-lesson-worksheet) with a submitted prediction, completed inputs, worked calculation, graph and reproducibility record. The standalone HTML keeps the prediction and answer on separate printed pages. This addition is available in current source and Pages; the historical `0.4.0rc2` assets are unchanged.
 
-## Planned capabilities
+The advanced workspace also includes a [visual demand timeline](docs/engineering/energy-scenario-workspace.md#compose-a-demand-timeline): add, select, move and remove explicit load steps, preview requested energy, then run the schedule through the existing engine. Failures and recovery events are preserved. It is available in current source and Pages after `0.4.0rc2`; historical release assets are unchanged.
 
-These are not controls in the current demo:
+## Next product decisions
 
-1. **Edit a demand timeline visually.** Compose explicit demand steps using the existing scenario contract; do not imply transient, workload, or GPU-job prediction.
-
-Prioritize these against reproducible first-run problems and learner feedback. Do not describe planned work as implemented behavior.
+Use reproducible first-run problems and learner feedback to prioritize the next capability. The guide, course, timeline editor and exports are available for evaluation; their delivery does not establish teaching effectiveness or independent use. A next release should package the reviewed source changes only after its exact artifacts have been tested.
 
 ## Evidence and stable-release conditions
 

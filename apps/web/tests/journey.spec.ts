@@ -1,6 +1,34 @@
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs/promises';
 
+test('visual demand timeline runs through the local Python API with preserved availability events', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.getByTestId('served-power')).toBeVisible();
+  await page.getByRole('button', { name: 'Edit demand timeline', exact: true }).click();
+  await page.getByRole('button', { name: 'Add demand step', exact: true }).click();
+  await page.getByLabel('Selected time (seconds)').fill('300');
+  await page.getByLabel('Selected demand (kW)').fill('500');
+  const response = page.waitForResponse(
+    (value) => value.url().endsWith('/api/v1/simulations') && value.request().method() === 'POST',
+  );
+  await page.getByRole('button', { name: 'Run edited timeline', exact: true }).click();
+  const result = await (await response).json();
+  // 1000 kW for 300 s + 500 kW for 1500 s = 291 2/3 kWh requested.
+  expect(Number(result.summary.requested_it_kwh)).toBeCloseTo(
+    (1000 * 300) / 3600 + (500 * 1500) / 3600,
+    9,
+  );
+  expect(
+    result.scenario.events.some((event: { action: string }) => event.action === 'asset_down'),
+  ).toBe(true);
+  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${result.run_id.slice(0, 12)}`);
+  const pending = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Export run', exact: true }).click();
+  expect(JSON.parse(await fs.readFile((await (await pending).path())!, 'utf8'))).toEqual(result);
+});
+
 test('a saved scenario is recalculated by the local Python dashboard after preview', async ({
   page,
 }) => {

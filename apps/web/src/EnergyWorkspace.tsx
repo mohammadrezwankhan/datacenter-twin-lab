@@ -106,7 +106,7 @@ export function FacilitySelector({
         </div>
         {!profile && (
           <span className="custom-case">
-            {preset ? 'Reference scenario selected' : 'Imported scenario selected'}
+            {preset ? 'Reference scenario selected' : 'Custom scenario selected'}
           </span>
         )}
       </div>

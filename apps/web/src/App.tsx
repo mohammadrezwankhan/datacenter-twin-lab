@@ -27,6 +27,9 @@ const EvidenceHub = lazy(() =>
 const ScenarioFiles = lazy(() =>
   import('./ScenarioFiles').then((module) => ({ default: module.ScenarioFiles })),
 );
+const DemandTimeline = lazy(() =>
+  import('./DemandTimeline').then((module) => ({ default: module.DemandTimeline })),
+);
 type Page = 'start' | 'overview' | 'topology' | 'evidence' | 'learn' | 'energy' | 'assurance';
 function initialPage(): Page {
   if (!browserDemo) return 'overview';
@@ -364,6 +367,7 @@ export function App() {
   const [baseline, setBaseline] = useState<Run | null>(null),
     [notice, setNotice] = useState('');
   const [filesOpen, setFilesOpen] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(false);
   const [motion, setMotion] = useState(
     () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   );
@@ -433,7 +437,11 @@ export function App() {
     );
     return () => window.clearInterval(timer);
   }, [playing, run]);
-  async function calculate(nextPreset?: string, importedScenario?: SiteScenario) {
+  async function calculate(
+    nextPreset?: string,
+    suppliedScenario?: SiteScenario,
+    source: 'import' | 'timeline' = 'import',
+  ) {
     active.current?.abort();
     const controller = new AbortController();
     active.current = controller;
@@ -443,7 +451,7 @@ export function App() {
     setPlaying(false);
     try {
       const scenario =
-        importedScenario ??
+        suppliedScenario ??
         (nextPreset
           ? await request<SiteScenario>(
               `demo?preset=${encodeURIComponent(nextPreset)}`,
@@ -461,9 +469,13 @@ export function App() {
         const url = new URL(window.location.href);
         url.searchParams.set('preset', nextPreset);
         window.history.replaceState(null, '', url);
-      } else if (importedScenario) {
+      } else if (suppliedScenario) {
         setPreset('');
-        setNotice('Imported inputs calculated. Results and hashes come from this engine.');
+        setNotice(
+          source === 'timeline'
+            ? 'Edited demand timeline calculated. Results and exports now use this schedule.'
+            : 'Imported inputs calculated. Results and hashes come from this engine.',
+        );
         const url = new URL(window.location.href);
         url.searchParams.delete('preset');
         url.searchParams.set('mode', 'advanced');
@@ -609,6 +621,16 @@ export function App() {
             </div>
             {needsWorkspace && page !== 'energy' && (
               <div className="heading-actions">
+                {(page === 'overview' || page === 'topology') && (
+                  <button
+                    disabled={!run || busy}
+                    aria-expanded={timelineOpen}
+                    aria-controls="demand-timeline"
+                    onClick={() => setTimelineOpen(!timelineOpen)}
+                  >
+                    Edit demand timeline
+                  </button>
+                )}
                 <button
                   disabled={!run || busy}
                   aria-expanded={filesOpen}
@@ -759,7 +781,7 @@ export function App() {
                       >
                         {preset === '' && (
                           <option value="" disabled>
-                            Imported scenario
+                            Custom scenario
                           </option>
                         )}
                         {presets.map((p) => (
@@ -834,6 +856,15 @@ export function App() {
                     </button>
                     <ScenarioSettings draft={draft} busy={busy} onChange={setDraft} />
                   </form>
+                  {timelineOpen && (
+                    <Suspense fallback={<p role="status">Opening the demand editor…</p>}>
+                      <DemandTimeline
+                        current={draft}
+                        busy={busy}
+                        onRun={(scenario) => void calculate(undefined, scenario, 'timeline')}
+                      />
+                    </Suspense>
+                  )}
                   <div className="run-context" role="status">
                     <span>
                       {dirty
