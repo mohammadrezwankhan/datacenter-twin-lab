@@ -38,7 +38,9 @@ def render(results: Path, output: Path, preview: Path | None, monochrome: bool) 
     deficit_fill = "#EEEEEE" if monochrome else "#FDEAD4"
     plt.rcParams.update({
         "font.family": "DejaVu Sans", "font.size": 13,
-        "svg.fonttype": "none", "svg.hashsalt": "demand-timing-lesson",
+        # Embed glyph paths so browsers without the authoring font keep the layout.
+        # The article supplies an equivalent text table and complete image alt text.
+        "svg.fonttype": "path", "svg.hashsalt": "demand-timing-lesson",
         "text.color": ink, "axes.labelcolor": ink,
         "xtick.color": ink, "ytick.color": ink,
         "axes.spines.top": False, "axes.spines.right": False,
