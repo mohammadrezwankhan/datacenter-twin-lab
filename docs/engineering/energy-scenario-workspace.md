@@ -64,6 +64,8 @@ Schema-1 PUE planning, sensitivity/comparison collections, Markdown and HTML rep
 
 ## Compose a demand timeline
 
+For a worked application, use [the equal-energy timing lesson](../tutorials/demand-timing.md). Its downloadable cases each request 375 kWh but put different amounts of that demand inside the same outage.
+
 In the advanced workspace or the local dashboard, select **Edit demand timeline**. The chart shows requested IT power in kW against elapsed seconds. Numbered points select a step; the same selection is available through the **Point** list and labelled step buttons. The **Initial** point sets the demand before the first scheduled change.
 
 1. Select **Add demand step**. The editor places it in the largest time gap; set its time and power with the fields or keyboard-accessible sliders.

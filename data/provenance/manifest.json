@@ -55,6 +55,13 @@
       "license": "Apache-2.0",
       "assumption_date": "2026-09-23",
       "notes": "Four profiles use nominal IT loads of 50, 200, 30 and 5 MW. Load-step cases change demand to 80%, 110% and 100% at 300, 600 and 900 seconds. Extended-reserve cases replace the baseline storage with four hours of gross initial energy, disable charging, run four hours and remove utility/generator supply from 300 to 11100 seconds. Added outage cases retain the baseline event schedule. Overrides are explicit synthetic inputs, not GPU transients, renewable dispatch, grid-forming controls, black start or equipment response. Energy coverage does not establish uptime."
+    },
+    {
+      "id": "EDU-DEMAND-TIMING-001",
+      "source_type": "original_synthetic_assumption",
+      "license": "Apache-2.0",
+      "assumption_date": "2026-09-27",
+      "notes": "Three original prescribed-demand schedules each request 375 kWh over 1800 seconds, with 900 seconds each at 1000 and 500 kW. They share a 100 kWh initial battery, disabled charging, 0.90 discharge and 0.95 distribution efficiencies, and utility/generator loss from 300 to 900 seconds. Timing is varied to teach the difference between total energy and outage-overlap energy. No measured workload, GPU job scheduling, throughput equivalence, physical transfer performance or facility reliability is implied."
     }
   ]
 }

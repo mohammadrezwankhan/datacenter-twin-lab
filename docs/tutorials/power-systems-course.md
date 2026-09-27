@@ -4,6 +4,8 @@
 
 Start with the [power and energy lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy), then use the lesson selector or **Next lesson**. Each lesson has one input, a challenge value, a worked answer, and a result you can inspect in the browser.
 
+After power/energy and ride-through, try [same 375 kWh, different outage outcomes](demand-timing.md): compare three demand schedules with identical total energy, peak power and storage, then explain the effect of outage overlap.
+
 ![The interactive course studio with a 50 MW lesson, selectable isometric objects, event replay, and a prediction-and-result workspace](../images/course-studio.png)
 
 ## Explore, predict, explain
