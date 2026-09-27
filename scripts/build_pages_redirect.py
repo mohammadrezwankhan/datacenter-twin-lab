@@ -18,6 +18,15 @@ def build(site: Path, output: Path) -> None:
     if not (site / "index.html").is_file():
         raise ValueError("Build the complete browser site first")
     output.mkdir(parents=True, exist_ok=False)
+    # Keep public media/download URLs usable in older posts and cached clients.
+    # Only HTML entry points change; the input is the already allowlisted build.
+    for source in site.rglob("*"):
+        if source.is_symlink():
+            raise ValueError("Static assets must not contain symbolic links")
+        if source.is_file():
+            target = output / source.relative_to(site)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(source.read_bytes())
     script = r"""
 const target = new URL(DESTINATION);
 const prefix = '/datacenter-twin-lab/';
@@ -30,11 +39,14 @@ target.search = window.location.search;
 target.hash = window.location.hash;
 window.location.replace(target.href);
 """.replace("DESTINATION", json.dumps(destination).replace("<", "\\u003c"))
-    pages = [*site.rglob("index.html"), site / "404.html"]
+    pages = list(site.rglob("*.html"))
     for source in pages:
         relative = source.relative_to(site)
         page_path = relative.parent.as_posix()
-        suffix = "" if page_path == "." else page_path + "/"
+        if relative.name == "index.html":
+            suffix = "" if page_path == "." else page_path + "/"
+        else:
+            suffix = "" if relative.name == "404.html" else relative.as_posix()
         canonical = html.escape(destination + suffix, quote=True)
         document = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">

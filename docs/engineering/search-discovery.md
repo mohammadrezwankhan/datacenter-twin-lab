@@ -14,6 +14,8 @@ The owner requested old website links to forward to the primary host. `scripts/b
 
 The CI source revision pins source links in generated notes. A local release build without that environment value links to its version tag. Both point to public material only; no private planning or campaign records enter the generated site.
 
+The legacy artifact retains the allowlisted public media and downloads so older image embeds and cached clients keep working. Its HTML entry points, including reports, forward to the corresponding primary-host page. No private workspace or old Git objects are copied.
+
 ## GEO means useful, inspectable answers
 
 Each lesson states a specific question, an answer with units, explicit assumptions and reproduction links. The author/evidence page distinguishes measured software behavior from physical validation. This makes the content easier for a person or retrieval system to quote accurately. No hidden crawler-only copy, keyword stuffing, invented authority, or model instructions are present.

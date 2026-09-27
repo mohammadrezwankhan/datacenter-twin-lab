@@ -33,6 +33,9 @@ test('search pages legacy forwarding preserves lesson, query and fragment on the
   }
   const note = await readFile(join(output, 'learn/ride-through/index.html'), 'utf8');
   expect(note).toContain(`content="0;url=${site.url}learn/ride-through/"`);
+  expect(await readFile(join(output, 'guide-preview.png'))).toEqual(
+    await readFile(new URL('../../../.local/browser-demo-site/guide-preview.png', import.meta.url)),
+  );
 });
 
 test('search pages expose all twelve worked lessons with JavaScript disabled', async ({
