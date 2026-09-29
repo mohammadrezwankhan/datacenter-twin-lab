@@ -575,6 +575,7 @@ export function App() {
             Engine {run?.engine_version || ENGINE_VERSION}
           </p>
           {browserDemo && <a href="./learn/">Course notes &amp; worked answers →</a>}
+          {browserDemo && <a href="./evidence/">Reference results &amp; sources →</a>}
           <span className="mini-tag">Local calculations</span>
         </div>
       </aside>

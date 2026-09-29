@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import site from '../site.config.json' with { type: 'json' };
+import { nativeRun } from './course-test-helpers';
 
 test('search pages legacy forwarding preserves lesson, query and fragment on the fixed host', async ({
   page,
@@ -103,7 +104,7 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   const urls = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map(
     (match) => match[1],
   );
-  expect(new Set(urls).size).toBe(15);
+  expect(new Set(urls).size).toBe(16);
   expect(urls.every((url) => url.startsWith(publicBase))).toBe(true);
   const robots = await request.get('./robots.txt');
   expect(await robots.text()).toContain(`Sitemap: ${publicBase}sitemap.xml`);
@@ -112,6 +113,10 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   for (const canonical of urls) {
     const relative = canonical.slice(publicBase.length);
     await page.goto(`./${relative}`);
+    const verification = page.locator('meta[name="google-site-verification"]');
+    if (!relative && publicBase === site.url)
+      await expect(verification).toHaveAttribute('content', site.googleSiteVerification);
+    else await expect(verification).toHaveCount(0);
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', canonical);
     await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', canonical);
@@ -126,8 +131,17 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
     );
     expect(linkedData['@context']).toBe('https://schema.org');
     expect(JSON.stringify(linkedData)).not.toMatch(/aggregateRating|award|reviewRating/);
+    await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+      'content',
+      '1280',
+    );
+    await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute(
+      'content',
+      '900',
+    );
+    expect(JSON.stringify(linkedData)).toContain(`${publicBase}about/#author`);
   }
-  expect(titles.size).toBe(15);
+  expect(titles.size).toBe(16);
   const image = await request.get('./guide-preview.png');
   expect(image.status()).toBe(200);
   expect(image.headers()['content-type']).toContain('image/png');
@@ -136,7 +150,7 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
 test('search pages remain accessible, responsive and linked to live experiments', async ({
   page,
 }) => {
-  for (const path of ['learn/', 'learn/ride-through/', 'about/']) {
+  for (const path of ['learn/', 'learn/ride-through/', 'evidence/', 'about/']) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`./${path}`);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -151,4 +165,113 @@ test('search pages remain accessible, responsive and linked to live experiments'
   await page.getByRole('link', { name: 'Run this browser lesson' }).click();
   await expect(page.getByLabel('Choose a lesson')).toHaveValue('ride-through');
   await expect(page.getByTestId('lesson-result')).toBeVisible();
+});
+
+test('search pages result records reproduce all 24 native lesson calculations', async ({
+  browser,
+  baseURL,
+  request,
+}) => {
+  const expectations = JSON.parse(
+    execFileSync(
+      process.env.TWIN_PYTHON || 'python',
+      [
+        '-c',
+        'import json,sys;sys.path.insert(0,"tests");from test_course_lessons import LESSON_CASES;print(json.dumps(LESSON_CASES))',
+      ],
+      { cwd: '../..', encoding: 'utf8' },
+    ),
+  );
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const page = await context.newPage();
+  try {
+    for (const lesson of lessons) {
+      const response = await request.get(`./learn/${lesson.id}/results.json`);
+      expect(response.status()).toBe(200);
+      const record = await response.json();
+      expect(record.lesson_id).toBe(lesson.id);
+      expect(record.result_unit).toBe(lesson.resultUnit);
+      expect(record.records).toHaveLength(2);
+      expect(record.source_revision).toMatch(/^(?:[a-f0-9]{40}|v1\.0\.0)$/);
+      const expected = expectations.find((item: { id: string }) => item.id === lesson.id);
+      await page.goto(`./learn/${lesson.id}/#worked-answer`);
+      const cells = page.locator('#calculated-results [data-result]');
+      for (const [index, row] of record.records.entries()) {
+        expect(row.input).toBe(index ? lesson.challenge : lesson.initial);
+        expect(row.calculation).toEqual(nativeRun(row.calculation));
+        expect(Number(row.result)).toBeCloseTo(
+          Number(index ? expected.expected_challenge : expected.expected_initial),
+          7,
+        );
+        await expect(cells.nth(index)).toHaveAttribute('data-result', String(row.result));
+        await expect(cells.nth(index)).toHaveText(
+          new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(Number(row.result)),
+        );
+      }
+      await expect(page.locator('#cite')).toContainText(`${site.url}learn/${lesson.id}/`);
+      const graph = JSON.parse(
+        (await page.locator('script[type="application/ld+json"]').textContent())!,
+      )['@graph'];
+      for (const citation of graph[0].citation) {
+        await expect(page.locator(`a[href="${citation.url}"]`).first()).toBeVisible();
+      }
+    }
+  } finally {
+    await context.close();
+  }
+});
+
+test('search pages evidence claims link to complete versioned records without JavaScript', async ({
+  browser,
+  baseURL,
+  request,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const page = await context.newPage();
+  try {
+    await page.goto('./');
+    await page
+      .getByRole('link', { name: 'Reference results and source records', exact: true })
+      .click();
+    await expect(page).toHaveURL(new URL('evidence/', baseURL!).href);
+    await expect(page.locator('#quick-answer')).toContainText('307.8 seconds');
+    await expect(page.locator('#quick-answer')).toContainText('153.9 seconds');
+    await expect(page.locator('#quick-answer')).toContainText('607.8 s or 453.9 s elapsed');
+    const index = await (await request.get('./evidence-index.json')).json();
+    const table = page.getByRole('table');
+    for (const item of index.cases) {
+      const run = await (await request.get('./' + item.run_path)).json();
+      expect(run).toEqual(nativeRun(run));
+      await expect(page.locator('#' + item.id)).toContainText(item.outcome);
+      const row = table.getByRole('row').filter({ hasText: item.title });
+      for (const field of ['requested_it_kwh', 'served_it_kwh', 'unserved_it_kwh']) {
+        await expect(row).toContainText(
+          new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(
+            Number(run.summary[field]),
+          ),
+        );
+      }
+    }
+    const graph = JSON.parse(
+      (await page.locator('script[type="application/ld+json"]').textContent())!,
+    )['@graph'];
+    const dataset = graph.find((item: { '@type': string }) => item['@type'] === 'Dataset');
+    expect(dataset.distribution).toHaveLength(6);
+    for (const item of dataset.distribution) {
+      const relative = item.contentUrl.slice(site.url.length);
+      expect((await request.get('./' + relative)).status()).toBe(200);
+      await expect(page.locator(`a[href="../${relative}"]`)).toBeVisible();
+    }
+    await expect(page.locator('#cite')).toContainText(
+      'No DOI or independent external reproduction is asserted',
+    );
+    const missingPage = await readFile(
+      new URL('../../../.local/browser-demo-site/404.html', import.meta.url),
+      'utf8',
+    );
+    expect(missingPage).toContain('content="noindex"');
+    expect(await (await request.get('./sitemap.xml')).text()).not.toContain('404.html');
+  } finally {
+    await context.close();
+  }
 });

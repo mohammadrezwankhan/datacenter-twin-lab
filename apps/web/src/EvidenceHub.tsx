@@ -75,6 +75,9 @@ export function EvidenceHub() {
         </ol>
         <div className="proof-links">
           <a href={source('docs/evidence.md')}>Read the evidence page ↗</a>
+          {import.meta.env.MODE === 'demo' && (
+            <a href="./evidence/">Readable reference results ↗</a>
+          )}
           <a href={`${repository}/releases/tag/v${ENGINE_VERSION}`}>Versioned software release ↗</a>
           <a href={`${repository}/actions/workflows/tests.yml`}>Inspect actual CI runs ↗</a>
         </div>
