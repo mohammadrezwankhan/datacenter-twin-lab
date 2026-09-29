@@ -1,12 +1,12 @@
 # Explore a power system, one assumption at a time
 
-The [browser course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) contains twelve interactive lessons for datacenter engineers learning power continuity. No installation or account is needed. Open the atlas for all four chapters, or follow **Next lesson**.
+The [browser course](https://khanlab.co.technology/?lesson=power-energy) contains twelve interactive lessons for datacenter engineers learning power continuity. No installation or account is needed. Open the atlas for all four chapters, or follow **Next lesson**.
 
 ![The actual AI-outage lesson in the course studio](../images/course-studio.png)
 
 ## A first experiment
 
-Open [lesson 3: battery ride-through](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ride-through). The starting case has 100 kWh stored, a 1,000 kW IT request, utility loss at 300 seconds, and a failed generator. Charging is disabled. The result is battery depletion at 607.8 seconds elapsed.
+Open [lesson 3: battery ride-through](https://khanlab.co.technology/?lesson=ride-through). The starting case has 100 kWh stored, a 1,000 kW IT request, utility loss at 300 seconds, and a failed generator. Charging is disabled. The result is battery depletion at 607.8 seconds elapsed.
 
 Choose **Try the challenge value**, which changes reserve to 50 kWh. Before selecting **Run lesson**, predict the new depletion time in **s elapsed**. The result is **453.9 s**, comprising 300 seconds before failure and 153.9 seconds of battery service. The starting result remains available for comparison. The [worksheet](../tutorials/battery-ride-through-worksheet.md) separates prediction from the worked answer for printing.
 

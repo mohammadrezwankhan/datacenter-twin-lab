@@ -1,6 +1,6 @@
 # One minute from prediction to proof
 
-[Watch the captioned browser recording](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=evidence#demo), [download the WebM](../images/proof-demo.webm), or [read the English captions](../images/proof-demo.vtt).
+[Watch the captioned browser recording](https://khanlab.co.technology/?mode=evidence#demo), [download the WebM](../images/proof-demo.webm), or [read the English captions](../images/proof-demo.vtt).
 
 This is a continuous recording of the actual `0.4.0rc1` browser application at 1280 × 900. It has no audio. Deliberate reading pauses make it approximately one minute long; they are not measurements of calculation or download speed. The native result and on-demand Python result were checked during recording. The [recording receipt](../images/proof-demo-recording.json) records input identity, source-file hashes, media hashes and step times. It is maintainer verification, not outside review.
 

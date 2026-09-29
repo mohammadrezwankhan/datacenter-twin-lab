@@ -2,7 +2,7 @@
 
 **The time of a demand peak changes what a battery must supply.** Three 30-minute schedules below each request **375 kWh**, average **750 kW**, and reach the same **1,000 kW peak**. They share a 100 kWh battery and the same ten-minute loss of utility and generator supply. One is served throughout; the other two have different amounts of unserved energy.
 
-This is a reproducible exercise for datacenter engineers learning continuity. It extends the [power and energy lesson](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) and [battery ride-through worksheet](battery-ride-through-worksheet.md) by varying **when demand occurs**. All inputs are original synthetic assumptions.
+This is a reproducible exercise for datacenter engineers learning continuity. It extends the [power and energy lesson](https://khanlab.co.technology/?lesson=power-energy) and [battery ride-through worksheet](battery-ride-through-worksheet.md) by varying **when demand occurs**. All inputs are original synthetic assumptions.
 
 ## Compare the schedules
 
@@ -28,7 +28,7 @@ Download a scenario through its **Raw** file view:
 - [B: late-peak.json](../examples/demand-timing/late-peak.json)
 - [C: shifted-peak.json](../examples/demand-timing/shifted-peak.json)
 
-Open the [advanced workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced), select **Import scenario**, choose the saved JSON and select **Run imported scenario**. Files are read on your device. Use **Edit demand timeline** to inspect the schedule, and **Export run** to keep the completed calculation. **Verify against Python** compares the entire result with the reference Python engine on your device.
+Open the [advanced workspace](https://khanlab.co.technology/?mode=advanced), select **Import scenario**, choose the saved JSON and select **Run imported scenario**. Files are read on your device. Use **Edit demand timeline** to inspect the schedule, and **Export run** to keep the completed calculation. **Verify against Python** compares the entire result with the reference Python engine on your device.
 
 Use one downloaded case at a time. A draft edit takes effect only after running it. Changing the initial IT demand does not rescale later demand events. The `1.0.0` browser archive includes the import and timeline controls, and its source archive includes these inputs and reproduction scripts. The unchanged `0.4.0rc2` assets predate these additions.
 
