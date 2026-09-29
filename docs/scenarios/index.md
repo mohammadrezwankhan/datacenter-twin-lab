@@ -1,21 +1,21 @@
 # Scenario catalog
 
-**Question:** what does an explicit power-continuity model show for a 50 MW aggregate AI-cluster load and for the smaller reference failures behind it?
+**Question:** how do stored energy, generator startup and surviving paths change delivered IT power during an outage?
 
-The browser AI-cluster case uses **50,000 kW (50 MW)** IT demand and **5,000 kWh (5 MWh)** initial battery energy. With the same 0.90 discharge and 0.95 distribution efficiencies as the verified 1 MW fixture, the synthetic battery supplies IT for **307.8 s**, depletes at **607.8 s**, and utility restores service at **900 s**.
+Start with the [1 MW predict-run-explain guide](https://khanlab.co.technology/), then explore the five reference failures below. The advanced AI-cluster case scales the declared load and reserve to **50,000 kW (50 MW)** and **5,000 kWh (5 MWh)**. With the same 0.90 discharge and 0.95 distribution efficiencies, its synthetic battery supplies IT for **307.8 s**, depletes at **607.8 s**, and utility restores service at **900 s**.
 
 ## Runnable cases
 
 | Preset | Start with this question | Event | Expected service result | Runnable route |
 | --- | --- | --- | --- | --- |
-| `ai_cluster_generator_failure` | How long does a 5 MWh reserve support a 50 MW aggregate load? | Utility and generator down at 300 s; restored at 900 s | 307.8 s ride-through; depletion at 607.8 s; the same scaled loss ratios as the 1 MW fixture | [Browser preset](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_generator_failure) |
 | [`normal`](normal.md) | What happens with healthy 1 MW supply? | No outage events | 500 kWh served; 0 kWh unserved; battery ends at 100 kWh | `python -m datacenter_twin simulate --preset normal` |
 | [`utility_loss`](utility_loss.md) | Can the 1 MW battery bridge generator startup? | Utility down at 300 s; utility restored at 900 s | Generator is requested at 300 s and ready at 330 s; all 500 kWh served; 0 s unserved | `python -m datacenter_twin simulate --preset utility_loss` |
 | [`generator_failure`](generator_failure.md) | What if the 1 MW generator also fails? | Utility and generator down at 300 s; restored at 900 s | Battery depletes at 607.8 s; 292.2 s unserved; 81.166666... kWh unserved; final battery 23.75 kWh | `python -m datacenter_twin simulate --preset generator_failure` |
 | [`path_maintenance`](path_maintenance.md) | Can one surviving path carry the 1 MW load? | Path A down at 300 s; restored at 900 s | Surviving path serves 665 kW; 335 kW unserved for 600 s; 55.833333... kWh unserved; battery remains 100 kWh | `python -m datacenter_twin simulate --preset path_maintenance` |
 | [`shared_domain`](shared_domain.md) | What if both paths share a failed control domain? | Shared controls down at 300 s; restored at 900 s | Both paths unavailable; 1,000 kW unserved for 600 s; 166.666666... kWh unserved | `python -m datacenter_twin simulate --preset shared_domain` |
+| `ai_cluster_generator_failure` | How long does a 5 MWh reserve support a 50 MW aggregate load? | Utility and generator down at 300 s; restored at 900 s | 307.8 s ride-through; depletion at 607.8 s; the same scaled loss ratios as the 1 MW fixture | [Browser preset](https://khanlab.co.technology/?preset=ai_cluster_generator_failure) |
 
-The AI-cluster row is the scaled browser teaching case; the five original rows remain the Python CLI regression fixtures. For a runnable browser first step, open the [GitHub Pages demo](https://mohammadrezwankhan.github.io/datacenter-twin-lab/); for the 1 MW route, use [`?preset=generator_failure`](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=generator_failure).
+The AI-cluster row is the scaled teaching case; all six rows run in the browser or through `simulate --preset`. For a first browser step, open the [1 MW guided experiment](https://khanlab.co.technology/), which disables charging for its 100/50 kWh comparison. To inspect the original charging-enabled 1 MW fixture, open the [advanced generator-failure preset](https://khanlab.co.technology/?preset=generator_failure).
 
 ## Run the reference cases together
 
@@ -37,7 +37,7 @@ New to the electrical terms? Use the [unit-aware glossary and kW/kWh example](gl
 
 ## Read the diagrams
 
-For an interactive view, the [twelve-lesson course studio](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy) adds selectable isometric objects, interval replay and optional prediction checks. Its [guide](../engineering/course-studio.md) connects the illustrations to the exported quantities.
+For an interactive view, the [twelve-lesson course studio](https://khanlab.co.technology/?lesson=power-energy) adds selectable isometric objects, interval replay and optional prediction checks. Its [guide](../engineering/course-studio.md) connects the illustrations to the exported quantities.
 
 The diagrams show the same synthetic topology used by the reference presets. Events change asset or domain availability at explicit boundaries; they do not model switching transients or protection behavior.
 

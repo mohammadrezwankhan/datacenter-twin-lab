@@ -1,6 +1,6 @@
 # Watch and reproduce the 1 MW experiment
 
-[Open the current 1 MW experiment](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=generator_failure) or [view a still frame](../images/demo-preview.png).
+[Open the current 1 MW experiment](https://khanlab.co.technology/?preset=generator_failure) or [view a still frame](../images/demo-preview.png).
 
 ![Actual browser walkthrough](../images/demo-walkthrough.gif)
 

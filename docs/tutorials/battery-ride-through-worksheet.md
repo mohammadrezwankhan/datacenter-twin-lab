@@ -4,7 +4,7 @@
 
 Name: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_  Date: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-Open [Calculate battery ride-through](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ride-through).
+Open [Calculate battery ride-through](https://khanlab.co.technology/?lesson=ride-through).
 Make your prediction before reading the answer. In print preview, check that
 **Worked answer** starts on a separate page; page-break support varies by renderer.
 
@@ -107,4 +107,4 @@ reliability, or performance assessment. It does not model battery aging,
 temperature effects, or electrical switching transients.
 
 Return to the [course notes](power-systems-course.md) or
-[run lesson 3 again](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ride-through).
+[run lesson 3 again](https://khanlab.co.technology/?lesson=ride-through).

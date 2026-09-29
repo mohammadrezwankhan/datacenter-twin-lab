@@ -6,10 +6,11 @@ The answer for this fixture is **307.8 s of battery ride-through**. The outage s
 
 ## Run the case in the browser
 
-- [Open the default AI-cluster case](https://mohammadrezwankhan.github.io/datacenter-twin-lab/), which selects `ai_cluster_generator_failure`.
-- [Open the generator-failure preset directly](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_generator_failure).
-- [Try utility loss with generator pickup](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?preset=ai_cluster_utility_loss).
-- [Study the same scale in lesson 10](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=ai-outage), then [start the full course](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?lesson=power-energy).
+- [Open the 50 MW generator-failure preset](https://khanlab.co.technology/?preset=ai_cluster_generator_failure), which explicitly selects `ai_cluster_generator_failure` in the advanced workspace.
+- [Try utility loss with generator pickup](https://khanlab.co.technology/?preset=ai_cluster_utility_loss).
+- [Study the same scale in lesson 10](https://khanlab.co.technology/?lesson=ai-outage), then [start the full course](https://khanlab.co.technology/?lesson=power-energy).
+
+The [home page](https://khanlab.co.technology/) starts with the simpler 1 MW predict-run-explain guide. Use the preset link above to reproduce the 50 MW values on this page.
 
 Run the case, select the **Battery depleted 607.8 s** event, and inspect the interval after depletion. Served IT power is zero until the utility restoration event at 900 s. The browser's default calculation uses exact JavaScript arithmetic; **Verify against Python** is an optional action after a run.
 

@@ -1,6 +1,6 @@
 # Explore power continuity across facility profiles
 
-Choose a facility, stress its supply, and trace what reaches the IT load. The [energy workspace](https://mohammadrezwankhan.github.io/datacenter-twin-lab/?mode=advanced) combines an interactive isometric campus, interval power flows, editable equipment limits, a complete event replay and reproducible reports.
+Choose a facility, stress its supply, and trace what reaches the IT load. The [energy workspace](https://khanlab.co.technology/?mode=advanced) combines an interactive isometric campus, interval power flows, editable equipment limits, a complete event replay and reproducible reports.
 
 ## Four starting points
 
