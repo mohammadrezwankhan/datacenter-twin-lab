@@ -114,7 +114,7 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
     const relative = canonical.slice(publicBase.length);
     await page.goto(`./${relative}`);
     const verification = page.locator('meta[name="google-site-verification"]');
-    if (!relative && publicBase === site.url)
+    if (site.googleSiteVerification && !relative && publicBase === site.url)
       await expect(verification).toHaveAttribute('content', site.googleSiteVerification);
     else await expect(verification).toHaveCount(0);
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);

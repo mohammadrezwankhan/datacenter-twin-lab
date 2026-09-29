@@ -14,7 +14,7 @@ The owner requested old website links to forward to the primary host. `scripts/b
 
 The CI source revision pins source links in generated notes. A local release build without that environment value links to its version tag. Both point to public material only; no private planning or campaign records enter the generated site.
 
-The public Search Console HTML verification value in `site.config.json` belongs to the owner's existing account and exact `https://khanlab.co.technology/` URL-prefix property. It is published only on that configured homepage, including on future rebuilds. This public ownership proof is not an API credential or a visitor-tracking script. Its presence alone does not establish successful verification, sitemap processing or indexing; record those outcomes only after the service confirms them.
+`googleSiteVerification` in `site.config.json` is empty until the owner confirms connecting the exact site to the selected Search Console account. Once authorized, its public HTML verification value is published only on the configured homepage and retained on future rebuilds. This ownership proof is not an API credential or a visitor-tracking script. Its presence alone does not establish successful verification, sitemap processing or indexing; record those outcomes only after the service confirms them.
 
 The legacy artifact retains the allowlisted public media and downloads so older image embeds and cached clients keep working. Its HTML entry points, including reports, forward to the corresponding primary-host page. No private workspace or old Git objects are copied.
 
