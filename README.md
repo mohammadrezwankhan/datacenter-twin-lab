@@ -4,7 +4,7 @@ _A reproducible synthetic continuity laboratory for datacenter power systems._
 
 ## Start with one battery question
 
-[Read the twelve course lessons](https://khanlab.co.technology/learn/) · [Author and reproducibility](https://khanlab.co.technology/about/)
+[Read the twelve course lessons](https://khanlab.co.technology/learn/) · [Reference results and sources](https://khanlab.co.technology/evidence/) · [About the author](https://khanlab.co.technology/about/)
 
 **How long can a 1 MW IT load ride through a utility outage on 100 kWh of stored battery energy?**
 

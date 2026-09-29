@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { lessons, lessonScenario } from './course-lessons';
+import { lessons, lessonScenario, lessonPlanningScenario } from './course-lessons';
 import { n, request } from './client';
 import type { PlanningRun as Planning, Run, SiteScenario } from './types';
 import { RunTools } from './RunTools';
@@ -127,25 +127,11 @@ export function Course() {
       let nextRun: Run | null = null;
       let nextPlanning: Planning | null = null;
       if (lesson.id === 'pue') {
-        nextPlanning = await request<Planning>('planning', controller.signal, {
-          schema_version: 1,
-          id: 'course-pue',
-          name: '50 MW annual energy planning',
-          currency: 'USD',
-          it_capacity_kw: '50000',
-          tariff_per_kwh: null,
-          price_status: 'unknown',
-          assumption_date: '2026-09-12',
-          source_ids: ['EDU-POWER-001'],
-          segments: [
-            {
-              label: 'Assumed constant annual load',
-              hours: '8760',
-              it_load_kw: '50000',
-              assumed_pue: input,
-            },
-          ],
-        });
+        nextPlanning = await request<Planning>(
+          'planning',
+          controller.signal,
+          lessonPlanningScenario(input),
+        );
       } else {
         nextRun = await request<Run>('simulations', controller.signal, scenario);
       }

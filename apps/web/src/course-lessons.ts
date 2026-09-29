@@ -1,4 +1,28 @@
 import type { SiteScenario } from './types';
+import type { PlanningScenario } from './js-engine/planning';
+
+// Keep the interactive course and its readable result records on the same input recipe.
+export function lessonPlanningScenario(value: string): PlanningScenario {
+  return {
+    schema_version: 1,
+    id: 'course-pue',
+    name: '50 MW annual energy planning',
+    currency: 'USD',
+    it_capacity_kw: '50000',
+    tariff_per_kwh: null,
+    price_status: 'unknown',
+    assumption_date: '2026-09-12',
+    source_ids: ['EDU-POWER-001'],
+    segments: [
+      {
+        label: 'Assumed constant annual load',
+        hours: '8760',
+        it_load_kw: '50000',
+        assumed_pue: value,
+      },
+    ],
+  };
+}
 
 export type Lesson = {
   id: string;
