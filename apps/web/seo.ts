@@ -32,7 +32,7 @@ export function publicSiteUrl(value: string): string {
 const style = `
 :root{color-scheme:light;--ink:#173041;--muted:#425c6b;--teal:#09685e;--paper:#f6f9f8;--line:#cadbd7}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.7 system-ui,sans-serif}
-a{color:#005d82;text-underline-offset:.2em}a:hover{color:#00364c}a:focus-visible{outline:3px solid #a44806;outline-offset:4px}
+a{color:#005d82;text-underline-offset:.2em;overflow-wrap:anywhere}a:hover{color:#00364c}a:focus-visible{outline:3px solid #a44806;outline-offset:4px}
 .skip{position:absolute;left:1rem;top:-5rem;background:white;padding:.5rem}.skip:focus{top:1rem}
 header,main,footer{max-width:1120px;margin:auto;padding:1.5rem 2rem}header{display:flex;gap:1.5rem;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid var(--line)}
 header>a{font-weight:800;letter-spacing:.06em;text-decoration:none;color:var(--ink)}nav{display:flex;gap:1.25rem;flex-wrap:wrap}

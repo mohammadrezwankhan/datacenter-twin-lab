@@ -150,12 +150,18 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
 test('search pages remain accessible, responsive and linked to live experiments', async ({
   page,
 }) => {
-  for (const path of ['learn/', 'learn/ride-through/', 'evidence/', 'about/']) {
+  for (const path of [
+    'learn/',
+    ...lessons.map((lesson) => `learn/${lesson.id}/`),
+    'evidence/',
+    'about/',
+  ]) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`./${path}`);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true,
-    );
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      `${path} must fit the viewport, including full-length source revision links`,
+    ).toBe(true);
     const audit = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
       .analyze();
