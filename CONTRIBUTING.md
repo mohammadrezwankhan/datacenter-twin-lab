@@ -19,14 +19,37 @@ Numerical review is welcome when you can state the independent equation, units, 
 
 ## Before opening a pull request
 
-Use Python 3.12 or later from the repository root:
+For a documentation-only change, check relative links, code blocks, Mermaid fences, and caveat wording. Follow the first-run browser route when the copy describes a control. A wording or link correction can use the [hosted course](https://khanlab.co.technology/); it does not require installing Python or Node. Do not include generated output files, private manuals, licensed standards text, credentials, customer traces, or internal planning/history.
 
-```sh
-python -m unittest discover -s tests -v
-npm --prefix apps/web run build
+For Python or dashboard changes, start from a checkout of your fork with **Python 3.12 or later**, **Node 24**, and npm available. Run the following commands from the repository root, where `pyproject.toml` lives. The environment's Python is called directly, so no activation script is needed.
+
+Windows / PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-api.lock
+$env:TWIN_PYTHON = (Resolve-Path .\.venv\Scripts\python.exe).Path
+npm.cmd --prefix apps/web ci --ignore-scripts
+npm.cmd --prefix apps/web run build
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+.\.venv\Scripts\python.exe -m datacenter_twin simulate --preset generator_failure --format markdown
 ```
 
-For a documentation-only change, check relative links, code blocks, Mermaid fences, and caveat wording. Follow the first-run browser route when the copy describes a control. Do not include generated output files, private manuals, licensed standards text, credentials, customer traces, or internal planning/history.
+macOS / Linux:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-api.lock
+export TWIN_PYTHON="$PWD/.venv/bin/python"
+npm --prefix apps/web ci --ignore-scripts
+npm --prefix apps/web run build
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m datacenter_twin simulate --preset generator_failure --format markdown
+```
+
+`requirements-api.lock` installs the API and HTTP test dependencies used by CI; the numerical core itself uses only the Python standard library. `npm ci` installs the locked frontend tools before the type check and dashboard build. Use the environment's Python for later CLI runs and tests. `TWIN_PYTHON` also selects it for browser test helpers. The final command is a first-run smoke check using an existing synthetic case.
+
+For browser calculation or interaction changes, continue with the [browser development and parity checks](docs/engineering/browser-demo.md). That workflow prepares the synthetic fixtures before the engine checks and exercises the browser results against Python; keep `TWIN_PYTHON` set to the environment above.
 
 For a numerical or scenario change, also run the affected preset and record the command, input hash, expected values, observed values, units, and whether the result is synthetic. A changed snapshot alone is not an independent derivation. Keep unknown costs and unavailable values explicit.
 
