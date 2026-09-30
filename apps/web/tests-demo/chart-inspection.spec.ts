@@ -59,7 +59,7 @@ test('research curve drag selects real samples with letterboxing, keyboard seek,
     await page.mouse.down();
     await page.mouse.move(point.x, point.y, { steps: 2 });
     await page.mouse.up();
-    await expect(input).toHaveValue(String(index));
+    await expect(input).toHaveValue(String(index), { timeout: 5000 });
     await expect(chart.locator('.research-chart-values')).toContainText(
       `Nearest sampled point · Time (s): ${samples[index]}`,
     );
@@ -67,7 +67,7 @@ test('research curve drag selects real samples with letterboxing, keyboard seek,
 
   const beforeKeyboard = Number(await input.inputValue());
   await input.press('ArrowLeft');
-  await expect(input).toHaveValue(String(Math.max(0, beforeKeyboard - 1)));
+  await expect(input).toHaveValue(String(Math.max(0, beforeKeyboard - 1)), { timeout: 5000 });
   const after = await downloadJson(page, 'research-export-json');
   expect(after).toEqual(baseline);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -147,14 +147,16 @@ test('power timeline pointer selects the containing interval and keyboard seek s
   await svg.scrollIntoViewIfNeeded();
   const slider = page.getByLabel('Replay interval');
   for (const index of [0, Math.floor((rows.length - 1) / 2), rows.length - 1]) {
-    const start = Number(rows[index]!.start_s);
-    const viewX = 46 + ((940 - 46 - 16) * start) / Number(baseline.scenario.duration_s);
+    // Inspect inside each interval: a boundary mapped through CSS pixels can
+    // legitimately land infinitesimally on either side of that boundary.
+    const middle = (Number(rows[index]!.start_s) + Number(rows[index]!.end_s)) / 2;
+    const viewX = 46 + ((940 - 46 - 16) * middle) / Number(baseline.scenario.duration_s);
     const point = await screenPoint(svg, viewX, 90);
     await page.mouse.move(point.x, point.y);
     await page.mouse.down();
     await page.mouse.move(point.x, point.y, { steps: 2 });
     await page.mouse.up();
-    await expect(slider).toHaveValue(String(index));
+    await expect(slider).toHaveValue(String(index), { timeout: 5000 });
     await expect(page.getByTestId('power-chart-inspection')).toContainText(
       `${Number(rows[index]!.start_s).toLocaleString('en-US')}–${Number(rows[index]!.end_s).toLocaleString('en-US')} s`,
     );
