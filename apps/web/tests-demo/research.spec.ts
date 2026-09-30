@@ -63,8 +63,18 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
       await expect(page.getByTestId('research-run')).toBeDisabled();
       await load.fill('0.6');
     }
+    const predictions = page
+      .getByRole('group', { name: '01 · Predict before the run', exact: true })
+      .getByRole('radio');
+    await predictions.nth(0).check();
     await page.getByTestId('research-run').click();
     await expect(page.getByTestId('research-export-json')).toBeVisible();
+    await expect(page.getByText('Applied result', { exact: true })).toBeVisible();
+    await expect(page.getByText('Draft changed.', { exact: true })).not.toBeVisible();
+    await predictions.nth(1).check();
+    await expect(page.getByText('Showing prior applied run', { exact: true })).toBeVisible();
+    await predictions.nth(0).check();
+    await expect(page.getByText('Applied result', { exact: true })).toBeVisible();
     const pending = page.waitForEvent('download');
     await page.getByTestId('research-export-json').click();
     const result = JSON.parse(
