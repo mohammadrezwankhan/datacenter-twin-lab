@@ -14,3 +14,11 @@ identified reference evidence, not original synthetic inputs or account quotatio
 The optional compiled dashboard contains React, React DOM, and Scheduler under the MIT
 License. Their copyright and permission notice is retained in
 apps/web/public/THIRD-PARTY-NOTICES.txt and copied into built dashboards and wheels.
+
+The optional advanced power-dynamics studies adapt the owner-supplied Python
+equivalents identified in docs/studies/power-dynamics.md. The original MATLAB
+files and measured GPU trace were not supplied. The modified nine-bus test
+network is attributed separately; third-party reference data is not relicensed
+by the project. NumPy and SciPy retain their own notices inside the distributed
+scientific runtime wheels. No original upload archive or compiled bytecode is
+included in the public tree.

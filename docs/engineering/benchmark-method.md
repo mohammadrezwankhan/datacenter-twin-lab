@@ -35,6 +35,8 @@ Chromium **153.0.8010.12**, Windows x64, 1280 × 900, unthrottled loopback Vite 
 [Raw browser samples and per-resource bytes](../validation/guide-benchmark-0.4.0rc1.json). The video and poster load on the separate evidence page. Python is an optional later download. Replay is an animation of an already computed result; it is neither simulation execution time nor real-time physical behavior. These local timings cannot predict mobile or internet load times.
 
 ```sh
+python -m pip install -r requirements-studies.lock
+python scripts/fetch_study_runtime.py
 python scripts/prepare_browser_demo.py
 npm --prefix apps/web run build:demo
 npm --prefix apps/web run test:demo -- benchmark.spec.ts

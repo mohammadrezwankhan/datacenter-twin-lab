@@ -19,6 +19,10 @@ import { ENGINE_VERSION } from './js-engine/version';
 import './energy-workspace.css';
 
 const browserDemo = import.meta.env.MODE === 'demo';
+const ResearchStudio = lazy(() =>
+  import('./research/Studio').then((module) => ({ default: module.ResearchStudio })),
+);
+const EmtStudy = lazy(() => import('./emt/Study').then((module) => ({ default: module.EmtStudy })));
 const Course = lazy(() => import('./Course').then((module) => ({ default: module.Course })));
 const EvidenceHub = lazy(() =>
   import('./EvidenceHub').then((module) => ({ default: module.EvidenceHub })),
@@ -29,10 +33,21 @@ const ScenarioFiles = lazy(() =>
 const DemandTimeline = lazy(() =>
   import('./DemandTimeline').then((module) => ({ default: module.DemandTimeline })),
 );
-type Page = 'start' | 'overview' | 'topology' | 'evidence' | 'learn' | 'energy' | 'assurance';
+type Page =
+  | 'start'
+  | 'overview'
+  | 'topology'
+  | 'evidence'
+  | 'learn'
+  | 'energy'
+  | 'assurance'
+  | 'emt'
+  | 'studies';
 function initialPage(): Page {
-  if (!browserDemo) return 'overview';
   const query = new URLSearchParams(window.location.search);
+  if (browserDemo && query.has('study')) return 'studies';
+  if (query.get('mode') === 'emt') return 'emt';
+  if (!browserDemo) return 'overview';
   if (query.has('lesson')) return 'learn';
   if (query.get('mode') === 'evidence') return 'assurance';
   return query.has('preset') || query.get('mode') === 'advanced' ? 'overview' : 'start';
@@ -352,7 +367,7 @@ function Compare({ baseline, run }: { baseline: Run; run: Run }) {
 
 export function App() {
   const [page, setPage] = useState<Page>(initialPage);
-  const needsWorkspace = !['start', 'learn', 'assurance'].includes(page);
+  const needsWorkspace = !['start', 'learn', 'assurance', 'emt', 'studies'].includes(page);
   const [draft, setDraft] = useState<SiteScenario | null>(null),
     [run, setRun] = useState<Run | null>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null),
@@ -374,11 +389,21 @@ export function App() {
   const dirty = !!draft && !!run && JSON.stringify(draft) !== JSON.stringify(run.scenario);
   function navigate(next: typeof page) {
     setPage(next);
-    if (browserDemo) {
+    if (browserDemo || next === 'emt' || page === 'emt') {
       const url = new URL(window.location.href);
+      if (next !== 'studies') url.searchParams.delete('study');
+      else {
+        url.searchParams.set('study', 'load-step');
+        url.searchParams.delete('preset');
+      }
       if (next !== 'learn') url.searchParams.delete('lesson');
-      if (next === 'start' || next === 'learn') url.searchParams.delete('mode');
-      else url.searchParams.set('mode', next === 'assurance' ? 'evidence' : 'advanced');
+      if (next === 'start' || next === 'learn' || next === 'studies')
+        url.searchParams.delete('mode');
+      else
+        url.searchParams.set(
+          'mode',
+          next === 'assurance' ? 'evidence' : next === 'emt' ? 'emt' : 'advanced',
+        );
       if (next === 'start') url.searchParams.delete('preset');
       if (next === 'learn' && !url.searchParams.has('lesson'))
         url.searchParams.set('lesson', 'power-energy');
@@ -526,6 +551,8 @@ export function App() {
             [
               ...(browserDemo ? [['start', '◉', 'Start here'] as const] : []),
               ...(browserDemo ? [['learn', '▹', '12 browser lessons'] as const] : []),
+              ['emt', '∿', 'EMT study'],
+              ...(browserDemo ? [['studies', '◌', 'Power dynamics studies'] as const] : []),
               ['overview', '◫', browserDemo ? 'Advanced workspace' : 'Overview'],
               ['assurance', '✓', 'Research evidence'],
               ...(!browserDemo || needsWorkspace
@@ -575,86 +602,100 @@ export function App() {
           </p>
           {browserDemo && <a href="./learn/">Course notes &amp; worked answers →</a>}
           {browserDemo && <a href="./evidence/">Reference results &amp; sources →</a>}
+          {!browserDemo && (
+            <a href="https://khanlab.co.technology/?study=load-step">
+              Open the power dynamics studies →
+            </a>
+          )}
           <span className="mini-tag">Local calculations</span>
         </div>
       </aside>
       <div className="main-shell">
         <header className="topbar">
           <span className="breadcrumb">
-            WORKSPACE <span>/</span> <b>Power continuity</b>
+            WORKSPACE <span>/</span>{' '}
+            <b>
+              {page === 'emt'
+                ? 'DC-link transients'
+                : page === 'studies'
+                  ? 'Power dynamics studies'
+                  : 'Power continuity'}
+            </b>
           </span>
           <span className="mode-badge">
             <i /> SIMULATED
           </span>
         </header>
         <main id="workspace-main" tabIndex={-1}>
-          <div className="page-heading">
-            <div>
-              <div className="eyebrow">DATACENTER TWIN LAB / ENERGY EXPLORER</div>
-              <h1>
-                {page === 'start'
-                  ? 'How long will the battery last?'
-                  : page === 'assurance'
-                    ? 'A result you can reproduce.'
-                    : page === 'learn'
-                      ? 'Power systems, made visible.'
-                      : page === 'evidence'
-                        ? 'Evidence & options'
-                        : page === 'topology'
-                          ? 'Power topology'
+          {page !== 'emt' && page !== 'studies' && (
+            <div className="page-heading">
+              <div>
+                <div className="eyebrow">DATACENTER TWIN LAB / ENERGY EXPLORER</div>
+                <h1>
+                  {page === 'start'
+                    ? 'How long will the battery last?'
+                    : page === 'assurance'
+                      ? 'A result you can reproduce.'
+                      : page === 'learn'
+                        ? 'Power systems, made visible.'
+                        : page === 'evidence'
+                          ? 'Evidence & options'
+                          : page === 'topology'
+                            ? 'Power topology'
+                            : page === 'energy'
+                              ? 'The energy systems playbook'
+                              : 'Power, under pressure.'}
+                </h1>
+                <p>
+                  {page === 'start'
+                    ? 'A five-minute power-continuity experiment for datacenter engineers. Predict, run, explain.'
+                    : page === 'assurance'
+                      ? 'Equations, inputs and outputs, together in one research assurance packet.'
+                      : page === 'learn'
+                        ? 'Twelve interactive lessons for datacenter engineers. Predict, experiment and explain.'
+                        : page === 'evidence'
+                          ? 'Trace the inputs and options behind each calculation.'
                           : page === 'energy'
-                            ? 'The energy systems playbook'
-                            : 'Power, under pressure.'}
-              </h1>
-              <p>
-                {page === 'start'
-                  ? 'A five-minute power-continuity experiment for datacenter engineers. Predict, run, explain.'
-                  : page === 'assurance'
-                    ? 'Equations, inputs and outputs, together in one research assurance packet.'
-                    : page === 'learn'
-                      ? 'Twelve interactive lessons for datacenter engineers. Predict, experiment and explain.'
-                      : page === 'evidence'
-                        ? 'Trace the inputs and options behind each calculation.'
-                        : page === 'energy'
-                          ? 'Turn infrastructure questions into transparent engineering experiments.'
-                          : 'Configure your facility. Stress the supply. See what keeps running.'}
-              </p>
-            </div>
-            {needsWorkspace && page !== 'energy' && (
-              <div className="heading-actions">
-                {(page === 'overview' || page === 'topology') && (
+                            ? 'Turn infrastructure questions into transparent engineering experiments.'
+                            : 'Configure your facility. Stress the supply. See what keeps running.'}
+                </p>
+              </div>
+              {needsWorkspace && page !== 'energy' && (
+                <div className="heading-actions">
+                  {(page === 'overview' || page === 'topology') && (
+                    <button
+                      disabled={!run || busy}
+                      aria-expanded={timelineOpen}
+                      aria-controls="demand-timeline"
+                      onClick={() => setTimelineOpen(!timelineOpen)}
+                    >
+                      Edit demand timeline
+                    </button>
+                  )}
                   <button
                     disabled={!run || busy}
-                    aria-expanded={timelineOpen}
-                    aria-controls="demand-timeline"
-                    onClick={() => setTimelineOpen(!timelineOpen)}
+                    aria-expanded={filesOpen}
+                    aria-controls="scenario-files"
+                    onClick={() => setFilesOpen(!filesOpen)}
                   >
-                    Edit demand timeline
+                    Import scenario
                   </button>
-                )}
-                <button
-                  disabled={!run || busy}
-                  aria-expanded={filesOpen}
-                  aria-controls="scenario-files"
-                  onClick={() => setFilesOpen(!filesOpen)}
-                >
-                  Import scenario
-                </button>
-                <button
-                  disabled={!run || busy}
-                  onClick={() => {
-                    setBaseline(run);
-                    setNotice('Baseline saved for this session.');
-                  }}
-                >
-                  Save baseline
-                </button>
-                <button disabled={!run} onClick={exportRun}>
-                  Export run <span aria-hidden="true">↗</span>
-                </button>
-              </div>
-            )}
-          </div>
+                  <button
+                    disabled={!run || busy}
+                    onClick={() => {
+                      setBaseline(run);
+                      setNotice('Baseline saved for this session.');
+                    }}
+                  >
+                    Save baseline
+                  </button>
+                  <button disabled={!run} onClick={exportRun}>
+                    Export run <span aria-hidden="true">↗</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           {error && (
             <div role="alert" className="error-banner">
               {error}
@@ -690,6 +731,16 @@ export function App() {
           {page === 'learn' && (
             <Suspense fallback={<p role="status">Opening the course studio…</p>}>
               <Course />
+            </Suspense>
+          )}
+          {page === 'emt' && (
+            <Suspense fallback={<p role="status">Opening the transient study…</p>}>
+              <EmtStudy />
+            </Suspense>
+          )}
+          {page === 'studies' && (
+            <Suspense fallback={<p role="status">Opening the power dynamics studio…</p>}>
+              <ResearchStudio />
             </Suspense>
           )}
           {needsWorkspace && !run && !error && (

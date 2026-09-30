@@ -45,9 +45,12 @@ def dispatch_json(path: str, body: str = "null") -> str:
         result = demo_scenario(preset).to_dict()
     elif route.path == "catalog":
         result = load_catalog()
-    elif route.path in ("simulations", "quotes/normalize", "reports", "sweeps", "planning"):
+    elif route.path in ("simulations", "quotes/normalize", "reports", "sweeps", "planning", "emt"):
         payload = parse_json_document(body.encode("utf-8"))
-        if route.path == "simulations":
+        if route.path == "emt":
+            from .emt import simulate_emt
+            result = simulate_emt(payload)
+        elif route.path == "simulations":
             result = simulate_continuity(SiteScenario.from_dict(payload)).to_dict()
         elif route.path == "planning":
             result = simulate_planning(Scenario.from_dict(payload))

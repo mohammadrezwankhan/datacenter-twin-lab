@@ -6,6 +6,8 @@ import type { SiteScenario } from './src/types.ts';
 import type { Run } from './src/types.ts';
 import site from './site.config.json' with { type: 'json' };
 import { displayQuantity, lessonRecords, type EvidenceIndex } from './seo-records';
+import { emtPage } from './seo-emt';
+import { researchPage } from './seo-research';
 
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const title = 'Datacenter Power Systems: Free Interactive Course | Datacenter Twin Lab';
@@ -109,7 +111,7 @@ ${site.googleSiteVerification && path === '' && base === site.url ? `<meta name=
     content: string,
     schema: unknown,
   ): string {
-    const root = path.startsWith('learn/') && path !== 'learn/' ? '../../' : '../';
+    const root = '../'.repeat(path.split('/').filter(Boolean).length);
     return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 ${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/png" sizes="96x96" href="${root}favicon.png"><meta name="theme-color" content="#0b655d"><style>${style}</style></head>
 <body><a class="skip" href="#main">Skip to content</a><header><a href="${root}">DATACENTER TWIN LAB</a>
@@ -183,7 +185,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
       return html
         .replace(
           '<!-- PUBLIC_COURSE_LINKS -->',
-          '<a href="./learn/">Read all twelve course lessons</a> · <a href="./evidence/">Reference results and source records</a> · <a href="./about/">About the author and evidence</a> ·',
+          '<a href="./learn/">Read all twelve course lessons</a> · <a href="./studies/emt/">Explore the EMT study</a> · <a href="./studies/power-dynamics/">Power dynamics studies</a> · <a href="./evidence/">Reference results and source records</a> · <a href="./about/">About the author and evidence</a> ·',
         )
         .replace(/<title>[\s\S]*?<\/title>/, '')
         .replace(/<meta\s+(?:name="description"|property="og:[^"]+")[\s\S]*?>/g, '')
@@ -227,7 +229,8 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
 <p><a class="button" href="../?lesson=ride-through">Try the battery experiment →</a></p>
 <div class="tags"><span>Free · no account</span><span>Browser + Python</span><span>Predict · run · explain</span></div>${graphic}
 <h2>Build your power-systems intuition</h2><p>For datacenter engineers learning power continuity. Begin with power and energy, work through outages and shared failures, then compare aggregate AI demand and annual PUE planning. Basic arithmetic is enough to start.</p><div class="cards">${cards}</div>
-<section class="panel"><h2>What these experiments establish</h2><p>These are deterministic synthetic electrical examples with explicit units, input scenarios and downloadable results. They teach reserve accounting and failure-path reasoning. They do not predict GPU jobs, grid adequacy, electrical transients or certified facility uptime.</p><p><a href="../about/">Read about the author, model scope and reproducibility evidence →</a></p></section>`,
+<section class="panel"><h2>Go inside a voltage sag</h2><p>Ready for a different timescale? The separate <a href="../studies/emt/">EMT fundamentals study</a> explores a 200 ms ideal DC-link RLC transient with waveforms, an energy ledger and step-refinement checks. Continue with five <a href="../studies/power-dynamics/">advanced power-dynamics studies</a> of converter response and grid modes.</p></section>
+<section class="panel"><h2>What these twelve experiments establish</h2><p>These are deterministic synthetic electrical examples with explicit units, input scenarios and downloadable results. They teach reserve accounting and failure-path reasoning. They do not predict GPU jobs, grid adequacy, electrical transients or certified facility uptime.</p><p><a href="../about/">Read about the author, model scope and reproducibility evidence →</a></p></section>`,
           course,
         ),
       );
@@ -483,12 +486,57 @@ python scripts/build_evidence.py --verify outputs/reproduction-${ENGINE_VERSION}
           ],
         ),
       );
+      const emt = emtPage(source);
+      emit(
+        'studies/emt/index.html',
+        document(
+          'DC-link EMT Study: Voltage Sag and Recovery | Datacenter Twin Lab',
+          'Explore a 200 ms DC-link RLC transient with interactive voltage and current plots, an energy ledger and reproducible Python calculations.',
+          'studies/emt/',
+          emt.content,
+          {
+            '@type': 'LearningResource',
+            '@id': url('studies/emt/#study'),
+            name: 'Inside a voltage sag',
+            url: url('studies/emt/'),
+            author,
+            learningResourceType: 'Interactive study',
+            isAccessibleForFree: true,
+            inLanguage: 'en',
+            description:
+              'An original ideal DC-link RLC teaching circuit, with equations, assumptions and numerical checks.',
+          },
+        ),
+      );
+      emit('studies/emt/default-config.json', JSON.stringify(emt.result.config, null, 2) + '\n');
+      emit('studies/emt/default-result.json', JSON.stringify(emt.result) + '\n');
+      emit(
+        'studies/power-dynamics/index.html',
+        document(
+          'Power Dynamics Studies: Converter Response and Grid Modes | Datacenter Twin Lab',
+          'Five interactive Python studies explore load steps, converter modes, synthetic load spectra, abc versus QSS models and a modified nine-bus network.',
+          'studies/power-dynamics/',
+          researchPage(source),
+          {
+            '@type': 'LearningResource',
+            '@id': url('studies/power-dynamics/#studies'),
+            name: 'Power dynamics study studio',
+            url: url('studies/power-dynamics/'),
+            author,
+            learningResourceType: 'Interactive study collection',
+            isAccessibleForFree: true,
+            inLanguage: 'en',
+          },
+        ),
+      );
       const paths = [
         '',
         'learn/',
         ...lessons.map((lesson) => `learn/${lesson.id}/`),
         'evidence/',
         'about/',
+        'studies/emt/',
+        'studies/power-dynamics/',
       ];
       emit(
         'sitemap.xml',

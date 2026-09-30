@@ -38,6 +38,8 @@ Use Python 3.12+ and Node 24 from the repository root:
 
 ```sh
 npm --prefix apps/web ci --ignore-scripts
+python -m pip install -r requirements-studies.lock
+python scripts/fetch_study_runtime.py
 python scripts/prepare_browser_demo.py
 npm --prefix apps/web run test:engine
 npm --prefix apps/web run build:demo

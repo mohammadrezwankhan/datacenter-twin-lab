@@ -1,0 +1,11 @@
+# Datacenter Twin Lab
+
+A local-first power-continuity what-if simulator and twelve-lesson course maintained by Mohammad Rezwan Khan. Canonical site: https://khanlab.co.technology/
+
+- [DC-link EMT study](https://khanlab.co.technology/studies/emt/)
+- [Power-dynamics studies](https://khanlab.co.technology/studies/power-dynamics/)
+- [Course notes](https://khanlab.co.technology/learn/)
+- [Results and sources](https://khanlab.co.technology/evidence/)
+- [Author, model scope and reproducibility](https://khanlab.co.technology/about/)
+
+The model uses declared inputs and reproducible numerical examples. It does not control equipment or establish facility calibration, certified uptime or equipment safety. Read the visible course and evidence pages for assumptions and limitations.

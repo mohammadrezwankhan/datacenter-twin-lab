@@ -23,6 +23,8 @@ The guided route has three actions. **01 · Predict:** enter an estimate in seco
 
 ## Browser and local workflows
 
+- Explore the [DC-link EMT lesson](../studies/emt.md) for a 200 ms voltage sag, then the [five advanced power dynamics studies](../studies/power-dynamics.md) for load steps, modes, spectra, model comparison and interacting grid ports.
+
 - [Open the advanced energy workspace](https://khanlab.co.technology/?mode=advanced) to inspect the full electrical topology, replay events, change bounded assumptions, and export a run.
 - [Open the evidence hub's captioned 60-second demo](https://khanlab.co.technology/?mode=evidence#demo) or read its [transcript and reproduction notes](../examples/proof-demo.md).
 - Follow the [quickstart](../quickstart.md) to install the published, hash-pinned v1.0.0 CLI/dashboard wheel, or use its source-build and verification commands.

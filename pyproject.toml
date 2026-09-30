@@ -20,6 +20,7 @@ Issues = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues"
 [project.optional-dependencies]
 api = ["fastapi==0.141.1", "uvicorn==0.52.4"]
 test-api = ["httpx==0.28.1"]
+studies = ["numpy==2.4.6", "scipy==1.18.0"]
 
 [project.scripts]
 datacenter-twin = "datacenter_twin.cli:main"
