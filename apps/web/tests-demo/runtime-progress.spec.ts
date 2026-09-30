@@ -46,7 +46,13 @@ test('cancelling an in-flight source download clears progress and applies no res
   });
   await page.route('**/research.zip', async (route) => {
     await gate;
-    await route.continue();
+    try {
+      await route.continue();
+    } catch (error) {
+      // Terminating the worker can finish its network route before this gate
+      // opens. Other routing errors still fail the cancellation test.
+      if (!String(error).includes('Route is already handled')) throw error;
+    }
   });
 
   await page.getByTestId('research-run').click();

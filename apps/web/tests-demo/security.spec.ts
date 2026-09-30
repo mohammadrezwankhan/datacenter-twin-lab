@@ -12,7 +12,13 @@ test('power dynamics security headers protect HTML and the scientific worker', a
   expect(headers['x-frame-options']).toBe('SAMEORIGIN');
   expect(headers['x-content-type-options']).toBe('nosniff');
   expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
-  expect(headers['permissions-policy']).toBe('camera=(), microphone=(), geolocation=()');
+  const permissions = headers['permissions-policy'].split(',').map((value) => value.trim());
+  // A local security proxy may add further denials; these required denials
+  // must still be present exactly, without depending on header ordering.
+  for (const feature of ['camera', 'microphone', 'geolocation'])
+    expect(permissions.filter((value) => value.startsWith(`${feature}=`))).toEqual([
+      `${feature}=()`,
+    ]);
   const csp = headers['content-security-policy'];
   expect(csp).toContain("default-src 'self'");
   expect(csp).toContain("frame-ancestors 'self'");
