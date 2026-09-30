@@ -1,5 +1,5 @@
-name: First-run reproducibility help
-description: Report a setup or first-run problem with enough context to reproduce it
+name: First-run or lesson help
+description: Report a browser, setup, or confusing lesson step
 title: "[first-run] "
 labels:
   - help wanted
@@ -7,47 +7,59 @@ body:
   - type: markdown
     attributes:
       value: |
-        Start with the [quickstart](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md). Remove credentials and private data before posting.
-  - type: input
-    id: revision
+        Tell us where you got stuck in the [browser course](https://khanlab.co.technology/) or [quickstart](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md). Browser-only reports need no Python installation, release hash, or hand calculation.
+        Issues are public. Remove credentials, private files, and sensitive facility details before posting.
+  - type: dropdown
+    id: route
     attributes:
-      label: Release or commit
-      description: Exact tag, commit, or wheel version.
-    validations:
-      required: true
-  - type: textarea
-    id: environment
-    attributes:
-      label: Environment
-      description: Operating system, Python version, pip version, and source or wheel path. Include Node/browser versions only if using the dashboard.
+      label: Where were you working?
+      options:
+        - Hosted browser course
+        - Downloaded browser bundle
+        - Python CLI
+        - Local Python dashboard
+        - Documentation / not sure
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps and command
-      description: Include the commands from a clean or clearly described environment and the first failing step.
-      render: shell
-    validations:
-      required: true
-  - type: textarea
-    id: expected
-    attributes:
-      label: Expected first-run result
-      description: What did the quickstart say should happen? Include units or URL/port where relevant.
+      label: Page and steps
+      description: Paste the page URL (including the lesson), name the control or instruction, and describe what you clicked or typed. For local use, include the command and first failing step. Keep private paths and credentials out.
     validations:
       required: true
   - type: textarea
     id: actual
     attributes:
-      label: Observed result
-      description: Include the complete concise error and any sanitized output.
+      label: What happened?
+      description: Include the error or confusing wording. A screenshot or short output excerpt can help, but is optional; remove private data first.
     validations:
       required: true
   - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect? (optional)
+      description: Tell us what you thought the next step or result would be, in your own words.
+    validations:
+      required: false
+  - type: input
+    id: environment
+    attributes:
+      label: Browser or local environment (if known)
+      description: For the course, your browser and operating system are enough. For Python or the local dashboard, add the Python version and how you installed it if known.
+    validations:
+      required: false
+  - type: input
+    id: revision
+    attributes:
+      label: Release or commit (if known)
+      description: Add a tag, commit, or wheel version if available. The hosted page URL above is enough to start; leave this blank if unsure.
+    validations:
+      required: false
+  - type: textarea
     id: input_hash
     attributes:
-      label: Input hash or sanitized export
+      label: Input hash or sanitized export (optional)
       description: Add an input SHA-256 or sanitized export only when relevant; do not upload private inputs.
     validations:
       required: false
