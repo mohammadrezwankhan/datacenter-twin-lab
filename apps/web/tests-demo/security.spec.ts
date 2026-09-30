@@ -41,7 +41,8 @@ test('power dynamics security headers protect HTML and the scientific worker', a
   await expect(page.locator('main')).toHaveCount(1);
   await expect(page.getByRole('region', { name: 'Power dynamics research studio' })).toBeVisible();
   await page.getByRole('button', { name: 'Run load step', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Study output' })).toBeVisible();
+  await expect(page.getByTestId('research-export-json')).toBeVisible();
+  await expect(page.getByText('Applied result', { exact: true })).toBeVisible();
   const landmarks = await new AxeBuilder({ page })
     .withRules(['landmark-one-main', 'landmark-main-is-top-level'])
     .analyze();
