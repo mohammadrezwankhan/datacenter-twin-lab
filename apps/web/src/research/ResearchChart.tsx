@@ -1,4 +1,5 @@
-import type { PointerEvent } from 'react';
+import { useRef, type PointerEvent } from 'react';
+import { svgViewBoxPoint } from '../chartPointer';
 import type { ResearchChart as ChartData } from './types';
 
 const colors = ['#68d4df', '#efb75b', '#b69cff', '#8dcc9e', '#e98c9d'];
@@ -72,6 +73,7 @@ export function ResearchChart({
   const valid = count > 0 && ys.length > 0;
   const xValue = chart.x[index];
   const cleanId = chart.id.replaceAll('_', ' ').replaceAll('-', ' ');
+  const inspectingPointer = useRef<number | null>(null);
   const pathFor = (values: number[]) => {
     const commands: string[] = [];
     let begun = false;
@@ -90,8 +92,7 @@ export function ResearchChart({
   const lineAt = (lineIndex: number) => chart.lines[lineIndex]?.values[index];
   const focusPointFromPointer = (event: PointerEvent<SVGSVGElement>) => {
     if (count < 2) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const viewX = ((event.clientX - rect.left) / rect.width) * width;
+    const viewX = svgViewBoxPoint(event.currentTarget, event.clientX, event.clientY).x;
     const target = xMin + Math.max(0, Math.min(1, (viewX - left) / plotWidth)) * (xMax - xMin);
     let nearest = 0;
     for (let candidate = 1; candidate < count; candidate++) {
@@ -103,6 +104,18 @@ export function ResearchChart({
     }
     onFocus();
     onPointChange(nearest);
+  };
+  const startInspecting = (event: PointerEvent<SVGSVGElement>) => {
+    if (event.button !== 0) return;
+    inspectingPointer.current = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    focusPointFromPointer(event);
+  };
+  const stopInspecting = (event: PointerEvent<SVGSVGElement>) => {
+    if (inspectingPointer.current !== event.pointerId) return;
+    inspectingPointer.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   return (
@@ -149,7 +162,9 @@ export function ResearchChart({
               ' actual samples.'
             }
             onPointerMove={focusPointFromPointer}
-            onPointerDown={focusPointFromPointer}
+            onPointerDown={startInspecting}
+            onPointerUp={stopInspecting}
+            onPointerCancel={stopInspecting}
           >
             <title>
               {chart.title} · {chart.x_label} by {chart.y_label}
@@ -261,12 +276,21 @@ export function ResearchChart({
                 onFocus={onFocus}
                 onChange={(event) => onPointChange(Number(event.target.value))}
               />
-              <strong>
-                {chart.x_label}: {fmt(xValue, 6)}
+              <strong aria-label="Selected sample timestamp">
+                {chart.x_label}: {fmt(xValue, 7)}
               </strong>
             </div>
           )}
-          <div className="research-chart-values" aria-label="Selected sample values">
+          <div
+            className="research-chart-values"
+            aria-label="Selected sample values"
+            aria-live="polite"
+          >
+            <span className="research-chart-selected-point">
+              <b>
+                Nearest sampled point · {chart.x_label}: {fmt(xValue, 7)}
+              </b>
+            </span>
             {chart.lines.map((line, lineIndex) => (
               <span key={line.label}>
                 <i style={{ background: line.color || colors[lineIndex % colors.length] }} />

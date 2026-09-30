@@ -3,10 +3,15 @@ export const n = (value: unknown, digits = 1) =>
     ? 'Unknown'
     : Number(value).toLocaleString('en-US', { maximumFractionDigits: digits });
 
-export async function request<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
+export async function request<T>(
+  path: string,
+  signal?: AbortSignal,
+  body?: unknown,
+  onProgress?: (progress: import('./runtime-progress').RuntimeProgress) => void,
+): Promise<T> {
   if (import.meta.env.MODE === 'demo') {
     const { browserRequest } = await import('./browser-client');
-    return browserRequest<T>(path, signal, body);
+    return browserRequest<T>(path, signal, body, onProgress);
   }
   const response = await fetch(`/api/v1/${path}`, {
     signal,

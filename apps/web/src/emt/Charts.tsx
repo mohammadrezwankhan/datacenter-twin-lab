@@ -1,4 +1,6 @@
+import { useRef, type PointerEvent } from 'react';
 import type { EmtConfig, EmtResult } from './engine';
+import { svgViewBoxPoint } from '../chartPointer';
 
 type Series = { name: string; color: string; values: number[] };
 
@@ -15,6 +17,7 @@ function LineChart({
   config,
   result,
   timeMark,
+  onSampleIndexChange,
   series,
 }: {
   title: string;
@@ -23,6 +26,7 @@ function LineChart({
   config: EmtConfig;
   result: EmtResult;
   timeMark: number;
+  onSampleIndexChange: (index: number) => void;
   series: Series[];
 }) {
   const width = 720;
@@ -43,6 +47,17 @@ function LineChart({
   const spanMs = Math.max(1e-9, config.duration_ms);
   const x = (timeMs: number) => left + (timeMs / spanMs) * plotWidth;
   const y = (value: number) => top + ((high - value) / (high - low)) * plotHeight;
+  let selectedIndex = 0;
+  let selectedDistance = Infinity;
+  result.rows.forEach((row, index) => {
+    const distance = Math.abs(row.time_ms - timeMark);
+    if (distance < selectedDistance) {
+      selectedIndex = index;
+      selectedDistance = distance;
+    }
+  });
+  const selectedRow = result.rows[selectedIndex] ?? result.rows[0];
+  const inspectingPointer = useRef<number | null>(null);
   const ticks = Array.from({ length: 5 }, (_, index) => high - (index / 4) * (high - low));
   const timeTicks = Array.from({ length: 5 }, (_, index) => (index / 4) * spanMs);
   const pathFor = (values: number[]) =>
@@ -55,7 +70,7 @@ function LineChart({
           y(values[index] ?? values[values.length - 1] ?? 0).toFixed(2),
       )
       .join(' ');
-  const cursorX = x(Math.max(0, Math.min(spanMs, timeMark)));
+  const cursorX = x(selectedRow?.time_ms ?? 0);
   const eventLeft = x(config.sag_start_ms);
   const eventRight = x(Math.min(config.duration_ms, config.sag_start_ms + config.sag_duration_ms));
   const minLabel = numberText(observedMin, unit === 'A' ? 2 : 1);
@@ -71,8 +86,35 @@ function LineChart({
     ', over 0 to ' +
     numberText(spanMs) +
     ' milliseconds. Marker at ' +
-    numberText(timeMark, 2) +
+    numberText(selectedRow?.time_ms ?? timeMark, 2) +
     ' milliseconds.';
+  const inspectFromPointer = (event: PointerEvent<SVGSVGElement>) => {
+    const viewX = svgViewBoxPoint(event.currentTarget, event.clientX, event.clientY).x;
+    const fraction = Math.max(0, Math.min(1, (viewX - left) / plotWidth));
+    const targetTime = fraction * spanMs;
+    let nearest = 0;
+    let distance = Infinity;
+    result.rows.forEach((row, index) => {
+      const next = Math.abs(row.time_ms - targetTime);
+      if (next < distance) {
+        nearest = index;
+        distance = next;
+      }
+    });
+    onSampleIndexChange(nearest);
+  };
+  const startInspecting = (event: PointerEvent<SVGSVGElement>) => {
+    if (event.button !== 0) return;
+    inspectingPointer.current = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    inspectFromPointer(event);
+  };
+  const stopInspecting = (event: PointerEvent<SVGSVGElement>) => {
+    if (inspectingPointer.current !== event.pointerId) return;
+    inspectingPointer.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
+  };
 
   return (
     <section className="emt-chart-card" aria-label={title}>
@@ -102,6 +144,13 @@ function LineChart({
         viewBox={'0 0 ' + width + ' ' + height}
         role="img"
         aria-label={description}
+        onPointerDown={startInspecting}
+        onPointerMove={(event) => {
+          if (event.pointerType === 'mouse' || inspectingPointer.current === event.pointerId)
+            inspectFromPointer(event);
+        }}
+        onPointerUp={stopInspecting}
+        onPointerCancel={stopInspecting}
       >
         <title>{description}</title>
         <rect
@@ -182,24 +231,34 @@ function LineChart({
         />
         <circle
           cx={cursorX}
-          cy={y(
-            series[series.length - 1]?.values[
-              Math.min(
-                result.rows.length - 1,
-                Math.round((timeMark / spanMs) * (result.rows.length - 1)),
-              )
-            ] ?? 0,
-          )}
+          cy={y(series[series.length - 1]?.values[selectedIndex] ?? 0)}
           r="4"
           fill={series[series.length - 1]?.color}
           className="emt-chart-dot"
         />
       </svg>
+      <div className="emt-chart-inspection" aria-live="polite" data-testid="emt-chart-inspection">
+        <strong>Nearest sampled point</strong>
+        <span>Time: {numberText(selectedRow?.time_ms ?? timeMark, 4)} ms</span>
+        {series.map((item) => (
+          <span key={item.name}>
+            {item.name}: {numberText(item.values[selectedIndex] ?? 0, unit === 'A' ? 3 : 2)} {unit}
+          </span>
+        ))}
+      </div>
     </section>
   );
 }
 
-export function EmtCharts({ result, timeMark }: { result: EmtResult; timeMark: number }) {
+export function EmtCharts({
+  result,
+  timeMark,
+  onSampleIndexChange,
+}: {
+  result: EmtResult;
+  timeMark: number;
+  onSampleIndexChange: (index: number) => void;
+}) {
   const { config, rows } = result;
   return (
     <div className="emt-charts">
@@ -210,6 +269,7 @@ export function EmtCharts({ result, timeMark }: { result: EmtResult; timeMark: n
         config={config}
         result={result}
         timeMark={timeMark}
+        onSampleIndexChange={onSampleIndexChange}
         series={[
           { name: 'Source', color: '#58d8e8', values: rows.map((row) => row.source_v) },
           { name: 'DC bus', color: '#f0788f', values: rows.map((row) => row.bus_v) },
@@ -222,6 +282,7 @@ export function EmtCharts({ result, timeMark }: { result: EmtResult; timeMark: n
         config={config}
         result={result}
         timeMark={timeMark}
+        onSampleIndexChange={onSampleIndexChange}
         series={[
           { name: 'Source current', color: '#f1b451', values: rows.map((row) => row.source_a) },
         ]}

@@ -1,6 +1,7 @@
 import { useRef, type CSSProperties } from 'react';
 import { lessons } from './course-lessons';
 import { courseChapters, courseThemes } from './course-themes';
+import { CurriculumTracks, trackForLesson } from './CurriculumTracks';
 import './course-map.css';
 
 type CourseMapProps = {
@@ -29,6 +30,7 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
 
   return (
     <section className="course-map" aria-label="Course map">
+      <CurriculumTracks activeTrack={trackForLesson(selectedLesson.id)} />
       <div
         className="course-map-current"
         style={lessonStyle(selectedTheme.accent, selectedTheme.softAccent)}

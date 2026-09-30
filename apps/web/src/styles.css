@@ -609,6 +609,38 @@ main {
   cursor: crosshair;
   margin: 18px 0 6px;
 }
+.power-chart-wrap {
+  min-width: 0;
+}
+.power-chart {
+  touch-action: pan-y;
+}
+.power-chart-inspection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 14px;
+  margin: 3px 0 4px;
+  padding: 8px 10px;
+  border: 1px solid #2d414f;
+  border-radius: 5px;
+  background: #111e2b;
+  color: #b5c4d4;
+  font:
+    10px Consolas,
+    'SFMono-Regular',
+    monospace;
+}
+.power-chart-inspection strong {
+  color: #92a7ba;
+  font:
+    600 10px 'Segoe UI',
+    system-ui,
+    sans-serif;
+}
+.power-chart-inspection span {
+  white-space: nowrap;
+}
 .power-chart text {
   fill: #8ea0b7;
   font-size: 10px;

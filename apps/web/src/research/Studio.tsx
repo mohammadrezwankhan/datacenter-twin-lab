@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent, CSSProperties } from 'react';
 import { researchRequest } from './runtime-client';
+import { RuntimeProgress } from '../RuntimeProgress';
+import type { RuntimeProgress as RuntimeProgressState } from '../runtime-progress';
 import { ModePlot } from './ModePlot';
 import { ResearchDiagram } from './NetworkDiagram';
 import { ResearchChart } from './ResearchChart';
@@ -189,6 +191,7 @@ export function ResearchStudio() {
   const [result, setResult] = useState<ResearchResult | null>(null);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState('');
+  const [progress, setProgress] = useState<RuntimeProgressState | null>(null);
   const [runError, setRunError] = useState<RunError | null>(null);
   const [chartFocus, setChartFocus] = useState('');
   const [pointIndex, setPointIndex] = useState(0);
@@ -223,6 +226,7 @@ export function ResearchStudio() {
     setResult(null);
     setBusy(false);
     setStatus('');
+    setProgress(null);
     setRunError(null);
     setChartFocus('');
     setPointIndex(0);
@@ -245,12 +249,21 @@ export function ResearchStudio() {
     const selectedPrediction = modeChoiceForPrediction(study, prediction);
     setBusy(true);
     setStatus('Preparing local numerical runtime…');
+    setProgress({ stage: 'starting', message: 'Starting the local numerical runtime' });
     setRunError(null);
     try {
-      const response = await researchRequest<ResearchResult>('research', activeController.signal, {
-        study: selectedId,
-        config: parsed.config,
-      });
+      const response = await researchRequest<ResearchResult>(
+        'research',
+        activeController.signal,
+        {
+          study: selectedId,
+          config: parsed.config,
+        },
+        (nextProgress) => {
+          if (!activeController.signal.aborted && sequence === requestSequence.current)
+            setProgress(nextProgress);
+        },
+      );
       if (
         activeController.signal.aborted ||
         sequence !== requestSequence.current ||
@@ -267,12 +280,14 @@ export function ResearchStudio() {
       setResult(response);
       setAppliedPrediction(selectedPrediction);
       setStatus('');
+      setProgress(null);
       setChartFocus(response.charts[0]?.id ?? '');
       setPointIndex(0);
     } catch (cause) {
       if (sequence !== requestSequence.current) return;
       if ((cause as Error).name === 'AbortError') {
         setStatus('Run cancelled. No result was applied.');
+        setProgress(null);
       } else {
         const detail = (cause as Error).message || 'An unknown runtime or solver error occurred.';
         const runtimeFailure =
@@ -282,6 +297,7 @@ export function ResearchStudio() {
           detail,
         });
         setStatus('');
+        setProgress(null);
       }
     } finally {
       if (sequence === requestSequence.current) {
@@ -296,6 +312,7 @@ export function ResearchStudio() {
     controller.current?.abort();
     controller.current = null;
     setBusy(false);
+    setProgress(null);
     setStatus('Run cancelled. No result was applied.');
   }
 
@@ -306,18 +323,23 @@ export function ResearchStudio() {
 
   if (!isDemo) {
     return (
-      <main className="research-studio research-hosted-only" style={accentStyle}>
+      <section
+        className="research-studio research-hosted-only"
+        aria-label="Power dynamics research studio"
+        style={accentStyle}
+      >
         <span className="research-eyebrow">ADVANCED STUDY STUDIO</span>
         <h1>Research studies run in the browser studio</h1>
         <p>The optional Python and scientific runtime is packaged with the public static course.</p>
         <a href={'https://khanlab.co.technology/?study=' + studyId}>Open the hosted study ↗</a>
-      </main>
+      </section>
     );
   }
 
   return (
-    <main
+    <section
       className="research-studio"
+      aria-label="Power dynamics research studio"
       data-testid="research-studio"
       data-study={study.id}
       style={accentStyle}
@@ -487,9 +509,11 @@ export function ResearchStudio() {
             </span>
           </div>
           {busy && (
-            <div className="research-busy" role="status" aria-live="polite">
-              <span className="research-spinner" />{' '}
-              <span>Preparing local numerical runtime… The active worker can be cancelled.</span>
+            <div className="research-busy runtime-progress-shell">
+              <RuntimeProgress
+                progress={progress ?? { stage: 'starting', message: 'Preparing local runtime' }}
+                testId="research-runtime-progress"
+              />
               <button type="button" onClick={cancelRun} data-testid="research-cancel">
                 Cancel
               </button>
@@ -577,8 +601,10 @@ export function ResearchStudio() {
                     accent={study.color}
                     active={chartFocus === chart.id}
                     onFocus={() => {
-                      setChartFocus(chart.id);
-                      setPointIndex(0);
+                      if (chartFocus !== chart.id) {
+                        setChartFocus(chart.id);
+                        setPointIndex(0);
+                      }
                     }}
                     pointIndex={chartFocus === chart.id ? pointIndex : 0}
                     onPointChange={setPointIndex}
@@ -711,6 +737,6 @@ export function ResearchStudio() {
         </a>
         <span>Teaching models · no facility or GPU trace validation</span>
       </footer>
-    </main>
+    </section>
   );
 }

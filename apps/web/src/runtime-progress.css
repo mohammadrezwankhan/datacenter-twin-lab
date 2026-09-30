@@ -1,0 +1,75 @@
+.runtime-progress {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #c7d8dc;
+  border-radius: 0.65rem;
+  background: #f5faf9;
+  color: #193638;
+  font-size: 0.9rem;
+}
+
+.runtime-progress-stage {
+  justify-self: start;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: #dcefea;
+  color: #15584d;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.runtime-progress-stage.is-download,
+.runtime-progress-stage.is-packages {
+  background: #e8efff;
+  color: #263b80;
+}
+
+.runtime-progress-stage.is-verify {
+  background: #fff1ce;
+  color: #654700;
+}
+
+.runtime-progress-message {
+  font-weight: 650;
+}
+
+.runtime-progress-resource,
+.runtime-progress-bytes small {
+  color: #486165;
+  font-size: 0.78rem;
+}
+
+.runtime-progress-bytes {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.runtime-progress-bytes progress {
+  width: 100%;
+  height: 0.55rem;
+  accent-color: #16836f;
+}
+
+.runtime-progress-shell {
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.runtime-progress-shell .runtime-progress {
+  flex: 1 1 100%;
+  border-color: #3a5662;
+  background: #0f202b;
+  color: #deeff1;
+}
+
+.runtime-progress-shell .runtime-progress-resource,
+.runtime-progress-shell .runtime-progress-bytes small {
+  color: #a7bec5;
+}
+
+.runtime-progress-shell button {
+  margin-left: auto;
+}

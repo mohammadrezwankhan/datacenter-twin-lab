@@ -3,16 +3,17 @@ requires = ["setuptools==84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "datacenter-twin-lab"
+name = "datacenter-twin"
 dynamic = ["version"]
 description = "Reproducible local-first power-continuity what-if simulation and reports"
-readme = "README.md"
+readme = "README-PYPI.md"
 requires-python = ">=3.12"
 license = "Apache-2.0"
 authors = [{name = "Mohammad Rezwan Khan"}]
 dependencies = []
 
 [project.urls]
+Homepage = "https://khanlab.co.technology/"
 Repository = "https://github.com/mohammadrezwankhan/datacenter-twin-lab"
 Documentation = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md"
 Issues = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues"

@@ -1,0 +1,202 @@
+.curriculum-tracks {
+  --track-ink: #eaf2f8;
+  --track-muted: #9db0bf;
+  --track-line: #293a49;
+  margin: 0 0 10px;
+  padding: 15px;
+  border: 1px solid #283a49;
+  border-radius: 13px;
+  color: var(--track-ink);
+  background: radial-gradient(ellipse at 0 0, rgb(117 171 191 / 8%), transparent 58%), #0e1a26;
+}
+
+.curriculum-tracks-heading {
+  margin: 0 0 12px;
+}
+
+.curriculum-tracks-eyebrow {
+  color: #9bb0c0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.35px;
+}
+
+.curriculum-tracks-heading h2 {
+  margin: 4px 0 2px;
+  color: #f0f6fa;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.25px;
+}
+
+.curriculum-tracks-heading p,
+.curriculum-track-panel-copy p {
+  margin: 0;
+  color: var(--track-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.curriculum-track-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 9px;
+}
+
+.curriculum-track-tab {
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 11px;
+  border: 1px solid var(--track-line);
+  border-left: 3px solid var(--track-accent);
+  border-radius: 9px;
+  color: #c5d3dd;
+  background: #111f2c;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.curriculum-track-tab[data-track='foundations'] {
+  --track-accent: #6bd79c;
+  --track-soft: #173629;
+}
+
+.curriculum-track-tab[data-track='facility'] {
+  --track-accent: #edb34c;
+  --track-soft: #392e1c;
+}
+
+.curriculum-track-tab[data-track='power-dynamics'] {
+  --track-accent: #b59aff;
+  --track-soft: #292343;
+}
+
+.curriculum-track-tab:hover {
+  border-color: color-mix(in srgb, var(--track-accent) 54%, #344351);
+  background: color-mix(in srgb, var(--track-soft) 52%, #111f2c);
+}
+
+.curriculum-track-tab.is-selected {
+  border-color: color-mix(in srgb, var(--track-accent) 52%, #344351);
+  color: #f3f7fa;
+  background: color-mix(in srgb, var(--track-soft) 75%, #111f2c);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--track-accent) 12%, transparent);
+}
+
+.curriculum-track-tab-title {
+  color: var(--track-accent);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.curriculum-track-tab-summary {
+  color: #9eb1bf;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.curriculum-track-panel {
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--track-accent) 27%, #2b3c4a);
+  border-radius: 9px;
+  background: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--track-soft) 26%, #101d29),
+    #101d29 66%
+  );
+}
+
+.curriculum-track-panel[data-track='foundations'] {
+  --track-accent: #6bd79c;
+  --track-soft: #173629;
+}
+
+.curriculum-track-panel[data-track='facility'] {
+  --track-accent: #edb34c;
+  --track-soft: #392e1c;
+}
+
+.curriculum-track-panel[data-track='power-dynamics'] {
+  --track-accent: #b59aff;
+  --track-soft: #292343;
+}
+
+.curriculum-track-panel-copy h3 {
+  margin: 0 0 3px;
+  color: var(--track-accent);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.curriculum-track-routes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.curriculum-track-routes a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 29px;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--track-accent) 27%, #354553);
+  border-radius: 999px;
+  color: #d9e5ed;
+  background: rgb(8 19 29 / 52%);
+  font-size: 10px;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.curriculum-track-routes a:hover {
+  border-color: color-mix(in srgb, var(--track-accent) 63%, #40505d);
+  color: #fff;
+  background: color-mix(in srgb, var(--track-soft) 68%, #101d29);
+}
+
+.curriculum-tracks :is(button, a, [role='tabpanel']):focus-visible {
+  outline: 2px solid #f3f8fc;
+  outline-offset: 3px;
+}
+
+@media (max-width: 580px) {
+  .curriculum-tracks {
+    padding: 12px;
+  }
+
+  .curriculum-track-tabs {
+    gap: 5px;
+  }
+
+  .curriculum-track-tab {
+    min-height: 61px;
+    padding: 8px 7px;
+  }
+
+  .curriculum-track-tab-title {
+    font-size: 10px;
+  }
+
+  .curriculum-track-tab-summary {
+    font-size: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .curriculum-track-tab {
+    transition: none;
+  }
+}

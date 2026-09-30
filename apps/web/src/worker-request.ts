@@ -1,7 +1,10 @@
+import type { RuntimeProgress } from './runtime-progress';
+
 type Pending = {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   cleanup: () => void;
+  progress?: (progress: RuntimeProgress) => void;
 };
 
 /** A bounded, cancellable request channel. Workers are created on first use. */
@@ -18,7 +21,12 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
     }
     pending.clear();
   }
-  async function request<T>(path: string, signal?: AbortSignal, body?: unknown): Promise<T> {
+  async function request<T>(
+    path: string,
+    signal?: AbortSignal,
+    body?: unknown,
+    onProgress?: (progress: RuntimeProgress) => void,
+  ): Promise<T> {
     if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError');
     const json = JSON.stringify(body ?? null);
     if (new TextEncoder().encode(json).byteLength > 4 * 1024 * 1024)
@@ -28,6 +36,14 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
       worker.onmessage = ({ data }) => {
         const item = pending.get(data.id);
         if (!item) return;
+        if (data.progress) {
+          try {
+            item.progress?.(data.progress as RuntimeProgress);
+          } catch {
+            // A view callback cannot interrupt a worker request.
+          }
+          return;
+        }
         pending.delete(data.id);
         item.cleanup();
         if (data.error) item.reject(new Error(data.error));
@@ -51,6 +67,7 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
       pending.set(id, {
         resolve: (value) => resolve(value as T),
         reject,
+        progress: onProgress,
         cleanup: () => {
           clearTimeout(timer);
           signal?.removeEventListener('abort', abort);
