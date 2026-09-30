@@ -368,6 +368,7 @@
 
 .power-scene-details {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 16px 26px;
   min-height: 68px;
