@@ -12,6 +12,8 @@ After power/energy and ride-through, try [same 375 kWh, different outage outcome
 
 ## Explore, predict, explain
 
+For a different timescale after the twelve continuity lessons, try [Inside a voltage sag](../studies/emt.md) and the [Power dynamics study studio](../studies/power-dynamics.md). These separate advanced studies include their own equations, solver settings and numerical checks.
+
 Open **Explore all 12 lessons** to see four chapters: energy and reserve, continuity systems, shared risks and reserve, and planning at scale. Each lesson has its own accent color and scene. Numbers, titles, units and asset-state labels carry the meaning as well as color.
 
 1. **Configure:** use the slider or numeric field, or choose the starting or challenge input. A changed input stays a draft until you select **Run lesson**.

@@ -104,7 +104,7 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   const urls = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map(
     (match) => match[1],
   );
-  expect(new Set(urls).size).toBe(16);
+  expect(new Set(urls).size).toBe(18);
   expect(urls.every((url) => url.startsWith(publicBase))).toBe(true);
   const robots = await request.get('./robots.txt');
   expect(await robots.text()).toContain(`Sitemap: ${publicBase}sitemap.xml`);
@@ -141,7 +141,7 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
     );
     expect(JSON.stringify(linkedData)).toContain(`${publicBase}about/#author`);
   }
-  expect(titles.size).toBe(16);
+  expect(titles.size).toBe(18);
   const image = await request.get('./guide-preview.png');
   expect(image.status()).toBe(200);
   expect(image.headers()['content-type']).toContain('image/png');
@@ -155,6 +155,8 @@ test('search pages remain accessible, responsive and linked to live experiments'
     ...lessons.map((lesson) => `learn/${lesson.id}/`),
     'evidence/',
     'about/',
+    'studies/emt/',
+    'studies/power-dynamics/',
   ]) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`./${path}`);

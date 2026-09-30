@@ -33,6 +33,10 @@ jobs:
         run: python -m pip install -r requirements-api.lock
       - name: HTTP contracts and full regression suite
         run: python -m unittest discover -s tests -v
+      - name: Optional numerical studies with pinned scientific runtime
+        run: |
+          python -m pip install -r requirements-studies.lock
+          python -m unittest tests.test_research -v
       - name: Reproduce three evidence cases and validate their manifest
         run: |
           python scripts/build_evidence.py --output outputs/evidence --revision ${{ github.sha }}
@@ -101,11 +105,20 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
       - run: npm --prefix apps/web ci --ignore-scripts
+      - name: Prepare pinned numerical study runtimes
+        run: |
+          python -m pip install -r requirements-studies.lock
+          python scripts/fetch_study_runtime.py
       - run: python scripts/prepare_browser_demo.py
       - run: npm --prefix apps/web run test:engine
-      - run: npm --prefix apps/web run build:demo
-        env:
-          VITE_PUBLIC_SOURCE_REVISION: ${{ github.repository == 'mohammadrezwankhan/datacenter-twin-lab' && github.sha || '' }}
+      - name: Build browser demo with the appropriate source provenance
+        run: |
+          if [ "$GITHUB_REPOSITORY" = "mohammadrezwankhan/datacenter-twin-lab" ]; then
+            export VITE_PUBLIC_SOURCE_REVISION="$GITHUB_SHA"
+          else
+            unset VITE_PUBLIC_SOURCE_REVISION
+          fi
+          npm --prefix apps/web run build:demo
       - name: Install browser
         run: npx playwright install --with-deps chromium
         working-directory: apps/web
@@ -113,7 +126,7 @@ jobs:
         run: python scripts/build_pages_redirect.py --site .local/browser-demo-site --output .local/github-pages-redirect
       - run: npm --prefix apps/web run test:demo
       - name: Verify the same artifact at a custom-domain root
-        run: npm --prefix apps/web run test:demo -- --grep "all presets match native Python|evidence hub exposes|five-minute guide requires|search pages"
+        run: npm --prefix apps/web run test:demo -- --grep "all presets match native Python|evidence hub exposes|five-minute guide requires|search pages|EMT study|power dynamics"
         env:
           TWIN_DEMO_BASE: /
       - name: Retain browser and engine evidence

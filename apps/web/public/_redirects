@@ -1,0 +1,4 @@
+/apps https://mklab.co.technology/ 301
+/apps/ https://mklab.co.technology/ 301
+/apps/llms.txt https://mklab.co.technology/llms.txt 301
+/apps/* https://mklab.co.technology/apps/:splat 301

@@ -147,6 +147,8 @@ Browser verification from `apps/web`:
 npx playwright install chromium
 npm run build
 npm run test:e2e
+python -m pip install -r ../../requirements-studies.lock
+python ../../scripts/fetch_study_runtime.py
 python ../../scripts/prepare_browser_demo.py
 npm run test:engine
 npm run build:demo

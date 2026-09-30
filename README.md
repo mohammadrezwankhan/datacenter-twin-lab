@@ -48,6 +48,14 @@ The pictures below are screenshots of the actual guided interface. Their numbere
 
 The current source includes 18 named scenarios, four illustrative facility profiles, the twelve lessons, and on-demand reports and sensitivity tools. Ratings, demand, event timing, rates, and efficiencies are explicit synthetic inputs. [The roadmap](ROADMAP.md) separates capabilities in the release from work still planned or conditional.
 
+## Explore faster electrical dynamics
+
+Go beyond the outage timeline with the [DC-link EMT lesson](https://khanlab.co.technology/?mode=emt): configure an ideal RLC circuit, replay its voltage sag, inspect signed current and compare JavaScript with Python.
+
+The [power-dynamics studio](https://khanlab.co.technology/?study=load-step) adds five configurable Python studies: converter load steps, oscillation modes, a synthetic load spectrum, phase-model versus QSS response, and a modified nine-bus network. Color-coded diagrams, plots and JSON/CSV exports connect every result to its applied inputs. Its scientific runtime loads only when requested.
+
+[Read the EMT equations](docs/studies/emt.md) · [Study catalog and reproduction commands](docs/studies/power-dynamics.md). These additions are available on the current website and source; historical v1.0.0 assets remain unchanged.
+
 ## Reproduce the canonical case
 
 The guide follows lesson 3's exact scenario recipe: it starts from the reference-site inputs, then assigns lesson ID/name and source metadata, disables charging, and sets the initial reserve to `100` or `50` kWh. The [canonical case](docs/canonical-case.md) records those inputs and derives the results independently. A direct `generator_failure` preset run happens to produce the same 100 kWh numeric event time because the battery starts full, but its scenario ID, metadata, charging limit, input hash, and run ID are different.

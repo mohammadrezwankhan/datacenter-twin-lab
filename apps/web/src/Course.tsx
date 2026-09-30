@@ -560,6 +560,20 @@ export function Course() {
           temporary self-reports, not qualifications, scores or collected completion data.
         </p>
       </details>
+      <section className="panel">
+        <h2>Continue into power dynamics</h2>
+        <p>
+          Explore a faster timescale in the{' '}
+          <a href="?mode=emt">
+            <u>DC-link voltage-sag study</u>
+          </a>
+          , or investigate load steps, modes and grid ports in the{' '}
+          <a href="?study=load-step">
+            <u>advanced study studio</u>
+          </a>
+          .
+        </p>
+      </section>
     </div>
   );
 }

@@ -758,7 +758,8 @@
     flex-direction: column;
   }
 }
-@media (max-width: 760px) {
+/* Match the shared shell breakpoint, including the expanded study navigation. */
+@media (max-width: 900px) {
   .energy-app .sidebar {
     position: static;
     width: 100%;
