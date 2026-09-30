@@ -95,6 +95,42 @@ class ResearchStudyTests(unittest.TestCase):
         )
         self.assertTrue(any("not a solved joint equilibrium" in a for a in result["assumptions"]))
 
+    def test_model_comparison_states_and_outputs_converge_to_refined_bdf(self):
+        import numpy as np
+
+        from datacenter_twin.research.model_comparison import run_model_comparison
+
+        production = {0.6: self.results["model-comparison"]}
+        for load in (0.5, 0.55):
+            production[load] = self.run_study("model-comparison", {"load_final_pu": load})
+        for load in (0.5, 0.55, 0.6):
+            with self.subTest(load_final_pu=load):
+                refined = run_model_comparison({"load_final_pu": load}, rtol=1e-10, atol=1e-12)
+                coarse = production[load]
+                self.assertEqual(coarse["solver"]["rtol"], 1e-8)
+                self.assertEqual(coarse["solver"]["atol"], 1e-10)
+                coarse_state = np.asarray(coarse["diagnostics"]["final_state"])
+                refined_state = np.asarray(refined["diagnostics"]["final_state"])
+                scaled_state_error = np.abs(coarse_state - refined_state) / np.maximum(
+                    1.0, np.abs(refined_state)
+                )
+                self.assertLess(float(np.max(scaled_state_error)), 2e-6)
+                coarse_outputs = np.concatenate(
+                    [
+                        np.asarray(line["values"])
+                        for chart in coarse["charts"]
+                        for line in chart["lines"]
+                    ]
+                )
+                refined_outputs = np.concatenate(
+                    [
+                        np.asarray(line["values"])
+                        for chart in refined["charts"]
+                        for line in chart["lines"]
+                    ]
+                )
+                self.assertLess(float(np.max(np.abs(coarse_outputs - refined_outputs))), 2e-6)
+
     def test_grid_network_recomputes_power_flow_devices_and_schur_feedthrough(self):
         result = self.results["grid-network"]
         metrics = {m["label"]: m["value"] for m in result["metrics"]}
@@ -125,6 +161,9 @@ class ResearchStudyTests(unittest.TestCase):
                 self.run_study("modal", config)
         with self.assertRaises(ValueError):
             self.run_study("load-step", {"load_initial_pu": 0.7, "load_final_pu": 0.4})
+        for load in (0.61, 0.7):
+            with self.subTest(model_comparison_load_final_pu=load), self.assertRaises(ValueError):
+                self.run_study("model-comparison", {"load_final_pu": load})
 
 
 if __name__ == "__main__":

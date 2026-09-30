@@ -56,6 +56,13 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
     await page.goto(`./?study=${id}`);
     await expect(page.getByTestId('research-studio')).toHaveAttribute('data-study', id);
     expect(requests.some((url) => /pyodide|\.whl|research\.zip/.test(url))).toBe(false);
+    if (id === 'model-comparison') {
+      const load = page.getByTestId('research-input-load_final_pu');
+      await expect(load).toHaveAttribute('max', '0.6');
+      await load.fill('0.61');
+      await expect(page.getByTestId('research-run')).toBeDisabled();
+      await load.fill('0.6');
+    }
     await page.getByTestId('research-run').click();
     await expect(page.getByTestId('research-export-json')).toBeVisible();
     const pending = page.waitForEvent('download');
@@ -64,7 +71,16 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
       await readFile((await (await pending).path())!, 'utf8'),
     ) as ResearchResult;
     expect(result.study_id).toBe(id);
-    compare(result, native(result));
+    const reference = native(result);
+    // Preserve both complete results so compiled-runtime differences can be
+    // diagnosed from CI evidence without rerunning or weakening comparisons.
+    for (const [runtime, output] of Object.entries({ browser: result, native: reference })) {
+      await info.attach(`${id}-${runtime}.json`, {
+        body: Buffer.from(JSON.stringify(output, null, 2)),
+        contentType: 'application/json',
+      });
+    }
+    compare(result, reference);
     expect(
       requests
         .filter((url) => /\.whl/.test(url))
