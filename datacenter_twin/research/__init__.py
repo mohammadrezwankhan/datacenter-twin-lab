@@ -69,7 +69,7 @@ STUDY_LIMITS: dict[str, dict[str, tuple[float, float]]] = {
         "forcing_frequency_hz": (0.5, 30.0),
         "forcing_amplitude_pu": (0.01, 0.05),
     },
-    "model-comparison": {"load_final_pu": (0.5, 0.7)},
+    "model-comparison": {"load_final_pu": (0.5, 0.6)},
     "grid-network": {"load_scale": (0.4, 0.6)},
 }
 

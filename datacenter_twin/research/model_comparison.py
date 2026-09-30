@@ -12,8 +12,8 @@ from .model_validation import build_params, get_sys_derivatives
 _ORIGINAL_STEP_TIME = 1.025
 _STEP_TIME = 0.04
 _END_TIME = 0.08
-_RTOL = 1e-6
-_ATOL = 1e-8
+_RTOL = 1e-8
+_ATOL = 1e-10
 
 
 def _initial_state(p: dict[str, float]) -> np.ndarray:
@@ -50,7 +50,15 @@ def _initial_state(p: dict[str, float]) -> np.ndarray:
 
 
 def _integrate_segment(
-    x0: np.ndarray, t0: float, t1: float, values: np.ndarray, load: float, p: dict[str, float]
+    x0: np.ndarray,
+    t0: float,
+    t1: float,
+    values: np.ndarray,
+    load: float,
+    p: dict[str, float],
+    *,
+    rtol: float,
+    atol: float,
 ):
     def rhs(_t: float, x: np.ndarray) -> np.ndarray:
         return get_sys_derivatives(_t, x, load, p)[0]
@@ -67,8 +75,8 @@ def _integrate_segment(
         x0,
         method="BDF",
         t_eval=values,
-        rtol=_RTOL,
-        atol=_ATOL,
+        rtol=rtol,
+        atol=atol,
         jac_sparsity=sparsity,
         max_step=np.inf,
     )
@@ -85,7 +93,11 @@ def _integrate_segment(
     return sol
 
 
-def run_model_comparison(config: dict[str, float]) -> dict[str, object]:
+def run_model_comparison(
+    config: dict[str, float], *, rtol: float = _RTOL, atol: float = _ATOL
+) -> dict[str, object]:
+    if not np.isfinite(rtol) or not np.isfinite(atol) or rtol <= 0.0 or atol <= 0.0:
+        raise ValueError("BDF tolerances must be finite, positive values.")
     p = build_params()
     initial = _initial_state(p)
     final_load = config["load_final_pu"]
@@ -93,8 +105,10 @@ def run_model_comparison(config: dict[str, float]) -> dict[str, object]:
     n_after = 100
     t_before = np.linspace(0.0, _STEP_TIME, n_before)
     t_after = np.linspace(_STEP_TIME, _END_TIME, n_after + 1)[1:]
-    first = _integrate_segment(initial, 0.0, _STEP_TIME, t_before, 0.5, p)
-    second = _integrate_segment(first.y[:, -1], _STEP_TIME, _END_TIME, t_after, final_load, p)
+    first = _integrate_segment(initial, 0.0, _STEP_TIME, t_before, 0.5, p, rtol=rtol, atol=atol)
+    second = _integrate_segment(
+        first.y[:, -1], _STEP_TIME, _END_TIME, t_after, final_load, p, rtol=rtol, atol=atol
+    )
     t = np.r_[first.t, second.t]
     states = np.vstack((first.y.T, second.y.T))
     load = np.where(t < _STEP_TIME, 0.5, final_load)
@@ -117,8 +131,8 @@ def run_model_comparison(config: dict[str, float]) -> dict[str, object]:
         "config": dict(config),
         "solver": {
             "method": "SciPy BDF with exact 41+21 state-block Jacobian sparsity; two segments at the lesson load step",
-            "rtol": _RTOL,
-            "atol": _ATOL,
+            "rtol": float(rtol),
+            "atol": float(atol),
             "nfev": int(first.nfev + second.nfev),
             "njev": int(first.njev + second.njev),
             "nlu": int(first.nlu + second.nlu),

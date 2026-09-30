@@ -65,6 +65,10 @@ not a successful case with a warning hidden in a log.
   of the respective equations, initialization and numerical settings; they do
   not establish which model matches equipment. The short startup window is a
   bounded teaching adaptation, not the original full settling-time experiment.
+  The final-load range is 0.5–0.6 pu. BDF uses relative tolerance `1e-8` and
+  absolute tolerance `1e-10`; refinement checks cover the endpoints and midpoint.
+  A 0.7 pu experiment was sensitive to further tolerance reductions and is
+  excluded instead of presenting its finite output as a converged result.
 - **Grid ports:** a converged steady operating point and stable linear modes are
   different checks. The modified test network is not a grid-capacity assessment.
 
