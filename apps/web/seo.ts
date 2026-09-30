@@ -86,6 +86,7 @@ export function searchPages(): Plugin {
   function metadata(pageTitle: string, summary: string, path: string, schema: unknown): string {
     return `<title>${escape(pageTitle)}</title>
 ${site.googleSiteVerification && path === '' && base === site.url ? `<meta name="google-site-verification" content="${escape(site.googleSiteVerification)}">` : ''}
+${site.bingSiteVerification && path === '' && base === site.url ? `<meta name="msvalidate.01" content="${escape(site.bingSiteVerification)}">` : ''}
 <meta name="description" content="${escape(summary)}">
 <meta name="author" content="${escape(site.author)}">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">

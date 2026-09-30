@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tomllib
 from tempfile import TemporaryDirectory
 import venv
 from zipfile import ZipFile
@@ -17,7 +18,10 @@ def main() -> int:
     parser.add_argument("wheel_directory", type=Path)
     parser.add_argument("--require-web", action="store_true", help="Also require the built dashboard in the wheel")
     args = parser.parse_args()
-    wheels = list(args.wheel_directory.resolve().glob("datacenter_twin_lab-*.whl"))
+    root = Path(__file__).resolve().parents[1]
+    project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    distribution = project["name"]
+    wheels = list(args.wheel_directory.resolve().glob(distribution.replace("-", "_") + "-*.whl"))
     if len(wheels) != 1:
         parser.error("Expected exactly one Datacenter Twin Lab wheel in the supplied directory")
     wheel = wheels[0]
@@ -42,7 +46,6 @@ def main() -> int:
             for name in ("guide-preview.png", "proof-demo.webm", "proof-demo.vtt"):
                 if "datacenter_twin/web/" + name not in web_files:
                     raise RuntimeError(f"Bundled evidence media missing: {name}")
-    root = Path(__file__).resolve().parents[1]
     with TemporaryDirectory(prefix="datacenter-twin-install-") as directory:
         workspace = Path(directory)
         environment = workspace / "venv"
@@ -60,7 +63,7 @@ def main() -> int:
         identity = json.loads(execute(str(python), "-I", "-c",
             "import json,datacenter_twin; from importlib.metadata import version; "
             "print(json.dumps({'file':datacenter_twin.__file__,'runtime':datacenter_twin.__version__,"
-            "'distribution':version('datacenter-twin-lab')}))"))
+            f"'distribution':version({distribution!r})}}))"))
         if not Path(identity["file"]).resolve().is_relative_to(environment.resolve()):
             raise RuntimeError("Smoke test imported source checkout instead of the installed wheel")
         if identity["runtime"] != identity["distribution"]:

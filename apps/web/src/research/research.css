@@ -1076,6 +1076,14 @@
   color: #a6b7c1;
   font-size: 10px;
 }
+.research-chart-values .research-chart-selected-point {
+  padding-bottom: 6px;
+  border-bottom: 1px solid #283d49;
+}
+.research-chart-values .research-chart-selected-point b {
+  margin-left: 0;
+  color: #d6e3e9;
+}
 .research-chart-values b {
   margin-left: auto;
   color: #d8e4e9;

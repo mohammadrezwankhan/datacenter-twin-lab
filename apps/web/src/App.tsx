@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import type { PointerEvent } from 'react';
 import type { Asset, Catalog, Interval, Run, SiteScenario } from './types';
+import { svgViewBoxPoint } from './chartPointer';
 import { Evidence } from './Evidence';
 import { n, request } from './client';
 import { RunTools } from './RunTools';
@@ -24,6 +26,9 @@ const ResearchStudio = lazy(() =>
 );
 const EmtStudy = lazy(() => import('./emt/Study').then((module) => ({ default: module.EmtStudy })));
 const Course = lazy(() => import('./Course').then((module) => ({ default: module.Course })));
+const CurriculumTracks = lazy(() =>
+  import('./CurriculumTracks').then((module) => ({ default: module.CurriculumTracks })),
+);
 const EvidenceHub = lazy(() =>
   import('./EvidenceHub').then((module) => ({ default: module.EvidenceHub })),
 );
@@ -79,74 +84,119 @@ function PowerChart({
     left = 46,
     bottom = 140;
   const ymax = Math.max(1, ...rows.map((row) => Number(row.requested_it_kw))) * 1.12;
+  const selected = rows[cursor] ?? rows[0];
+  const inspectingPointer = useRef<number | null>(null);
   const x = (seconds: string | number) =>
     left + (Number(seconds) / run.scenario.duration_s) * (width - left - 16);
   const y = (kw: string | number) => bottom - (Number(kw) / ymax) * 116;
   const path = (key: 'served_it_kw' | 'requested_it_kw') =>
     rows.map((r, i) => `${i ? 'L' : 'M'}${x(r.start_s)},${y(r[key])} H${x(r.end_s)}`).join(' ');
+  const selectFromPointer = (event: PointerEvent<SVGRectElement>) => {
+    const svg = event.currentTarget.ownerSVGElement;
+    if (!svg || !rows.length) return;
+    const viewX = svgViewBoxPoint(svg, event.clientX, event.clientY).x;
+    const fraction = Math.max(0, Math.min(1, (viewX - left) / (width - left - 16)));
+    const seconds = fraction * Number(run.scenario.duration_s);
+    onSelect(
+      Math.max(
+        0,
+        rows.findLastIndex((row) => Number(row.start_s) <= seconds),
+      ),
+    );
+  };
+  const startInspecting = (event: PointerEvent<SVGRectElement>) => {
+    if (event.button !== 0) return;
+    inspectingPointer.current = event.pointerId;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    selectFromPointer(event);
+  };
+  const stopInspecting = (event: PointerEvent<SVGRectElement>) => {
+    if (inspectingPointer.current !== event.pointerId) return;
+    inspectingPointer.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+
   return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      role="img"
-      aria-label="IT power over the complete run, requested and served, in kilowatts"
-      className="power-chart"
-    >
-      {[0, 0.5, 1].map((f) => (
-        <g key={f}>
-          <line x1={left} y1={y(f * ymax)} x2={width - 16} y2={y(f * ymax)} className="gridline" />
-          <text x={left - 9} y={y(f * ymax) + 4} textAnchor="end">
-            {n(f * ymax, 0)}
-          </text>
-        </g>
-      ))}
-      <path
-        d={`${path('served_it_kw')} L${x(run.scenario.duration_s)},${bottom} L${left},${bottom} Z`}
-        className="chart-fill"
-      />
-      <path d={path('served_it_kw')} className="chart-served" />
-      <path d={path('requested_it_kw')} className="chart-requested" />
-      {run.events
-        .filter((e) => e.action.endsWith('_down') || e.action.endsWith('_up'))
-        .map((e, i) => (
-          <line key={i} x1={x(e.at_s)} x2={x(e.at_s)} y1={17} y2={bottom} className="eventline" />
+    <div className="power-chart-wrap">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label="IT power over the complete run, requested and served, in kilowatts"
+        className="power-chart"
+      >
+        {[0, 0.5, 1].map((f) => (
+          <g key={f}>
+            <line
+              x1={left}
+              y1={y(f * ymax)}
+              x2={width - 16}
+              y2={y(f * ymax)}
+              className="gridline"
+            />
+            <text x={left - 9} y={y(f * ymax) + 4} textAnchor="end">
+              {n(f * ymax, 0)}
+            </text>
+          </g>
         ))}
-      <line
-        x1={x(rows[cursor].start_s)}
-        x2={x(rows[cursor].start_s)}
-        y1={12}
-        y2={bottom}
-        className="cursorline"
-      />
-      {[0, 0.25, 0.5, 0.75, 1].map((f) => (
-        <text
-          key={f}
-          x={x(f * run.scenario.duration_s)}
-          y={height - 7}
-          textAnchor={f === 1 ? 'end' : 'middle'}
+        <path
+          d={`${path('served_it_kw')} L${x(run.scenario.duration_s)},${bottom} L${left},${bottom} Z`}
+          className="chart-fill"
+        />
+        <path d={path('served_it_kw')} className="chart-served" />
+        <path d={path('requested_it_kw')} className="chart-requested" />
+        {run.events
+          .filter((e) => e.action.endsWith('_down') || e.action.endsWith('_up'))
+          .map((e, i) => (
+            <line key={i} x1={x(e.at_s)} x2={x(e.at_s)} y1={17} y2={bottom} className="eventline" />
+          ))}
+        <line
+          x1={x(rows[cursor].start_s)}
+          x2={x(rows[cursor].start_s)}
+          y1={12}
+          y2={bottom}
+          className="cursorline"
+        />
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+          <text
+            key={f}
+            x={x(f * run.scenario.duration_s)}
+            y={height - 7}
+            textAnchor={f === 1 ? 'end' : 'middle'}
+          >
+            {clock(f * run.scenario.duration_s)}
+          </text>
+        ))}
+        <rect
+          x={left}
+          y={0}
+          width={width - left - 16}
+          height={bottom}
+          fill="transparent"
+          onPointerDown={startInspecting}
+          onPointerMove={(event) => {
+            if (event.pointerType === 'mouse' || inspectingPointer.current === event.pointerId)
+              selectFromPointer(event);
+          }}
+          onPointerUp={stopInspecting}
+          onPointerCancel={stopInspecting}
+        />
+      </svg>
+      {selected && (
+        <div
+          className="power-chart-inspection"
+          aria-live="polite"
+          data-testid="power-chart-inspection"
         >
-          {clock(f * run.scenario.duration_s)}
-        </text>
-      ))}
-      <rect
-        x={left}
-        y={0}
-        width={width - left - 16}
-        height={bottom}
-        fill="transparent"
-        onClick={(e) => {
-          const rect = e.currentTarget.ownerSVGElement!.getBoundingClientRect();
-          const seconds =
-            ((((e.clientX - rect.left) / rect.width) * width - left) / (width - left - 16)) *
-            run.scenario.duration_s;
-          onSelect(
-            Math.max(
-              0,
-              rows.findLastIndex((r) => Number(r.start_s) <= seconds),
-            ),
-          );
-        }}
-      />
-    </svg>
+          <strong>Interval at selected time</strong>
+          <span>
+            {n(selected.start_s, 3)}–{n(selected.end_s, 3)} s
+          </span>
+          <span>Requested: {n(selected.requested_it_kw, 3)} kW</span>
+          <span>Served: {n(selected.served_it_kw, 3)} kW</span>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -627,6 +677,11 @@ export function App() {
           </span>
         </header>
         <main id="workspace-main" tabIndex={-1}>
+          {browserDemo && (page === 'emt' || page === 'studies') && (
+            <Suspense fallback={null}>
+              <CurriculumTracks activeTrack="power-dynamics" />
+            </Suspense>
+          )}
           {page !== 'emt' && page !== 'studies' && (
             <div className="page-heading">
               <div>

@@ -789,6 +789,34 @@
   height: auto;
   margin-top: 5px;
   overflow: visible;
+  cursor: crosshair;
+  touch-action: pan-y;
+}
+.emt-chart-inspection {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 14px;
+  margin: 4px 5px 0;
+  padding: 8px 9px;
+  border: 1px solid #293f4c;
+  border-radius: 5px;
+  background: #111f2a;
+  color: #aabdc8;
+  font:
+    9px Consolas,
+    'SFMono-Regular',
+    monospace;
+}
+.emt-chart-inspection strong {
+  color: #87a0ae;
+  font:
+    600 9px 'Segoe UI',
+    system-ui,
+    sans-serif;
+}
+.emt-chart-inspection span {
+  white-space: nowrap;
 }
 .emt-chart text {
   fill: #8ca3b2;

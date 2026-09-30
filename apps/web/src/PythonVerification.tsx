@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { Run } from './types';
+import { RuntimeProgress } from './RuntimeProgress';
+import type { RuntimeProgress as RuntimeProgressState } from './runtime-progress';
 
 function ordered(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(ordered);
@@ -21,13 +23,16 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
   const [enabled, setEnabled] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const [status, setStatus] = useState('');
+  const [progress, setProgress] = useState<RuntimeProgressState | null>(null);
   const [error, setError] = useState('');
   useEffect(() => {
     setStatus('');
+    setProgress(null);
     setError('');
     if (!enabled) return;
     const controller = new AbortController();
     setStatus('Loading Python on request and checking this completed run…');
+    setProgress({ stage: 'starting', message: 'Starting Python verification' });
     (async () => {
       try {
         const { pythonRequest } = await import('./python-client');
@@ -35,6 +40,9 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
           run.schema_version === 1 ? 'planning' : 'simulations',
           controller.signal,
           run.schema_version === 1 ? run.assumptions : run.scenario,
+          (nextProgress) => {
+            if (!controller.signal.aborted) setProgress(nextProgress);
+          },
         );
         if (controller.signal.aborted) return;
         if (JSON.stringify(ordered(reference)) !== JSON.stringify(ordered(run)))
@@ -44,9 +52,11 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
         setStatus(
           `Exact match with Python: all inputs, hashes and calculated values (${run.run_id}).`,
         );
+        setProgress(null);
       } catch (cause) {
         if (!controller.signal.aborted) {
           setStatus('');
+          setProgress(null);
           setError((cause as Error).message);
         }
       }
@@ -63,6 +73,7 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
         Optional: downloads about 14 MB the first time. Your existing result stays available; the
         reference Python engine also runs on your device.
       </p>
+      <RuntimeProgress progress={progress} testId="python-runtime-progress" />
       {status && (
         <p role="status" data-testid="python-verification-status">
           {status}

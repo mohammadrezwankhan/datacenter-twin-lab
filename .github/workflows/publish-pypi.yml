@@ -1,0 +1,63 @@
+name: Publish verified core to PyPI
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  build:
+    if: github.repository == 'mohammadrezwankhan/datacenter-twin-lab' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.12'
+      - name: Require successful full CI for this exact source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run list --repo "$GITHUB_REPOSITORY" --workflow tests.yml --commit "$GITHUB_SHA" --event push --json conclusion,headSha --limit 20 > prior-ci.json
+          python -c "import json,os; rows=json.load(open('prior-ci.json')); assert any(r['conclusion']=='success' and r['headSha']==os.environ['GITHUB_SHA'] for r in rows), 'Full main CI must pass for this exact source before publishing'"
+      - name: Build the dependency-free core and check metadata
+        run: |
+          python -m pip wheel . --no-deps --wheel-dir dist
+          python scripts/verify_distribution.py dist
+          python -m pip install twine==6.2.0
+          python -m twine check --strict dist/*
+      - name: Record exact wheel and source
+        run: |
+          python -c "import hashlib,json,os,pathlib; p=next(pathlib.Path('dist').glob('*.whl')); pathlib.Path('publication-manifest.json').write_text(json.dumps({'source_revision':os.environ['GITHUB_SHA'],'wheel':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()},indent=2)+'\n')"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pypi-core-wheel
+          path: dist/*.whl
+          retention-days: 90
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: pypi-publication-evidence
+          path: |
+            publication-manifest.json
+            prior-ci.json
+          retention-days: 90
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/project/datacenter-twin/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: pypi-core-wheel
+          path: dist/
+      - name: Publish using the exact registered trusted publisher
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33

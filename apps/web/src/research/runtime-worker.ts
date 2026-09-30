@@ -1,45 +1,71 @@
 import type { PyodideInterface } from 'pyodide';
+import {
+  fetchVerifiedArchive,
+  observeRuntimeFetches,
+  type RuntimeProgress,
+  type RuntimeStage,
+} from '../runtime-progress';
 
 let runtime: Promise<PyodideInterface> | undefined;
+const waitingIds = new Set<number>();
+
+function report(progress: RuntimeProgress) {
+  for (const id of waitingIds) self.postMessage({ id, progress });
+}
+
 async function initialize() {
   const base = new URL('../', self.location.href);
   const runtimeURL = new URL('pyodide/', base).href;
-  const { loadPyodide } = await import(/* @vite-ignore */ `${runtimeURL}pyodide.mjs`);
-  const py: PyodideInterface = await loadPyodide({ indexURL: runtimeURL });
-  for (const prefix of ['engine', 'research']) {
-    const [archive, manifest] = await Promise.all([
-      fetch(new URL(`${prefix}.zip`, base)).then((r) => {
-        if (!r.ok) throw new Error(`${prefix} source download failed`);
-        return r.arrayBuffer();
-      }),
-      fetch(new URL(`${prefix}-manifest.json`, base)).then((r) => {
-        if (!r.ok) throw new Error(`${prefix} manifest download failed`);
-        return r.json();
-      }),
-    ]);
-    const digest = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', archive)))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
-    if (digest !== manifest.archive_sha256)
-      throw new Error(`${prefix} source integrity check failed`);
-    py.unpackArchive(archive, 'zip', { extractDir: '/home/pyodide' });
+  const archives: Array<{ name: string; data: ArrayBuffer }> = [];
+  for (const name of ['engine', 'research']) {
+    archives.push({ name, data: await fetchVerifiedArchive(base, name, report) });
   }
-  // Local, hash-pinned wheels; the locked runtime verifies their digests.
-  await py.loadPackage(['numpy', 'scipy']);
-  py.runPython('import json\nfrom datacenter_twin.research import run_study as _run_study');
-  return py;
+
+  let stage: RuntimeStage = 'initialize';
+  const restoreFetch = observeRuntimeFetches(runtimeURL, () => stage, report);
+  try {
+    const { loadPyodide } = await import(/* @vite-ignore */ `${runtimeURL}pyodide.mjs`);
+    stage = 'download';
+    report({ stage, message: 'Downloading Pyodide runtime files; overall download total unknown' });
+    const py: PyodideInterface = await loadPyodide({ indexURL: runtimeURL });
+    stage = 'initialize';
+    report({ stage, message: 'Finishing local Python interpreter initialization' });
+    stage = 'verify';
+    for (const archive of archives) {
+      report({
+        stage,
+        message: `Installing the verified ${archive.name} source archive`,
+        resource: `${archive.name}.zip`,
+      });
+      py.unpackArchive(archive.data, 'zip', { extractDir: '/home/pyodide' });
+    }
+    stage = 'packages';
+    report({ stage, message: 'Loading the pinned NumPy and SciPy wheels' });
+    // In Pyodide 314.0.6 the callback reports package work by phase. The
+    // worker fetch wrapper supplies byte counts for actual local wheel reads.
+    await py.loadPackage(['numpy', 'scipy'], {
+      messageCallback: (message) => report({ stage, message }),
+    });
+    py.runPython('import json\nfrom datacenter_twin.research import run_study as _run_study');
+    return py;
+  } finally {
+    restoreFetch();
+  }
 }
 
 let queue = Promise.resolve();
 self.addEventListener('message', (event: MessageEvent) => {
   const { id, path, body } = event.data;
+  waitingIds.add(id);
   queue = queue.then(async () => {
     try {
       if (path !== 'research') throw new Error('Unsupported study operation');
+      report({ stage: 'starting', message: 'Preparing the local scientific runtime' });
       const py = await (runtime ??= initialize().catch((error) => {
         runtime = undefined;
         throw error;
       }));
+      report({ stage: 'calculate', message: 'Calculating the configured research study' });
       py.globals.set('_study_request_json', body);
       const result = py.runPython(
         [
@@ -51,6 +77,8 @@ self.addEventListener('message', (event: MessageEvent) => {
       self.postMessage({ id, result: JSON.parse(result) });
     } catch (error) {
       self.postMessage({ id, error: error instanceof Error ? error.message : String(error) });
+    } finally {
+      waitingIds.delete(id);
     }
   });
 });

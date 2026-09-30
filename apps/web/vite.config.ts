@@ -6,6 +6,7 @@ import { basename, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENGINE_VERSION } from './src/js-engine/version.ts';
 import { searchPages } from './seo.ts';
+import { securityHeaders } from './security-headers.ts';
 
 function localEvidenceAssets(): string {
   const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -46,7 +47,7 @@ function localEvidenceAssets(): string {
 }
 
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), ...(mode === 'demo' ? [searchPages()] : [])],
+  plugins: [react(), ...(mode === 'demo' ? [searchPages(), securityHeaders()] : [])],
   // One static artifact can live at a custom-domain root or a repository subpath.
   base: mode === 'demo' ? './' : '/',
   publicDir: mode === 'demo' ? '../../.local/browser-demo-assets' : localEvidenceAssets(),

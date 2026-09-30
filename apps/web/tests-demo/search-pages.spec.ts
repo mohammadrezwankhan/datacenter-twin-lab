@@ -117,6 +117,10 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
     if (site.googleSiteVerification && !relative && publicBase === site.url)
       await expect(verification).toHaveAttribute('content', site.googleSiteVerification);
     else await expect(verification).toHaveCount(0);
+    const bingVerification = page.locator('meta[name="msvalidate.01"]');
+    if (site.bingSiteVerification && !relative && publicBase === site.url)
+      await expect(bingVerification).toHaveAttribute('content', site.bingSiteVerification);
+    else await expect(bingVerification).toHaveCount(0);
     await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', canonical);
     await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', canonical);

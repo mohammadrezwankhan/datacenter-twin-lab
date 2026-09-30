@@ -577,7 +577,7 @@ export function EmtStudy() {
           </div>
           <span className="emt-chart-note">Full observed range · units shown on axes</span>
         </div>
-        <EmtCharts result={result} timeMark={currentTimeMs} />
+        <EmtCharts result={result} timeMark={currentTimeMs} onSampleIndexChange={setSampleIndex} />
       </section>
 
       <section className="emt-analysis-grid">
