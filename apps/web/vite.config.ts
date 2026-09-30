@@ -41,6 +41,7 @@ function localEvidenceAssets(): string {
     resolve(root, 'apps/web/public/THIRD-PARTY-NOTICES.txt'),
     resolve(output, 'THIRD-PARTY-NOTICES.txt'),
   );
+  copyFileSync(resolve(root, 'apps/web/public/favicon.png'), resolve(output, 'favicon.png'));
   return output;
 }
 
