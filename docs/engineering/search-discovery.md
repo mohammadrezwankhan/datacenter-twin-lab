@@ -4,6 +4,10 @@ The static course has sixteen indexable pages: the working simulator, a course i
 
 The build emits unique titles/descriptions, canonical URLs, correctly sized Open Graph/Twitter previews, visible author attribution, connected `Person`, `WebSite`, `WebPage`, `SoftwareApplication`, `Course`, `LearningResource`, `Dataset`, `AboutPage` and breadcrumb JSON-LD, `sitemap.xml`, `robots.txt`, and a noindex missing-page document. The dataset describes the three visible synthetic reference cases and their downloadable inputs/results. No ratings, awards, third-party review, accreditation or facility guarantees are asserted. Notes use lightweight local CSS and an original inline calculation diagram; they do not download the Python runtime or dashboard bundle.
 
+The original battery-and-lightning brand icon is a 2.2 kB, 96 × 96 PNG at `favicon.png`, rendered from the self-contained SVG source in `apps/web/public/`. The simulator and every static note link to the same stable asset using their own relative mount path; local Python packages include it too. It uses no remote fonts, scripts or external images. Browser-tab identity and [search favicon eligibility](https://developers.google.com/search/docs/appearance/favicon-in-search) are distinct from search ranking or a guarantee that a search engine will display the icon.
+
+The first-visit guide loads with the application shell and its stylesheet, avoiding the short placeholder that moved the footer during startup. The course studio, evidence workspace and optional Python verification remain on demand. Performance scores are dated lab observations, not measured experience for every visitor.
+
 ## Canonical host and mirrors
 
 `apps/web/site.config.json` records the verified primary URL. A reviewed build can override it with `VITE_PUBLIC_SITE_URL`, which must be an HTTPS URL without credentials, query or fragment. Use a trailing slash. The same canonical value feeds HTML, structured data, previews and the sitemap. Internal links remain relative so the artifact works at an origin root and at the GitHub repository subpath.

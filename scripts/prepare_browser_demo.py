@@ -55,6 +55,7 @@ def prepare() -> dict:
     for name in RUNTIME_FILES:
         shutil.copyfile(runtime / name, output / "pyodide" / name)
     shutil.copyfile(ROOT / "apps/web/public/THIRD-PARTY-NOTICES.txt", output / "THIRD-PARTY-NOTICES.txt")
+    shutil.copyfile(ROOT / "apps/web/public/favicon.png", output / "favicon.png")
     for source in (ROOT / "docs/third-party").iterdir():
         if source.is_file():
             shutil.copyfile(source, output / "pyodide" / source.name)

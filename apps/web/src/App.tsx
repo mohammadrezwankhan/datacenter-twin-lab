@@ -5,6 +5,8 @@ import { n, request } from './client';
 import { RunTools } from './RunTools';
 import { PythonVerification } from './PythonVerification';
 import { PowerScene } from './PowerScene';
+// Load the first-visit guide with the shell so a lazy placeholder cannot move the footer.
+import { GuidedStart } from './GuidedStart';
 import {
   FacilitySelector,
   RunInsight,
@@ -18,9 +20,6 @@ import './energy-workspace.css';
 
 const browserDemo = import.meta.env.MODE === 'demo';
 const Course = lazy(() => import('./Course').then((module) => ({ default: module.Course })));
-const GuidedStart = lazy(() =>
-  import('./GuidedStart').then((module) => ({ default: module.GuidedStart })),
-);
 const EvidenceHub = lazy(() =>
   import('./EvidenceHub').then((module) => ({ default: module.EvidenceHub })),
 );
@@ -677,13 +676,11 @@ export function App() {
             </Suspense>
           )}
           {page === 'start' && (
-            <Suspense fallback={<p role="status">Opening the five-minute experiment…</p>}>
-              <GuidedStart
-                onExplore={() => navigate('overview')}
-                onLearn={() => navigate('learn')}
-                onEvidence={() => navigate('assurance')}
-              />
-            </Suspense>
+            <GuidedStart
+              onExplore={() => navigate('overview')}
+              onLearn={() => navigate('learn')}
+              onEvidence={() => navigate('assurance')}
+            />
           )}
           {page === 'assurance' && (
             <Suspense fallback={<p role="status">Opening the evidence packet…</p>}>
