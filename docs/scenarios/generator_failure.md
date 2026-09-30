@@ -29,4 +29,11 @@ Run it:
 python -m datacenter_twin simulate --preset generator_failure
 ```
 
+For Windows users using PowerShell, you can parse the JSON output into an object:
+
+```powershell
+$result = python -m datacenter_twin simulate --preset generator_failure | ConvertFrom-Json
+$result.summary
+```
+
 The relevant regression is [`test_failure_battery_depletes_exactly_and_utility_restores_service`](../../tests/test_continuity.py); that test also checks a unity-efficiency variant, so compare its assumptions with this default preset. This is a finite-energy fixture, not a UPS runtime guarantee or facility model.
