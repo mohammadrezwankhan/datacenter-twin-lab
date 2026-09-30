@@ -199,7 +199,8 @@ export function ResearchStudio() {
   const draftConfig = parsed.config;
   const dirty =
     result !== null &&
-    (!sameConfig(draftConfig, result.config) || prediction !== appliedPrediction);
+    (!sameConfig(draftConfig, result.config) ||
+      modeChoiceForPrediction(study, prediction) !== appliedPrediction);
 
   useEffect(() => () => controller.current?.abort(), []);
 
