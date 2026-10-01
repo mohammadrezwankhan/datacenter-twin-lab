@@ -29,4 +29,31 @@ Run it:
 python -m datacenter_twin simulate --preset generator_failure
 ```
 
+For Windows users using PowerShell, you can save the output and parse the JSON document. For full details on setting up your environment, see the [Quickstart](../quickstart.md).
+
+```powershell
+# Select the virtual environment created in the Quickstart,
+# or set this to your installed Python 3.12+ executable path.
+$pythonExecutable = (Resolve-Path -LiteralPath '.\.venv\Scripts\python.exe').Path
+
+& $pythonExecutable -m datacenter_twin simulate --preset generator_failure --output generator_failure_run.json
+$document = Get-Content -Raw -LiteralPath generator_failure_run.json | ConvertFrom-Json
+$run = $document.result
+$run.summary
+```
+*(Note: If `generator_failure_run.json` already exists, you will need to specify a new filename or delete the old one.)*
+
+You can directly verify the depletion and unserved time metrics:
+
+```powershell
+# Battery depletion time (607.8 s)
+($run.events | Where-Object action -eq 'battery_depleted').at_s
+
+# Total unserved duration (292.2 s)
+$run.summary.unserved_duration_s
+
+# Energy balance residual (0 kWh)
+$run.summary.energy_balance_residual_kwh
+```
+
 The relevant regression is [`test_failure_battery_depletes_exactly_and_utility_restores_service`](../../tests/test_continuity.py); that test also checks a unity-efficiency variant, so compare its assumptions with this default preset. This is a finite-energy fixture, not a UPS runtime guarantee or facility model.
