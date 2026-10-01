@@ -32,6 +32,10 @@ python -m datacenter_twin simulate --preset generator_failure
 For Windows users using PowerShell, you can save the output and parse the JSON document. For full details on setting up your environment, see the [Quickstart](../quickstart.md).
 
 ```powershell
+# Select the virtual environment created in the Quickstart,
+# or set this to your installed Python 3.12+ executable path.
+$pythonExecutable = (Resolve-Path -LiteralPath '.\.venv\Scripts\python.exe').Path
+
 & $pythonExecutable -m datacenter_twin simulate --preset generator_failure --output generator_failure_run.json
 $document = Get-Content -Raw -LiteralPath generator_failure_run.json | ConvertFrom-Json
 $run = $document.result
