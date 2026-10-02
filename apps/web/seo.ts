@@ -1,5 +1,6 @@
 import type { Plugin } from 'vite';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { lessons, lessonScenario, type Lesson } from './src/course-lessons.ts';
 import { ENGINE_VERSION } from './src/js-engine/version.ts';
 import type { SiteScenario } from './src/types.ts';
@@ -14,6 +15,9 @@ const title = 'Datacenter Power Systems: Free Interactive Course | Datacenter Tw
 const description =
   'Learn datacenter power continuity with 12 free browser lessons. Predict battery ride-through, test generator failures, and reproduce the energy balance in Python.';
 const courseName = 'Power Systems for Datacenter Engineers';
+const authorId = 'https://mrkhan.co.technology/#person';
+const authorUrl = 'https://mrkhan.co.technology/';
+const llmsFullByteLimit = 60 * 1024;
 const entities: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -23,6 +27,62 @@ const entities: Record<string, string> = {
 };
 const escape = (value: unknown) => String(value).replace(/[&<>"']/g, (c) => entities[c]);
 const json = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c');
+
+function decodeHtml(value: string): string {
+  return value.replace(
+    /&(?:#(\d+)|#x([\da-f]+)|amp|lt|gt|quot|apos|#39);/gi,
+    (entity, decimal, hex) => {
+      if (decimal) return String.fromCodePoint(Number(decimal));
+      if (hex) return String.fromCodePoint(Number.parseInt(hex, 16));
+      return (
+        {
+          '&amp;': '&',
+          '&lt;': '<',
+          '&gt;': '>',
+          '&quot;': '"',
+          '&apos;': "'",
+          '&#39;': "'",
+        }[entity.toLowerCase()] ?? entity
+      );
+    },
+  );
+}
+
+function visiblePageText(html: string): string {
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
+  return decodeHtml(
+    main
+      .replace(/<(script|style|svg)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+      .replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, '$1')
+      .replace(/<br\b[^>]*>/gi, '\n')
+      .replace(
+        /<\/(?:p|div|h[1-6]|li|tr|section|article|figure|table|caption|ul|ol|header|footer|main|nav|pre|blockquote)>/gi,
+        '\n',
+      )
+      .replace(/<[^>]+>/g, '')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim(),
+  );
+}
+
+function capUtf8(value: string, maximumBytes: number): string {
+  if (Buffer.byteLength(value, 'utf8') <= maximumBytes) return value;
+  const marker = '\n\n[Content truncated to fit the 60 KiB llms-full.txt limit.]\n';
+  const allowance = maximumBytes - Buffer.byteLength(marker, 'utf8');
+  let result = '';
+  let bytes = 0;
+  for (const character of value) {
+    const size = Buffer.byteLength(character, 'utf8');
+    if (bytes + size > allowance) break;
+    result += character;
+    bytes += size;
+  }
+  const boundary = result.lastIndexOf('\n');
+  if (boundary > result.length * 0.8) result = result.slice(0, boundary);
+  return result.trimEnd() + marker;
+}
 
 export function publicSiteUrl(value: string): string {
   const url = new URL(value);
@@ -59,9 +119,9 @@ export function searchPages(): Plugin {
   const url = (path = '') => new URL(path, base).href;
   const author = {
     '@type': 'Person',
-    '@id': url('about/#author'),
+    '@id': authorId,
     name: site.author,
-    url: url('about/#author'),
+    url: authorUrl,
     sameAs: 'https://github.com/mohammadrezwankhan',
   };
   const course = {
@@ -113,12 +173,13 @@ ${site.bingSiteVerification && path === '' && base === site.url ? `<meta name="m
     schema: unknown,
   ): string {
     const root = '../'.repeat(path.split('/').filter(Boolean).length);
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 ${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/png" sizes="96x96" href="${root}favicon.png"><meta name="theme-color" content="#0b655d"><style>${style}</style></head>
 <body><a class="skip" href="#main">Skip to content</a><header><a href="${root}">DATACENTER TWIN LAB</a>
 <nav aria-label="Site"><a href="${root}learn/">Course notes</a><a href="${root}evidence/">Results &amp; sources</a><a href="${root}about/">About the lab</a><a href="${repository}">GitHub</a></nav></header>
 <main id="main">${content}</main><footer>Original teaching material by ${site.author} · Version ${ENGINE_VERSION} · Apache-2.0.<br>
 Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/">model scope and reproducibility guide</a>.</footer></body></html>`;
+    return page;
   }
 
   function assumptions(lesson: Lesson, scenarios: Record<string, SiteScenario>): string {
@@ -183,7 +244,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
           inLanguage: 'en',
         },
       ];
-      return html
+      const landingPage = html
         .replace(
           '<!-- PUBLIC_COURSE_LINKS -->',
           '<a href="./learn/">Read all twelve course lessons</a> · <a href="./studies/emt/">Explore the EMT study</a> · <a href="./studies/power-dynamics/">Power dynamics studies</a> · <a href="./evidence/">Reference results and source records</a> · <a href="./about/">About the author and evidence</a> ·',
@@ -191,6 +252,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
         .replace(/<title>[\s\S]*?<\/title>/, '')
         .replace(/<meta\s+(?:name="description"|property="og:[^"]+")[\s\S]*?>/g, '')
         .replace('</head>', `${metadata(title, description, '', schema)}</head>`);
+      return landingPage;
     },
     generateBundle() {
       const scenarios = JSON.parse(
@@ -339,7 +401,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
           `
 <p class="eyebrow">About the lab / evidence you can inspect</p><h1>Understand the model. Reproduce the result.</h1>
 <p class="lead">Datacenter Twin Lab is a local-first power-continuity what-if simulator and a twelve-lesson course for datacenter engineers.</p>
-<p id="author">Created and maintained by <a href="https://github.com/mohammadrezwankhan">Mohammad Rezwan Khan</a>. The project is open source under Apache-2.0. It runs on your device without an account or shared simulation backend.</p>
+<p id="author">Created and maintained by <a href="https://mrkhan.co.technology/" rel="me">Mohammad Rezwan Khan</a>. Visit the <a href="https://mrkhan.co.technology/">engineering profile and publications</a>. The project is open source under Apache-2.0. It runs on your device without an account or shared simulation backend.</p>
 <p>Development and educational writing use AI assistance. Numerical examples are checked with stated equations, the Python reference engine and browser tests; those maintainer checks are distinct from independent external review. Inspect the <a href="../evidence/">reference results and complete records</a> to follow a claim back to its inputs.</p>
 <section class="panel answer"><h2>How long does 100 kWh support a 1 MW load?</h2><p>For this fixed-load example, 100 kWh × 0.90 discharge efficiency × 0.95 distribution efficiency = 85.5 kWh delivered. That is 307.8 seconds at 1,000 kW. With 50 kWh, it is 153.9 seconds. Charging is disabled; utility and generator fail at 300 seconds and recover at 900 seconds.</p><p><a href="../learn/ride-through/">Read the assumptions and run the experiment →</a></p></section>
 <h2>What the simulator does</h2><p>It accounts for finite battery energy, charging and losses, generator startup and failure, surviving-path capacity, shared failure domains, timed recovery and unserved energy. The fast JavaScript path can be checked on demand against the Python reference. Eighteen presets and twelve lessons use explicit inputs and unit-labelled results.</p>
@@ -543,13 +605,55 @@ python scripts/build_evidence.py --verify outputs/reproduction-${ENGINE_VERSION}
         'sitemap.xml',
         `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.map((path) => `<url><loc>${escape(url(path))}</loc></url>`).join('')}</urlset>\n`,
       );
-      emit('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${url('sitemap.xml')}\n`);
+      emit(
+        'robots.txt',
+        `User-agent: *\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: Bingbot\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nSitemap: ${url('sitemap.xml')}\n`,
+      );
+      emit('llms.txt', readFileSync(new URL('./public/llms.txt', import.meta.url), 'utf8'));
+      emit('llms-full.txt', '');
+      const ownershipFiles = readdirSync(new URL('./public/', import.meta.url)).filter((name) =>
+        /^[a-f0-9]{32}\.txt$/.test(name),
+      );
+      if (ownershipFiles.length !== 1)
+        throw new Error('Expected one 32-character IndexNow ownership file in apps/web/public');
+      const ownershipFile = ownershipFiles[0];
+      const ownershipKey = readFileSync(
+        new URL(`./public/${ownershipFile}`, import.meta.url),
+        'utf8',
+      );
+      if (ownershipKey.trim() !== ownershipFile.slice(0, -4))
+        throw new Error('IndexNow ownership filename and contents must match');
+      emit(ownershipFile, ownershipKey);
       emit(
         '404.html',
         '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Page not found | Datacenter Twin Lab</title></head><body><h1>Page not found</h1><p>The requested page is unavailable.</p><p><a href="' +
           escape(base) +
           '">Open Datacenter Twin Lab</a></p></body></html>',
       );
+    },
+    writeBundle(options, bundle) {
+      if (!options.dir) throw new Error('Expected a directory output for the static site');
+      const pages = Object.entries(bundle)
+        .filter(
+          ([fileName, output]) =>
+            output.type === 'asset' && fileName.endsWith('.html') && fileName !== '404.html',
+        )
+        .sort(([left], [right]) =>
+          left === 'index.html' ? -1 : right === 'index.html' ? 1 : left.localeCompare(right),
+        )
+        .map(([fileName, output]) => {
+          if (output.type !== 'asset') throw new Error('Expected static HTML output');
+          const html = Buffer.from(output.source).toString('utf8');
+          const pageTitle = decodeHtml(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? fileName);
+          const path = fileName === 'index.html' ? '' : fileName.replace(/index\.html$/, '');
+          return `\n## ${pageTitle}\n\nURL: ${url(path)}\n\n${visiblePageText(html)}`;
+        });
+      const fullText = [
+        '# Datacenter Twin Lab: full visible page text',
+        `Canonical site: ${base}`,
+        ...pages,
+      ].join('\n');
+      writeFileSync(resolve(options.dir, 'llms-full.txt'), capUtf8(fullText, llmsFullByteLimit));
     },
   };
 }

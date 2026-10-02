@@ -86,6 +86,10 @@ test('search pages expose all twelve worked lessons with JavaScript disabled', a
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Understand the model. Reproduce the result.',
     );
+    await expect(page.locator('#author a[rel="me"]')).toHaveAttribute(
+      'href',
+      'https://mrkhan.co.technology/',
+    );
     const manifest = await request.get('./data/evidence/v1.0.0/manifest.json');
     expect(manifest.status()).toBe(200);
     expect((await manifest.json()).engine_version).toBe('1.0.0');
@@ -107,8 +111,35 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   expect(new Set(urls).size).toBe(18);
   expect(urls.every((url) => url.startsWith(publicBase))).toBe(true);
   const robots = await request.get('./robots.txt');
-  expect(await robots.text()).toContain(`Sitemap: ${publicBase}sitemap.xml`);
-  expect(await robots.text()).not.toContain('Disallow: /');
+  const robotsText = await robots.text();
+  expect(robotsText).toContain(`Sitemap: ${publicBase}sitemap.xml`);
+  expect(robotsText).not.toContain('Disallow: /');
+  for (const crawler of [
+    'Googlebot',
+    'Bingbot',
+    'OAI-SearchBot',
+    'GPTBot',
+    'PerplexityBot',
+    'Claude-SearchBot',
+  ]) {
+    expect(robotsText).toContain(`User-agent: ${crawler}\nAllow: /`);
+  }
+  const llms = await request.get('./llms.txt');
+  expect(llms.status()).toBe(200);
+  expect(await llms.text()).toContain('https://mrkhan.co.technology/#person');
+  const fullText = await request.get('./llms-full.txt');
+  expect(fullText.status()).toBe(200);
+  const fullTextBody = await fullText.text();
+  expect(Buffer.byteLength(fullTextBody, 'utf8')).toBeLessThanOrEqual(60 * 1024);
+  expect(fullTextBody.match(/^## /gm)).toHaveLength(18);
+  expect(fullTextBody).toContain('## Datacenter Power Systems: Free Interactive Course');
+  expect(fullTextBody).toContain('## Power Systems for Datacenter Engineers');
+  expect(fullTextBody).toContain('## DC-link EMT Study: Voltage Sag and Recovery');
+  expect(fullTextBody).toContain('## Power Dynamics Studies: Converter Response and Grid Modes');
+  expect(fullTextBody).not.toContain('[Content truncated');
+  const indexNow = await request.get('./bc90742762581d53d7c536004f9443ec.txt');
+  expect(indexNow.status()).toBe(200);
+  expect(await indexNow.text()).toBe('bc90742762581d53d7c536004f9443ec');
   const titles = new Set<string>();
   for (const canonical of urls) {
     const relative = canonical.slice(publicBase.length);
@@ -143,7 +174,20 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
       'content',
       '900',
     );
-    expect(JSON.stringify(linkedData)).toContain(`${publicBase}about/#author`);
+    const linkedDataText = JSON.stringify(linkedData);
+    expect(linkedDataText).toContain('"@id":"https://mrkhan.co.technology/#person"');
+    expect(linkedDataText).toContain('"url":"https://mrkhan.co.technology/"');
+    expect(linkedDataText).not.toContain(`${publicBase}about/#author`);
+    if (relative === 'learn/') {
+      const course = linkedData['@graph'].find(
+        (item: { '@type': string }) => item['@type'] === 'Course',
+      );
+      expect(course.hasPart).toHaveLength(12);
+      expect(
+        course.hasPart.every((item: { '@type': string }) => item['@type'] === 'LearningResource'),
+      ).toBe(true);
+      expect(course).not.toHaveProperty('hasCourseInstance');
+    }
   }
   expect(titles.size).toBe(18);
   const image = await request.get('./guide-preview.png');
