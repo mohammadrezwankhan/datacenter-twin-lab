@@ -9,3 +9,15 @@ A local-first power-continuity what-if simulator and twelve-lesson course mainta
 - [Author, model scope and reproducibility](https://khanlab.co.technology/about/)
 
 The model uses declared inputs and reproducible numerical examples. It does not control equipment or establish facility calibration, certified uptime or equipment safety. Read the visible course and evidence pages for assumptions and limitations.
+
+## Maintainer and related resources
+
+Maintainer: [Mohammad Rezwan Khan](https://mrkhan.co.technology/). Unified identity: https://mrkhan.co.technology/#person
+
+- [Engineering profile and publications](https://mrkhan.co.technology/)
+- [Datacenter power course](https://khanlab.co.technology/)
+- [Hybrid-energy research preview](https://mkgrid.co.technology/)
+- [Synthetic wind-market research](https://mktrade.co.business/)
+- [Browser demo catalogue](https://mklab.co.technology/)
+
+This is an optional content index following the llms.txt proposal. It does not guarantee crawling, indexing, rankings, training use, or AI citations.
