@@ -139,6 +139,9 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   expect(fullTextBody).toContain('## DC-link EMT Study: Voltage Sag and Recovery');
   expect(fullTextBody).toContain('## Power Dynamics Studies: Converter Response and Grid Modes');
   expect(fullTextBody).not.toContain('[Content truncated');
+  expect(fullTextBody).not.toContain('Clear filters');
+  expect(fullTextBody).not.toContain('Pause flow');
+  expect(fullTextBody).toContain('The ideal source may absorb reverse current');
   const indexNow = await request.get('./bc90742762581d53d7c536004f9443ec.txt');
   expect(indexNow.status()).toBe(200);
   expect(await indexNow.text()).toBe('bc90742762581d53d7c536004f9443ec');

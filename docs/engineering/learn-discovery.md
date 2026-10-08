@@ -20,6 +20,8 @@ Manifest overview/runtime paths begin with `/` and are relative to the site's de
 
 All cards, descriptions, ordinary guide links and runtime links are generated HTML. Without JavaScript, three pathway links jump to the corresponding complete collection. With JavaScript, topic search and pathway filters update visible cards, a restrained result count, and the `q`/`path` URL parameters. Back/Forward restores the selection; unknown paths fall back to all items. Text is treated as text, never evaluated as HTML. The page adds no cookies, local-storage records, analytics or external inference calls.
 
+The plain-text reading export omits interface controls and repeated screen-reader link context. Teaching prose and model assumptions remain present, with all eighteen canonical page sections checked against the 60 KiB limit, including builds with a full source revision.
+
 `learn.css` applies only to the index. The cream/forest editorial styling is a Learn-specific design, not a change to numerical dashboards or lesson-result formatting. Existing lesson and study prose, source notices, canonical URLs, data downloads and runtime settings remain separate preservation dependencies.
 
 ## Illustrative systems

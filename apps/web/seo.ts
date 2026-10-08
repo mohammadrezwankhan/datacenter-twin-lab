@@ -55,7 +55,9 @@ function visiblePageText(html: string): string {
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
   return decodeHtml(
     main
-      .replace(/<(script|style|svg)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+      .replace(/<(script|style|svg|form|button|select)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+      // Accessible link context repeats adjacent titles; omit it from the reading export.
+      .replace(/<span\b[^>]*class="sr-only"[^>]*>[\s\S]*?<\/span>/gi, '')
       .replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, '$1')
       .replace(/<br\b[^>]*>/gi, '\n')
       .replace(
