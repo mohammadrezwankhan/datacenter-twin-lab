@@ -52,7 +52,9 @@ test('search pages expose all twelve worked lessons with JavaScript disabled', a
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Power Systems for Datacenter Engineers',
     );
-    await expect(page.locator('.card')).toHaveCount(12);
+    await expect(page.locator('.learning-card[data-kind="continuity"]')).toHaveCount(12);
+    await expect(page.locator('.learning-card[data-kind="emt"]')).toHaveCount(1);
+    await expect(page.locator('.learning-card[data-kind="dynamics"]')).toHaveCount(5);
     for (const lesson of lessons) {
       const response = await page.goto(`./learn/${lesson.id}/`);
       expect(response?.status()).toBe(200);

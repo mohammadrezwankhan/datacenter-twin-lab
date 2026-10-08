@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { lessons, lessonScenario, type Lesson } from './src/course-lessons.ts';
 import { ENGINE_VERSION } from './src/js-engine/version.ts';
 import type { SiteScenario } from './src/types.ts';
@@ -9,6 +10,8 @@ import site from './site.config.json' with { type: 'json' };
 import { displayQuantity, lessonRecords, type EvidenceIndex } from './seo-records';
 import { emtPage } from './seo-emt';
 import { researchPage } from './seo-research';
+import { buildLearningManifest } from './learn-manifest';
+import { learningDirectory, learningExplorer } from './learn-page';
 
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const title = 'Datacenter Power Systems: Free Interactive Course | Datacenter Twin Lab';
@@ -111,6 +114,7 @@ figure{margin:2rem 0}svg{max-width:100%;height:auto}figcaption,.small{font-size:
 `;
 
 export function searchPages(): Plugin {
+  let discoveryScript = '';
   const base = publicSiteUrl(process.env.VITE_PUBLIC_SITE_URL || site.url);
   const revision = process.env.VITE_PUBLIC_SOURCE_REVISION;
   if (revision && !/^[a-f0-9]{40}$/.test(revision))
@@ -173,9 +177,10 @@ ${site.bingSiteVerification && path === '' && base === site.url ? `<meta name="m
     schema: unknown,
   ): string {
     const root = '../'.repeat(path.split('/').filter(Boolean).length);
+    const learnIndex = path === 'learn/';
     const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/png" sizes="96x96" href="${root}favicon.png"><meta name="theme-color" content="#0b655d"><style>${style}</style></head>
-<body><a class="skip" href="#main">Skip to content</a><header><a href="${root}">DATACENTER TWIN LAB</a>
+${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/png" sizes="96x96" href="${root}favicon.png"><meta name="theme-color" content="#0b655d"><style>${style}</style>${learnIndex ? `<link rel="stylesheet" href="${root}assets/learn.css">` : ''}</head>
+<body${learnIndex ? ' class="learn-index"' : ''}><a class="skip" href="#main">Skip to content</a><header><a href="${root}">DATACENTER TWIN LAB</a>
 <nav aria-label="Site"><a href="${root}learn/">Course notes</a><a href="${root}evidence/">Results &amp; sources</a><a href="${root}about/">About the lab</a><a href="${repository}">GitHub</a></nav></header>
 <main id="main">${content}</main><footer>Original teaching material by ${site.author} · Version ${ENGINE_VERSION} · Apache-2.0.<br>
 Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/">model scope and reproducibility guide</a>.</footer></body></html>`;
@@ -207,6 +212,13 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
   return {
     name: 'public-course-search-pages',
     apply: 'build',
+    buildStart() {
+      discoveryScript = this.emitFile({
+        type: 'chunk',
+        id: fileURLToPath(new URL('./learn-discovery.ts', import.meta.url)),
+        name: 'learn-discovery',
+      });
+    },
     transformIndexHtml(html) {
       const schema = [
         {
@@ -271,12 +283,9 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
       ) as EvidenceIndex;
       if (evidence.version !== ENGINE_VERSION || evidence.cases.length !== 3)
         throw new Error('Expected the current three-case evidence index');
-      const cards = lessons
-        .map(
-          (lesson, index) =>
-            `<article class="card"><span class="eyebrow">Lesson ${String(index + 1).padStart(2, '0')} / 12</span><h2><a href="${lesson.id}/">${escape(lesson.title.replace(/^\d+\. /, ''))}</a></h2><p>${escape(lesson.question)}</p><span class="small">${escape(lesson.concept)}</span></article>`,
-        )
-        .join('');
+      const learning = buildLearningManifest(revision || null);
+      emit('learn/manifest.json', JSON.stringify(learning, null, 2) + '\n');
+      emit('assets/learn.css', readFileSync(new URL('./learn.css', import.meta.url), 'utf8'));
       const graphic = `<figure><svg viewBox="0 0 920 220" role="img" aria-labelledby="reserve-title reserve-desc"><title id="reserve-title">Halving stored energy halves ride-through in the charging-disabled case</title><desc id="reserve-desc">At 1,000 kW, 100 kWh supplies 307.8 seconds; 50 kWh supplies 153.9 seconds after discharge and distribution losses.</desc><rect width="920" height="220" rx="16" fill="#e7f3ee"/><g fill="#173041" font-family="system-ui" font-size="18"><text x="28" y="40">BATTERY RESERVE → DELIVERED TIME AT 1 MW</text><text x="28" y="96">100 kWh</text><text x="28" y="162">50 kWh</text></g><rect x="140" y="65" width="590" height="43" rx="6" fill="#09685e"/><rect x="140" y="132" width="295" height="43" rx="6" fill="#236fb0"/><g fill="white" font-family="system-ui" font-size="20" font-weight="700"><text x="162" y="93">307.8 s</text><text x="162" y="161">153.9 s</text></g><text x="28" y="202" fill="#425c6b" font-family="system-ui" font-size="15">Charging disabled · 90% discharge efficiency · 95% distribution efficiency</text></svg><figcaption>Original calculation diagram. Duration starts at the utility outage; it is not an elapsed event timestamp.</figcaption></figure>`;
       emit(
         'learn/index.html',
@@ -285,15 +294,19 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
           description,
           'learn/',
           `
-<p class="eyebrow">The power playbook / 12 practical lessons</p><h1>${courseName}</h1>
+<p class="eyebrow">The power playbook / ${learning.counts.continuity} practical lessons</p><h1>${courseName}</h1>
 <p class="lead">A generator fails. The battery takes over. Can you predict when the lights go out?</p>
 <p>Start with a 1 MW load and a 100 kWh battery, then change one assumption at a time. Read the calculations here, run each experiment in your browser, and compare the result with the reference Python engine.</p>
 <p class="byline">Original course by <a href="../about/#author">${site.author}</a> · Engine ${ENGINE_VERSION} · <a href="../evidence/">Reference results and citation records</a></p>
 <p><a class="button" href="../?lesson=ride-through">Try the battery experiment →</a></p>
-<div class="tags"><span>Free · no account</span><span>Browser + Python</span><span>Predict · run · explain</span></div>${graphic}
-<h2>Build your power-systems intuition</h2><p>For datacenter engineers learning power continuity. Begin with power and energy, work through outages and shared failures, then compare aggregate AI demand and annual PUE planning. Basic arithmetic is enough to start.</p><div class="cards">${cards}</div>
+<div class="tags"><span>Free · no account</span><span>Browser + Python</span><span>Predict · run · explain</span></div>
+${learningDirectory(learning.items)}
+${learningExplorer()}
+<h2>Build your power-systems intuition</h2><p>For datacenter engineers learning power continuity. Begin with power and energy, work through outages and shared failures, then compare aggregate AI demand and annual PUE planning. Basic arithmetic is enough to start.</p>${graphic}
 <section class="panel"><h2>Go inside a voltage sag</h2><p>Ready for a different timescale? The separate <a href="../studies/emt/">EMT fundamentals study</a> explores a 200 ms ideal DC-link RLC transient with waveforms, an energy ledger and step-refinement checks. Continue with five <a href="../studies/power-dynamics/">advanced power-dynamics studies</a> of converter response and grid modes.</p></section>
-<section class="panel"><h2>What these twelve experiments establish</h2><p>These are deterministic synthetic electrical examples with explicit units, input scenarios and downloadable results. They teach reserve accounting and failure-path reasoning. They do not predict GPU jobs, grid adequacy, electrical transients or certified facility uptime.</p><p><a href="../about/">Read about the author, model scope and reproducibility evidence →</a></p></section>`,
+<section class="panel"><h2>What these twelve experiments establish</h2><p>These are deterministic synthetic electrical examples with explicit units, input scenarios and downloadable results. They teach reserve accounting and failure-path reasoning. They do not predict GPU jobs, grid adequacy, electrical transients or certified facility uptime.</p><p><a href="../about/">Read about the author, model scope and reproducibility evidence →</a></p></section>
+<p class="small">${revision ? `Website source revision: <a href="${repository}/tree/${revision}">${revision.slice(0, 12)}</a>.` : 'Website source revision is not declared in this local build.'} The engine version does not identify every study model; see each guide and applied result.</p>
+<script type="module" src="../${this.getFileName(discoveryScript)}"></script>`,
           course,
         ),
       );

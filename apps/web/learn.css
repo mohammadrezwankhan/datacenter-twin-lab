@@ -1,0 +1,661 @@
+.learn-index {
+  --ink: #183d33;
+  --muted: #53645b;
+  --teal: #185c48;
+  --paper: #f6f3eb;
+  --line: #ccd2c6;
+  background: var(--paper);
+  color: var(--ink);
+}
+.learn-index [hidden] {
+  display: none !important;
+}
+.learn-index :is(button, input, select, summary, a):focus-visible {
+  outline: 3px solid #a44806;
+  outline-offset: 4px;
+}
+.learn-index header,
+.learn-index main,
+.learn-index footer {
+  max-width: 1280px;
+}
+.learn-index header {
+  align-items: center;
+}
+.learn-index header a {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+}
+.learn-index h1,
+.learn-index h2,
+.learn-index h3 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.learn-index h1 {
+  font-size: clamp(2.4rem, 5.4vw, 4.8rem);
+  max-width: 1000px;
+}
+.learn-index h2 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+.learn-index .lead {
+  color: var(--ink);
+  font-size: clamp(1.15rem, 2vw, 1.5rem);
+  max-width: 55ch;
+}
+.learn-index main > p:not(.lead) {
+  max-width: 85ch;
+}
+.learn-index a {
+  color: #145742;
+}
+.learn-index a:hover {
+  color: #092e23;
+}
+.learn-index .button {
+  background: #185c48;
+  color: white;
+  min-height: 48px;
+  border-radius: 4px;
+}
+.learn-index .button:hover {
+  background: #123f31;
+  color: white;
+}
+.learn-index .tags {
+  margin: 1.5rem 0 2rem;
+}
+.learn-index .tags span {
+  border: 0;
+  padding: 0 1.2rem 0 0;
+  border-right: 1px solid var(--line);
+  border-radius: 0;
+}
+.learn-index .tags span:last-child {
+  border: 0;
+}
+.learning-paths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 2.5rem 0 3.5rem;
+  background: #fffdf7;
+}
+.learning-paths > a {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-decoration: none;
+  border-top: 5px solid var(--path);
+  color: var(--ink);
+}
+.learning-paths > a + a {
+  border-left: 1px solid var(--line);
+}
+.learning-paths > a:hover {
+  background: #edf1e7;
+}
+.learning-paths strong {
+  font-size: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.learning-paths strong span {
+  font-size: 1.2rem;
+}
+.learning-paths > a > span:last-child {
+  font-size: 0.94rem;
+}
+.path-number,
+.group-heading > span {
+  font-size: 0.8rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.path-continuity {
+  --path: #185c48;
+  --tint: #e9f0e7;
+}
+.path-emt {
+  --path: #8a501a;
+  --tint: #f5ecdf;
+}
+.path-dynamics {
+  --path: #64448c;
+  --tint: #eee8f3;
+}
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  margin: 3rem 0 1.5rem;
+}
+.section-heading .eyebrow {
+  margin: 0;
+}
+.section-heading h2 {
+  margin: 0.3rem 0;
+}
+.section-heading > p {
+  max-width: 50ch;
+  font-size: 0.94rem;
+  color: var(--muted);
+  margin: 0;
+}
+.learn-search {
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+.learn-search label {
+  font-weight: 650;
+  display: block;
+}
+.learn-search input {
+  display: block;
+  width: 100%;
+  margin: 0.4rem 0 1rem;
+  border: 1px solid #728276;
+  border-radius: 5px;
+  background: white;
+  color: var(--ink);
+  min-height: 52px;
+  padding: 0.75rem;
+  font: inherit;
+}
+.learn-search fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.learn-search legend {
+  font-weight: 650;
+  margin-bottom: 0.5rem;
+}
+.path-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.learn-index button,
+.learn-index select {
+  font: inherit;
+  font-size: 1rem;
+  min-height: 48px;
+  border: 1px solid #738276;
+  border-radius: 5px;
+  color: var(--ink);
+  background: #fffdf8;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+}
+.learn-index button:hover,
+.learn-index select:hover {
+  background: #e9eee4;
+}
+.learn-index button[aria-pressed='true'] {
+  background: #185c48;
+  border-color: #185c48;
+  color: white;
+}
+.learn-index button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.search-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.search-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+.search-footer button {
+  background: transparent;
+  text-decoration: underline;
+}
+.learn-empty {
+  padding: 2rem;
+  border-left: 4px solid #8a501a;
+  background: #f5ecdf;
+}
+.learning-group {
+  scroll-margin-top: 1rem;
+  margin: 2rem 0 3rem;
+}
+.group-heading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.7rem;
+}
+.group-heading h3 {
+  font-size: 1.65rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.group-heading h3:before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--path);
+}
+.group-heading > span {
+  margin-left: auto;
+}
+.learning-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+.learning-card {
+  min-width: 0;
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-top: 3px solid var(--path);
+  border-radius: 9px;
+  padding: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.learning-card .eyebrow {
+  color: var(--path);
+  letter-spacing: 0.08em;
+}
+.learning-card h4 {
+  font-size: 1.2rem;
+  line-height: 1.35;
+  margin: 0.55rem 0;
+}
+.learning-card h4 a {
+  text-decoration: none;
+  color: var(--ink);
+}
+.learning-card h4 a:hover {
+  text-decoration: underline;
+}
+.learning-card p {
+  font-size: 1rem;
+  line-height: 1.65;
+  margin: 0.6rem 0;
+}
+.learning-card .card-description {
+  font-size: 1rem;
+  color: var(--muted);
+}
+.card-links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--line);
+}
+.card-links a,
+.explorer-links a {
+  font-weight: 650;
+  font-size: 0.9rem;
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.learn-explorer {
+  margin: 4rem 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+.model-picker {
+  font-size: 0.9rem;
+  font-weight: 650;
+  min-width: 190px;
+}
+.model-picker select {
+  display: block;
+  width: 100%;
+  margin-top: 0.4rem;
+}
+.model-explainer {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 2rem;
+  background: #fffdf8;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.diagram-container {
+  min-width: 0;
+}
+.diagram-container h3 {
+  font-size: 1.7rem;
+  line-height: 1.2;
+  margin: 0.5rem 0 1.2rem;
+}
+.diagram-stage {
+  perspective: 900px;
+  background: radial-gradient(circle, var(--tint), transparent 70%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.diagram-stage svg {
+  display: block;
+  width: 100%;
+  transform: rotateX(12deg) rotateY(-8deg);
+  transition: transform 0.35s ease;
+  transform-origin: center;
+}
+.diagram-stage.is-rotated svg {
+  transform: rotateX(8deg) rotateY(9deg);
+}
+.diagram-stage.static-view svg {
+  transform: none;
+  transition: none;
+}
+.diagram-stage .diagram-wire {
+  stroke: var(--path);
+  stroke-width: 3;
+  fill: none;
+}
+.diagram-flow {
+  stroke: var(--path);
+  stroke-width: 6;
+  fill: none;
+  stroke-dasharray: 10 500;
+  stroke-dashoffset: 0;
+  opacity: 0;
+}
+.node-depth {
+  fill: var(--tint);
+  stroke: var(--path);
+  stroke-width: 1.5;
+}
+.node-face {
+  fill: #fffdf8;
+  stroke: var(--path);
+  stroke-width: 1.5;
+}
+.diagram-stage text {
+  font:
+    13px system-ui,
+    sans-serif;
+  fill: #183d33;
+}
+.diagram-summary {
+  font-size: 0.94rem;
+  color: var(--muted);
+}
+.diagram-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.diagram-controls button {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.7rem;
+}
+.flow-status {
+  min-height: 2.8em;
+}
+.model-lenses {
+  min-width: 0;
+}
+.model-lenses details {
+  border-top: 1px solid var(--line);
+  padding: 0.6rem 0;
+}
+.model-lenses summary {
+  min-height: 48px;
+  padding: 0.6rem 0.2rem;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+.lens-number {
+  color: var(--path);
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  margin-right: 0.5rem;
+}
+.model-lenses details p {
+  font-size: 1rem;
+  margin: 0.3rem 0 1rem;
+}
+.model-lenses details a {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+.explorer-links {
+  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding-top: 0.6rem;
+}
+.flow-playing .diagram-flow {
+  opacity: 1;
+  animation: learn-flow 3s linear 1 both;
+}
+.flow-paused .diagram-flow {
+  animation-play-state: paused;
+}
+@keyframes learn-flow {
+  0% {
+    stroke-dashoffset: 500;
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@media (max-width: 1000px) {
+  .learning-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .model-explainer {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .diagram-stage {
+    max-width: 640px;
+  }
+  .section-heading {
+    align-items: start;
+    gap: 1rem;
+  }
+  .section-heading > p {
+    max-width: 38ch;
+  }
+  .learning-paths > a {
+    padding: 1rem;
+  }
+  .learning-paths strong {
+    font-size: 1.2rem;
+  }
+}
+@media (max-width: 600px) {
+  .learn-index main {
+    padding-top: 2rem;
+  }
+  .learning-paths {
+    grid-template-columns: 1fr;
+    margin: 2rem 0;
+  }
+  .learning-paths > a {
+    padding: 1rem 1.2rem;
+  }
+  .learning-paths > a + a {
+    border-left: 0;
+    border-top-width: 3px;
+  }
+  .learning-paths strong {
+    font-size: 1.35rem;
+  }
+  .learning-cards {
+    grid-template-columns: 1fr;
+  }
+  .section-heading {
+    display: block;
+  }
+  .section-heading > p {
+    margin-top: 1rem;
+  }
+  .learn-search,
+  .model-explainer {
+    padding: 1rem;
+  }
+  .path-filters button {
+    flex: 1 1 42%;
+  }
+  .search-footer {
+    align-items: start;
+  }
+  .group-heading {
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .group-heading > span {
+    margin-left: 0;
+    width: 100%;
+  }
+  .model-picker {
+    display: block;
+    margin-top: 1rem;
+  }
+  .model-lenses summary {
+    font-size: 1rem;
+  }
+  .diagram-stage text {
+    font-size: 14px;
+  }
+  .diagram-stage svg {
+    transform: none;
+  }
+  .learn-index .tags {
+    font-size: 1rem;
+  }
+  .learn-index figure {
+    margin: 2rem 0;
+  }
+  .learn-index .tags span {
+    padding-right: 0.6rem;
+  }
+  .card-links a {
+    font-size: 0.94rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagram-stage svg {
+    transition: none;
+    transform: none !important;
+  }
+  .flow-playing .diagram-flow {
+    animation: none;
+    opacity: 0;
+  }
+}
+@media (forced-colors: active) {
+  .learning-paths > a,
+  .learning-card,
+  .learn-search,
+  .model-explainer,
+  .diagram-stage {
+    border: 1px solid CanvasText;
+  }
+  .diagram-stage svg {
+    transform: none;
+  }
+  .diagram-wire,
+  .diagram-flow,
+  .node-face,
+  .node-depth {
+    stroke: CanvasText !important;
+  }
+  .node-face,
+  .node-depth {
+    fill: Canvas !important;
+  }
+  .diagram-stage text {
+    fill: CanvasText;
+  }
+  .learn-index button[aria-pressed='true'] {
+    outline: 2px solid Highlight;
+  }
+  .group-heading h3:before {
+    background: CanvasText;
+  }
+}
+@media print {
+  .learn-search,
+  .learning-paths,
+  .diagram-controls,
+  .model-picker {
+    display: none !important;
+  }
+  .learn-index [hidden].learning-card,
+  .learn-index [hidden].learning-group,
+  .learn-index [hidden].model-explainer {
+    display: block !important;
+  }
+  .learning-cards {
+    display: block;
+  }
+  .learning-card,
+  .model-explainer {
+    break-inside: avoid;
+    margin: 1rem 0;
+  }
+  .model-explainer {
+    display: block;
+  }
+  .model-lenses details > * {
+    display: block !important;
+  }
+  .diagram-stage svg {
+    transform: none !important;
+  }
+  .learn-index h1 {
+    font-size: 25pt;
+  }
+}
