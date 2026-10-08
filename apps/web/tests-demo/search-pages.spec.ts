@@ -52,7 +52,9 @@ test('search pages expose all twelve worked lessons with JavaScript disabled', a
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       'Power Systems for Datacenter Engineers',
     );
-    await expect(page.locator('.card')).toHaveCount(12);
+    await expect(page.locator('.learning-card[data-kind="continuity"]')).toHaveCount(12);
+    await expect(page.locator('.learning-card[data-kind="emt"]')).toHaveCount(1);
+    await expect(page.locator('.learning-card[data-kind="dynamics"]')).toHaveCount(5);
     for (const lesson of lessons) {
       const response = await page.goto(`./learn/${lesson.id}/`);
       expect(response?.status()).toBe(200);
@@ -137,6 +139,9 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   expect(fullTextBody).toContain('## DC-link EMT Study: Voltage Sag and Recovery');
   expect(fullTextBody).toContain('## Power Dynamics Studies: Converter Response and Grid Modes');
   expect(fullTextBody).not.toContain('[Content truncated');
+  expect(fullTextBody).not.toContain('Clear filters');
+  expect(fullTextBody).not.toContain('Pause flow');
+  expect(fullTextBody).toContain('The ideal source may absorb reverse current');
   const indexNow = await request.get('./bc90742762581d53d7c536004f9443ec.txt');
   expect(indexNow.status()).toBe(200);
   expect(await indexNow.text()).toBe('bc90742762581d53d7c536004f9443ec');

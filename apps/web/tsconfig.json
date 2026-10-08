@@ -13,5 +13,5 @@
     "allowImportingTsExtensions": true,
     "noEmit": true
   },
-  "include": ["src", "seo.ts", "seo-records.ts"]
+  "include": ["src", "seo.ts", "seo-records.ts", "learn-discovery.ts"]
 }

@@ -1,5 +1,11 @@
 import { DEFAULT_EMT, simulateEmt } from './src/emt/engine';
 
+export const emtIntroduction = {
+  title: 'Inside a voltage sag',
+  description:
+    'Explore a 200 ms DC-link transient. Change the circuit, replay the waveforms and check where the stored energy goes.',
+} as const;
+
 export function emtPage(source: string) {
   const result = simulateEmt(DEFAULT_EMT);
   const summary = result.summary;
@@ -11,7 +17,7 @@ export function emtPage(source: string) {
     .map((r, i) => `${i ? 'L' : 'M'}${x(r.time_ms).toFixed(2)},${y(r.bus_v).toFixed(2)}`)
     .join(' ');
   const content = `<p class="eyebrow">Advanced study / EMT fundamentals</p>
-<h1>Inside a voltage sag</h1><p class="lead">Explore a 200 ms DC-link transient. Change the circuit, replay the waveforms and check where the stored energy goes.</p>
+<h1>${emtIntroduction.title}</h1><p class="lead">${emtIntroduction.description}</p>
 <p class="byline">Original lesson by Mohammad Rezwan Khan · Circuit model dc-link-rlc-v1</p>
 <p><a class="button" href="../../?mode=emt">Open the interactive EMT study →</a></p>
 <section class="panel answer"><h2>The starting experiment</h2><p>An ideal 800 V DC source feeds a 0.08 Ω resistor and 0.6 mH inductor, then a 12 mF capacitor in parallel with a 12.8 Ω load. At 40 ms the source drops to 400 V. At 120 ms it returns to 800 V.</p><p>The bus starts at <strong>${summary.initial_bus_v.toFixed(2)} V</strong>, falls to <strong>${summary.minimum_bus_v.toFixed(2)} V</strong> and reaches a recovery peak of <strong>${summary.recovery_peak_v.toFixed(2)} V</strong>. Stored energy delays the response and produces ringing in this underdamped circuit.</p></section>

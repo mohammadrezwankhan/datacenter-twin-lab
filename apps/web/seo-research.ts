@@ -1,42 +1,45 @@
+type ResearchStudy = readonly [id: string, title: string, question: string, detail: string];
+
+export const researchStudies: readonly ResearchStudy[] = [
+  [
+    'load-step',
+    'Load-step response',
+    'How quickly does PCC power follow a change from 0.5 to 0.6 pu?',
+    'Run an equilibrated 21-state converter chain. Compare the requested load, PCC response and DC-link voltage.',
+  ],
+  [
+    'modal',
+    'Modes and frequency response',
+    'What changes when the voltage-loop bandwidth changes?',
+    'Inspect eigenvalues, damping, dominant state participation and a sampled small-signal frequency response.',
+  ],
+  [
+    'forced-response',
+    'Synthetic load spectrum',
+    'Which part of a repeating load swing reaches the PCC?',
+    'Apply a bounded sinusoidal load and compare its time response and spectrum. The input is explicitly synthetic.',
+  ],
+  [
+    'model-comparison',
+    'Phase model versus QSS',
+    'What does the reduced formulation leave out?',
+    'Compare the supplied 41-state abc and 21-state quasi-steady formulations, including their hand-set startup and a shared step at 0.04 s in a bounded 0.08 s window.',
+  ],
+  [
+    'grid-network',
+    'Interacting grid ports',
+    'Does a solved power flow imply stable dynamics?',
+    'Explore a modified nine-bus network with synchronous-machine, grid-forming, grid-following and data-center ports.',
+  ],
+];
+
 export function researchPage(source: string): string {
-  const studies = [
-    [
-      'load-step',
-      'Load-step response',
-      'How quickly does PCC power follow a change from 0.5 to 0.6 pu?',
-      'Run an equilibrated 21-state converter chain. Compare the requested load, PCC response and DC-link voltage.',
-    ],
-    [
-      'modal',
-      'Modes and frequency response',
-      'What changes when the voltage-loop bandwidth changes?',
-      'Inspect eigenvalues, damping, dominant state participation and a sampled small-signal frequency response.',
-    ],
-    [
-      'forced-response',
-      'Synthetic load spectrum',
-      'Which part of a repeating load swing reaches the PCC?',
-      'Apply a bounded sinusoidal load and compare its time response and spectrum. The input is explicitly synthetic.',
-    ],
-    [
-      'model-comparison',
-      'Phase model versus QSS',
-      'What does the reduced formulation leave out?',
-      'Compare the supplied 41-state abc and 21-state quasi-steady formulations, including their hand-set startup and a shared step at 0.04 s in a bounded 0.08 s window.',
-    ],
-    [
-      'grid-network',
-      'Interacting grid ports',
-      'Does a solved power flow imply stable dynamics?',
-      'Explore a modified nine-bus network with synchronous-machine, grid-forming, grid-following and data-center ports.',
-    ],
-  ];
   return `<p class="eyebrow">Advanced power dynamics / five interactive studies</p>
 <h1>Follow a load change through the power system</h1>
 <p class="lead">Explore converter response, oscillation modes and interacting grid ports with the supplied Python study equations running in your browser.</p>
 <p><a class="button" href="../../?study=load-step">Open the study studio →</a></p>
 <div class="tags"><span>Five configurable experiments</span><span>Local Python + SciPy</span><span>JSON and CSV exports</span></div>
-<h2>Choose a question, predict, then run</h2><div class="cards">${studies.map(([id, title, question, detail], i) => `<article class="card"><span class="eyebrow">Study ${i + 1} / 5</span><h2><a href="../../?study=${id}">${title}</a></h2><p><strong>${question}</strong></p><p>${detail}</p></article>`).join('')}</div>
+<h2>Choose a question, predict, then run</h2><div class="cards">${researchStudies.map(([id, title, question, detail], i) => `<article class="card"><span class="eyebrow">Study ${i + 1} / 5</span><h2><a href="../../?study=${id}">${title}</a></h2><p><strong>${question}</strong></p><p>${detail}</p></article>`).join('')}</div>
 <h2>Read the system at two timescales</h2>
 <p>The twelve <a href="../../learn/">power-continuity lessons</a> account for energy during outages. These advanced studies investigate the dynamics of idealized converter and grid models. For an introductory electromagnetic transient, begin with the separate <a href="../emt/">DC-link RLC voltage-sag lesson</a>.</p>
 <section class="panel answer"><h2>What a mode tells you</h2><p>For a linearized mode with eigenvalue λ = σ + jω, σ below zero indicates decay around that operating point. A positive σ indicates growth in the linearized model. Its frequency is |ω|/(2π) Hz; damping ratio is −σ/√(σ² + ω²). A converged power flow and stable dynamic modes answer different questions.</p></section>
