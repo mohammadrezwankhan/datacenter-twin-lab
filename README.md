@@ -94,17 +94,9 @@ The workflow is configured to test each push to `main` and each pull request. It
 
 The project uses deterministic quantities, unit-labelled outputs, explicit unknowns, stable input hashes, event logs, and energy ledgers. CI and local reproductions establish software behavior for these synthetic fixtures; they do not establish engineering performance or physical accuracy.
 
-For local verification from the repository root:
+For local verification, start with the [contributor setup](CONTRIBUTING.md#before-opening-a-pull-request): create an isolated Python environment, install the locked API and frontend dependencies, build the dashboard, and run the core tests and CLI smoke check.
 
-```sh
-python -m unittest discover -s tests -v
-npm --prefix apps/web ci --ignore-scripts
-npm --prefix apps/web run build
-python scripts/prepare_browser_demo.py
-npm --prefix apps/web run test:engine
-npm --prefix apps/web run build:demo
-npm --prefix apps/web run test:demo
-```
+Then follow [Rebuild and verify](docs/engineering/browser-demo.md#rebuild-and-verify) for the browser demo. That workflow installs the scientific dependencies, fetches the hash-checked runtime wheels **before** preparing the browser assets, runs the engine comparisons, and installs Chromium before the browser journeys. Run both workflows from the repository root and keep `TWIN_PYTHON` set to the same environment throughout.
 
 Browser and wheel verification details are in the [quickstart](docs/quickstart.md). The [adding-a-scenario guide](docs/engineering/adding-a-scenario.md) describes how to propose a small, independently checkable case. No test, benchmark run, automated audit, or maintainer-produced evidence packet counts as an independent external review.
 
