@@ -34,20 +34,33 @@ Results remain synthetic and uncalibrated. This does not establish facility safe
 
 ## Rebuild and verify
 
-Use Python 3.12+ and Node 24 from the repository root:
+Complete the [contributor setup](../../CONTRIBUTING.md#before-opening-a-pull-request) first. It creates an isolated Python environment, installs the locked API and frontend dependencies, and sets `TWIN_PYTHON` to that environment. Continue in the same terminal from the repository root so the native calculations and browser checks use the same Python packages.
+
+Windows / PowerShell:
+
+```powershell
+& $env:TWIN_PYTHON -m pip install -r requirements-studies.lock
+& $env:TWIN_PYTHON scripts/fetch_study_runtime.py
+& $env:TWIN_PYTHON scripts/prepare_browser_demo.py
+npm.cmd --prefix apps/web run test:engine
+npm.cmd --prefix apps/web run build:demo
+npm.cmd --prefix apps/web exec playwright install chromium
+npm.cmd --prefix apps/web run test:demo
+```
+
+macOS / Linux:
 
 ```sh
-npm --prefix apps/web ci --ignore-scripts
-python -m pip install -r requirements-studies.lock
-python scripts/fetch_study_runtime.py
-python scripts/prepare_browser_demo.py
+"$TWIN_PYTHON" -m pip install -r requirements-studies.lock
+"$TWIN_PYTHON" scripts/fetch_study_runtime.py
+"$TWIN_PYTHON" scripts/prepare_browser_demo.py
 npm --prefix apps/web run test:engine
 npm --prefix apps/web run build:demo
 npm --prefix apps/web exec playwright install chromium
 npm --prefix apps/web run test:demo
 ```
 
-If Python is not on PATH, set `TWIN_PYTHON` to its executable before the browser tests. The build lives in `.local/browser-demo-site` and uses relative asset paths so the same files work at a domain root or a repository subpath. From `apps/web`, run `npx vite preview --mode demo --host 127.0.0.1 --port 4174 --base /datacenter-twin-lab/` and open `http://127.0.0.1:4174/datacenter-twin-lab/`. Stop that preview before running `test:demo`, which starts its own server on the same port. The default suite covers that repository path; set `TWIN_DEMO_BASE=/` to exercise a root deployment. CI checks the guide's two reserves, complete native/Python equality and the evidence hub at the root using the same built artifact. See [custom-domain deployment](custom-domain.md) for DNS and HTTPS requirements.
+The build lives in `.local/browser-demo-site` and uses relative asset paths so the same files work at a domain root or a repository subpath. From `apps/web`, run `npx vite preview --mode demo --host 127.0.0.1 --port 4174 --base /datacenter-twin-lab/` and open `http://127.0.0.1:4174/datacenter-twin-lab/`. Stop that preview before running `test:demo`, which starts its own server on the same port. The default suite covers that repository path; set `TWIN_DEMO_BASE=/` to exercise a root deployment. CI checks the guide's two reserves, complete native/Python equality and the evidence hub at the root using the same built artifact. See [custom-domain deployment](custom-domain.md) for DNS and HTTPS requirements.
 
 The HTML entry includes a readable example and Python/documentation links before scripts load. The [twelve readable lesson pages](https://khanlab.co.technology/learn/) also work without JavaScript; the interactive simulations require it. All eighteen presets and all twelve default/challenge lesson pairs are checked against native Python. Phone-width and JavaScript-disabled journeys, optional Python verification, corruption/retry and initial network requests are checked as well. The [recorded walkthrough](../examples/demo-walkthrough.md) provides a small visual preview and a text transcript.
 
