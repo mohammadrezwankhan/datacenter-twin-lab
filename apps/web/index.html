@@ -18,162 +18,162 @@
     <meta property="og:type" content="website" />
     <title>Datacenter Twin Lab — power continuity, explained</title>
     <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "WebSite",
-      "@id": "https://khanlab.co.technology/#website",
-      "name": "Datacenter Twin Lab",
-      "url": "https://khanlab.co.technology/",
-      "description": "Learn datacenter power continuity with 12 free browser lessons and interactive DC-link EMT simulations.",
-      "inLanguage": "en",
-      "publisher": {
-        "@type": "Person",
-        "@id": "https://mrkhan.co.technology/#person",
-        "name": "Mohammad Rezwan Khan",
-        "url": "https://mrkhan.co.technology/"
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://khanlab.co.technology/#website",
+            "name": "Datacenter Twin Lab",
+            "url": "https://khanlab.co.technology/",
+            "description": "Learn datacenter power continuity with 12 free browser lessons and interactive DC-link EMT simulations.",
+            "inLanguage": "en",
+            "publisher": {
+              "@type": "Person",
+              "@id": "https://mrkhan.co.technology/#person",
+              "name": "Mohammad Rezwan Khan",
+              "url": "https://mrkhan.co.technology/"
+            }
+          },
+          {
+            "@type": "Course",
+            "@id": "https://khanlab.co.technology/#course",
+            "name": "Datacenter Power Systems: Continuity, Ride-Through, and Energy Balance",
+            "description": "A 12-lesson interactive browser course teaching datacenter power continuity, generator switchover dynamics, and Python energy balance modeling.",
+            "provider": {
+              "@type": "Person",
+              "@id": "https://mrkhan.co.technology/#person",
+              "name": "Mohammad Rezwan Khan",
+              "url": "https://mrkhan.co.technology/"
+            },
+            "isAccessibleForFree": true,
+            "inLanguage": "en",
+            "courseCode": "DCP-101",
+            "hasCourseInstance": [
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 1: Power vs Energy Fundamentals",
+                "url": "https://khanlab.co.technology/learn/power-energy/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 2: Distribution Loss and Thermal Margins",
+                "url": "https://khanlab.co.technology/learn/distribution-loss/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 3: Battery Ride-Through Calculations",
+                "url": "https://khanlab.co.technology/learn/ride-through/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 4: Generator Startup and Synchronization Delay",
+                "url": "https://khanlab.co.technology/learn/generator-delay/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 5: Generator Starting Failure Modes",
+                "url": "https://khanlab.co.technology/learn/generator-failure/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 6: N+1 Redundancy and Power Routing",
+                "url": "https://khanlab.co.technology/learn/n-plus-one/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 7: Shared Controls and Common-Mode Risks",
+                "url": "https://khanlab.co.technology/learn/shared-controls/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 8: Single Point of Failure (SPOF) Analysis",
+                "url": "https://khanlab.co.technology/learn/single-point/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 9: DC-Link Precharge & Inrush Current Limits",
+                "url": "https://khanlab.co.technology/learn/precharge/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 10: AI Server Cluster Dynamic Outage Transients",
+                "url": "https://khanlab.co.technology/learn/ai-outage/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 11: Critical System Recovery Deadlines",
+                "url": "https://khanlab.co.technology/learn/recovery-deadline/",
+                "courseMode": "Online"
+              },
+              {
+                "@type": "CourseInstance",
+                "name": "Lesson 12: Power Usage Effectiveness (PUE) Under Contingency",
+                "url": "https://khanlab.co.technology/learn/pue/",
+                "courseMode": "Online"
+              }
+            ]
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://khanlab.co.technology/#simulator",
+            "name": "Datacenter Twin Lab Simulator",
+            "url": "https://khanlab.co.technology/",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "Web browser; Python 3.12+",
+            "isAccessibleForFree": true,
+            "softwareVersion": "1.0.0",
+            "author": {
+              "@type": "Person",
+              "@id": "https://mrkhan.co.technology/#person"
+            },
+            "description": "Local-first interactive power continuity simulator calculating real-time battery ride-through, generator failure switchovers, and electrical loss dynamics."
+          },
+          {
+            "@type": "TechArticle",
+            "@id": "https://khanlab.co.technology/studies/emt/#article",
+            "name": "Electromagnetic Transient (EMT) Analysis of Datacenter DC-Link During Emergency Transfer",
+            "url": "https://khanlab.co.technology/studies/emt/",
+            "author": {
+              "@type": "Person",
+              "@id": "https://mrkhan.co.technology/#person"
+            },
+            "description": "Technical study of capacitor discharge rates, inverter bus stability, and generator synchronization dynamics during utility outages."
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://khanlab.co.technology/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "How can UPS battery ride-through be estimated from nameplate capacity?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "An illustrative idealized energy-balance estimate of UPS ride-through time (t) in seconds is: t = (E_nom * eta_dis * eta_dist / P_crit) * 3600, where E_nom is nominal battery capacity in kWh, eta_dis is battery discharge efficiency (typically 0.90 to 0.94), eta_dist is distribution path efficiency (typically 0.95), and P_crit is critical IT load in kW. For a 100 kWh battery pack supporting a 1000 kW (1 MW) critical IT load at 0.90 discharge and 0.95 distribution efficiency, the idealized arithmetic result is: 100 * 0.90 * 0.95 / 1000 * 3600 = 307.8 seconds (5.13 minutes). Actual usable runtime depends on discharge limits, conversion losses, load characteristics, temperature, and equipment ratings; this is not a Tier IV compliance assessment."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What causes DC-link voltage collapse during generator transfer?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "DC-link voltage collapse occurs when the rate of capacitor discharge exceeds rectifier input recharge during the open-transition transfer interval (t_transfer). The differential equation governing DC-link voltage is: C_dc * (dV_dc / dt) = I_rectifier - I_inverter. If the emergency diesel generator (EDG) startup delay plus Automatic Transfer Switch (ATS) slew time exceeds the critical capacitor hold-up duration without instantaneous BESS discharge support, V_dc drops below the under-voltage lockout threshold (typically 0.85 * V_nominal), triggering an emergency inverter shutdown."
+                }
+              }
+            ]
+          }
+        ]
       }
-    },
-    {
-      "@type": "Course",
-      "@id": "https://khanlab.co.technology/#course",
-      "name": "Datacenter Power Systems: Continuity, Ride-Through, and Energy Balance",
-      "description": "A 12-lesson interactive browser course teaching datacenter power continuity, generator switchover dynamics, and Python energy balance modeling.",
-      "provider": {
-        "@type": "Person",
-        "@id": "https://mrkhan.co.technology/#person",
-        "name": "Mohammad Rezwan Khan",
-        "url": "https://mrkhan.co.technology/"
-      },
-      "isAccessibleForFree": true,
-      "inLanguage": "en",
-      "courseCode": "DCP-101",
-      "hasCourseInstance": [
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 1: Power vs Energy Fundamentals",
-          "url": "https://khanlab.co.technology/learn/power-energy/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 2: Distribution Loss and Thermal Margins",
-          "url": "https://khanlab.co.technology/learn/distribution-loss/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 3: Battery Ride-Through Calculations",
-          "url": "https://khanlab.co.technology/learn/ride-through/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 4: Generator Startup and Synchronization Delay",
-          "url": "https://khanlab.co.technology/learn/generator-delay/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 5: Generator Starting Failure Modes",
-          "url": "https://khanlab.co.technology/learn/generator-failure/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 6: N+1 Redundancy and Power Routing",
-          "url": "https://khanlab.co.technology/learn/n-plus-one/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 7: Shared Controls and Common-Mode Risks",
-          "url": "https://khanlab.co.technology/learn/shared-controls/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 8: Single Point of Failure (SPOF) Analysis",
-          "url": "https://khanlab.co.technology/learn/single-point/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 9: DC-Link Precharge & Inrush Current Limits",
-          "url": "https://khanlab.co.technology/learn/precharge/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 10: AI Server Cluster Dynamic Outage Transients",
-          "url": "https://khanlab.co.technology/learn/ai-outage/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 11: Critical System Recovery Deadlines",
-          "url": "https://khanlab.co.technology/learn/recovery-deadline/",
-          "courseMode": "Online"
-        },
-        {
-          "@type": "CourseInstance",
-          "name": "Lesson 12: Power Usage Effectiveness (PUE) Under Contingency",
-          "url": "https://khanlab.co.technology/learn/pue/",
-          "courseMode": "Online"
-        }
-      ]
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://khanlab.co.technology/#simulator",
-      "name": "Datacenter Twin Lab Simulator",
-      "url": "https://khanlab.co.technology/",
-      "applicationCategory": "EducationalApplication",
-      "operatingSystem": "Web browser; Python 3.12+",
-      "isAccessibleForFree": true,
-      "softwareVersion": "1.0.0",
-      "author": {
-        "@type": "Person",
-        "@id": "https://mrkhan.co.technology/#person"
-      },
-      "description": "Local-first interactive power continuity simulator calculating real-time battery ride-through, generator failure switchovers, and electrical loss dynamics."
-    },
-    {
-      "@type": "TechArticle",
-      "@id": "https://khanlab.co.technology/studies/emt/#article",
-      "name": "Electromagnetic Transient (EMT) Analysis of Datacenter DC-Link During Emergency Transfer",
-      "url": "https://khanlab.co.technology/studies/emt/",
-      "author": {
-        "@type": "Person",
-        "@id": "https://mrkhan.co.technology/#person"
-      },
-      "description": "Technical study of capacitor discharge rates, inverter bus stability, and generator synchronization dynamics during utility outages."
-    },
-    {
-      "@type": "FAQPage",
-      "@id": "https://khanlab.co.technology/#faq",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How can UPS battery ride-through be estimated from nameplate capacity?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "An illustrative idealized energy-balance estimate of UPS ride-through time (t) in seconds is: t = (E_nom * eta_dis * eta_dist / P_crit) * 3600, where E_nom is nominal battery capacity in kWh, eta_dis is battery discharge efficiency (typically 0.90 to 0.94), eta_dist is distribution path efficiency (typically 0.95), and P_crit is critical IT load in kW. For a 100 kWh battery pack supporting a 1000 kW (1 MW) critical IT load at 0.90 discharge and 0.95 distribution efficiency, the idealized arithmetic result is: 100 * 0.90 * 0.95 / 1000 * 3600 = 307.8 seconds (5.13 minutes). Actual usable runtime depends on discharge limits, conversion losses, load characteristics, temperature, and equipment ratings; this is not a Tier IV compliance assessment."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "What causes DC-link voltage collapse during generator transfer?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "DC-link voltage collapse occurs when the rate of capacitor discharge exceeds rectifier input recharge during the open-transition transfer interval (t_transfer). The differential equation governing DC-link voltage is: C_dc * (dV_dc / dt) = I_rectifier - I_inverter. If the emergency diesel generator (EDG) startup delay plus Automatic Transfer Switch (ATS) slew time exceeds the critical capacitor hold-up duration without instantaneous BESS discharge support, V_dc drops below the under-voltage lockout threshold (typically 0.85 * V_nominal), triggering an emergency inverter shutdown."
-          }
-        }
-      ]
-    }
-  ]
-}
     </script>
   </head>
   <body>
