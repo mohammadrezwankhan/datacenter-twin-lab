@@ -22,6 +22,28 @@ RUNTIME_FILES = ("pyodide.mjs", "pyodide.asm.mjs", "pyodide.asm.wasm",
                  "python_stdlib.zip", "pyodide-lock.json")
 
 
+def copy_evidence_packets(source_root: Path, output: Path) -> None:
+    """Retain public release URLs, copying only manifest-declared proof files."""
+    output = output.resolve()
+    for manifest_path in sorted(source_root.glob("v*/manifest.json")):
+        evidence = manifest_path.parent
+        if evidence.is_symlink() or manifest_path.is_symlink():
+            raise SystemExit("Evidence packets must not contain symbolic links")
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        target = output / evidence.name
+        target.mkdir(parents=True, exist_ok=True)
+        for name, entry in manifest["artifacts"].items():
+            source = evidence / name
+            if (Path(name).name != name or "\\" in name or source.is_symlink()
+                    or not source.resolve().is_relative_to(evidence.resolve())):
+                raise SystemExit(f"Unsafe evidence source: {name}")
+            data = source.read_bytes().replace(b"\r\n", b"\n")
+            if sha256(data).hexdigest() != entry["sha256"]:
+                raise SystemExit(f"Evidence hash mismatch: {evidence.name}/{name}")
+            (target / name).write_bytes(data)
+        shutil.copyfile(manifest_path, target / "manifest.json")
+
+
 def prepare() -> dict:
     output = ROOT / ".local" / "browser-demo-assets"
     runtime = ROOT / "apps/web/node_modules/pyodide"
@@ -105,22 +127,12 @@ def prepare() -> dict:
     (output / "catalog.json").write_text(
         json.dumps(load_catalog(), separators=(",", ":")) + "\n", encoding="utf-8")
     (output / ".nojekyll").write_text("", encoding="utf-8")
-    # Only the versioned, explicitly hashed public proof packet joins the site.
+    # Retain historical public proof URLs as well as the current packet.
     evidence = ROOT / "data/evidence" / f"v{__version__}"
     evidence_manifest = json.loads((evidence / "manifest.json").read_text(encoding="utf-8"))
     if evidence_manifest["engine_version"] != __version__:
         raise SystemExit("Evidence packet version does not match the engine")
-    evidence_target = output / "data/evidence" / f"v{__version__}"
-    evidence_target.mkdir(parents=True, exist_ok=True)
-    for name, entry in evidence_manifest["artifacts"].items():
-        source = evidence / name
-        if Path(name).name != name or source.is_symlink() or not source.resolve().is_relative_to(evidence.resolve()):
-            raise SystemExit(f"Unsafe evidence source: {name}")
-        data = source.read_bytes().replace(b"\r\n", b"\n")
-        if sha256(data).hexdigest() != entry["sha256"]:
-            raise SystemExit(f"Evidence hash mismatch: {name}")
-        (evidence_target / name).write_bytes(data)
-    shutil.copyfile(evidence / "manifest.json", evidence_target / "manifest.json")
+    copy_evidence_packets(ROOT / "data/evidence", output / "data/evidence")
     shutil.copyfile(ROOT / "data/evidence" / f"index-v{__version__}.json", output / "evidence-index.json")
     # Original, on-demand evidence media is never requested by the first experiment.
     for name in ("guide-preview.png", "guide-predict.png", "guide-result.png", "guide-evidence.png",
