@@ -10,7 +10,7 @@ import argparse
 from collections import deque
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timezone
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from fractions import Fraction
 from hashlib import sha256
 from html.parser import HTMLParser
@@ -20,7 +20,7 @@ import re
 import sys
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlsplit, urlunsplit, unquote
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 import xml.etree.ElementTree as ET
 
 DEFAULT_BASE = 'https://khanlab.co.technology/'
@@ -31,6 +31,11 @@ BOTS = ('GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended')
 # larger than its packet verifier's 1e-90 tolerance but far below display precision.
 LEDGER_TOLERANCE = Fraction(1, 10**85)
 MAX_BYTES = 16 * 1024 * 1024
+MAX_REDIRECTS = 10
+# Retained engine evidence uses up to 100 significant digits and 198 decimal
+# places. Bound external values before Fraction expands a decimal exponent.
+MAX_NUMERIC_TEXT = 512
+MAX_NUMERIC_EXPONENT = 512
 
 
 class PageParser(HTMLParser):
@@ -101,9 +106,18 @@ def schema_types(value: object) -> set[str]:
 
 
 def rational(value: object) -> Fraction:
-    if isinstance(value, bool) or value is None:
-        raise ValueError('Numeric value is missing or boolean')
-    return Fraction(Decimal(str(value)))
+    if isinstance(value, bool) or not isinstance(value, (str, int, float, Decimal)):
+        raise ValueError('Numeric value must be a finite decimal')
+    text = str(value)
+    if len(text) > MAX_NUMERIC_TEXT:
+        raise ValueError('Numeric evidence exceeds the supported precision limit')
+    try:
+        number = Decimal(text)
+    except InvalidOperation as exc:
+        raise ValueError('Numeric value must be a finite decimal') from exc
+    if not number.is_finite() or abs(number.as_tuple().exponent) > MAX_NUMERIC_EXPONENT:
+        raise ValueError('Numeric evidence exceeds the supported exponent limit')
+    return Fraction(number)
 
 
 def safe_packet_name(name: str) -> bool:
@@ -122,6 +136,42 @@ def normalized_page(url: str) -> str:
     return urlunsplit((p.scheme, p.netloc, p.path or '/', '', ''))
 
 
+class _NoAutomaticRedirects(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+def _open_same_origin(request: Request):
+    """Validate every redirect before I/O and discard redirect bodies unread."""
+    origin = request.full_url
+    parsed = urlsplit(origin)
+    if (parsed.scheme not in ('http', 'https') or not parsed.hostname
+            or parsed.username is not None or parsed.password is not None):
+        raise ValueError('Audit URLs must use HTTP(S) without credentials')
+    opener = build_opener(_NoAutomaticRedirects())
+    for hop in range(MAX_REDIRECTS + 1):
+        try:
+            return opener.open(request, timeout=15)
+        except HTTPError as exc:
+            if exc.code not in (301, 302, 303, 307, 308):
+                raise
+            try:
+                location = exc.headers.get('Location') or exc.headers.get('URI')
+                if not location:
+                    raise
+                target = urljoin(request.full_url, location)
+                if not same_origin(origin, target):
+                    raise ValueError(f'Off-origin redirect blocked: {request.full_url} -> {target}')
+                if hop == MAX_REDIRECTS:
+                    raise ValueError('Audit redirect limit exceeded')
+            finally:
+                # urllib's default redirect handler reads the entire response
+                # body before redirecting, outside default_fetch's byte limit.
+                exc.close()
+            request = Request(target, method=request.get_method(),
+                              headers=dict(request.header_items()))
+
+
 def default_probe(url: str) -> tuple[int, str]:
     """Validate linked downloadable assets without transferring large reports/PDFs.
 
@@ -130,19 +180,20 @@ def default_probe(url: str) -> tuple[int, str]:
     """
     request = Request(url, method='HEAD', headers={'User-Agent': 'DatacenterTwinLab-ReadOnlyQA/1.0'})
     try:
-        with urlopen(request, timeout=15) as response:
+        with _open_same_origin(request) as response:
             return response.status, response.geturl()
     except HTTPError as exc:
         if exc.code not in (405, 501):
             raise
+        exc.close()
     request = Request(url, headers={'User-Agent': 'DatacenterTwinLab-ReadOnlyQA/1.0', 'Range': 'bytes=0-0'})
-    with urlopen(request, timeout=15) as response:
+    with _open_same_origin(request) as response:
         return response.status, response.geturl()
 
 
 def default_fetch(url: str) -> tuple[int, str, bytes, str]:
     request = Request(url, headers={'User-Agent': 'DatacenterTwinLab-ReadOnlyQA/1.0', 'Accept': '*/*'})
-    with urlopen(request, timeout=15) as response:
+    with _open_same_origin(request) as response:
         size = 0
         parts = []
         while True:
