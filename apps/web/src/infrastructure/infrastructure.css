@@ -168,6 +168,8 @@
   color: var(--accent);
 }
 .infra-lesson-nav span {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 0.87rem;
   line-height: 1.4;
 }

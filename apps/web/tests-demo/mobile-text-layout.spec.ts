@@ -1,6 +1,36 @@
 import { expect, test } from '@playwright/test';
 import { courseCatalog } from '../src/curriculum';
 
+test('infrastructure lesson labels remain contained with a fallback font at 320px', async ({
+  browser,
+}, testInfo) => {
+  const context = await browser.newContext({
+    viewport: { width: 320, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+  });
+  try {
+    const page = await context.newPage();
+    await page.goto(`${testInfo.project.use.baseURL}?lesson=evidence-load-ledger`);
+    await expect(page.locator('.infra-lesson-nav')).toBeVisible();
+    await page.addStyleTag({ content: 'body { font-family: Verdana, sans-serif; }' });
+    const overflow = await page.locator('.infra-lesson-nav button').evaluateAll((buttons) =>
+      buttons.flatMap((button) => {
+        const box = button.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(button);
+        const text = range.getBoundingClientRect();
+        return text.left < box.left - 2 || text.right > box.right + 2
+          ? [button.textContent?.trim()]
+          : [];
+      }),
+    );
+    expect(overflow).toEqual([]);
+  } finally {
+    await context.close();
+  }
+});
+
 for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
   test(`touch navigation keeps labels inside separate buttons at ${width}px`, async ({
     browser,
