@@ -95,6 +95,41 @@ test('power dynamics runtime versions match the selected Pyodide lock', async ({
   });
 });
 
+test('load-step rejects equal or decreasing loads before downloading the runtime', async ({
+  page,
+}) => {
+  const runtimeRequests: string[] = [];
+  page.on('request', (request) => {
+    if (/pyodide|\.whl|research\.zip/.test(request.url())) runtimeRequests.push(request.url());
+  });
+  await page.goto('./?study=load-step');
+  const initial = page.getByTestId('research-input-load_initial_pu');
+  const final = page.getByTestId('research-input-load_final_pu');
+  const run = page.getByTestId('research-run');
+  await initial.fill('0.6');
+  for (const value of ['0.6', '0.4']) {
+    await final.fill(value);
+    await expect(run).toBeDisabled({ timeout: 3000 });
+    await expect(
+      page.getByText('Final load must exceed initial load', { exact: false }),
+    ).toBeVisible();
+    await expect(initial).toHaveValue('0.6');
+    await expect(final).toHaveValue(value);
+  }
+  for (const [before, after] of [
+    ['0.3', '0.4'],
+    ['0.7', '0.8'],
+  ]) {
+    await initial.fill(before);
+    await final.fill(after);
+    await expect(run).toBeEnabled();
+    await expect(
+      page.getByText('Final load must exceed initial load', { exact: false }),
+    ).toHaveCount(0);
+  }
+  expect(runtimeRequests).toEqual([]);
+});
+
 for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', 'grid-network']) {
   test(`power dynamics ${id} runs locally and matches native numerical outputs`, async ({
     page,
@@ -176,6 +211,15 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   await expect(page.getByTestId('research-results')).toContainText('No applied result yet');
   await page.getByTestId('research-run').click();
   await expect(page.getByTestId('research-export-json')).toBeVisible();
+  await page.getByTestId('research-input-load_initial_pu').fill('0.6');
+  await expect(page.getByTestId('research-run')).toBeDisabled({ timeout: 3000 });
+  await expect(page.getByText('Showing prior applied run', { exact: true })).toBeVisible();
+  const priorDownload = page.waitForEvent('download');
+  await page.getByTestId('research-export-json').click();
+  const prior = JSON.parse(await readFile((await (await priorDownload).path())!, 'utf8'));
+  expect(prior.config.load_initial_pu).toBe(0.5);
+  expect(prior.config.load_final_pu).toBe(0.6);
+  await page.getByTestId('research-input-load_initial_pu').fill('0.5');
   await page.getByTestId('research-input-dc_capacitance_pu').fill('0');
   await expect(page.getByTestId('research-run')).toBeDisabled();
   const pending = page.waitForEvent('download');
