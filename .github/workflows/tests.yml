@@ -16,7 +16,8 @@ jobs:
   verify:
     name: Python ${{ matrix.python }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    # Ubuntu 3.12 also installs browser dependencies; allow slow hosted mirrors.
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
