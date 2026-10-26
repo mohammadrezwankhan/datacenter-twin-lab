@@ -54,11 +54,35 @@ For a run file, only its scenario inputs are used. Saved result rows, claimed ha
 
 **Download current scenario** saves validated draft inputs, including edits not yet run. This is different from **Export run**, which saves the last completed calculation. Keep either file to reopen it after a page reload; no custom scenario is stored in the URL or a shared database. Source identifiers remain as supplied and require their own provenance review.
 
-To reproduce downloaded inputs with the matching Python source:
+For the CLI recipes below, use Python 3.12 or newer with the matching engine installed; follow the [release installation instructions](../quickstart.md#run-the-released-dashboard-python-only). Use that environment's Python executable in place of `python` if necessary. Check `python -m datacenter_twin --version` against the completed export's `engine_version` before comparing results.
+
+To reproduce a **Download current scenario** file, pass that scenario JSON directly to `--scenario`:
 
 ```sh
 python -m datacenter_twin simulate --scenario twin-scenario.json --output reopened-run.json
 ```
+
+The CLI's `--scenario` option accepts scenario inputs only; it rejects complete run exports. For a browser **Export run** file (including **Export guided run (JSON)**), or a Python `simulate` JSON export, extract the embedded scenario first. In a new working folder, save a copy of your export as `twin-run.json` and save this as `extract_scenario.py`:
+
+```python
+import json
+from pathlib import Path
+
+document = json.loads(Path("twin-run.json").read_text(encoding="utf-8-sig"))
+run = document.get("result", document)  # CLI timestamp wrapper or browser run
+with Path("twin-scenario.json").open("x", encoding="utf-8") as output:
+    json.dump(run["scenario"], output, indent=2)
+    output.write("\n")
+```
+
+Then run:
+
+```sh
+python extract_scenario.py
+python -m datacenter_twin simulate --scenario twin-scenario.json --output reopened-run.json
+```
+
+The extractor refuses to overwrite an existing `twin-scenario.json`; the CLI also protects an existing output file. Use new filenames or a fresh folder for another experiment. Extraction leaves the original export intact and does not validate its saved results. The CLI validates the extracted inputs and recalculates them. Its JSON output stores the complete run under `result`, alongside a separate `generated_at_utc` timestamp. With the same engine version, compare that complete run (including `input_sha256`) with the original browser run, or with the original CLI file's `result`; the export timestamp is not a model result.
 
 Schema-1 PUE planning, sensitivity/comparison collections, Markdown and HTML reports are not electrical scenario imports. Invalid JSON, unsupported fields, missing assets, cycles and contract bounds are rejected without replacing the current experiment. The `1.0.0` wheel and browser archive include this import workflow. The earlier `0.4.0rc2` assets remain unchanged.
 
