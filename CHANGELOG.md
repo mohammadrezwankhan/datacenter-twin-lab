@@ -8,7 +8,7 @@
 - Add a separate 2.0.1 evidence packet. Versioned run IDs change; unchanged canonical numerical fields and scenario input hashes remain equal. Historical assets and evidence remain untouched.
 - Keep versioned source/archive navigation separate from the published-releases list and audit the current evidence packet.
 
-See [maintenance release scope](docs/releases/v2.0.1.md). Publication requires the actual release receipt; this entry alone is not proof of a published artifact.
+Published [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1) on 2026-10-26 from `513ddc7150027f5e274a8d50d5edcd3c31167a5e`. See [maintenance release scope and receipt](docs/releases/v2.0.1.md). Historical assets remain unchanged.
 
 ## 2.0.0 — Infrastructure Engineering
 

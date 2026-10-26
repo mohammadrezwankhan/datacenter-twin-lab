@@ -20,8 +20,8 @@ The package-index command `pip install datacenter-twin` is not available yet.
 
 The recipe below preserves the original 12 October artifact. It predates the
 odd-record spectrum correction and subsequent packaging/setup fixes. Version
-2.0.1 is a maintenance candidate until its actual release is published; consult
-the quickstart above for the available published package and its scope.
+[2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1) was published on 2026-10-26; consult
+the quickstart above for its checksum-pinned installation and maintenance scope.
 Historical assets remain unchanged.
 
 PyPI publication is pending. Use the published [v2.0.0 GitHub
