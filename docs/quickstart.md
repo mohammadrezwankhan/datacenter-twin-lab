@@ -14,7 +14,7 @@ No result is presented before the deliberate run. The equation applies both effi
 
 Open the [advanced simulator](https://khanlab.co.technology/?mode=advanced), the existing [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), the [course and study catalog](https://khanlab.co.technology/learn/), or the [evidence hub](https://khanlab.co.technology/?mode=evidence#demo). The catalog contains 24 continuity/infrastructure lessons, one EMT lesson and five dynamics studies; these 30 learning items are separate from the eighteen facility presets. The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the continuity lesson atlas.
 
-The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. The installation commands below select the tagged v2.0.0 — Infrastructure Engineering release, built from `424cf5349ea1f53d5d207a2d48af689774d878dc`. The current website and `main` may include later maintenance; installing a tagged wheel does not install those later commits. Historical v1.0.0 assets remain unchanged. Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
+The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. The installation commands below select the published [v2.0.1 numerical and packaging maintenance release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1), built from `513ddc7150027f5e274a8d50d5edcd3c31167a5e` and published on 2026-10-26. The [patch receipt](releases/v2.0.1.md) records its source, checks and SHA-256. Earlier v2.0.0 and v1.0.0 assets remain unchanged; the original hash-pinned v2.0.0 recipe is retained in [README-PYPI](../README-PYPI.md#historical-v200-reproduction). Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
 
 The original `generator_failure` preset remains available for CLI reproduction. Its default 100 kWh battery starts full, so pre-outage charging cannot increase that opening balance. In that preset, changing the starting reserve to 50 kWh allows pre-outage charging and yields **478.2675 s elapsed**, rather than the guide challenge's **453.9 s** with charging disabled. The exact lesson recipe and independent hand calculation are in the [canonical case](canonical-case.md).
 
@@ -24,7 +24,7 @@ For a preserved recording of the earlier interface, see the optional [still imag
 
 Open the [advanced workspace](https://khanlab.co.technology/?mode=advanced), select **Import scenario**, and choose a schema-2 scenario JSON or exported electrical run. Review the changed assumptions, then choose **Run imported scenario**. The demo calculates locally and can verify the complete result against Python. **Download current scenario** saves draft inputs; **Export run** saves the completed result. See [file formats, bounds and reproduction instructions](engineering/energy-scenario-workspace.md#reopen-a-saved-experiment).
 
-This workflow is included in the pinned `2.0.0` release below and the current website.
+This workflow is included in the pinned `2.0.1` release below and the current website.
 
 ## Evidence and release links
 
@@ -39,18 +39,18 @@ Automated checks establish software behavior for these synthetic fixtures. Check
 
 If [uv is installed](https://docs.astral.sh/uv/getting-started/installation/), run the released CLI from an empty working folder with one command. `uvx` creates a cached, isolated environment; it downloads Python 3.12 if needed. Git, Node, and a source checkout are unnecessary.
 
-The commands below install the published [v2.0.0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.0). Its wheel includes the CLI, compiled local dashboard, 24 course lessons, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. The package is not published on PyPI; these commands download the GitHub release directly.
+The commands below install the published [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1). Its wheel includes the CLI, compiled local dashboard, 24 course lessons, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. The package is not published on PyPI; these commands download the GitHub release directly.
 
 The v2 distribution name is `datacenter-twin`, replacing the historical GitHub wheel name `datacenter-twin-lab`. Both provide `datacenter_twin` and the `datacenter-twin` command. Use a fresh environment rather than installing both distributions together; do not remove a working older environment to try this release.
 
 ```sh
-uvx --python 3.12 --from "datacenter-twin @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.0/datacenter_twin-2.0.0-py3-none-any.whl#sha256=274e5a837ebcb2872c0d9bc0a40eb5db7092e9793bb97b075e17e73fa20e9393" datacenter-twin simulate --preset generator_failure --format markdown
+uvx --python 3.12 --from "datacenter-twin @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b" datacenter-twin simulate --preset generator_failure --format markdown
 ```
 
 This command runs the original 1 MW / 100 kWh reference fixture and reports battery depletion at **607.8 s elapsed**. For the local dashboard, use the same wheel with its API extra:
 
 ```sh
-uvx --python 3.12 --from "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.0/datacenter_twin-2.0.0-py3-none-any.whl#sha256=274e5a837ebcb2872c0d9bc0a40eb5db7092e9793bb97b075e17e73fa20e9393" datacenter-twin serve
+uvx --python 3.12 --from "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b" datacenter-twin serve
 ```
 
 Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8001` if that port is occupied. These commands work in PowerShell and POSIX shells. They pin the GitHub wheel and its digest; this project is **not published on PyPI**. The API extra resolves compatible transitive dependencies from the package index. Use the locked source workflow for the exact development dependency set.
@@ -59,13 +59,13 @@ The release routes are checked outside the checkout so they import the installed
 
 ## Run the released dashboard (Python only)
 
-In an empty working folder, create a new isolated environment and install the published `2.0.0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The version check should print **2.0.0**. The wheel contains the built local interface and evidence assets; no source checkout or frontend build is needed.
+In an empty working folder, create a new isolated environment and install the published `2.0.1` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The version check should print **2.0.1**. The wheel contains the built local interface and evidence assets; no source checkout or frontend build is needed.
 
 Windows / PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.0/datacenter_twin-2.0.0-py3-none-any.whl#sha256=274e5a837ebcb2872c0d9bc0a40eb5db7092e9793bb97b075e17e73fa20e9393"
+.\.venv\Scripts\python.exe -m pip install "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b"
 .\.venv\Scripts\python.exe -m datacenter_twin --version
 .\.venv\Scripts\python.exe -m datacenter_twin serve
 ```
@@ -76,7 +76,7 @@ macOS / Linux:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.0/datacenter_twin-2.0.0-py3-none-any.whl#sha256=274e5a837ebcb2872c0d9bc0a40eb5db7092e9793bb97b075e17e73fa20e9393"
+.venv/bin/python -m pip install "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b"
 .venv/bin/python -m datacenter_twin --version
 .venv/bin/python -m datacenter_twin serve
 ```
@@ -103,7 +103,7 @@ The presets, catalogue and research evidence ship in the wheel. Open **Research 
 
 ## Windows evidence-file paths
 
-The `2.0.0` wheel retains the Windows long-path correction introduced before `1.0.0` for bundled evidence reports. It uses the extended path for the trusted installation root; no system setting needs to change. The earlier `0.4.0rc1` asset remains unchanged and can return a missing-file response when a full report filename exceeds Windows' traditional 260-character limit. If keeping that older candidate, use a shorter virtual-environment location or `UV_CACHE_DIR`. See [Microsoft's path-length explanation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation).
+The `2.0.1` wheel retains the Windows long-path correction introduced before `1.0.0` for bundled evidence reports. It uses the extended path for the trusted installation root; no system setting needs to change. The earlier `0.4.0rc1` asset remains unchanged and can return a missing-file response when a full report filename exceeds Windows' traditional 260-character limit. If keeping that older candidate, use a shorter virtual-environment location or `UV_CACHE_DIR`. See [Microsoft's path-length explanation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation).
 
 ## Run from source
 

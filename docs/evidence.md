@@ -18,11 +18,11 @@ Ride-through is measured from the `300 s` outage boundary; depletion time is the
 
 The tracked [`2.0.1 evidence index`](../data/evidence/index-v2.0.1.json) links the cases to their input hashes, run IDs, scenario/run JSON, reports, [`manifest.json`](../data/evidence/v2.0.1/manifest.json), and [receipt](../data/evidence/v2.0.1/receipt.md). The manifest hashes every packet file except itself; its digest should be retained separately when pinning a copy.
 
-From a clean checkout of the exact release source, build and verify a fresh local packet:
+The [published v2.0.1 release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1) identifies source `513ddc7150027f5e274a8d50d5edcd3c31167a5e`, artifact checksums and completed maintainer checks. From a clean checkout of that tag, build and verify a fresh local packet:
 
 ```sh
 python scripts/build_evidence.py --output outputs/reproduction-2.0.1 \
-  --revision <public-commit-or-tag> \
+  --revision v2.0.1 \
   --repository mohammadrezwankhan/datacenter-twin-lab
 python scripts/build_evidence.py --verify outputs/reproduction-2.0.1
 ```
