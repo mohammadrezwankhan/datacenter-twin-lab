@@ -34,6 +34,8 @@ function parseConfig(study: ResearchStudy, draft: NumericDraft) {
       };
     config[field.name] = value;
   }
+  if (study.id === 'load-step' && config.load_final_pu <= config.load_initial_pu)
+    return { error: 'Final load must exceed initial load for this upward load-step study.' };
   return { config };
 }
 
