@@ -16,7 +16,8 @@ jobs:
   verify:
     name: Python ${{ matrix.python }} / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
+    # Ubuntu 3.12 also installs browser dependencies; allow slow hosted mirrors.
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
@@ -98,8 +99,9 @@ jobs:
     name: Browser demo and Python parity
     needs: verify
     runs-on: ubuntu-latest
-    # Both browser suites can take 14 minutes; allow setup and artifact cleanup.
-    timeout-minutes: 20
+    # Both suites can take 14 minutes; slow browser dependency setup took 16.
+    # Keep time for both suites and artifact cleanup on standard hosted runners.
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
