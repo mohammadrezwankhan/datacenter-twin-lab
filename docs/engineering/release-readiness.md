@@ -1,5 +1,10 @@
 # Release scope and reproducibility
 
+The published **[2.0.1 maintenance release](../releases/v2.0.1.md)** packages the later odd-record spectrum
+correction, complete current-dashboard inventory checks and Windows first-run
+guidance. See [the patch notes](../releases/v2.0.1.md) and [current evidence](../evidence.md).
+Its 2026-10-26 publication receipt identifies the exact checked source, fresh installed artifacts and verified static delivery. The gates below continue to apply to future releases; a prepared source, tag or draft alone is not publication. Published v2.0.0 assets remain unchanged.
+
 Version **2.0.0 — Infrastructure Engineering** extends the local teaching and research application to 24 lessons. It retains the canonical 1 MW guide, eighteen presets, four facility profiles, scenario import, demand-timeline editing, sensitivity tools, reports, printable legacy worksheets, EMT and five power-dynamics studies. Twelve infrastructure lessons add bounded educational screens, separate result serialization, original diagrams, 36 assessments and static reading notes. The [owner's publication decision](../releases/v2.0.0-publication-decision.md) covers attribution and educational publication while retaining engineering HOLD.
 
 Version 1.0.0 remains the first full software release, selected on 27 September 2026. Its published assets and historical evidence predate the later EMT, power-dynamics and infrastructure additions and are unchanged.
@@ -20,6 +25,8 @@ The release decision does not assert independent external reproduction. That evi
 | Static hosting | Tested browser artifact, anonymous file hashes and live JavaScript/Python equality |
 
 The release page identifies the exact revision and completed checks. Configuration is not proof of a passing run. Keep source, wheel, browser and evidence checksums together; preserve earlier tags and assets.
+
+For a wheel containing the dashboard, retain the current native build in `datacenter_twin/web` when running the distribution verifier. It compares the complete web file inventory and SHA-256 bytes, including files outside the evidence manifest. Build the wheel in a fresh packaging source/build tree: an old setuptools `build/lib` can retain obsolete evidence or hashed assets even after a new dashboard build. A fresh installation environment alone does not establish wheel freshness. Core-only wheels remain valid without `--require-web`, including when a local dashboard build exists; the flag requires the dashboard.
 
 ## Compatibility and support
 

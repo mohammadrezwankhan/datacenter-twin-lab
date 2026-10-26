@@ -142,8 +142,11 @@ def prepare() -> dict:
     output = ROOT / ".local" / "browser-demo-assets"
     runtime = ROOT / "apps/web/node_modules/pyodide"
     package = json.loads((runtime / "package.json").read_text(encoding="utf-8"))
-    if package["version"] != "314.0.6":
-        raise SystemExit("Expected locked Pyodide 314.0.6; run npm ci in apps/web")
+    locked_version = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))[
+        "devDependencies"
+    ]["pyodide"]
+    if package["version"] != locked_version:
+        raise SystemExit(f"Expected locked Pyodide {locked_version}; run npm ci in apps/web")
     (output / "pyodide").mkdir(parents=True, exist_ok=True)
     files = [f"datacenter_twin/{name}.py" for name in MODULES]
     files += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT / "datacenter_twin/resources").glob("*.json"))]

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.1 — Numerical and packaging maintenance
+
+- Package the existing odd-length one-sided spectrum correction, including the saved 30 Hz / 0.05 pu case and scalar-DFT regression.
+- Include current native-dashboard files only; verify the complete wheel inventory and file hashes before installation.
+- Retain the short-path Windows installation guidance, 24 lessons, EMT and five dynamics studies, eighteen presets and existing public contracts.
+- Add a separate 2.0.1 evidence packet. Versioned run IDs change; unchanged canonical numerical fields and scenario input hashes remain equal. Historical assets and evidence remain untouched.
+- Keep versioned source/archive navigation separate from the published-releases list and audit the current evidence packet.
+
+Published [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1) on 2026-10-26 from `513ddc7150027f5e274a8d50d5edcd3c31167a5e`. See [maintenance release scope and receipt](docs/releases/v2.0.1.md). Historical assets remain unchanged.
+
 ## 2.0.0 — Infrastructure Engineering
 
 - Extend the course to 24 lessons with the twelve supplied infrastructure adaptations, 36 assessments, chapter/page attribution and twelve no-JavaScript reading notes.

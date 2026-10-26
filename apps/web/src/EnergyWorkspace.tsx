@@ -66,7 +66,6 @@ export function FacilitySelector({
             className={`facility-card ${profile?.id === item.id ? 'is-selected' : ''}`}
             style={{ '--profile-color': item.color } as CSSProperties}
             aria-pressed={profile?.id === item.id}
-            aria-label={`${item.name} profile`}
             disabled={busy}
             onClick={() => onSelect(item.presets[mode])}
           >

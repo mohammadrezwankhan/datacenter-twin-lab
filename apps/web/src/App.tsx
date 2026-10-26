@@ -280,7 +280,6 @@ function Topology({
               transform={`translate(${p.x}, ${p.y})`}
               role="button"
               tabIndex={0}
-              aria-label={`${a.name}: ${words(state)}`}
               onClick={() => onSelect(a.id)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -593,9 +592,10 @@ export function App() {
             e.preventDefault();
             navigate(browserDemo ? 'start' : 'overview');
           }}
-          aria-label="Datacenter Twin Lab home"
         >
-          <span className="brand-mark">◈</span>
+          <span className="brand-mark" aria-hidden="true">
+            ◈
+          </span>
           <span>
             DATACENTER<span className="brand-sub">TWIN LAB</span>
           </span>

@@ -41,7 +41,7 @@ async function initialize() {
     }
     stage = 'packages';
     report({ stage, message: 'Loading the pinned NumPy and SciPy wheels' });
-    // In Pyodide 314.0.6 the callback reports package work by phase. The
+    // The pinned Pyodide callback reports package work by phase. The
     // worker fetch wrapper supplies byte counts for actual local wheel reads.
     await py.loadPackage(['numpy', 'scipy'], {
       messageCallback: (message) => report({ stage, message }),

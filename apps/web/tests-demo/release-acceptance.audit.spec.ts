@@ -58,7 +58,7 @@ test('visible reset label and commissioning PUE constraint are exposed to the br
   page,
 }) => {
   await page.goto('./?lesson=power-energy');
-  const reset = page.getByRole('button', { name: /^Starting input:/ });
+  const reset = page.getByRole('button', { name: /^Starting input\b/ });
   await expect(reset).toContainText('Starting input');
   await reset.focus();
   await page.keyboard.press('Enter');

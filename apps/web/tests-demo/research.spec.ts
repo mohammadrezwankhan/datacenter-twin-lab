@@ -47,6 +47,54 @@ function compare(a: unknown, b: unknown, path = ''): void {
   } else expect(a, path).toEqual(b);
 }
 
+test('power dynamics runtime versions match the selected Pyodide lock', async ({
+  page,
+  context,
+  baseURL,
+}, info) => {
+  // Use the same locally staged runtime as the application. No CDN fallback can
+  // conceal a missing wheel or a package imported from the wrong distribution.
+  const allowedOrigin = `${new URL(baseURL!).origin}/`;
+  await context.route('**/*', (route) =>
+    route.request().url().startsWith(allowedOrigin) ? route.continue() : route.abort(),
+  );
+  await page.goto('./?study=load-step');
+  const expected = JSON.parse(await readFile('package.json', 'utf8')).devDependencies.pyodide;
+  const versions = await page.evaluate(async () => {
+    const base = new URL('./', location.href);
+    const runtime = new URL('pyodide/', base).href;
+    const [lock, engine, research] = await Promise.all([
+      fetch(`${runtime}pyodide-lock.json`).then((response) => response.json()),
+      fetch(new URL('engine-manifest.json', base)).then((response) => response.json()),
+      fetch(new URL('research-manifest.json', base)).then((response) => response.json()),
+    ]);
+    const { loadPyodide } = await import(`${runtime}pyodide.mjs`);
+    const py = await loadPyodide({ indexURL: runtime });
+    await py.loadPackage(['numpy', 'scipy']);
+    const imported = JSON.parse(
+      py.runPython(
+        'import json,numpy,scipy\njson.dumps({"numpy":numpy.__version__,"scipy":scipy.__version__})',
+      ),
+    );
+    return { loaded: py.version, lock, engine, research, imported };
+  });
+  expect(versions.loaded).toBe(expected);
+  expect(versions.engine.pyodide_version).toBe(expected);
+  for (const name of ['numpy', 'scipy']) {
+    const locked = versions.lock.packages[name];
+    expect(versions.imported[name]).toBe(locked.version);
+    expect(versions.research.runtime).toContainEqual(
+      expect.objectContaining({ name, version: locked.version, sha256: locked.sha256 }),
+    );
+  }
+  await info.attach('loaded-runtime-versions.json', {
+    body: Buffer.from(
+      JSON.stringify({ pyodide: versions.loaded, imported: versions.imported }, null, 2),
+    ),
+    contentType: 'application/json',
+  });
+});
+
 for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', 'grid-network']) {
   test(`power dynamics ${id} runs locally and matches native numerical outputs`, async ({
     page,

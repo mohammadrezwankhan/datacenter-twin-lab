@@ -69,10 +69,24 @@ class EngineeringHeroMediaTests(unittest.TestCase):
                         root / '.local/engineering-hero-public',
                     )
 
+    def test_browser_preparation_rejects_runtime_version_that_differs_from_web_manifest(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            self._make_minimal_demo_tree(root)
+            runtime_package = root / 'apps/web/node_modules/pyodide/package.json'
+            runtime_package.write_text(json.dumps({'version': '314.0.6'}))
+            with patch.object(prepare_browser_demo, 'ROOT', root), self.assertRaisesRegex(
+                SystemExit, 'Expected locked Pyodide 314.0.7'
+            ):
+                prepare_browser_demo.prepare()
+
     def _make_minimal_demo_tree(self, root: Path) -> None:
-        runtime = root / 'apps/web/node_modules/pyodide'
+        web = root / 'apps/web'
+        web.mkdir(parents=True)
+        (web / 'package.json').write_text(json.dumps({'devDependencies': {'pyodide': '314.0.7'}}))
+        runtime = web / 'node_modules/pyodide'
         runtime.mkdir(parents=True)
-        (runtime / 'package.json').write_text(json.dumps({'version': '314.0.6'}))
+        (runtime / 'package.json').write_text(json.dumps({'version': '314.0.7'}))
         for name in prepare_browser_demo.RUNTIME_FILES:
             (runtime / name).write_bytes(name.encode())
 
@@ -92,12 +106,13 @@ class EngineeringHeroMediaTests(unittest.TestCase):
             (public / name).write_bytes(name.encode())
         (root / 'docs/third-party').mkdir(parents=True)
 
-        evidence = root / 'data/evidence/v2.0.0'
+        version = prepare_browser_demo.__version__
+        evidence = root / f'data/evidence/v{version}'
         evidence.mkdir(parents=True)
         (evidence / 'manifest.json').write_text(json.dumps({
-            'engine_version': '2.0.0', 'artifacts': {},
+            'engine_version': version, 'artifacts': {},
         }))
-        (root / 'data/evidence/index-v2.0.0.json').write_text('{}')
+        (root / f'data/evidence/index-v{version}.json').write_text('{}')
 
     def _make_hero_release_tree(self, release: Path, omit_from_manifest: str | None = None) -> None:
         content = {

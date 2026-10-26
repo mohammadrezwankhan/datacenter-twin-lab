@@ -80,12 +80,33 @@ class RuntimeDownloadTests(unittest.TestCase):
                 self.open.assert_called_once()
         self.sleep.assert_not_called()
 
+    def test_main_rejects_runtime_version_that_differs_from_web_manifest(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(fetch, "ROOT", Path(directory)):
+            root = Path(directory)
+            web = root / "apps/web"
+            web.mkdir(parents=True)
+            (web / "package.json").write_text(json.dumps({"devDependencies": {"pyodide": "314.0.7"}}))
+            runtime = web / "node_modules/pyodide"
+            runtime.mkdir(parents=True)
+            (runtime / "package.json").write_text(json.dumps({"version": "314.0.6"}))
+            packages = {
+                name: {"file_name": name + ".whl", "sha256": self.digest, "version": "test"}
+                for name in ["numpy", "scipy"]
+            }
+            (runtime / "pyodide-lock.json").write_text(json.dumps({"packages": packages}))
+            with patch.object(fetch, "_download_wheel", return_value=self.payload):
+                with self.assertRaisesRegex(SystemExit, "Expected locked Pyodide 314.0.7"):
+                    fetch.main()
+
     def test_main_writes_only_verified_bytes_and_reuses_cache(self):
         with tempfile.TemporaryDirectory() as directory, patch.object(fetch, "ROOT", Path(directory)):
             root = Path(directory)
-            runtime = root / "apps/web/node_modules/pyodide"
+            web = root / "apps/web"
+            web.mkdir(parents=True)
+            (web / "package.json").write_text(json.dumps({"devDependencies": {"pyodide": "314.0.7"}}))
+            runtime = web / "node_modules/pyodide"
             runtime.mkdir(parents=True)
-            (runtime / "package.json").write_text(json.dumps({"version": "314.0.6"}))
+            (runtime / "package.json").write_text(json.dumps({"version": "314.0.7"}))
             packages = {
                 name: {"file_name": name + ".whl", "sha256": self.digest, "version": "test"}
                 for name in ["numpy", "scipy"]

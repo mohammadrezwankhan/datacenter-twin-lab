@@ -171,7 +171,7 @@ export async function fetchVerifiedArchive(
   return archive;
 }
 
-/** Pyodide 314.0.6 has no loadPyodide byte callback. Observe its existing,
+/** The pinned Pyodide runtime has no loadPyodide byte callback. Observe its existing,
  * local runtime fetches during boot/package installation without re-fetching
  * files. Restore the worker's fetch method immediately after initialization. */
 export function observeRuntimeFetches(

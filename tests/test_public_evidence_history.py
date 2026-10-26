@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from datacenter_twin import __version__
 
 from scripts.prepare_browser_demo import copy_evidence_packets
 
@@ -14,7 +15,7 @@ class PublicEvidenceHistoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)
             copy_evidence_packets(root / 'data/evidence', output)
-            for version in ('v1.0.0', 'v2.0.0'):
+            for version in ('v1.0.0', 'v2.0.0', f'v{__version__}'):
                 original = root / 'data/evidence' / version
                 target = output / version
                 manifest = json.loads((original / 'manifest.json').read_text())

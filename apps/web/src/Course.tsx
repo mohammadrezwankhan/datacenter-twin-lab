@@ -319,21 +319,13 @@ export function Course() {
               </span>
             </div>
             <div className="lesson-presets">
-              <button
-                type="button"
-                onClick={() => setValue(lesson.initial)}
-                aria-label="Starting input: reset to the reference value"
-              >
+              <button type="button" onClick={() => setValue(lesson.initial)}>
                 <span>Starting input</span>
                 <strong>
                   {lesson.initial} {lesson.unit}
                 </strong>
               </button>
-              <button
-                type="button"
-                onClick={() => setValue(lesson.challenge)}
-                aria-label="Try the challenge value"
-              >
+              <button type="button" onClick={() => setValue(lesson.challenge)}>
                 <span>Try the challenge value</span>
                 <strong>
                   {lesson.challenge} {lesson.unit}

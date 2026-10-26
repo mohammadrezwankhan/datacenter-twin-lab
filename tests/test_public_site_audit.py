@@ -6,6 +6,7 @@ import json
 from hashlib import sha256
 from pathlib import Path
 import unittest
+from datacenter_twin import __version__
 from urllib.error import HTTPError
 
 SOURCE = Path(__file__).resolve().parents[1] / 'scripts' / 'audit_public_site.py'
@@ -34,7 +35,7 @@ def page(path, schema='TechArticle', links=''):
 def fixtures(*, corrupt=False):
     receipt = b'This is a synthetic verification fixture.\n'
     manifest = {
-        'engine_version': '2.0.0',
+        'engine_version': __version__,
         'artifacts': {'receipt.md': {'sha256': sha256(receipt).hexdigest()}},
         'cases': [],
     }
@@ -45,8 +46,8 @@ def fixtures(*, corrupt=False):
         '/about/': page('/about/'),
         '/evidence/': page('/evidence/'),
         '/studies/emt/': page('/studies/emt/'),
-        '/data/evidence/v2.0.0/manifest.json': json.dumps(manifest).encode(),
-        '/data/evidence/v2.0.0/receipt.md': b'TAMPERED' if corrupt else receipt,
+        f'/data/evidence/v{__version__}/manifest.json': json.dumps(manifest).encode(),
+        f'/data/evidence/v{__version__}/receipt.md': b'TAMPERED' if corrupt else receipt,
     }
     for i in range(1, 25):
         items[f'/learn/{i:02d}/'] = page(f'/learn/{i:02d}/', ['LearningResource', 'TechArticle'])
@@ -73,6 +74,19 @@ class AuditorTests(unittest.TestCase):
         self.assertEqual(report.checks['lessons_discovered'], 24)
         self.assertEqual(report.checks['artifacts_verified'], 1)
         self.assertEqual(len(report.sitemap_pages), 29)
+
+    def test_current_packet_is_audited_even_when_clean_historical_packet_exists(self):
+        items = fixtures(corrupt=True)
+        historical = b'Historical receipt.\n'
+        items['/data/evidence/v2.0.0/receipt.md'] = historical
+        items['/data/evidence/v2.0.0/manifest.json'] = json.dumps({
+            'engine_version': '2.0.0',
+            'artifacts': {'receipt.md': {'sha256': sha256(historical).hexdigest()}},
+            'cases': [],
+        }).encode()
+        report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute()
+        self.assertEqual(report.status, 'fail')
+        self.assertTrue(any('SHA-256 mismatch' in x for x in report.failures), report.failures)
 
     def test_raw_byte_hash_mismatch_is_failure(self):
         audit = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(fixtures(corrupt=True)))

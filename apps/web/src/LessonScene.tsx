@@ -59,6 +59,7 @@ function Selectable({
   onSelect: (id: string) => void;
   children: ReactNode;
 }) {
+  const descriptionId = useId();
   const keyDown = (event: KeyboardEvent<SVGGElement>) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -70,14 +71,14 @@ function Selectable({
       className={`lesson-scene-object${selected === id ? ' is-selected' : ''}`}
       role="button"
       tabIndex={0}
-      aria-label={`${title}. ${detail}. Select for details.`}
       aria-pressed={selected === id}
+      aria-describedby={descriptionId}
       onClick={() => onSelect(id)}
       onKeyDown={keyDown}
     >
-      <title>
-        {title} · {detail}
-      </title>
+      <desc id={descriptionId}>
+        {title}. {detail}. Select for details.
+      </desc>
       {children}
     </g>
   );
@@ -171,7 +172,7 @@ function EquipmentLabel({
   value: string;
 }) {
   return (
-    <g aria-hidden="true">
+    <g>
       <rect x={x} y={y} width={width} height="36" rx="8" fill="#0d1b25" stroke="#47616b" />
       <text x={x + width / 2} y={y + 14} textAnchor="middle" className="lesson-scene-label">
         {title}
@@ -1600,7 +1601,7 @@ function inspectorsFor(
             },
           ]),
         );
-      if (lesson.id === 'n-plus-one')
+      if (lesson.id === 'n-plus-one') {
         entries.unshift(
           add(
             'source',
@@ -1613,6 +1614,19 @@ function inspectorsFor(
             ],
           ),
         );
+        entries.push(
+          add(
+            'load',
+            'Requested IT demand',
+            'Requested, served and unserved IT power from the selected interval.',
+            [
+              { label: 'Requested power', value: kw(row?.requested_it_kw) },
+              { label: 'Served power', value: kw(row?.served_it_kw) },
+              { label: 'Unserved power', value: kw(row?.unserved_it_kw) },
+            ],
+          ),
+        );
+      }
       return entries.length
         ? entries
         : [

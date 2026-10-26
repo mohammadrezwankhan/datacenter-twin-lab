@@ -77,6 +77,37 @@ absolute measured watts, performance prediction or measured-trace reproduction
 is represented. No MATLAB equivalence, independent external technical review
 or physical calibration is established by these software checks.
 
+## Check the last spectrum bin
+
+The forced-response record has 801 samples over two seconds, including both
+endpoints. Its 400 Hz sample rate gives 401 nonnegative-frequency bins; the last
+is about 199.7503 Hz. An odd-length record has no standalone Nyquist coefficient:
+the last positive-frequency bin still has a negative-frequency partner. Its
+one-sided amplitude must therefore be doubled, just like the other positive
+bins. See [NumPy's real-FFT conventions](https://numpy.org/doc/stable/reference/generated/numpy.fft.rfft.html).
+
+The v2.0.0 release wheel predates the current correction and reports half the
+one-sided amplitude at this last bin. A comparison using the saved 30 Hz,
+0.05 pu forcing case confirms that current source matches a direct scalar DFT
+for both the synthetic input and simulated PCC output. Their time-domain curves
+and all other spectrum bins are unchanged in that comparison. These tiny
+high-frequency leakage terms are not the imposed 30 Hz amplitude, a measured
+GPU trace or a facility-accuracy result. Use current source for this check; the
+historical release asset has not been replaced.
+
+From the source checkout, with the optional scientific dependencies installed:
+
+```sh
+python -m datacenter_twin.research --study forced-response --config data/studies/forced-response-spectrum.json --output outputs/forced-response-spectrum.json
+python -m unittest tests.test_research.ResearchSpectrumTests -v
+```
+
+To repeat the export, choose a new output filename or append `--force` to
+overwrite the earlier result.
+
+The regression reconstructs the symmetric Hann window and final DFT coefficient
+with scalar trigonometric sums, independently of the production NumPy FFT.
+
 ## Reproduce locally
 
 ![Section 03 · Reproduce / parameters](../visuals/sections/section-03-reproduce.svg)
@@ -94,8 +125,12 @@ The scientific runtime is optional; the base continuity package still has no
 required third-party dependencies. Historical v1.0.0 release assets predate
 these studies. Each result records the applied inputs, model, method, tolerances,
 charts and diagnostics. Native and browser execution use the same reviewed
-Python source with pinned NumPy 2.4.6 and SciPy 1.18.0; differential checks allow
-documented numerical tolerances for different compiled runtime builds.
+Python source. Native package versions come from the
+[scientific lock](../../requirements-studies.lock); browser wheel versions and
+hashes come from the installed Pyodide lock and are checked by the
+[runtime preparation script](../../scripts/fetch_study_runtime.py). Those native
+and browser package versions can differ. Differential checks allow documented
+numerical tolerances for the different runtime builds.
 
 ## Sources and attribution
 

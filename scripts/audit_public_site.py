@@ -23,8 +23,13 @@ from urllib.parse import urljoin, urlsplit, urlunsplit, unquote
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 import xml.etree.ElementTree as ET
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+from datacenter_twin import __version__  # noqa: E402
+
 DEFAULT_BASE = 'https://khanlab.co.technology/'
-PACKET = '/data/evidence/v2.0.0/'
+PACKET = f'/data/evidence/v{__version__}/'
 SEEDS = ('/', '/learn/', '/about/', '/evidence/', '/studies/emt/')
 BOTS = ('GPTBot', 'ClaudeBot', 'PerplexityBot', 'Google-Extended')
 # The Python reference stores 100-decimal-digit exports. This tolerance is

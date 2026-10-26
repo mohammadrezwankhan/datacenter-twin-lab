@@ -1,8 +1,15 @@
 # Roadmap
 
-## Current status: v1.0.0
+## Current source: 2.0.1 maintenance candidate
 
-Version **1.0.0** packages the current teaching-software workflow. It focuses on reproducible teaching experiments for datacenter power continuity. It does not claim production reliability analysis, site validation, or independent review. Review the supported release scope in [release readiness](docs/engineering/release-readiness.md).
+The [2.0.1 patch scope](docs/releases/v2.0.1.md) prepares the later numerical and
+packaging fixes for a separate checked release. It adds no new model or public
+schema. Publication and hosting require their exact-source gates; v2.0.0 remains
+the published historical milestone until actual release proof exists.
+
+## Published milestone: v2.0.0 — Infrastructure Engineering
+
+Version **2.0.0** extends the teaching application with twelve Infrastructure Engineering lessons alongside twelve continuity lessons, one EMT lesson and five power-dynamics studies. The current [Learn catalog](https://khanlab.co.technology/learn/) contains these **30 learning items**; eighteen advanced facility presets are a separate catalog. It does not claim production reliability analysis, site validation, or independent review. Infrastructure content retains its source labels and **Engineering HOLD**. Review the supported release scope in [release readiness](docs/engineering/release-readiness.md) and the [educational publication decision](docs/releases/v2.0.0-publication-decision.md).
 
 ## Available in the current source and browser demo
 
@@ -11,27 +18,29 @@ Version **1.0.0** packages the current teaching-software workflow. It focuses on
 | Five-minute guided start           | Default first-visit route: predict, explicitly run, and explain a 1 MW / 100 kWh synthetic case. Compare the charging-disabled 50 kWh challenge.                                                           |
 | Scenario catalog                   | Eighteen named cases, including five reference cases and facility-profile outage, demand-step, and extended-reserve cases for 50 MW, 200 MW, 30 MW, and 5 MW aggregate IT loads. All inputs are synthetic. |
 | Advanced energy workspace          | Inspect an interactive isometric electrical scene, run and replay events, edit bounded assumptions, and export the completed result.                                                                       |
-| Twelve browser lessons             | Four course chapters with predictions, challenge values, selectable scenes, event replay, worked answers, and result exports.                                                                              |
+| Twelve continuity lessons          | Four course chapters with predictions, challenge values, selectable scenes, event replay, worked answers, and result exports.                                                                              |
+| Twelve infrastructure lessons      | Bounded educational screens, original diagrams, 36 assessments and separate `infrastructure-screen-1` results. Source statement, Editorial derivation, Illustrative assumption and Unresolved labels remain visible. |
+| EMT and power dynamics             | One DC-link RLC lesson and five separate converter/network studies. Their model assumptions and reproduction routes are distinct from the aggregate continuity engine. |
 | Deterministic calculation          | Standard-library Python engine and exact JavaScript browser engine, with a Python comparison available on request. Full-result checks cover values, assumptions, and hashes.                               |
 | Reports and sensitivity            | Export JSON, Markdown, and HTML; compare bounded reserve, efficiency, demand, and delay cases. Unknown values remain explicit.                                                                             |
 | Evidence and contribution material | Reproducibility packet, independent-review protocol, source register, tutorials, notebook, scenario guidance, and contribution ideas.                                                                      |
 | Local use                          | CLI and loopback dashboard. The browser demo runs its first result locally and has no shared simulation backend or client analytics.                                                                       |
 
-Open the [guided experiment](https://khanlab.co.technology/), the [advanced workspace](https://khanlab.co.technology/?mode=advanced), the [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), or the [12-lesson course](https://khanlab.co.technology/?lesson=power-energy). The [evidence hub](https://khanlab.co.technology/?mode=evidence) and [tutorial index](docs/tutorials/index.md) provide the supporting material.
+Open the [guided experiment](https://khanlab.co.technology/), the [advanced workspace](https://khanlab.co.technology/?mode=advanced), the [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), or the [course and study catalog](https://khanlab.co.technology/learn/). The [evidence hub](https://khanlab.co.technology/?mode=evidence) and [tutorial index](docs/tutorials/index.md) provide the supporting material. The [Python quickstart](docs/quickstart.md#run-with-uv) pins the published v2.0.0 wheel and its checksum. The current website and `main` can include later maintenance; the tagged release assets remain unchanged.
 
-Current source and the browser demo also [reopen scenario JSON and electrical run exports](docs/engineering/energy-scenario-workspace.md#reopen-a-saved-experiment): validate inputs, preview changed assumptions, calculate a fresh result and compare it with Python. The `1.0.0` release packages this workflow; earlier release assets remain unchanged.
+Current source and the browser demo also [reopen scenario JSON and electrical run exports](docs/engineering/energy-scenario-workspace.md#reopen-a-saved-experiment): validate inputs, preview changed assumptions, calculate a fresh result and compare it with Python. This workflow was included in `1.0.0` and is retained in `2.0.0`; earlier release assets remain unchanged.
 
-All twelve lessons also [export a printable worksheet](docs/tutorials/power-systems-course.md#print-a-lesson-worksheet) with a submitted prediction, completed inputs, worked calculation, graph and reproducibility record. The standalone HTML keeps the prediction and answer on separate printed pages. The `1.0.0` release includes the same worksheet workflow as the current browser demo.
+The twelve continuity lessons also [export a printable worksheet](docs/tutorials/power-systems-course.md#print-a-lesson-worksheet) with a submitted prediction, completed inputs, worked calculation, graph and reproducibility record. The standalone HTML keeps the prediction and answer on separate printed pages. The `2.0.0` release retains this legacy worksheet workflow; infrastructure screens use their separate report format.
 
-The advanced workspace also includes a [visual demand timeline](docs/engineering/energy-scenario-workspace.md#compose-a-demand-timeline): add, select, move and remove explicit load steps, preview requested energy, then run the schedule through the existing engine. Failures and recovery events are preserved. The `1.0.0` release packages the editor and the equal-energy timing tutorial; historical release assets remain unchanged.
+The advanced workspace also includes a [visual demand timeline](docs/engineering/energy-scenario-workspace.md#compose-a-demand-timeline): add, select, move and remove explicit load steps, preview requested energy, then run the schedule through the existing engine. Failures and recovery events are preserved. The `2.0.0` release retains the editor and the equal-energy timing tutorial; historical release assets remain unchanged.
 
 ## Next product decisions
 
-Use reproducible first-run problems and learner feedback to prioritize the next capability. The guide, course, timeline editor and exports are available for evaluation; their delivery does not establish teaching effectiveness or independent use. The 1.0.0 release packages these workflows. Prioritize further changes using concrete reproduction or usability feedback.
+Use reproducible first-run problems and learner feedback to prioritize the next capability. The guide, course, timeline editor and exports are available for evaluation; their delivery does not establish teaching effectiveness or independent use. Prioritize further changes using concrete reproduction or usability feedback.
 
 ## Release evidence and external review
 
-The v1.0.0 software milestone covers the guide, course, eighteen presets, reports, scenario imports and visual demand editor. Release artifacts must pass the exact-source Python, browser, installed-package and hash checks described in [release readiness](docs/engineering/release-readiness.md). Historical candidate assets remain unchanged.
+The v2.0.0 software milestone retains the guide, continuity course, eighteen presets, reports, scenario imports and visual demand editor, and adds Infrastructure Engineering while preserving the later EMT/dynamics models. Release artifacts must pass the exact-source Python, browser, installed-package and hash checks described in [release readiness](docs/engineering/release-readiness.md). The v1.0.0 milestone and historical candidate assets remain unchanged.
 
 Independent external reproduction remains an open evidence goal. Use the existing [review discussion](https://github.com/mohammadrezwankhan/datacenter-twin-lab/discussions/5) and [protocol](docs/validation/review-protocol.md), preserve reviewer attribution and scope, and resolve any reproduced mismatch. Maintainer or agent QA cannot satisfy that goal. Software versioning does not imply facility validation.
 

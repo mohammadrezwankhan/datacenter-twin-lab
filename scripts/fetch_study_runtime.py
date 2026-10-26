@@ -50,9 +50,12 @@ def _download_wheel(url: str, expected_sha256: str, name: str) -> bytes:
 
 def main():
     runtime = ROOT / "apps/web/node_modules/pyodide"
-    version = json.loads((runtime / "package.json").read_text())["version"]
-    if version != "314.0.6":
-        raise SystemExit("Expected locked Pyodide 314.0.6")
+    version = json.loads((runtime / "package.json").read_text(encoding="utf-8"))["version"]
+    locked_version = json.loads((ROOT / "apps/web/package.json").read_text(encoding="utf-8"))[
+        "devDependencies"
+    ]["pyodide"]
+    if version != locked_version:
+        raise SystemExit(f"Expected locked Pyodide {locked_version}")
     packages = json.loads((runtime / "pyodide-lock.json").read_text())["packages"]
     target = ROOT / ".local/study-runtime"
     target.mkdir(parents=True, exist_ok=True)

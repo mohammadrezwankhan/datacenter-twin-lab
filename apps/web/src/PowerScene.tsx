@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react';
 import type { Interval, Run } from './types';
 import './power-scene.css';
@@ -34,6 +34,7 @@ function DesktopCampus({
   selected: SourceKey;
   onSelect: (key: SourceKey) => void;
 }) {
+  const descriptionId = useId();
   const demand = Math.max(1, numeric(row.requested_it_kw));
   const flows = {
     grid: numeric(row.grid_kw),
@@ -180,7 +181,7 @@ function DesktopCampus({
         role="button"
         tabIndex={0}
         aria-pressed={selected === 'grid'}
-        aria-label={`Utility feed, ${kw(flows.grid)} in this interval, state ${assetState('utility')}. Select for details.`}
+        aria-describedby={`${descriptionId}-grid`}
         onClick={() => onSelect('grid')}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -189,9 +190,9 @@ function DesktopCampus({
           }
         }}
       >
-        <title>
-          Utility feed · {kw(flows.grid)} · {assetState('utility')}
-        </title>
+        <desc id={`${descriptionId}-grid`}>
+          {kw(flows.grid)} in this interval, state {assetState('utility')}. Select for details.
+        </desc>
         <rect className="power-hit-area" x="58" y="35" width="220" height="249" rx="10" />
         <path
           d="M161 87 112 201M161 87 205 202M135 151H187M124 174H196M143 128H179M111 201H205M141 118H181"
@@ -333,7 +334,7 @@ function DesktopCampus({
         role="button"
         tabIndex={0}
         aria-pressed={selected === 'site'}
-        aria-label={`Server hall and IT load, ${kw(row.served_it_kw)} served of ${kw(row.requested_it_kw)} requested, ${kw(row.unserved_it_kw)} unserved. Select for details.`}
+        aria-describedby={`${descriptionId}-site`}
         onClick={() => onSelect('site')}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -342,9 +343,10 @@ function DesktopCampus({
           }
         }}
       >
-        <title>
-          Server hall · {kw(row.served_it_kw)} served · {kw(row.unserved_it_kw)} unserved
-        </title>
+        <desc id={`${descriptionId}-site`}>
+          {kw(row.served_it_kw)} served of {kw(row.requested_it_kw)} requested,{' '}
+          {kw(row.unserved_it_kw)} unserved. Select for details.
+        </desc>
         <path className="power-hit-area" d="M293 72H754V347H293Z" />
         <rect x="357" y="274" width="160" height="30" rx="7" className="power-label-plate" />
         <text x="437" y="287" textAnchor="middle" className="power-label-main">
@@ -361,7 +363,7 @@ function DesktopCampus({
         role="button"
         tabIndex={0}
         aria-pressed={selected === 'battery'}
-        aria-label={`UPS battery, ${kw(flows.battery)} discharging, ${kw(flows.charge)} charging, ${kwh(row.battery_end_kwh)} at interval end. Select for details.`}
+        aria-describedby={`${descriptionId}-battery`}
         onClick={() => onSelect('battery')}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -370,7 +372,10 @@ function DesktopCampus({
           }
         }}
       >
-        <title>UPS battery · {kwh(row.battery_end_kwh)} at interval end</title>
+        <desc id={`${descriptionId}-battery`}>
+          {kw(flows.battery)} discharging, {kw(flows.charge)} charging, {kwh(row.battery_end_kwh)}{' '}
+          at interval end. Select for details.
+        </desc>
         <rect className="power-hit-area" x="799" y="55" width="223" height="159" rx="10" />
         <path
           d="M830 106 893 83 969 105 907 129Z"
@@ -404,7 +409,7 @@ function DesktopCampus({
         role="button"
         tabIndex={0}
         aria-pressed={selected === 'generator'}
-        aria-label={`Standby generator, ${kw(flows.generator)} output this interval, state ${assetState('generator')}. Select for details.`}
+        aria-describedby={`${descriptionId}-generator`}
         onClick={() => onSelect('generator')}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
@@ -413,9 +418,10 @@ function DesktopCampus({
           }
         }}
       >
-        <title>
-          Standby generator · {kw(flows.generator)} · {assetState('generator')}
-        </title>
+        <desc id={`${descriptionId}-generator`}>
+          {kw(flows.generator)} output this interval, state {assetState('generator')}. Select for
+          details.
+        </desc>
         <rect className="power-hit-area" x="841" y="233" width="213" height="139" rx="10" />
         <path
           d="M861 267 926 244 1013 269 947 294Z"
@@ -479,6 +485,7 @@ function MobileCampus({
   selected: SourceKey;
   onSelect: (key: SourceKey) => void;
 }) {
+  const descriptionId = useId();
   const flows = {
     grid: numeric(row.grid_kw),
     generator: numeric(row.generator_kw),
@@ -492,6 +499,7 @@ function MobileCampus({
     role: 'button' as const,
     tabIndex: 0,
     'aria-pressed': picked(key),
+    'aria-describedby': `${descriptionId}-${key}`,
     onClick: () => onSelect(key),
     onKeyDown: (event: KeyboardEvent<SVGGElement>) => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -589,11 +597,10 @@ function MobileCampus({
       <g
         {...choose('grid')}
         className={`power-scene-object source-grid${picked('grid') ? ' is-selected' : ''}`}
-        aria-label={`Utility feed, ${kw(flows.grid)} this interval, state ${state('utility')}. Select for details.`}
       >
-        <title>
-          Utility feed · {kw(flows.grid)} · {state('utility')}
-        </title>
+        <desc id={`${descriptionId}-grid`}>
+          {kw(flows.grid)} this interval, state {state('utility')}. Select for details.
+        </desc>
         <rect className="power-hit-area" x="7" y="8" width="114" height="137" rx="8" />
         <path
           d="m67 28-25 57m25-57 25 57M51 48h32M47 59h40M54 39h26M42 85h50m-27-57-7 15h14Zm-20 44 20 13 20-13"
@@ -654,11 +661,11 @@ function MobileCampus({
       <g
         className={`power-scene-object source-site${picked('site') ? ' is-selected' : ''}`}
         {...choose('site')}
-        aria-label={`Server hall and IT load, ${kw(row.served_it_kw)} served of ${kw(row.requested_it_kw)} requested, ${kw(row.unserved_it_kw)} unserved. Select for details.`}
       >
-        <title>
-          Server hall · {kw(row.served_it_kw)} served · {kw(row.unserved_it_kw)} unserved
-        </title>
+        <desc id={`${descriptionId}-site`}>
+          {kw(row.served_it_kw)} served of {kw(row.requested_it_kw)} requested,{' '}
+          {kw(row.unserved_it_kw)} unserved. Select for details.
+        </desc>
         <path
           className="power-hit-area"
           d="M102 158 208 199 319 157 319 236 208 278 102 238Z M113 284H298V314H113Z"
@@ -675,9 +682,11 @@ function MobileCampus({
       <g
         className={`power-scene-object source-battery${picked('battery') ? ' is-selected' : ''}`}
         {...choose('battery')}
-        aria-label={`UPS battery, ${kw(flows.battery)} discharging, ${kw(flows.charge)} charging, ${kwh(row.battery_end_kwh)} at interval end. Select for details.`}
       >
-        <title>UPS battery · {kwh(row.battery_end_kwh)} at interval end</title>
+        <desc id={`${descriptionId}-battery`}>
+          {kw(flows.battery)} discharging, {kw(flows.charge)} charging, {kwh(row.battery_end_kwh)}{' '}
+          at interval end. Select for details.
+        </desc>
         <rect className="power-hit-area" x="277" y="11" width="120" height="133" rx="8" />
         <path d="m295 42 43-16 48 15-43 17Z" fill="#50456b" stroke="#ad9ad6" />
         <path d="M295 42v47l48 16V58Z" fill="#302b46" stroke="#8c7bb3" />
@@ -700,11 +709,11 @@ function MobileCampus({
       <g
         className={`power-scene-object source-generator${picked('generator') ? ' is-selected' : ''}`}
         {...choose('generator')}
-        aria-label={`Standby generator, ${kw(flows.generator)} output this interval, state ${state('generator')}. Select for details.`}
       >
-        <title>
-          Standby generator · {kw(flows.generator)} · {state('generator')}
-        </title>
+        <desc id={`${descriptionId}-generator`}>
+          {kw(flows.generator)} output this interval, state {state('generator')}. Select for
+          details.
+        </desc>
         <rect className="power-hit-area" x="274" y="276" width="124" height="108" rx="8" />
         <path d="m286 301 42-16 55 16-42 17Z" fill="#75552f" stroke="#e5b36b" />
         <path d="M286 301v39l55 18v-40Z" fill="#493824" stroke="#b98448" />

@@ -804,6 +804,8 @@
     padding-bottom: 2px;
   }
   .energy-app .nav-item {
+    /* Touch target minima must not replace each label's intrinsic width. */
+    flex: 0 0 auto;
     width: auto;
     white-space: nowrap;
     margin: 0;

@@ -2,6 +2,32 @@ import { expect, test } from '@playwright/test';
 import { nativeRun } from './course-test-helpers';
 import { ENGINE_VERSION } from '../src/js-engine/version';
 
+test('evidence navigation distinguishes versioned source from published releases', async ({
+  page,
+  request,
+}) => {
+  const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
+  await page.goto('./?mode=evidence');
+  await expect(
+    page.getByRole('link', { name: `Versioned source v${ENGINE_VERSION}`, exact: false }),
+  ).toHaveAttribute('href', `${repository}/tree/v${ENGINE_VERSION}`, { timeout: 3000 });
+  await expect(
+    page.getByRole('link', { name: 'Published releases', exact: false }),
+  ).toHaveAttribute('href', `${repository}/releases`, { timeout: 3000 });
+  for (const path of ['about/', 'evidence/']) {
+    const response = await request.get(`./${path}`);
+    expect(response.ok()).toBe(true);
+    const html = await response.text();
+    expect(html).not.toContain(`${repository}/releases/tag/v${ENGINE_VERSION}`);
+    expect(html).toContain(`${repository}/releases`);
+    expect(html).toContain(
+      path === 'about/'
+        ? `${repository}/tree/v${ENGINE_VERSION}`
+        : `${repository}/archive/refs/tags/v${ENGINE_VERSION}.zip`,
+    );
+  }
+});
+
 test('evidence hub exposes three complete native-equal cases, reports and captions', async ({
   page,
   request,

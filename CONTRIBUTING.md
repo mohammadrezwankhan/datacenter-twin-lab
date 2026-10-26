@@ -47,7 +47,7 @@ npm --prefix apps/web run build
 .venv/bin/python -m datacenter_twin simulate --preset generator_failure --format markdown
 ```
 
-`requirements-api.lock` installs the API and HTTP test dependencies used by CI; the numerical core itself uses only the Python standard library. `npm ci` installs the locked frontend tools before the type check and dashboard build. Use the environment's Python for later CLI runs and tests. `TWIN_PYTHON` also selects it for browser test helpers. The final command is a first-run smoke check using an existing synthetic case.
+`requirements-api.lock` installs the API and HTTP test dependencies used by CI; the numerical core itself uses only the Python standard library. When updating an API dependency, follow the [selective API-lock refresh and validation workflow](docs/engineering/dependency-validation.md#refreshing-the-api-dependency-lock). `npm ci` installs the locked frontend tools before the type check and dashboard build. Use the environment's Python for later CLI runs and tests. `TWIN_PYTHON` also selects it for browser test helpers. The final command is a first-run smoke check using an existing synthetic case.
 
 For browser calculation or interaction changes, continue with the [browser development and parity checks](docs/engineering/browser-demo.md). That workflow prepares the synthetic fixtures before the engine checks and exercises the browser results against Python; keep `TWIN_PYTHON` set to the environment above.
 

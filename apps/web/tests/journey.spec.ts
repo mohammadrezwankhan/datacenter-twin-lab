@@ -112,7 +112,7 @@ test('failure, depletion, recovery, replay and baseline stay visible', async ({ 
   await expect(page.getByRole('button', { name: 'Pause replay' })).toBeVisible();
   await page.getByRole('button', { name: 'Pause replay' }).click();
   await page.getByRole('button', { name: 'Power topology' }).click();
-  await page.getByRole('button', { name: /Distribution A:/ }).click();
+  await page.getByRole('button', { name: /Distribution A/ }).click();
   await expect(page.getByText('a-room · shared-controls', { exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Declared relationships' })).toBeVisible();
 });

@@ -31,7 +31,7 @@ test('all facility and pressure selections export native-equal runs', async ({ p
   test.setTimeout(180000);
   await page.goto('./?mode=advanced');
   for (const profile of facilityProfiles) {
-    await page.getByRole('button', { name: `${profile.name} profile`, exact: true }).click();
+    await page.getByRole('button', { name: profile.name, exact: false }).click();
     await expect(page.getByRole('button', { name: 'Run scenario' })).toBeEnabled();
     for (const mode of scenarioModes) {
       await page
@@ -112,7 +112,7 @@ test('scene is visible and keyboard operable at desktop, tablet and phone widths
     await expect(scene.locator('svg')).toBeVisible();
     await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Resume animation' })).toBeVisible();
-    const battery = scene.getByRole('button', { name: /^UPS battery,/ });
+    const battery = scene.getByRole('button', { name: /^UPS battery\b/i });
     await battery.focus();
     await battery.press('Enter');
     await expect(scene.getByRole('heading', { name: 'UPS battery', exact: true })).toBeVisible();

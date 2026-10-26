@@ -13,6 +13,33 @@ import venv
 from zipfile import ZipFile
 
 
+def verify_web_inventory(archive: ZipFile, web_root: Path, *, require_web: bool = False) -> None:
+    """Compare every bundled dashboard file with the current native build."""
+    prefix = "datacenter_twin/web/"
+    entries = [entry for entry in archive.infolist() if entry.filename.startswith(prefix) and not entry.is_dir()]
+    if not entries:
+        if require_web:
+            raise RuntimeError("Build apps/web before building a dashboard distribution")
+        return
+
+    names = [entry.filename[len(prefix):] for entry in entries]
+    if len(names) != len(set(names)):
+        raise RuntimeError("Duplicate bundled dashboard file names")
+    current_files = {path.relative_to(web_root).as_posix(): path for path in web_root.rglob("*") if path.is_file()}
+    if not current_files:
+        raise RuntimeError("Bundled dashboard verification requires the current native build; build apps/web first")
+    missing = sorted(current_files.keys() - set(names))
+    extra = sorted(set(names) - current_files.keys())
+    if missing or extra:
+        raise RuntimeError(
+            f"Bundled dashboard inventory mismatch (missing: {missing}; extra: {extra}). "
+            "Rebuild the wheel from a fresh packaging source/build tree"
+        )
+    for name in sorted(names):
+        if sha256(archive.read(prefix + name)).digest() != sha256(current_files[name].read_bytes()).digest():
+            raise RuntimeError(f"Bundled dashboard hash mismatch: {name}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("wheel_directory", type=Path)
@@ -28,7 +55,9 @@ def main() -> int:
     with ZipFile(wheel) as archive:
         if any(name.endswith(".docx") or any(part in {"docs", "planning", "campaign"} for part in Path(name).parts) for name in archive.namelist()):
             raise RuntimeError("Private source material must not be included in the wheel")
-        web_files = [name for name in archive.namelist() if name.startswith("datacenter_twin/web/")]
+        verify_web_inventory(archive, root / "datacenter_twin" / "web", require_web=args.require_web)
+        web_files = [entry.filename for entry in archive.infolist()
+                     if entry.filename.startswith("datacenter_twin/web/") and not entry.is_dir()]
         if web_files and "datacenter_twin/web/THIRD-PARTY-NOTICES.txt" not in web_files:
             raise RuntimeError("Bundled dashboard must retain its React/React DOM/Scheduler notices")
         if args.require_web and ("datacenter_twin/web/index.html" not in web_files or

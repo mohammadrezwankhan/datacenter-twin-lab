@@ -19,8 +19,7 @@
     "https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/HEAD/CITATION.cff"
   ],
   "description": "Synthetic electrical-continuity and energy-planning research software with a deterministic Python engine, local API, dashboard and bounded educational Infrastructure Engineering screens. Not calibrated to a real facility. Third-party references retain their separate rights notices.",
-  "version": "2.0.0",
-  "datePublished": "2026-10-12",
+  "version": "2.0.1",
   "keywords": [
     "data center",
     "electrical continuity",
@@ -28,5 +27,6 @@
     "energy planning",
     "Python"
   ],
-  "license": "https://spdx.org/licenses/Apache-2.0.html"
+  "license": "https://spdx.org/licenses/Apache-2.0.html",
+  "datePublished": "2026-10-26"
 }

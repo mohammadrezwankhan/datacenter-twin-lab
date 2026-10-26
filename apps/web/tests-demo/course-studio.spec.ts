@@ -62,7 +62,7 @@ test('course atlas, predictions, replay and session review marks form one learni
   const scene = page.getByRole('region', { name: 'Lesson visualisation' });
   await scene.getByRole('button', { name: /asset down · utility/ }).click();
   await expect(scene.locator('output')).toContainText('300 s–310 s');
-  await scene.getByRole('button', { name: /Battery energy store/ }).press('Enter');
+  await scene.getByRole('button', { name: /^BATTERY · SELECTED INTERVAL\b/i }).press('Enter');
   await expect(scene.locator('.lesson-scene-inspector h3')).toHaveText('Battery energy store');
   await scene.getByLabel('Inspect lesson component').selectOption('depletion');
   await expect(scene.locator('.lesson-scene-inspector h3')).toHaveText('Battery depletion event');
@@ -191,7 +191,7 @@ test('reduced motion respects the device preference without removing interactive
   await expect(
     scene.getByRole('button', { name: 'Animation disabled by reduced motion preference' }),
   ).toBeDisabled();
-  await scene.getByRole('button', { name: /Elapsed interval/ }).press('Enter');
+  await scene.getByRole('button', { name: /^TIME\b/i }).press('Enter');
   await expect(scene.locator('.lesson-scene-inspector')).toContainText('Elapsed');
   expect(
     await page

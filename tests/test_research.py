@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import unittest
 
 try:
@@ -164,6 +165,47 @@ class ResearchStudyTests(unittest.TestCase):
         for load in (0.61, 0.7):
             with self.subTest(model_comparison_load_final_pu=load), self.assertRaises(ValueError):
                 self.run_study("model-comparison", {"load_final_pu": load})
+
+
+@unittest.skipUnless(_NUMERICS_AVAILABLE, "research studies require the optional NumPy/SciPy stack")
+class ResearchSpectrumTests(unittest.TestCase):
+    def test_odd_length_spectrum_doubles_highest_positive_bin(self):
+        from datacenter_twin.research import run_study
+
+        result = run_study(
+            "forced-response", {"forcing_frequency_hz": 30.0, "forcing_amplitude_pu": 0.05}
+        )
+        time_chart, spectrum = result["charts"]
+        times = time_chart["x"]
+        count = len(times)
+        self.assertEqual(count, 801)
+        bin_index = (count - 1) // 2
+        sample_interval = times[1] - times[0]
+        self.assertAlmostEqual(spectrum["x"][-1], bin_index / (count * sample_interval))
+        self.assertLess(spectrum["x"][-1], 1.0 / (2.0 * sample_interval))
+        self.assertEqual(len(time_chart["lines"]), 2)
+        self.assertEqual(len(spectrum["lines"]), 2)
+
+        # Direct scalar DFT, independent of the production NumPy FFT/window.
+        # For odd N the final positive-frequency bin has a distinct negative
+        # partner; it is not a self-conjugate Nyquist bin (NumPy rfft notes).
+        window = [0.5 - 0.5 * math.cos(2.0 * math.pi * i / (count - 1)) for i in range(count)]
+        for signal, output in zip(time_chart["lines"], spectrum["lines"]):
+            with self.subTest(signal=signal["label"]):
+                mean = math.fsum(signal["values"]) / count
+                weighted = [(value - mean) * weight for value, weight in zip(signal["values"], window)]
+                real = math.fsum(
+                    value * math.cos(2.0 * math.pi * bin_index * i / count)
+                    for i, value in enumerate(weighted)
+                )
+                imag = math.fsum(
+                    value * math.sin(2.0 * math.pi * bin_index * i / count)
+                    for i, value in enumerate(weighted)
+                )
+                expected = 2.0 * math.hypot(real, imag) / math.fsum(window)
+                tolerance = max(1e-15, expected * 1e-5)
+                self.assertGreater(expected, 100.0 * tolerance)
+                self.assertAlmostEqual(output["values"][-1], expected, delta=tolerance)
 
 
 if __name__ == "__main__":

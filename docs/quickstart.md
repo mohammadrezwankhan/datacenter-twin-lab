@@ -12,9 +12,9 @@ The default browser route opens the five-minute guided experiment. It derives fr
 
 No result is presented before the deliberate run. The equation applies both efficiency losses before dividing IT energy by the requested IT power. After the result, use the optional Python comparison or expand the report and sensitivity tools. The default JavaScript run does not load the Python runtime; it is loaded only when requested. See the [browser guide](engineering/browser-demo.md) for runtime and privacy details.
 
-Open the [advanced simulator](https://khanlab.co.technology/?mode=advanced), the existing [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), the [12-lesson course](https://khanlab.co.technology/?lesson=power-energy), or the [evidence hub](https://khanlab.co.technology/?mode=evidence#demo). The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the lesson atlas.
+Open the [advanced simulator](https://khanlab.co.technology/?mode=advanced), the existing [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), the [course and study catalog](https://khanlab.co.technology/learn/), or the [evidence hub](https://khanlab.co.technology/?mode=evidence#demo). The catalog contains 24 continuity/infrastructure lessons, one EMT lesson and five dynamics studies; these 30 learning items are separate from the eighteen facility presets. The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the continuity lesson atlas.
 
-The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. Current source is v2.0.0 — Infrastructure Engineering. The pinned v1.0.0 installation commands below remain historical, immutable examples; see the current GitHub release for v2.0.0 artifacts. Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
+The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. The installation commands below select the published [v2.0.1 numerical and packaging maintenance release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1), built from `513ddc7150027f5e274a8d50d5edcd3c31167a5e` and published on 2026-10-26. The [patch receipt](releases/v2.0.1.md) records its source, checks and SHA-256. Earlier v2.0.0 and v1.0.0 assets remain unchanged; the original hash-pinned v2.0.0 recipe is retained in [README-PYPI](../README-PYPI.md#historical-v200-reproduction). Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
 
 The original `generator_failure` preset remains available for CLI reproduction. Its default 100 kWh battery starts full, so pre-outage charging cannot increase that opening balance. In that preset, changing the starting reserve to 50 kWh allows pre-outage charging and yields **478.2675 s elapsed**, rather than the guide challenge's **453.9 s** with charging disabled. The exact lesson recipe and independent hand calculation are in the [canonical case](canonical-case.md).
 
@@ -24,7 +24,7 @@ For a preserved recording of the earlier interface, see the optional [still imag
 
 Open the [advanced workspace](https://khanlab.co.technology/?mode=advanced), select **Import scenario**, and choose a schema-2 scenario JSON or exported electrical run. Review the changed assumptions, then choose **Run imported scenario**. The demo calculates locally and can verify the complete result against Python. **Download current scenario** saves draft inputs; **Export run** saves the completed result. See [file formats, bounds and reproduction instructions](engineering/energy-scenario-workspace.md#reopen-a-saved-experiment).
 
-This workflow is included in the pinned `1.0.0` release below and current Pages.
+This workflow is included in the pinned `2.0.1` release below and the current website.
 
 ## Evidence and release links
 
@@ -39,47 +39,53 @@ Automated checks establish software behavior for these synthetic fixtures. Check
 
 If [uv is installed](https://docs.astral.sh/uv/getting-started/installation/), run the released CLI from an empty working folder with one command. `uvx` creates a cached, isolated environment; it downloads Python 3.12 if needed. Git, Node, and a source checkout are unnecessary.
 
-The commands below install the published [v1.0.0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v1.0.0). Its wheel includes the CLI, compiled local dashboard, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. This repository is not published on PyPI.
+The commands below install the published [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1). Its wheel includes the CLI, compiled local dashboard, 24 course lessons, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. The package is not published on PyPI; these commands download the GitHub release directly.
+
+The v2 distribution name is `datacenter-twin`, replacing the historical GitHub wheel name `datacenter-twin-lab`. Both provide `datacenter_twin` and the `datacenter-twin` command. Use a fresh environment rather than installing both distributions together; do not remove a working older environment to try this release.
 
 ```sh
-uvx --python 3.12 --from "datacenter-twin-lab @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650" datacenter-twin simulate --preset generator_failure --format markdown
+uvx --python 3.12 --from "datacenter-twin @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b" datacenter-twin simulate --preset generator_failure --format markdown
 ```
 
 This command runs the original 1 MW / 100 kWh reference fixture and reports battery depletion at **607.8 s elapsed**. For the local dashboard, use the same wheel with its API extra:
 
 ```sh
-uvx --python 3.12 --from "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650" datacenter-twin serve
+uvx --python 3.12 --from "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b" datacenter-twin serve
 ```
 
 Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8001` if that port is occupied. These commands work in PowerShell and POSIX shells. They pin the GitHub wheel and its digest; this project is **not published on PyPI**. The API extra resolves compatible transitive dependencies from the package index. Use the locked source workflow for the exact development dependency set.
 
-The route was exercised with uv 0.12.11 and Python 3.12.14 on Windows, outside the checkout, including a real CLI report and dashboard run. For an installed Python 3.12+, `--python` can also take its executable path. See [uv's tool isolation and source options](https://docs.astral.sh/uv/guides/tools/). If you prefer pip, use the following route.
+The release routes are checked outside the checkout so they import the installed wheel. For an installed Python 3.12+, `--python` can also take its executable path. See [uv's tool isolation and source options](https://docs.astral.sh/uv/guides/tools/). If you prefer pip, use the following route.
 
 ## Run the released dashboard (Python only)
 
-In an empty working folder, create an isolated environment and install the published `1.0.0` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The version check should print **1.0.0**. The wheel contains the built local interface and evidence assets; no source checkout or frontend build is needed.
+In an empty working folder, create a new isolated environment and install the published `2.0.1` wheel with its `api` extra. These commands call the environment's Python directly, so no activation script is needed. The version check should print **2.0.1**. The wheel contains the built local interface and evidence assets; no source checkout or frontend build is needed.
 
 Windows / PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650"
+.\.venv\Scripts\python.exe -m pip install "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b"
 .\.venv\Scripts\python.exe -m datacenter_twin --version
 .\.venv\Scripts\python.exe -m datacenter_twin serve
 ```
+
+If Windows refuses a bundled file during installation because its path is too long, recreate the virtual environment in a shorter working path and reinstall. Deeply nested working folders can make paths inside `site-packages` exceed the system's supported length. Create a new environment there rather than moving an existing one.
 
 macOS / Linux:
 
 ```sh
 python3 -m venv .venv
-.venv/bin/python -m pip install "datacenter-twin-lab[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v1.0.0/datacenter_twin_lab-1.0.0-py3-none-any.whl#sha256=5055afa89a68fb7427ca0b751bdad1dc99370d2ba81c53246b6aad029226b650"
+.venv/bin/python -m pip install "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b"
 .venv/bin/python -m datacenter_twin --version
 .venv/bin/python -m datacenter_twin serve
 ```
 
 Use a Python executable at version 3.12 or later; for example, replace the first Windows `python` with `py -3.12` if you use that launcher. Your Python installation must include pip and venv support. The initial installation needs network access to GitHub and the dependency package index. It installs the built interface and API dependencies; Git, Node, an API key, and a cloud account are not required. The release pins FastAPI and Uvicorn; this convenient extra resolves their compatible transitive dependencies. Use the locked source workflow below when you need the repository's exact development dependency set.
 
-Open [127.0.0.1:8000](http://127.0.0.1:8000). Select **Generator failure / battery depletion**, run the original 1 MW scenario, and select the `607.8 s` battery-depleted event. Served IT power drops to zero until restoration at `900 s`. Try **A-path maintenance / surviving overload** to see 665 kW served and 335 kW unserved during the outage interval. [The tutorial](tutorials/continuity-walkthrough.md) derives both results. The 50 kWh CLI sweep value uses the preset's charging behavior; it is not the charging-disabled guided lesson challenge.
+Open [127.0.0.1:8000](http://127.0.0.1:8000). For the installed 24-lesson course, open [the local course](http://127.0.0.1:8000/?lesson=power-energy) and use **Choose a lesson** to switch between continuity and Infrastructure Engineering. The workspace sidebar's **Open the browser course** link opens the current hosted course instead. Adjust the port in either local URL if you changed it.
+
+In the local workspace, select **Generator failure / battery depletion**, run the original 1 MW scenario, and select the `607.8 s` battery-depleted event. Served IT power drops to zero until restoration at `900 s`. Try **A-path maintenance / surviving overload** to see 665 kW served and 335 kW unserved during the outage interval. [The tutorial](tutorials/continuity-walkthrough.md) derives both results. The 50 kWh CLI sweep value uses the preset's charging behavior; it is not the charging-disabled guided lesson challenge.
 
 Stop the server with Ctrl+C. If port 8000 is occupied, append `--port 8001` to the serve command and open port 8001. After stopping, you can run the bundled CLI preset in the same environment:
 
@@ -97,7 +103,7 @@ The presets, catalogue and research evidence ship in the wheel. Open **Research 
 
 ## Windows evidence-file paths
 
-The `1.0.0` wheel includes the Windows long-path correction for bundled evidence reports. It uses the extended path for the trusted installation root; no system setting needs to change. The earlier `0.4.0rc1` asset remains unchanged and can return a missing-file response when a full report filename exceeds Windows' traditional 260-character limit. If keeping that older candidate, use a shorter virtual-environment location or `UV_CACHE_DIR`. See [Microsoft's path-length explanation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation).
+The `2.0.1` wheel retains the Windows long-path correction introduced before `1.0.0` for bundled evidence reports. It uses the extended path for the trusted installation root; no system setting needs to change. The earlier `0.4.0rc1` asset remains unchanged and can return a missing-file response when a full report filename exceeds Windows' traditional 260-character limit. If keeping that older candidate, use a shorter virtual-environment location or `UV_CACHE_DIR`. See [Microsoft's path-length explanation](https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation).
 
 ## Run from source
 
@@ -168,7 +174,7 @@ python scripts/verify_distribution.py dist --require-web
 
 The verifier expects exactly one project wheel in the selected directory. Use a separate directory for each retained version. The verifier creates a temporary environment, installs the local wheel with `--no-index --no-deps`, checks import/version identity, and exercises both entry points plus continuity and catalogue resources. Schema-1 samples are copied from this repository. The schema-2 demo and catalogue are package resources. `--require-web` also checks that the compiled dashboard is included; omit it for an intentional CLI-only wheel. The installed core needs no network; an installed dashboard server still requires the optional API dependencies.
 
-The workflow is configured to run on each push to `main` and each pull request. It targets Python 3.12 and 3.14 on Windows and Ubuntu for the core/API, frontend type/build, and installed-wheel checks. Playwright Chromium journeys run on Ubuntu/Python 3.12. This describes the per-commit matrix; check the exact commit to establish which jobs passed. PyPI publication remains pending a configured owner publishing identity; the pinned GitHub wheel commands above install the published 1.0.0 release. Containers and shared deployment are outside this delivery.
+The workflow is configured to run on each push to `main` and each pull request. It targets Python 3.12 and 3.14 on Windows and Ubuntu for the core/API, frontend type/build, and installed-wheel checks. Playwright Chromium journeys run on Ubuntu/Python 3.12. This describes the per-commit matrix; check the exact commit to establish which jobs passed. PyPI publication remains pending a configured owner publishing identity; the pinned GitHub wheel commands above install the published 2.0.0 release. Containers and shared deployment are outside this delivery.
 
 ## Assumptions and limits
 
@@ -182,4 +188,4 @@ The public source tree excludes private manuals, planning references and the pri
 
 ## Facility configurations
 
-The energy workspace adds four illustrative profiles (50 MW AI, 200 MW hyperscale, 30 MW crypto mining and 5 MW traditional IT), each with outage, load-step and extended-reserve cases. Select an asset in the animated campus, change storage/loss/asset-limit assumptions, and export the result. See the [energy scenario guide](engineering/energy-scenario-workspace.md) for exact assumptions and hand calculations. These profiles are included in the `1.0.0` release wheel above. Historical [v0.3.0a0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v0.3.0a0) and [v0.2.0a0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v0.2.0a0) assets retain their original contents.
+The energy workspace adds four illustrative profiles (50 MW AI, 200 MW hyperscale, 30 MW crypto mining and 5 MW traditional IT), each with outage, load-step and extended-reserve cases. Select an asset in the animated campus, change storage/loss/asset-limit assumptions, and export the result. See the [energy scenario guide](engineering/energy-scenario-workspace.md) for exact assumptions and hand calculations. These profiles are included in the `2.0.0` release wheel above. Historical [v1.0.0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v1.0.0), [v0.3.0a0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v0.3.0a0) and [v0.2.0a0](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v0.2.0a0) assets retain their original contents.

@@ -11,8 +11,13 @@ async function exportResult(page: import('@playwright/test').Page) {
 
 test('the five-minute guide requires a prediction and matches native results for both reserves', async ({
   page,
-}) => {
-  test.setTimeout(90000);
+}, info) => {
+  test.setTimeout(180000);
+  const runtimeRequests: string[] = [];
+  page.on('request', (request) => {
+    if (/pyodide|\.whl|engine\.zip|engine-manifest/.test(request.url()))
+      runtimeRequests.push(request.url());
+  });
   await page.goto('./');
   await expect(
     page.getByRole('heading', { name: /five minutes to reason it through/i }),
@@ -78,6 +83,19 @@ test('the five-minute guide requires a prediction and matches native results for
     expect(Number(depleted.at_s) - 300).toBeCloseTo(item.rideThrough, 7);
     expect(Number(depleted.at_s)).toBeCloseTo(item.elapsed, 7);
     expect(result.summary.energy_balance_residual_kwh).toBe('0');
+
+    // First useful result stays JavaScript-only. Verification is requested only
+    // after the complete native comparison and independent runway expectations.
+    if (index === 0) expect(runtimeRequests).toEqual([]);
+    await page.getByLabel('Verify against Python').check();
+    await expect(page.getByTestId('python-verification-status')).toContainText(
+      `Exact match with Python: all inputs, hashes and calculated values (${result.run_id}).`,
+    );
+    expect(await exportResult(page)).toEqual(result);
+    await info.attach(`guided-${item.reserve}kwh-complete-result.json`, {
+      body: Buffer.from(JSON.stringify(result, null, 2)),
+      contentType: 'application/json',
+    });
   }
 });
 
