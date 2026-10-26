@@ -5,26 +5,26 @@ continuity slice. It is a local, deterministic calculation record. It does not
 claim facility calibration, external validation, hosted availability, or
 physical equipment behavior.
 
-## Re-run from source
+## Generate reports from the current source
 
 From the repository root, use Python 3.12 or newer. Maintainer numerical
 verification used Python 3.12.14 on Windows.
 
 ```sh
 python -m unittest discover -s tests -v
-python -m datacenter_twin simulate --preset generator_failure --format markdown \
-  --output docs/validation/examples/generator-failure-report.md --force
-python -m datacenter_twin simulate --preset generator_failure --format html \
-  --output docs/validation/examples/generator-failure-report.html --force
-python -m datacenter_twin sweep --preset generator_failure \
-  --parameter battery_initial_kwh --values 0 50 100 --format markdown
+python -m datacenter_twin simulate --preset generator_failure --format markdown --output outputs/capsule-current/generator-failure-report.md
+python -m datacenter_twin simulate --preset generator_failure --format html --output outputs/capsule-current/generator-failure-report.html
+python -m datacenter_twin sweep --preset generator_failure --parameter battery_initial_kwh --values 0 50 100 --format markdown
 ```
 
-The report commands regenerate small human-readable artifacts. They do not
-commit a full interval JSON run to this capsule. The CLI's JSON mode remains
-available for machine use, with its compatibility timestamp wrapper; the
-Markdown and HTML modes contain no wall-clock timestamp and are byte-stable
-for equal inputs.
+Choose unused output paths; these commands deliberately omit `--force` and do
+not replace the checked-in evidence. Each report identifies the engine version,
+input hash and run ID. The recorded reports below use engine `0.3.0a0`, so a
+current engine's report need not match their bytes or run ID even when the input
+hash and numerical results agree. Equal inputs and the same engine revision
+produce byte-stable Markdown/HTML; JSON mode adds a compatibility timestamp
+wrapper. The sweep above retains the preset's charging behavior; the independent
+battery worksheet below explicitly disables charging instead.
 
 ## Maintainer evidence recorded here
 
@@ -34,14 +34,43 @@ The checked-in examples use the `generator_failure` preset from
 
 | Artifact | Engine | Run ID | Input SHA-256 | Artifact SHA-256 | Bytes |
 | --- | --- | --- | --- | --- | ---: |
-| [Markdown report](examples/generator-failure-report.md) | `0.3.0a0` | `b93b91d64b3fc0bbd96b` | `202d1950bc8762c95216904dd9bbc890c1e1cdb51fe3f824e6e3d98f76410195` | `70159bdd25f39a5cd1c703ed273ef5e3de49c613e345454e188081cf80bc6e2b` | 2595 |
+| [Annotated Markdown report](examples/generator-failure-report.md) | `0.3.0a0` | `b93b91d64b3fc0bbd96b` | `202d1950bc8762c95216904dd9bbc890c1e1cdb51fe3f824e6e3d98f76410195` | `6024c11e7e44719b7a57b94d9ecb128122dbe34ab84179a6e75fba1dc70a0072` | 2768 |
 | [HTML report](examples/generator-failure-report.html) | `0.3.0a0` | `b93b91d64b3fc0bbd96b` | `202d1950bc8762c95216904dd9bbc890c1e1cdb51fe3f824e6e3d98f76410195` | `77039c122d9d182ed3916c50c1842bbb4c8f79a23422f95f9ca9fa26aed61c3e` | 4223 |
 
-Verify an artifact digest with a platform-appropriate command, for example:
+The Markdown file includes two later illustration links; it is an annotated
+copy, not the original raw engine export. The table hashes the actual linked
+files. Verify their bytes from this checkout, for example:
 
 ```sh
 python -c "from pathlib import Path; import hashlib; p=Path('docs/validation/examples/generator-failure-report.md'); print(hashlib.sha256(p.read_bytes()).hexdigest())"
 ```
+
+### Reproduce the original export bytes
+
+The public `v0.3.0a0` tag points to
+[`96fcf002f69ef53b2298330b9ad96ae89807e491`](https://github.com/mohammadrezwankhan/datacenter-twin-lab/commit/96fcf002f69ef53b2298330b9ad96ae89807e491).
+Use that exact revision in a separate, new worktree with Python 3.12 or newer:
+
+The sibling worktree path must not already exist. For another reproduction,
+choose a fresh worktree path and update both the `git worktree add` and `cd`
+paths, or reuse the pinned worktree with unused report output paths.
+
+```sh
+git worktree add --detach ../datacenter-twin-capsule-v0.3.0a0 96fcf002f69ef53b2298330b9ad96ae89807e491
+cd ../datacenter-twin-capsule-v0.3.0a0
+python -m datacenter_twin simulate --preset generator_failure --format markdown --output outputs/capsule-v030/generator-failure-report.md
+python -m datacenter_twin simulate --preset generator_failure --format html --output outputs/capsule-v030/generator-failure-report.html
+python -c "from pathlib import Path; import hashlib; p=Path('outputs/capsule-v030/generator-failure-report.md'); print(hashlib.sha256(p.read_bytes()).hexdigest())"
+python -c "from pathlib import Path; import hashlib; p=Path('outputs/capsule-v030/generator-failure-report.html'); print(hashlib.sha256(p.read_bytes()).hexdigest())"
+```
+
+The original generated Markdown is 2,595 bytes with SHA-256
+`70159bdd25f39a5cd1c703ed273ef5e3de49c613e345454e188081cf80bc6e2b`;
+HTML is 4,223 bytes with SHA-256
+`77039c122d9d182ed3916c50c1842bbb4c8f79a23422f95f9ca9fa26aed61c3e`.
+Both match the raw report files at that pinned revision. The annotated Markdown
+in the current checkout intentionally has different bytes. A matching digest
+establishes file identity, not independent review or physical accuracy.
 
 The report's input hash is the canonical schema-2 scenario hash. The report
 also records the engine version, assumptions, units, warnings, event timeline,
