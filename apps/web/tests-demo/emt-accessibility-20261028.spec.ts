@@ -208,3 +208,42 @@ test('responsive-20261028 modal study table is accessible and keyboard-scrollabl
     .poll(() => tableRegion.evaluate((element) => element.scrollLeft))
     .toBeGreaterThan(dimensions.scrollLeft);
 });
+
+test('responsive-20261028 EMT and dynamics studies reflow at phone and tablet widths', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const viewports = [
+    { width: 320, height: 740 },
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+  ];
+  const routes = [
+    { path: './?mode=emt', heading: 'Inside a voltage sag' },
+    { path: './?study=load-step', heading: 'A step in demand' },
+  ];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    for (const route of routes) {
+      await page.goto(route.path);
+      await expect(page.getByRole('heading', { name: route.heading })).toBeVisible();
+      const layout = await page.evaluate(() => ({
+        viewportWidth: document.documentElement.clientWidth,
+        documentWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+      }));
+      expect(
+        layout.documentWidth - layout.viewportWidth,
+        `${route.path} at ${viewport.width}px`,
+      ).toBeLessThanOrEqual(1);
+
+      if (route.path.includes('study=')) {
+        const targetHeights = await page
+          .locator('.research-footer a')
+          .evaluateAll((links) => links.map((link) => link.getBoundingClientRect().height));
+        expect(targetHeights).toHaveLength(2);
+        for (const height of targetHeights) expect(height).toBeGreaterThanOrEqual(24);
+      }
+    }
+  }
+});

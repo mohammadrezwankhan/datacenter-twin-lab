@@ -10,6 +10,7 @@ function NodeButton({
   info,
   active,
   onPick,
+  titleId,
   labelId,
   sublabelId,
   descriptionId,
@@ -19,6 +20,7 @@ function NodeButton({
   info: NodeInfo;
   active: boolean;
   onPick: (id: NodeId) => void;
+  titleId: string;
   labelId: string;
   sublabelId: string;
   descriptionId: string;
@@ -36,18 +38,13 @@ function NodeButton({
       role="button"
       tabIndex={0}
       aria-pressed={active}
-      aria-labelledby={`${labelId} ${sublabelId}`}
+      aria-labelledby={`${titleId} ${labelId} ${sublabelId}`}
       aria-describedby={descriptionId}
       onClick={() => onPick(id)}
       onKeyDown={onKeyDown}
       style={{ '--node-color': info.color } as React.CSSProperties}
     >
-      <title>
-        {info.title} · {info.note}
-      </title>
-      <desc id={descriptionId}>
-        {info.title}. {info.note}
-      </desc>
+      <title id={titleId}>{info.title}</title>
       {children}
     </g>
   );
@@ -201,6 +198,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
     labelId: `${diagramId}-${id}-label`,
     sublabelId: `${diagramId}-${id}-sublabel`,
   });
+  const nodeTitleId = (id: NodeId) => `${diagramId}-${id}-title`;
   const nodeDescriptionId = (id: NodeId) => `${diagramId}-${id}-description`;
   const network = study.id === 'grid-network';
   const infos: Record<NodeId, NodeInfo> = network
@@ -247,6 +245,9 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
         ...casePortInfo,
       };
   const active = infos[selected];
+  const renderedNodeIds: NodeId[] = network
+    ? ['grid', 'sm', 'gfm', 'gfl', 'dc', 'load']
+    : ['grid', 'converter', 'link', 'load'];
   const labels =
     study.id === 'model-comparison'
       ? { converter: 'FULL + REDUCED', subtitle: '41 / 21 STATE' }
@@ -301,6 +302,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               className="research-cable-highlight"
             />
             <NodeButton
+              titleId={nodeTitleId('grid')}
               {...nodeLabelIds('grid')}
               descriptionId={nodeDescriptionId('grid')}
               id="grid"
@@ -322,6 +324,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               />
             </NodeButton>
             <NodeButton
+              titleId={nodeTitleId('converter')}
               {...nodeLabelIds('converter')}
               descriptionId={nodeDescriptionId('converter')}
               id="converter"
@@ -349,6 +352,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               />
             </NodeButton>
             <NodeButton
+              titleId={nodeTitleId('link')}
               {...nodeLabelIds('link')}
               descriptionId={nodeDescriptionId('link')}
               id="link"
@@ -371,6 +375,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               <path d="M580 247V273M603 240V266M626 247V273" stroke="#c6b2ff" strokeWidth="3" />
             </NodeButton>
             <NodeButton
+              titleId={nodeTitleId('load')}
               {...nodeLabelIds('load')}
               descriptionId={nodeDescriptionId('load')}
               id="load"
@@ -409,6 +414,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               className="research-cable-highlight"
             />
             <NodeButton
+              titleId={nodeTitleId('grid')}
               {...nodeLabelIds('grid')}
               descriptionId={nodeDescriptionId('grid')}
               id="grid"
@@ -449,6 +455,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
                     strokeWidth="2"
                   />
                   <NodeButton
+                    titleId={nodeTitleId(id)}
                     {...nodeLabelIds(id)}
                     descriptionId={nodeDescriptionId(id)}
                     id={id}
@@ -480,6 +487,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               );
             })}
             <NodeButton
+              titleId={nodeTitleId('load')}
               {...nodeLabelIds('load')}
               descriptionId={nodeDescriptionId('load')}
               id="load"
@@ -506,6 +514,13 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
           CONCEPTUAL TOPOLOGY · NOT TO SCALE · MODEL BOUNDARY IS STUDY-SPECIFIC
         </text>
       </svg>
+      <div className="research-diagram-descriptions">
+        {renderedNodeIds.map((id) => (
+          <span key={id} className="research-sr-only" id={nodeDescriptionId(id)} aria-hidden="true">
+            {infos[id].note}
+          </span>
+        ))}
+      </div>
       <div className="research-diagram-inspector" aria-live="polite">
         <i style={{ background: active.color }} />
         <div>

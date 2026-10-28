@@ -28,6 +28,7 @@ function DeviceButton({
   id,
   selected,
   onSelect,
+  titleId,
   labelId,
   valueId,
   descriptionId,
@@ -36,27 +37,24 @@ function DeviceButton({
   id: DeviceId;
   selected: boolean;
   onSelect: (id: DeviceId) => void;
+  titleId: string;
   labelId: string;
   valueId: string;
   descriptionId: string;
   children: ReactNode;
 }) {
-  const device = devices[id];
   return (
     <g
       className={'emt-device emt-device-' + id + (selected ? ' is-selected' : '')}
       role="button"
       tabIndex={0}
       aria-pressed={selected}
-      aria-labelledby={`${labelId} ${valueId}`}
+      aria-labelledby={`${titleId} ${labelId} ${valueId}`}
       aria-describedby={descriptionId}
       onClick={() => onSelect(id)}
       onKeyDown={(event) => selectOnKey(event, id, onSelect)}
     >
-      <title>
-        {device.title} · {device.role}
-      </title>
-      <desc id={descriptionId}>{device.role}. Select for details.</desc>
+      <title id={titleId}>{devices[id].title}</title>
       {children}
     </g>
   );
@@ -239,6 +237,7 @@ export function EmtScene({
           id="source"
           selected={selected === 'source'}
           onSelect={onSelect}
+          titleId={`${sceneId}-source-title`}
           labelId={`${sceneId}-source-label`}
           valueId={`${sceneId}-source-value`}
           descriptionId={`${sceneId}-source-description`}
@@ -281,6 +280,7 @@ export function EmtScene({
           id="reactor"
           selected={selected === 'reactor'}
           onSelect={onSelect}
+          titleId={`${sceneId}-reactor-title`}
           labelId={`${sceneId}-reactor-label`}
           valueId={`${sceneId}-reactor-value`}
           descriptionId={`${sceneId}-reactor-description`}
@@ -324,6 +324,7 @@ export function EmtScene({
           id="bus"
           selected={selected === 'bus'}
           onSelect={onSelect}
+          titleId={`${sceneId}-bus-title`}
           labelId={`${sceneId}-bus-label`}
           valueId={`${sceneId}-bus-value`}
           descriptionId={`${sceneId}-bus-description`}
@@ -375,6 +376,7 @@ export function EmtScene({
           id="capacitor"
           selected={selected === 'capacitor'}
           onSelect={onSelect}
+          titleId={`${sceneId}-capacitor-title`}
           labelId={`${sceneId}-capacitor-label`}
           valueId={`${sceneId}-capacitor-value`}
           descriptionId={`${sceneId}-capacitor-description`}
@@ -414,6 +416,7 @@ export function EmtScene({
           id="load"
           selected={selected === 'load'}
           onSelect={onSelect}
+          titleId={`${sceneId}-load-title`}
           labelId={`${sceneId}-load-label`}
           valueId={`${sceneId}-load-value`}
           descriptionId={`${sceneId}-load-description`}
@@ -475,6 +478,18 @@ export function EmtScene({
           IDEAL DC EQUIVALENT · LINEAR RLC NETWORK · NOT SWITCHING DETAIL
         </text>
       </svg>
+      <div className="emt-scene-descriptions">
+        {(Object.keys(devices) as DeviceId[]).map((id) => (
+          <span
+            key={id}
+            className="emt-sr-only"
+            id={`${sceneId}-${id}-description`}
+            aria-hidden="true"
+          >
+            {devices[id].role}. Select for details.
+          </span>
+        ))}
+      </div>
       <div
         className="emt-scene-reference-status"
         role="group"
