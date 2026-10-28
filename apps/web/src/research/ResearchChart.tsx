@@ -137,7 +137,7 @@ export function ResearchChart({
           {valid ? count + ' samples' : 'No finite samples'}
         </span>
       </div>
-      <div className="research-chart-legend" aria-label="Chart legend">
+      <div className="research-chart-legend" role="group" aria-label="Chart legend">
         {chart.lines.map((line, lineIndex) => (
           <span key={line.label}>
             <i style={{ background: line.color || colors[lineIndex % colors.length] }} />
@@ -276,13 +276,14 @@ export function ResearchChart({
                 onFocus={onFocus}
                 onChange={(event) => onPointChange(Number(event.target.value))}
               />
-              <strong aria-label="Selected sample timestamp">
+              <strong>
                 {chart.x_label}: {fmt(xValue, 7)}
               </strong>
             </div>
           )}
           <div
             className="research-chart-values"
+            role="group"
             aria-label="Selected sample values"
             aria-live="polite"
           >
@@ -307,7 +308,12 @@ export function ResearchChart({
             <summary>
               Data table <span>{count} x/y samples · full data in CSV</span>
             </summary>
-            <div className="research-table-scroll">
+            <div
+              className="research-table-scroll"
+              role="region"
+              aria-label={`${chart.title} data table`}
+              tabIndex={0}
+            >
               <table>
                 <thead>
                   <tr>

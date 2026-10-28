@@ -663,7 +663,12 @@ export function EmtStudy() {
             Open sampled values{' '}
             <span>{minuteSampledRows.length} displayed rows · 100 µs underlying output</span>
           </summary>
-          <div className="emt-table-scroll">
+          <div
+            className="emt-table-scroll"
+            role="region"
+            aria-label="Sampled transient values"
+            tabIndex={0}
+          >
             <table>
               <thead>
                 <tr>

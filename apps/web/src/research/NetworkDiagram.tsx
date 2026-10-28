@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import type { ResearchStudy } from './types';
 
@@ -10,12 +10,18 @@ function NodeButton({
   info,
   active,
   onPick,
+  labelId,
+  sublabelId,
+  descriptionId,
   children,
 }: {
   id: NodeId;
   info: NodeInfo;
   active: boolean;
   onPick: (id: NodeId) => void;
+  labelId: string;
+  sublabelId: string;
+  descriptionId: string;
   children: ReactNode;
 }) {
   const onKeyDown = (event: KeyboardEvent<SVGGElement>) => {
@@ -30,7 +36,8 @@ function NodeButton({
       role="button"
       tabIndex={0}
       aria-pressed={active}
-      aria-label={info.title + '. ' + info.note}
+      aria-labelledby={`${labelId} ${sublabelId}`}
+      aria-describedby={descriptionId}
       onClick={() => onPick(id)}
       onKeyDown={onKeyDown}
       style={{ '--node-color': info.color } as React.CSSProperties}
@@ -38,6 +45,9 @@ function NodeButton({
       <title>
         {info.title} · {info.note}
       </title>
+      <desc id={descriptionId}>
+        {info.title}. {info.note}
+      </desc>
       {children}
     </g>
   );
@@ -75,6 +85,8 @@ function IsoBlock({
   color,
   label,
   sublabel,
+  labelId,
+  sublabelId,
 }: {
   x: number;
   y: number;
@@ -84,6 +96,8 @@ function IsoBlock({
   color: string;
   label: string;
   sublabel: string;
+  labelId: string;
+  sublabelId: string;
 }) {
   const shift = depth * 0.55;
   return (
@@ -157,6 +171,7 @@ function IsoBlock({
         strokeOpacity=".65"
       />
       <text
+        id={labelId}
         x={x + width / 2}
         y={y + shift * 2 + height / 2 - 1}
         textAnchor="middle"
@@ -165,6 +180,7 @@ function IsoBlock({
         {label}
       </text>
       <text
+        id={sublabelId}
         x={x + width / 2}
         y={y + shift * 2 + height / 2 + 14}
         textAnchor="middle"
@@ -180,6 +196,12 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
   const [selected, setSelected] = useState<NodeId>(
     study.id === 'grid-network' ? 'gfm' : 'converter',
   );
+  const diagramId = useId();
+  const nodeLabelIds = (id: NodeId) => ({
+    labelId: `${diagramId}-${id}-label`,
+    sublabelId: `${diagramId}-${id}-sublabel`,
+  });
+  const nodeDescriptionId = (id: NodeId) => `${diagramId}-${id}-description`;
   const network = study.id === 'grid-network';
   const infos: Record<NodeId, NodeInfo> = network
     ? {
@@ -279,6 +301,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               className="research-cable-highlight"
             />
             <NodeButton
+              {...nodeLabelIds('grid')}
+              descriptionId={nodeDescriptionId('grid')}
               id="grid"
               info={infos.grid}
               active={selected === 'grid'}
@@ -286,6 +310,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             >
               <rect x="69" y="133" width="172" height="154" rx="10" className="research-hit" />
               <IsoBlock
+                {...nodeLabelIds('grid')}
                 x={90}
                 y={160}
                 width={105}
@@ -297,6 +322,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               />
             </NodeButton>
             <NodeButton
+              {...nodeLabelIds('converter')}
+              descriptionId={nodeDescriptionId('converter')}
               id="converter"
               info={infos.converter}
               active={selected === 'converter'}
@@ -304,6 +331,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             >
               <rect x="277" y="112" width="229" height="173" rx="12" className="research-hit" />
               <IsoBlock
+                {...nodeLabelIds('converter')}
                 x={321}
                 y={153}
                 width={135}
@@ -321,6 +349,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               />
             </NodeButton>
             <NodeButton
+              {...nodeLabelIds('link')}
+              descriptionId={nodeDescriptionId('link')}
               id="link"
               info={infos.link}
               active={selected === 'link'}
@@ -328,6 +358,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             >
               <rect x="524" y="124" width="179" height="173" rx="11" className="research-hit" />
               <IsoBlock
+                {...nodeLabelIds('link')}
                 x={560}
                 y={168}
                 width={91}
@@ -340,6 +371,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               <path d="M580 247V273M603 240V266M626 247V273" stroke="#c6b2ff" strokeWidth="3" />
             </NodeButton>
             <NodeButton
+              {...nodeLabelIds('load')}
+              descriptionId={nodeDescriptionId('load')}
               id="load"
               info={infos.load}
               active={selected === 'load'}
@@ -347,6 +380,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             >
               <rect x="747" y="119" width="194" height="181" rx="12" className="research-hit" />
               <IsoBlock
+                {...nodeLabelIds('load')}
                 x={790}
                 y={159}
                 width={100}
@@ -375,6 +409,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               className="research-cable-highlight"
             />
             <NodeButton
+              {...nodeLabelIds('grid')}
+              descriptionId={nodeDescriptionId('grid')}
               id="grid"
               info={infos.grid}
               active={selected === 'grid'}
@@ -382,6 +418,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             >
               <rect x="44" y="130" width="189" height="177" rx="11" className="research-hit" />
               <IsoBlock
+                {...nodeLabelIds('grid')}
                 x={79}
                 y={168}
                 width={103}
@@ -412,6 +449,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
                     strokeWidth="2"
                   />
                   <NodeButton
+                    {...nodeLabelIds(id)}
+                    descriptionId={nodeDescriptionId(id)}
                     id={id}
                     info={infos[id]}
                     active={selected === id}
@@ -426,6 +465,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
                       className="research-hit"
                     />
                     <IsoBlock
+                      {...nodeLabelIds(id)}
                       x={300}
                       y={y + 5}
                       width={159}
@@ -440,6 +480,8 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               );
             })}
             <NodeButton
+              {...nodeLabelIds('load')}
+              descriptionId={nodeDescriptionId('load')}
               id="load"
               info={infos.load}
               active={selected === 'load'}
@@ -447,6 +489,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             >
               <rect x="774" y="124" width="183" height="172" rx="11" className="research-hit" />
               <IsoBlock
+                {...nodeLabelIds('load')}
                 x={809}
                 y={165}
                 width={104}

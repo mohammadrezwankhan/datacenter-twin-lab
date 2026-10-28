@@ -204,7 +204,12 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
         <summary>
           Mode table <span>{validModes.length} eigenvalues · select a row to focus its marker</span>
         </summary>
-        <div className="research-table-scroll">
+        <div
+          className="research-table-scroll"
+          role="region"
+          aria-label="Eigenvalue mode data table"
+          tabIndex={0}
+        >
           <table>
             <thead>
               <tr>

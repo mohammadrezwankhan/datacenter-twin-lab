@@ -60,6 +60,31 @@ test('responsive-20261028 infrastructure track heading stays inside its panel at
         boxLeft: box.left,
         boxRight: box.right,
         fontSize: getComputedStyle(element).fontSize,
+        // Keep platform-specific failures actionable without relaxing reflow checks.
+        overflowCandidates: Array.from(document.querySelectorAll<HTMLElement>('body *'))
+          .filter((node) => node instanceof HTMLElement && node.checkVisibility())
+          .flatMap((node) => {
+            const rect = node.getBoundingClientRect();
+            const range = document.createRange();
+            range.selectNodeContents(node);
+            const content = range.getBoundingClientRect();
+            if (rect.right <= 321 && content.right <= 321) return [];
+            const style = getComputedStyle(node);
+            return [
+              {
+                tag: node.tagName,
+                className: node.className,
+                text: node.textContent?.trim().slice(0, 120),
+                left: rect.left,
+                right: rect.right,
+                contentRight: content.right,
+                width: rect.width,
+                font: style.font,
+                overflow: style.overflowX,
+                parent: node.parentElement?.className,
+              },
+            ];
+          }),
       };
     });
     await testInfo.attach('responsive-20261028-infrastructure-track-heading.json', {

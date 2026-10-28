@@ -39,7 +39,8 @@
 .emt-study select:focus-visible,
 .emt-study a:focus-visible,
 .emt-study summary:focus-visible,
-.emt-device:focus-visible {
+.emt-device:focus-visible,
+.emt-table-scroll:focus-visible {
   outline: 2px solid #84e4ee;
   outline-offset: 3px;
 }

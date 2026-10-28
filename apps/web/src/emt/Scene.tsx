@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import type { EmtConfig, EmtRow } from './engine';
 import { getEmtReferenceStatus } from './visuals';
@@ -27,11 +28,17 @@ function DeviceButton({
   id,
   selected,
   onSelect,
+  labelId,
+  valueId,
+  descriptionId,
   children,
 }: {
   id: DeviceId;
   selected: boolean;
   onSelect: (id: DeviceId) => void;
+  labelId: string;
+  valueId: string;
+  descriptionId: string;
   children: ReactNode;
 }) {
   const device = devices[id];
@@ -41,13 +48,15 @@ function DeviceButton({
       role="button"
       tabIndex={0}
       aria-pressed={selected}
-      aria-label={device.title + '. ' + device.role + '. Select for details.'}
+      aria-labelledby={`${labelId} ${valueId}`}
+      aria-describedby={descriptionId}
       onClick={() => onSelect(id)}
       onKeyDown={(event) => selectOnKey(event, id, onSelect)}
     >
       <title>
         {device.title} · {device.role}
       </title>
+      <desc id={descriptionId}>{device.role}. Select for details.</desc>
       {children}
     </g>
   );
@@ -68,6 +77,7 @@ export function EmtScene({
   selected: DeviceId;
   onSelect: (id: DeviceId) => void;
 }) {
+  const sceneId = useId();
   const referenceStatus = getEmtReferenceStatus(config, row);
   const currentFraction = peakCurrentA > 0 ? Math.min(1, Math.abs(row.source_a) / peakCurrentA) : 0;
   const loadFraction = peakCurrentA > 0 ? Math.min(1, Math.abs(row.load_a) / peakCurrentA) : 0;
@@ -225,7 +235,14 @@ export function EmtScene({
           />
         </g>
 
-        <DeviceButton id="source" selected={selected === 'source'} onSelect={onSelect}>
+        <DeviceButton
+          id="source"
+          selected={selected === 'source'}
+          onSelect={onSelect}
+          labelId={`${sceneId}-source-label`}
+          valueId={`${sceneId}-source-value`}
+          descriptionId={`${sceneId}-source-description`}
+        >
           <rect x="105" y="186" width="150" height="116" rx="10" className="emt-hit" />
           <path
             d="M128 225 186 202 237 219 179 242Z"
@@ -240,15 +257,34 @@ export function EmtScene({
             opacity={0.35 + (row.source_v / config.source_v) * 0.55}
           />
           <rect x="132" y="310" width="106" height="34" rx="6" className="emt-label-plate" />
-          <text x="185" y="324" textAnchor="middle" className="emt-label">
+          <text
+            id={`${sceneId}-source-label`}
+            x="185"
+            y="324"
+            textAnchor="middle"
+            className="emt-label"
+          >
             DC SOURCE
           </text>
-          <text x="185" y="337" textAnchor="middle" className="emt-value">
+          <text
+            id={`${sceneId}-source-value`}
+            x="185"
+            y="337"
+            textAnchor="middle"
+            className="emt-value"
+          >
             {Math.round(row.source_v)} V
           </text>
         </DeviceButton>
 
-        <DeviceButton id="reactor" selected={selected === 'reactor'} onSelect={onSelect}>
+        <DeviceButton
+          id="reactor"
+          selected={selected === 'reactor'}
+          onSelect={onSelect}
+          labelId={`${sceneId}-reactor-label`}
+          valueId={`${sceneId}-reactor-value`}
+          descriptionId={`${sceneId}-reactor-description`}
+        >
           <rect x="283" y="149" width="180" height="140" rx="12" className="emt-hit" />
           <path d="M311 199 365 178 427 198 372 219Z" fill="#473e66" stroke="#a88aff" />
           <path d="M311 199 372 219V272L311 250Z" fill="url(#emt-violet)" stroke="#8170b0" />
@@ -264,15 +300,34 @@ export function EmtScene({
             />
           ))}
           <rect x="317" y="280" width="113" height="34" rx="6" className="emt-label-plate" />
-          <text x="373" y="294" textAnchor="middle" className="emt-label">
+          <text
+            id={`${sceneId}-reactor-label`}
+            x="373"
+            y="294"
+            textAnchor="middle"
+            className="emt-label"
+          >
             SERIES REACTOR
           </text>
-          <text x="373" y="307" textAnchor="middle" className="emt-value">
+          <text
+            id={`${sceneId}-reactor-value`}
+            x="373"
+            y="307"
+            textAnchor="middle"
+            className="emt-value"
+          >
             {config.inductance_mh} mH
           </text>
         </DeviceButton>
 
-        <DeviceButton id="bus" selected={selected === 'bus'} onSelect={onSelect}>
+        <DeviceButton
+          id="bus"
+          selected={selected === 'bus'}
+          onSelect={onSelect}
+          labelId={`${sceneId}-bus-label`}
+          valueId={`${sceneId}-bus-value`}
+          descriptionId={`${sceneId}-bus-description`}
+        >
           <rect x="445" y="151" width="149" height="147" rx="12" className="emt-hit" />
           <path d="M467 202 518 182 572 201 520 221Z" fill="#633e59" stroke="#f0788f" />
           <path d="M467 202 520 221V274L467 255Z" fill="#4a2f43" stroke="#b65472" />
@@ -296,15 +351,34 @@ export function EmtScene({
             opacity=".52"
           />
           <rect x="467" y="282" width="105" height="34" rx="6" className="emt-label-plate" />
-          <text x="519" y="296" textAnchor="middle" className="emt-label">
+          <text
+            id={`${sceneId}-bus-label`}
+            x="519"
+            y="296"
+            textAnchor="middle"
+            className="emt-label"
+          >
             DC BUS
           </text>
-          <text x="519" y="309" textAnchor="middle" className="emt-value">
+          <text
+            id={`${sceneId}-bus-value`}
+            x="519"
+            y="309"
+            textAnchor="middle"
+            className="emt-value"
+          >
             {Math.round(row.bus_v)} V
           </text>
         </DeviceButton>
 
-        <DeviceButton id="capacitor" selected={selected === 'capacitor'} onSelect={onSelect}>
+        <DeviceButton
+          id="capacitor"
+          selected={selected === 'capacitor'}
+          onSelect={onSelect}
+          labelId={`${sceneId}-capacitor-label`}
+          valueId={`${sceneId}-capacitor-value`}
+          descriptionId={`${sceneId}-capacitor-description`}
+        >
           <rect x="561" y="293" width="143" height="105" rx="12" className="emt-hit" />
           <path d="M579 321 618 306 657 320 618 336Z" fill="#44375f" stroke="#a88aff" />
           <path d="M579 321 618 336V375L579 359Z" fill="url(#emt-violet)" stroke="#8973bc" />
@@ -316,15 +390,34 @@ export function EmtScene({
           />
           <path d="M626 353V382M640 347V378" stroke="#d4c5ff" strokeWidth="2.5" />
           <rect x="566" y="382" width="126" height="29" rx="6" className="emt-label-plate" />
-          <text x="629" y="394" textAnchor="middle" className="emt-label">
+          <text
+            id={`${sceneId}-capacitor-label`}
+            x="629"
+            y="394"
+            textAnchor="middle"
+            className="emt-label"
+          >
             DC-LINK CAPACITOR
           </text>
-          <text x="629" y="405" textAnchor="middle" className="emt-value">
+          <text
+            id={`${sceneId}-capacitor-value`}
+            x="629"
+            y="405"
+            textAnchor="middle"
+            className="emt-value"
+          >
             {config.capacitance_mf} mF
           </text>
         </DeviceButton>
 
-        <DeviceButton id="load" selected={selected === 'load'} onSelect={onSelect}>
+        <DeviceButton
+          id="load"
+          selected={selected === 'load'}
+          onSelect={onSelect}
+          labelId={`${sceneId}-load-label`}
+          valueId={`${sceneId}-load-value`}
+          descriptionId={`${sceneId}-load-description`}
+        >
           <rect x="650" y="158" width="200" height="178" rx="12" className="emt-hit" />
           <path d="M686 196 749 171 817 194 753 220Z" fill="#67513a" stroke="#f1b451" />
           <path d="M686 196 753 220V292L686 265Z" fill="url(#emt-amber)" stroke="#ad8147" />
@@ -342,10 +435,22 @@ export function EmtScene({
             strokeWidth="3"
           />
           <rect x="694" y="300" width="116" height="34" rx="6" className="emt-label-plate" />
-          <text x="752" y="314" textAnchor="middle" className="emt-label">
+          <text
+            id={`${sceneId}-load-label`}
+            x="752"
+            y="314"
+            textAnchor="middle"
+            className="emt-label"
+          >
             RESISTIVE LOAD
           </text>
-          <text x="752" y="327" textAnchor="middle" className="emt-value">
+          <text
+            id={`${sceneId}-load-value`}
+            x="752"
+            y="327"
+            textAnchor="middle"
+            className="emt-value"
+          >
             {row.load_a.toFixed(1)} A
           </text>
         </DeviceButton>
