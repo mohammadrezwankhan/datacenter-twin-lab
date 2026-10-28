@@ -25,6 +25,7 @@ import {
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const title = 'Datacenter Power Systems: Free Interactive Course | Datacenter Twin Lab';
 const description = `Learn datacenter continuity and Infrastructure Engineering with ${courseTotal} free browser lessons, EMT and power-dynamics studies. Inspect assumptions, run educational screens and reproduce the evidence.`;
+const catalogDescription = `Browse all ${courseTotal} free datacenter power lessons with worked assumptions, examples and source records. Search by topic, choose a learning path, and continue into EMT and power-dynamics studies.`;
 const courseName = 'Power Systems for Datacenter Engineers';
 const authorId = 'https://mrkhan.co.technology/#person';
 const authorUrl = 'https://mrkhan.co.technology/';
@@ -294,7 +295,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
         'learn/index.html',
         document(
           courseName + ' | Free Course Notes',
-          description,
+          catalogDescription,
           'learn/',
           `
 <p class="eyebrow">The power playbook / ${courseTotal} practical lessons</p><h1>${courseName}</h1>
@@ -666,9 +667,9 @@ python scripts/build_evidence.py --verify outputs/reproduction-${ENGINE_VERSION}
       emit(ownershipFile, ownershipKey.trim());
       emit(
         '404.html',
-        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>Page not found | Datacenter Twin Lab</title></head><body><h1>Page not found</h1><p>The requested page is unavailable.</p><p><a href="' +
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Page not found | Datacenter Twin Lab</title><style>:root{color-scheme:light}*{box-sizing:border-box}body{min-height:100vh;min-height:100svh;margin:0;padding:clamp(1rem,5vw,3rem);display:grid;place-items:center;background:#f6f9f8;color:#173041;font:1rem/1.6 system-ui,sans-serif}main{width:min(100%,42rem);padding:clamp(1.25rem,4vw,2rem);border:1px solid #cadbd7;border-radius:.8rem;background:#fff}h1{line-height:1.15;overflow-wrap:anywhere}a{display:inline-flex;min-height:2.75rem;align-items:center;padding:.65rem 1rem;border-radius:.45rem;background:#0b655d;color:#fff;text-decoration:none;overflow-wrap:anywhere}a:hover{background:#064c46}a:focus-visible{outline:3px solid #a44806;outline-offset:3px}</style></head><body><main><h1>Page not found</h1><p>The requested page is unavailable.</p><p><a href="' +
           escape(base) +
-          '">Open Datacenter Twin Lab</a></p></body></html>',
+          '">Return to the Datacenter Twin Lab home page</a></p></main></body></html>',
       );
     },
     writeBundle(options, bundle) {

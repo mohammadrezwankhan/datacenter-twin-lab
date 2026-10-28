@@ -10,6 +10,8 @@ import { PowerScene } from './PowerScene';
 // Load the first-visit guide with the shell so a lazy placeholder cannot move the footer.
 import { GuidedStart } from './GuidedStart';
 import { EngineeringHero } from './EngineeringHero';
+// Keep the small track outline in the shell so loading a study cannot move it later.
+import { CurriculumTracks } from './CurriculumTracks';
 import {
   FacilitySelector,
   RunInsight,
@@ -32,9 +34,6 @@ const ResearchStudio = lazy(() =>
 const EmtStudy = lazy(() => import('./emt/Study').then((module) => ({ default: module.EmtStudy })));
 const Course = lazy(() =>
   import('./CourseRouter').then((module) => ({ default: module.CourseRouter })),
-);
-const CurriculumTracks = lazy(() =>
-  import('./CurriculumTracks').then((module) => ({ default: module.CurriculumTracks })),
 );
 const EvidenceHub = lazy(() =>
   import('./EvidenceHub').then((module) => ({ default: module.EvidenceHub })),
@@ -683,9 +682,7 @@ export function App() {
         </header>
         <main id="workspace-main" tabIndex={-1}>
           {browserDemo && (page === 'emt' || page === 'studies') && (
-            <Suspense fallback={null}>
-              <CurriculumTracks activeTrack="power-dynamics" />
-            </Suspense>
+            <CurriculumTracks activeTrack="power-dynamics" />
           )}
           {page !== 'emt' && page !== 'studies' && (
             <div className="page-heading">
@@ -806,7 +803,13 @@ export function App() {
             </Suspense>
           )}
           {page === 'emt' && (
-            <Suspense fallback={<p role="status">Opening the transient study…</p>}>
+            <Suspense
+              fallback={
+                <div className="emt-study-loading" role="status">
+                  Opening the transient study…
+                </div>
+              }
+            >
               <EmtStudy />
             </Suspense>
           )}

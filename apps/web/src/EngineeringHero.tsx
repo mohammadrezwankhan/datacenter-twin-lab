@@ -1,4 +1,6 @@
-import { createElement, useEffect, useState } from 'react';
+import { createElement, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import './engineering-hero.css';
 
 const assetRoot = `${import.meta.env.BASE_URL}assets/engineering-hero/v1/`;
 const adapterPath = `${assetRoot}integration/vanilla/khan-grid-hero.js`;
@@ -62,6 +64,8 @@ function loadAdapter(): Promise<void> {
 
 export function EngineeringHero() {
   const [adapterReady, setAdapterReady] = useState(false);
+  const [adapterStylesReady, setAdapterStylesReady] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -79,45 +83,76 @@ export function EngineeringHero() {
     };
   }, []);
 
+  // Keep the poster fallback visible until the custom element's own visual rules are ready.
+  useEffect(() => {
+    if (!adapterReady) return;
+    const stylesheet = stageRef.current
+      ?.querySelector<HTMLElement>('khan-grid-hero')
+      ?.shadowRoot?.querySelector<HTMLLinkElement>('link[rel="stylesheet"]');
+    if (!stylesheet) return;
+
+    const isLoaded = () => {
+      try {
+        return Boolean(stylesheet.sheet?.cssRules.length);
+      } catch {
+        return false;
+      }
+    };
+    if (isLoaded()) {
+      setAdapterStylesReady(true);
+      return;
+    }
+
+    const onLoad = () => setAdapterStylesReady(true);
+    stylesheet.addEventListener('load', onLoad, { once: true });
+    return () => stylesheet.removeEventListener('load', onLoad);
+  }, [adapterReady]);
+
+  const enhancedReady = adapterReady && adapterStylesReady;
+  const adapterPosition: CSSProperties = enhancedReady
+    ? { display: 'block', width: '100%' }
+    : {
+        display: 'block',
+        width: '100%',
+        position: 'absolute',
+        inset: 0,
+        visibility: 'hidden',
+      };
+
   return (
     <section
       className="engineering-hero"
       data-testid="engineering-hero"
       aria-label="Engineering film"
     >
-      <div
-        className="engineering-hero-frame"
-        style={
-          adapterReady
-            ? undefined
-            : { aspectRatio: '16 / 9', position: 'relative', overflow: 'hidden' }
-        }
-      >
-        {adapterReady ? (
+      <div className="engineering-hero-stage" ref={stageRef}>
+        {adapterReady &&
           createElement('khan-grid-hero', {
             site: 'khanlab',
             mode: 'video',
             'video-src': `${assetRoot}hero-1080p60.mp4`,
             'poster-src': `${assetRoot}poster.png`,
             'hide-cta': '',
-            style: { display: 'block', width: '100%' },
-          })
-        ) : (
-          <img
-            className="engineering-hero-fallback"
-            src={`${assetRoot}poster.png`}
-            alt="A frame from an illustrative electro-thermal, evidence, workspace, and hybrid-energy engineering animation."
-            width={1920}
-            height={1080}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'block',
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
+            style: adapterPosition,
+          })}
+        {!enhancedReady && (
+          <div className="engineering-hero-fallback-content">
+            <div className="engineering-hero-frame">
+              <img
+                className="engineering-hero-fallback"
+                src={`${assetRoot}poster.png`}
+                alt="A frame from an illustrative electro-thermal, evidence, workspace, and hybrid-energy engineering animation."
+                width={1920}
+                height={1080}
+              />
+            </div>
+            <div className="engineering-hero-copy">
+              <p>
+                Physics → executable models → evidence → energy systems. Illustrative telemetry; not
+                live data, certified acceptance, plant control, or investment advice.
+              </p>
+            </div>
+          </div>
         )}
       </div>
       <p className="engineering-hero-summary">

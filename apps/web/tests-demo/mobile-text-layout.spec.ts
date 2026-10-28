@@ -31,6 +31,49 @@ test('infrastructure lesson labels wrap at 320px with enlarged text', async ({
   }
 });
 
+test('responsive-20261028 infrastructure track heading stays inside its panel at 200% text', async ({
+  browser,
+}, testInfo) => {
+  const context = await browser.newContext({
+    viewport: { width: 320, height: 844 },
+    hasTouch: true,
+    isMobile: true,
+    reducedMotion: 'reduce',
+  });
+  const page = await context.newPage();
+  try {
+    await page.goto(`${testInfo.project.use.baseURL}?lesson=evidence-load-ledger`);
+    const heading = page.locator('.curriculum-track-panel-copy h3');
+    await expect(heading).toHaveText('Infrastructure Engineering');
+    await page.addStyleTag({ content: 'html { font-size: 200%; }' });
+    await heading.scrollIntoViewIfNeeded();
+    const bounds = await heading.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const text = range.getBoundingClientRect();
+      return {
+        viewportWidth: document.documentElement.clientWidth,
+        documentWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+        textLeft: text.left,
+        textRight: text.right,
+        boxLeft: box.left,
+        boxRight: box.right,
+        fontSize: getComputedStyle(element).fontSize,
+      };
+    });
+    await testInfo.attach('responsive-20261028-infrastructure-track-heading.json', {
+      body: Buffer.from(JSON.stringify(bounds, null, 2)),
+      contentType: 'application/json',
+    });
+    expect(bounds.documentWidth).toBeLessThanOrEqual(bounds.viewportWidth + 1);
+    expect(bounds.textLeft).toBeGreaterThanOrEqual(bounds.boxLeft - 2);
+    expect(bounds.textRight).toBeLessThanOrEqual(bounds.boxRight + 2);
+  } finally {
+    await context.close();
+  }
+});
+
 for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
   test(`touch navigation keeps labels inside separate buttons at ${width}px`, async ({
     browser,

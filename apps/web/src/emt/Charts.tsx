@@ -1,15 +1,10 @@
 import { useRef, type PointerEvent } from 'react';
 import type { EmtConfig, EmtResult } from './engine';
 import { svgViewBoxPoint } from '../chartPointer';
+import { emtNumberText as numberText } from './format';
 import { sourceStepPath } from './visuals';
 
 type Series = { name: string; color: string; values: number[]; heldStep?: boolean };
-
-const numberText = (value: number, digits = 0) =>
-  new Intl.NumberFormat('en', {
-    maximumFractionDigits: digits,
-    minimumFractionDigits: digits,
-  }).format(value);
 
 function LineChart({
   title,

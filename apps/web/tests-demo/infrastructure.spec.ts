@@ -16,6 +16,8 @@ import { fuelEvidence, fuelInputs } from '../src/infrastructure/fuel';
 
 const sha256 = (value: unknown) =>
   createHash('sha256').update(canonicalJson(value), 'utf8').digest('hex');
+const SCREEN_REL_TOL = 1e-11;
+const SCREEN_ABS_TOL = 1e-10;
 const titleFor = (key: string) =>
   key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (character) => character.toUpperCase());
 const equationCheck: Record<string, string> = {
@@ -46,6 +48,34 @@ const inputLabel = (model: ModelName, key: string) => {
   const unit = screenUnits(model).inputs[key];
   return `${titleFor(key)}${unit ? ` (${unit})` : ''}`;
 };
+
+// Match verify_infrastructure.py's numeric tolerances; keep discrete outputs exact.
+function assertScreenOutputsMatchAcrossRuntimes(actual: ScreenOutputs, expected: ScreenOutputs) {
+  expect(Object.keys(actual).sort()).toEqual(Object.keys(expected).sort());
+  for (const key of Object.keys(expected)) {
+    const actualValue = actual[key];
+    const expectedValue = expected[key];
+    if (typeof expectedValue === 'number') {
+      expect(typeof actualValue).toBe('number');
+      const actualNumber = actualValue as number;
+      expect(Number.isFinite(actualNumber)).toBe(true);
+      if (Number.isInteger(expectedValue)) {
+        expect(actualNumber).toBe(expectedValue);
+        continue;
+      }
+      const tolerance = Math.max(
+        SCREEN_ABS_TOL,
+        SCREEN_REL_TOL * Math.max(Math.abs(actualNumber), Math.abs(expectedValue)),
+      );
+      expect(
+        Math.abs(actualNumber - expectedValue),
+        `${key} should match across runtimes within rel=${SCREEN_REL_TOL} / abs=${SCREEN_ABS_TOL}`,
+      ).toBeLessThanOrEqual(tolerance);
+      continue;
+    }
+    expect(actualValue).toEqual(expectedValue);
+  }
+}
 
 async function exportCompleted(page: Page) {
   const pending = page.waitForEvent('download');
@@ -94,7 +124,7 @@ function assertRawResult(
   expect(result.contentVersion).toBe(lesson.contentVersion);
   expect(result.modelVersion).toBe('1.0.0');
   expect(result.inputs).toEqual(inputs);
-  expect(result.outputs).toEqual(outputs);
+  assertScreenOutputsMatchAcrossRuntimes(result.outputs, outputs);
   expect(result.inputUnits).toEqual(
     Object.fromEntries(Object.keys(inputs).map((key) => [key, screenUnits(model).inputs[key]])),
   );
