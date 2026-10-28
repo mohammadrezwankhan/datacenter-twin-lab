@@ -28,7 +28,6 @@ function DeviceButton({
   id,
   selected,
   onSelect,
-  titleId,
   labelId,
   valueId,
   descriptionId,
@@ -37,7 +36,6 @@ function DeviceButton({
   id: DeviceId;
   selected: boolean;
   onSelect: (id: DeviceId) => void;
-  titleId: string;
   labelId: string;
   valueId: string;
   descriptionId: string;
@@ -49,12 +47,12 @@ function DeviceButton({
       role="button"
       tabIndex={0}
       aria-pressed={selected}
-      aria-labelledby={`${titleId} ${labelId} ${valueId}`}
+      aria-labelledby={`${labelId} ${valueId}`}
       aria-describedby={descriptionId}
       onClick={() => onSelect(id)}
       onKeyDown={(event) => selectOnKey(event, id, onSelect)}
     >
-      <title id={titleId}>{devices[id].title}</title>
+      <title>{devices[id].title}</title>
       {children}
     </g>
   );
@@ -237,7 +235,6 @@ export function EmtScene({
           id="source"
           selected={selected === 'source'}
           onSelect={onSelect}
-          titleId={`${sceneId}-source-title`}
           labelId={`${sceneId}-source-label`}
           valueId={`${sceneId}-source-value`}
           descriptionId={`${sceneId}-source-description`}
@@ -264,7 +261,7 @@ export function EmtScene({
             className="emt-label"
           >
             DC SOURCE
-          </text>
+          </text>{' '}
           <text
             id={`${sceneId}-source-value`}
             x="185"
@@ -280,7 +277,6 @@ export function EmtScene({
           id="reactor"
           selected={selected === 'reactor'}
           onSelect={onSelect}
-          titleId={`${sceneId}-reactor-title`}
           labelId={`${sceneId}-reactor-label`}
           valueId={`${sceneId}-reactor-value`}
           descriptionId={`${sceneId}-reactor-description`}
@@ -308,7 +304,7 @@ export function EmtScene({
             className="emt-label"
           >
             SERIES REACTOR
-          </text>
+          </text>{' '}
           <text
             id={`${sceneId}-reactor-value`}
             x="373"
@@ -324,7 +320,6 @@ export function EmtScene({
           id="bus"
           selected={selected === 'bus'}
           onSelect={onSelect}
-          titleId={`${sceneId}-bus-title`}
           labelId={`${sceneId}-bus-label`}
           valueId={`${sceneId}-bus-value`}
           descriptionId={`${sceneId}-bus-description`}
@@ -360,7 +355,7 @@ export function EmtScene({
             className="emt-label"
           >
             DC BUS
-          </text>
+          </text>{' '}
           <text
             id={`${sceneId}-bus-value`}
             x="519"
@@ -376,7 +371,6 @@ export function EmtScene({
           id="capacitor"
           selected={selected === 'capacitor'}
           onSelect={onSelect}
-          titleId={`${sceneId}-capacitor-title`}
           labelId={`${sceneId}-capacitor-label`}
           valueId={`${sceneId}-capacitor-value`}
           descriptionId={`${sceneId}-capacitor-description`}
@@ -400,7 +394,7 @@ export function EmtScene({
             className="emt-label"
           >
             DC-LINK CAPACITOR
-          </text>
+          </text>{' '}
           <text
             id={`${sceneId}-capacitor-value`}
             x="629"
@@ -416,7 +410,6 @@ export function EmtScene({
           id="load"
           selected={selected === 'load'}
           onSelect={onSelect}
-          titleId={`${sceneId}-load-title`}
           labelId={`${sceneId}-load-label`}
           valueId={`${sceneId}-load-value`}
           descriptionId={`${sceneId}-load-description`}
@@ -446,7 +439,7 @@ export function EmtScene({
             className="emt-label"
           >
             RESISTIVE LOAD
-          </text>
+          </text>{' '}
           <text
             id={`${sceneId}-load-value`}
             x="752"
