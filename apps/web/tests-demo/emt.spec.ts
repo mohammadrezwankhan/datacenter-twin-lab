@@ -79,7 +79,8 @@ test('EMT study is responsive, keyboard accessible and motion controllable', asy
   const paused = await page.locator('#emt-seek').inputValue();
   await page.waitForTimeout(100);
   expect(await page.locator('#emt-seek').inputValue()).toBe(paused);
-  const component = page.getByRole('button', { name: /capacitor.*Select for details/i });
+  const component = page.getByRole('button', { name: /capacitor/i });
+  await expect(component).toHaveAccessibleDescription(/Select for details/i);
   await component.focus();
   await page.keyboard.press('Enter');
   await expect(component).toHaveAttribute('aria-pressed', 'true');
