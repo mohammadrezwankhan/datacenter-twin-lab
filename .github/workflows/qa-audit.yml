@@ -52,6 +52,8 @@ jobs:
           npm --prefix apps/web run build:demo
       - name: Install Chromium with required native libraries
         run: npm --prefix apps/web exec -- playwright install --with-deps chromium
+      - name: Check enlarged-text reflow before the full browser suite
+        run: npm --prefix apps/web run test:demo -- --grep "infrastructure track heading stays inside"
       - name: Browser demo tests, including viewport matrix and performance observations
         env:
           TWIN_PYTHON: python

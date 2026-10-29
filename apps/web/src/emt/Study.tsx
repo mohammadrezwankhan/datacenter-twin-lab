@@ -12,6 +12,7 @@ import type { EmtConfig, EmtResult } from './engine';
 import { EmtCharts } from './Charts';
 import { EmtScene, type DeviceId } from './Scene';
 import { EmtVerification } from './Verification';
+import { emtNumber as number, emtSigned as signed } from './format';
 import { csvFor } from '../result-csv';
 import './study.css';
 
@@ -78,12 +79,6 @@ const fields: { key: Field; label: string; unit: string; step: string; help: str
   },
 ];
 
-const number = (value: number, digits = 2) =>
-  new Intl.NumberFormat('en', { maximumFractionDigits: digits, minimumFractionDigits: 0 }).format(
-    value,
-  );
-const signed = (value: number, digits = 6) =>
-  `${value > 0 ? '+' : ''}${new Intl.NumberFormat('en', { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(value)}`;
 const toDraft = (config: EmtConfig): Draft =>
   Object.fromEntries(
     (Object.keys(config) as Field[]).map((key) => [key, String(config[key])]),
@@ -668,7 +663,12 @@ export function EmtStudy() {
             Open sampled values{' '}
             <span>{minuteSampledRows.length} displayed rows · 100 µs underlying output</span>
           </summary>
-          <div className="emt-table-scroll">
+          <div
+            className="emt-table-scroll"
+            role="region"
+            aria-label="Sampled transient values"
+            tabIndex={0}
+          >
             <table>
               <thead>
                 <tr>

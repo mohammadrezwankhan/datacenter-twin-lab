@@ -57,6 +57,7 @@
   box-sizing: border-box;
 }
 body {
+  display: flow-root;
   margin: 0;
   background: var(--bg);
   color: var(--text);
@@ -839,6 +840,20 @@ tr:last-child td {
   padding: 50px;
   text-align: center;
   color: var(--muted);
+}
+/* Keep the footer below the initial viewport while the deferred EMT study is loading. */
+.emt-study-loading {
+  display: grid;
+  place-items: center;
+  min-height: clamp(24rem, 58vh, 40rem);
+  max-width: 1540px;
+  margin: 8px auto 20px;
+  padding: 24px;
+  border: 1px solid #283b4a;
+  border-radius: 12px;
+  background: #111e2b;
+  color: #a9bece;
+  text-align: center;
 }
 .error-banner {
   background: #3c251f;

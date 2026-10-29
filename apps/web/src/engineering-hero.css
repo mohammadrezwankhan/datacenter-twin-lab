@@ -1,0 +1,70 @@
+.engineering-hero {
+  display: block;
+  width: 100%;
+  max-width: 1120px;
+  margin: 2rem auto;
+  min-width: 0;
+}
+.engineering-hero-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+.engineering-hero khan-grid-hero {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  background: #070d19;
+  color: #eef3fb;
+  padding: clamp(8px, 1.5vw, 16px);
+  border-radius: 18px;
+}
+.engineering-hero khan-grid-hero::part(frame) {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+.engineering-hero-fallback-content {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: clamp(8px, 1.5vw, 16px);
+  border-radius: 18px;
+  background: #070d19;
+  color: #eef3fb;
+}
+.engineering-hero-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #060c18;
+  border: 1px solid #263448;
+  border-radius: 18px;
+}
+.engineering-hero-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #060c18;
+}
+.engineering-hero-copy {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 15px;
+  font-family: Inter, 'SF Pro Display', Arial, sans-serif;
+}
+.engineering-hero-copy p {
+  flex: 1 1 360px;
+  margin: 0;
+  color: #aebed2;
+  font-size: 14px;
+  line-height: 1.6;
+}

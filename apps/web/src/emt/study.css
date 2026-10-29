@@ -39,7 +39,8 @@
 .emt-study select:focus-visible,
 .emt-study a:focus-visible,
 .emt-study summary:focus-visible,
-.emt-device:focus-visible {
+.emt-device:focus-visible,
+.emt-table-scroll:focus-visible {
   outline: 2px solid #84e4ee;
   outline-offset: 3px;
 }
@@ -180,6 +181,17 @@
 }
 .emt-scene-wrap {
   min-width: 0;
+}
+.emt-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .emt-scene {
   display: block;
