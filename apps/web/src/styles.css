@@ -169,6 +169,11 @@ code {
   display: flex;
   flex-direction: column;
 }
+@media (min-width: 901px) {
+  .sidebar {
+    overflow-y: auto;
+  }
+}
 .brand {
   color: var(--text);
   display: flex;
@@ -241,6 +246,15 @@ code {
   font-size: 11px;
   line-height: 1.8;
   margin: 8px 0 13px;
+}
+.sidebar-bottom > a {
+  display: block;
+  min-height: 44px;
+  padding-block: 6px;
+  margin-bottom: 8px;
+}
+.sidebar-bottom > .mini-tag {
+  display: inline-block;
 }
 .status-dot {
   width: 6px;
