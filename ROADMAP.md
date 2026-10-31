@@ -1,11 +1,11 @@
 # Roadmap
 
-## Current source: 2.0.1 maintenance candidate
+## Published maintenance release: v2.0.1
 
-The [2.0.1 patch scope](docs/releases/v2.0.1.md) prepares the later numerical and
-packaging fixes for a separate checked release. It adds no new model or public
-schema. Publication and hosting require their exact-source gates; v2.0.0 remains
-the published historical milestone until actual release proof exists.
+The [v2.0.1 maintenance release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1)
+was published on **26 October 2026**. Its [scope and publication receipt](docs/releases/v2.0.1.md)
+record the checked numerical and packaging fixes. It adds no new model or public
+schema and preserves the original v2.0.0 release assets and historical milestone.
 
 ## Published milestone: v2.0.0 — Infrastructure Engineering
 
@@ -26,7 +26,7 @@ Version **2.0.0** extends the teaching application with twelve Infrastructure En
 | Evidence and contribution material | Reproducibility packet, independent-review protocol, source register, tutorials, notebook, scenario guidance, and contribution ideas.                                                                      |
 | Local use                          | CLI and loopback dashboard. The browser demo runs its first result locally and has no shared simulation backend or client analytics.                                                                       |
 
-Open the [guided experiment](https://khanlab.co.technology/), the [advanced workspace](https://khanlab.co.technology/?mode=advanced), the [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), or the [course and study catalog](https://khanlab.co.technology/learn/). The [evidence hub](https://khanlab.co.technology/?mode=evidence) and [tutorial index](docs/tutorials/index.md) provide the supporting material. The [Python quickstart](docs/quickstart.md#run-with-uv) pins the published v2.0.0 wheel and its checksum. The current website and `main` can include later maintenance; the tagged release assets remain unchanged.
+Open the [guided experiment](https://khanlab.co.technology/), the [advanced workspace](https://khanlab.co.technology/?mode=advanced), the [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), or the [course and study catalog](https://khanlab.co.technology/learn/). The [evidence hub](https://khanlab.co.technology/?mode=evidence) and [tutorial index](docs/tutorials/index.md) provide the supporting material. The [Python quickstart](docs/quickstart.md#run-with-uv) pins the published v2.0.1 wheel with its SHA-256 checksum. The current website and `main` can include later maintenance; the tagged release assets remain unchanged.
 
 Current source and the browser demo also [reopen scenario JSON and electrical run exports](docs/engineering/energy-scenario-workspace.md#reopen-a-saved-experiment): validate inputs, preview changed assumptions, calculate a fresh result and compare it with Python. This workflow was included in `1.0.0` and is retained in `2.0.0`; earlier release assets remain unchanged.
 
