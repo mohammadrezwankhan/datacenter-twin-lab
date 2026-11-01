@@ -78,6 +78,14 @@ class AuditorTests(unittest.TestCase):
         self.assertEqual(embedded['dashboard_url'], 'https://khanlab.co.technology/')
         self.assertEqual(embedded['dashboard_url'], canonical['dashboard_url'])
 
+    def test_discovery_export_uses_current_engine_and_pinned_sources(self):
+        root = Path(__file__).resolve().parents[1]
+        text = (root / 'apps' / 'web' / 'public' / 'llms-full.txt').read_text(encoding='utf-8')
+        self.assertIn(f'Datacenter Twin Lab, version {__version__}.', text)
+        self.assertNotIn('Documentation source: v1.0.0.', text)
+        pinned = re.findall(r'Documentation source: ([0-9a-f]{40})\.', text)
+        self.assertEqual(len(pinned), 12)
+
     def test_strict_site_clean_fixture_passes(self):
         audit = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(fixtures()))
         report = audit.execute()
