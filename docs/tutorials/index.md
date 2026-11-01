@@ -29,7 +29,7 @@ The guided route has three actions. **01 · Predict:** enter an estimate in seco
 
 - [Open the advanced energy workspace](https://khanlab.co.technology/?mode=advanced) to inspect the full electrical topology, replay events, change bounded assumptions, and export a run.
 - [Open the evidence hub's captioned 60-second demo](https://khanlab.co.technology/?mode=evidence#demo) or read its [transcript and reproduction notes](../examples/proof-demo.md).
-- Follow the [quickstart](../quickstart.md) to install the published, hash-pinned v1.0.0 CLI/dashboard wheel, or use its source-build and verification commands.
+- Follow the [quickstart](../quickstart.md) to install the published, hash-pinned v2.0.1 CLI/dashboard wheel, or use its source-build and verification commands.
 - Use the [course studio guide](../engineering/course-studio.md) to navigate the four-chapter course and its interactive scenes.
 - Use the [evidence packet](../evidence.md) and [benchmark method](../engineering/benchmark-method.md) to reproduce the release's numerical artifacts and interpret timing observations.
 - Start a small contribution with [adding a scenario](../engineering/adding-a-scenario.md).
