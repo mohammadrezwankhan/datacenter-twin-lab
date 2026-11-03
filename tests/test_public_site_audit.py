@@ -5,6 +5,7 @@ import importlib.util
 import json
 from hashlib import sha256
 from pathlib import Path
+import re
 import unittest
 from datacenter_twin import __version__
 from urllib.error import HTTPError
@@ -67,6 +68,24 @@ def fetch_for(items):
 
 
 class AuditorTests(unittest.TestCase):
+    def test_embedded_lesson_config_matches_canonical_dashboard_url(self):
+        root = Path(__file__).resolve().parents[1]
+        html = (root / 'docs' / 'index.html').read_text(encoding='utf-8')
+        match = re.search(r'<script id="lab-config" type="application/json">(.*?)</script>', html, re.S)
+        self.assertIsNotNone(match)
+        embedded = json.loads(match.group(1))
+        canonical = json.loads((root / 'docs' / 'lesson-config.json').read_text(encoding='utf-8'))
+        self.assertEqual(embedded['dashboard_url'], 'https://khanlab.co.technology/')
+        self.assertEqual(embedded['dashboard_url'], canonical['dashboard_url'])
+
+    def test_discovery_export_uses_current_engine_and_pinned_sources(self):
+        root = Path(__file__).resolve().parents[1]
+        text = (root / 'apps' / 'web' / 'public' / 'llms-full.txt').read_text(encoding='utf-8')
+        self.assertIn(f'Datacenter Twin Lab, version {__version__}.', text)
+        self.assertNotIn('Documentation source: v1.0.0.', text)
+        pinned = re.findall(r'Documentation source: ([0-9a-f]{40})\.', text)
+        self.assertEqual(len(pinned), 12)
+
     def test_strict_site_clean_fixture_passes(self):
         audit = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(fixtures()))
         report = audit.execute()

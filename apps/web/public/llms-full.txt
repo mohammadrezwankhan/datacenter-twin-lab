@@ -1,5 +1,6 @@
-# Datacenter Twin Lab: full visible page text
+# Datacenter Twin Lab: visible page text and summaries
 Canonical site: https://khanlab.co.technology/
+The course index and Infrastructure Engineering entries summarize their visible introductions and engineering HOLD. Follow their canonical URLs for complete prose, worked cases, assessments and sources. Other entries retain their visible page text.
 
 ## Datacenter Power Systems: Free Interactive Course | Datacenter Twin Lab
 
@@ -7,7 +8,8 @@ URL: https://khanlab.co.technology/
 
 Datacenter Twin Lab
 
-Learn datacenter power continuity with twelve free, interactive browser lessons.
+Learn datacenter continuity and Infrastructure Engineering with 24 free, interactive
+browser lessons.
 
 A generator fails. How long does the battery last?
 
@@ -23,7 +25,7 @@ Calculations run on your device; no account is required.
 JavaScript is disabled. Use the Python quickstart or read the worked
 example below.
 
-Read all twelve course lessons · Explore the EMT study · Power dynamics studies · Reference results and source records · About the author and evidence ·
+Read all 24 course lessons · Explore the EMT study · Power dynamics studies · Reference results and source records · About the author and evidence ·
 Python quickstart
 ·
 Worked example
@@ -40,7 +42,7 @@ URL: https://khanlab.co.technology/about/
 About the lab / evidence you can inspect
 Understand the model. Reproduce the result.
 
-Datacenter Twin Lab is a local-first power-continuity what-if simulator and a twelve-lesson course for datacenter engineers.
+Datacenter Twin Lab is a local-first power-continuity what-if simulator and a 24-lesson course for datacenter engineers.
 
 Created and maintained by Mohammad Rezwan Khan. Visit the engineering profile and publications. The project is open source under Apache-2.0. It runs on your device without an account or shared simulation backend.
 
@@ -51,13 +53,14 @@ For this fixed-load example, 100 kWh × 0.90 discharge efficiency × 0.95 distri
 Read the assumptions and run the experiment →
 
 What the simulator does
-It accounts for finite battery energy, charging and losses, generator startup and failure, surviving-path capacity, shared failure domains, timed recovery and unserved energy. The fast JavaScript path can be checked on demand against the Python reference. Eighteen presets and twelve lessons use explicit inputs and unit-labelled results.
+It accounts for finite battery energy, charging and losses, generator startup and failure, surviving-path capacity, shared failure domains, timed recovery and unserved energy. The fast JavaScript path can be checked on demand against the Python reference. Eighteen presets and twelve continuity lessons use explicit inputs and unit-labelled results. Twelve Infrastructure Engineering lessons add separate bounded educational screens, with their assumptions and engineering HOLD visible.
 
 What the evidence means
 The tests and published packets establish reproducible software behavior for the declared inputs. They do not establish facility calibration, AC transients, protection coordination, GPU workload performance, grid adequacy, certified uptime or equipment safety. This software does not control equipment. Independent external reproduction has not yet been obtained.
 
 Inspect or cite the work
-Version 1.0.0 source, packages and release evidence
+Version 2.0.1 source
+Published releases and packages
 Canonical input equations and reconstruction instructions
 Versioned evidence manifest with per-file hashes
 Author and software citation record
@@ -67,7 +70,7 @@ Install and run with Python
 How to contribute
 Try one lesson, note anything confusing and describe the steps to reproduce it. A clearer explanation, a documentation fix or an independently derived example can help the next learner. Read the contribution guide or open an issue.
 
-Explore the twelve lessons →
+Explore all 24 lessons →
 
 ## Datacenter Power Continuity: Results & Reproducibility Evidence
 
@@ -80,7 +83,7 @@ Cite the evidence.
 
 Three datacenter power-continuity cases you can calculate by hand, run in the browser and reproduce in Python.
 
-Original examples by Mohammad Rezwan Khan · Engine 1.0.0 · Citation and source revision
+Original examples by Mohammad Rezwan Khan · Engine 2.0.1 · Citation and source revision
 
 Battery runtime answerThree reference casesReproduce the resultsCite the work
 
@@ -110,7 +113,7 @@ Scenario JSON · Complete result JSON
 
 Identity and pinned sourceInput SHA-256: a11b0d4078daef9a79e07f7969940203c23ccaa800c0a2c60cc5853b0acacfd0
 
-Run: 598f3279493596e75400. Result at the cited source revision.
+Run: 7264f710596ef5aef30f. Result at the cited source revision.
 
 Reference 02
 50 kWh at 1 MW
@@ -124,7 +127,7 @@ Scenario JSON · Complete result JSON
 
 Identity and pinned sourceInput SHA-256: 0db72b981fa59c8a566e5610fd8627f4c623baeb8bb2662d22c5cae246a2b8b9
 
-Run: b27bf2eb3e3f3a603202. Result at the cited source revision.
+Run: 5303e03c55bbad457de0. Result at the cited source revision.
 
 Reference 03
 One 700 kW surviving path
@@ -138,7 +141,7 @@ Scenario JSON · Complete result JSON
 
 Identity and pinned sourceInput SHA-256: 6b446789e2f755b9ac1ac81896c7f0d85827a9a03b6ceedfd8fbdc6cb3b775dd
 
-Run: bdbd07fc183ea54c6cba. Result at the cited source revision.
+Run: 897b256f455b7f7b3c8d. Result at the cited source revision.
 
 Energy accounting over each complete 1,800-second run · kWh
 CaseRequested ITServed ITUnserved IT
@@ -159,12 +162,12 @@ The energy table rounds to six decimal places; the case summaries may be shorter
 
 Reproduce the result before using it
 
-Download the version 1.0.0 source and evidence assets, or check out the exact public source revision linked below.
+Download the version 2.0.1 source archive, or check out the exact public source revision linked below. Separately published packages are listed under published releases.
 
 From that source directory, build and verify the three-case packet with Python 3.12 or later:
 
-python scripts/build_evidence.py --output outputs/reproduction-1.0.0
-python scripts/build_evidence.py --verify outputs/reproduction-1.0.0
+python scripts/build_evidence.py --output outputs/reproduction-2.0.1
+python scripts/build_evidence.py --verify outputs/reproduction-2.0.1
 
 Reconstruct the ledger from its terms, independently of the reported residual: source energy equals served IT energy plus the change in stored battery energy and the conversion losses. Requested IT energy equals served plus unserved IT energy.
 
@@ -178,16 +181,16 @@ Versioned expected-versus-observed receipt
 
 Cite the claim and its configuration
 
-Mohammad Rezwan Khan. Datacenter Twin Lab, version 1.0.0. Synthetic continuity reference cases. https://khanlab.co.technology/evidence/
+Mohammad Rezwan Khan. Datacenter Twin Lab, version 2.0.1. Synthetic continuity reference cases. https://khanlab.co.technology/evidence/
 
-For numerical reuse, include the case name, input SHA-256, engine version, result file and exact source revision. Documentation for this build: v1.0.0. Use the software citation record for author and repository details.
+For numerical reuse, include the case name, input SHA-256, engine version, result file and exact source revision. Documentation for this build: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. Use the software citation record for author and repository details.
 
 This is a software reproduction record, not a peer-reviewed paper or a calibrated facility dataset. No DOI or independent external reproduction is asserted. Original code and inputs are Apache-2.0; source notices describe the material included.
 
 What can these results support?
 They support learning about finite reserve, losses, outage timing and path capacity for the stated synthetic inputs. They do not establish equipment suitability, facility uptime, grid adequacy, GPU job performance or physical safety. See the model scope and authorship and external reproduction protocol.
 
-Explore all twelve worked lessons →
+Explore all 24 worked lessons →
 
 ## Interrupt a 50 MW AI cluster | Datacenter Power Lesson 10
 
@@ -198,7 +201,7 @@ Lesson 10 / 12 · Aggregate AI power demand
 Interrupt a 50 MW AI cluster
 How long can 5 MWh of stored energy bridge a 50 MW load?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -245,10 +248,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Interrupt a 50 MW AI cluster.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/ai-outage/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Interrupt a 50 MW AI cluster.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/ai-outage/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 9. Track energy before the outage11. Catch a sub-second service gap →
 
@@ -261,7 +264,7 @@ Lesson 02 / 12 · Efficiency
 Account for distribution losses
 How much source power is needed to deliver 1,000 kW?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -305,10 +308,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Account for distribution losses.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/distribution-loss/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Account for distribution losses.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/distribution-loss/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 1. Power becomes energy3. Calculate battery ride-through →
 
@@ -321,7 +324,7 @@ Lesson 04 / 12 · Sequence and delay
 Bridge generator startup
 What changes when startup takes 60 seconds instead of 30?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -366,10 +369,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Bridge generator startup.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/generator-delay/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Bridge generator startup.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/generator-delay/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 3. Calculate battery ride-through5. Add a failed generator →
 
@@ -382,7 +385,7 @@ Lesson 05 / 12 · Combined failures
 Add a failed generator
 What changes if the generator cannot start?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -429,10 +432,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Add a failed generator.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/generator-failure/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Add a failed generator.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/generator-failure/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 4. Bridge generator startup6. Check a surviving path →
 
@@ -440,65 +443,103 @@ Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching case
 
 URL: https://khanlab.co.technology/learn/
 
-The power playbook / 12 practical lessons
-Power Systems for Datacenter Engineers
-
 A generator fails. The battery takes over. Can you predict when the lights go out?
 
-Start with a 1 MW load and a 100 kWh battery, then change one assumption at a time. Read the calculations here, run each experiment in your browser, and compare the result with the reference Python engine.
+## 23. Build an integrated commissioning evidence loop | Datacenter Twin Lab
 
-Original course by Mohammad Rezwan Khan · Engine 1.0.0 · Reference results and citation records
+URL: https://khanlab.co.technology/learn/infrastructure/commissioning-evidence-loop/
 
-Try the battery experiment →
+A completed component test answers a component question. Integrated continuity requires an initial state, expected sequence, instruments, acceptance criteria, stop conditions and recovery boundary that span the service chain. Compare two clocks, then examine the measurement boundary behind an apparently precise efficiency number.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
 
-Free · no accountBrowser + PythonPredict · run · explain
-Original calculation diagram. Duration starts at the utility outage; it is not an elapsed event timestamp.
+## 13. Build an evidence-controlled load ledger | Datacenter Twin Lab
 
-Build your power-systems intuition
-For datacenter engineers learning power continuity. Begin with power and energy, work through outages and shared failures, then compare aggregate AI demand and annual PUE planning. Basic arithmetic is enough to start.
-Lesson 01 / 12Power becomes energy
-How much energy does a constant load request in half an hour?
-kW and kWh
-Lesson 02 / 12Account for distribution losses
-How much source power is needed to deliver 1,000 kW?
-Efficiency
-Lesson 03 / 12Calculate battery ride-through
-Does half the stored energy give half the ride-through duration?
-Finite storage
-Lesson 04 / 12Bridge generator startup
-What changes when startup takes 60 seconds instead of 30?
-Sequence and delay
-Lesson 05 / 12Add a failed generator
-What changes if the generator cannot start?
-Combined failures
-Lesson 06 / 12Check a surviving path
-Are two paths enough when either one must carry the whole load?
-N+1 capacity reasoning
-Lesson 07 / 12Expose shared control failures
-Can a shared control fault defeat both power paths?
-Failure domains
-Lesson 08 / 12Find a single point of failure
-What happens to two paths when their common main bus fails?
-Common upstream assets
-Lesson 09 / 12Track energy before the outage
-Why does the 50 kWh case last longer when it can charge first?
-Opening balances
-Lesson 10 / 12Interrupt a 50 MW AI cluster
-How long can 5 MWh of stored energy bridge a 50 MW load?
-Aggregate AI power demand
-Lesson 11 / 12Catch a sub-second service gap
-Does 57 kWh bridge recovery at 500 seconds? Does 58 kWh?
-Exact event timing
-Lesson 12 / 12Separate PUE from continuity
-How does assumed PUE change annual energy for the same 50 MW IT load?
-Facility energy planning
+URL: https://khanlab.co.technology/learn/infrastructure/evidence-load-ledger/
 
-Go inside a voltage sag
-Ready for a different timescale? The separate EMT fundamentals study explores a 200 ms ideal DC-link RLC transient with waveforms, an energy ledger and step-refinement checks. Continue with five advanced power-dynamics studies of converter response and grid modes.
+Begin where the original course leaves off: not with a bigger battery, but with a more disciplined definition of demand. A facility total is meaningful only when every term belongs to the same boundary and operating condition. In this lesson, a 20 MW IT allocation becomes a traceable facility ledger, while a second example demonstrates why conflicting source values must remain visible.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
 
-What these twelve experiments establish
-These are deterministic synthetic electrical examples with explicit units, input scenarios and downloadable results. They teach reserve accounting and failure-path reasoning. They do not predict GPU jobs, grid adequacy, electrical transients or certified facility uptime.
-Read about the author, model scope and reproducibility evidence →
+## 22. Review spatial capacity and phased development | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/facilities-phased-development/
+
+A rack count is not a facility plan. Equipment requires service space, replacement routes, structural capacity and coordinated boundaries through every construction phase. Use the manuscript’s historical operating account to practise reporting what was actually stated without turning different area descriptions into one misleading density metric.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 16. Audit generator banks and usable fuel | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/generator-bank-fuel/
+
+The original startup lessons ask whether a generator becomes available in time. This lesson asks a different question: can the available bank carry the backed load at all? Follow a source claim through its real-power conversion, post-loss capacity and fuel ledger. A failed arithmetic claim should stay failed even when the combined installed nameplates look impressive.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 19. Inspect grounding, distortion and control-power loops | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/grounding-power-quality/
+
+Low resistance, low distortion and a nominal battery voltage each answer only a narrowly defined question. This lesson turns those single numbers into explicit boundaries. Follow the ground current, compare harmonic denominators, and include the return conductor in the trip circuit before drawing any conclusion about service.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 24. Audit the correction before releasing the design | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/integrated-design-release/
+
+The final lesson asks for a justified release decision, not the largest possible green score. Bring capacity, connectivity, protection, thermal behaviour, controls and evidence together. Then audit a proposed correction from the manuscript’s separate campus example: a remedy is another engineering assertion and must be recalculated.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 21. Separate physical routes, optical budgets and fabric capacity | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/network-optical-budget/
+
+Two fibres are not automatically two independent services, and a low optical loss is not automatically an application pass. Separate the physical administration route from the logical fabric, then calculate a narrow loss budget and post-uplink-loss capacity. The lesson adds communications reasoning without pretending that the existing electrical simulator already models packets.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 18. Trace protection zones and the full trip chain | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/protection-trip-chain/
+
+Protection is not a green status field at one current. It is a chain from the actual fault through measurement, logic, DC supply and interruption. Use a declared inverse-time curve to learn how a calculation behaves, then inspect what that curve cannot establish about CT saturation, electrical zones or selectivity.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 14. Test capacity, paths and common dependencies | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/resilience-state-matrix/
+
+The existing lessons show how a surviving path or shared controller can govern electrical service. Now extend that intuition into a state matrix. Installed equipment, connected equipment and independently substitutable equipment are different sets. A spare counts only when it can reach the required load in the state being assessed.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 20. Coordinate liquid cooling and thermal ride-through | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/thermal-liquid-continuity/
+
+Battery minutes do not create cooling minutes. Start with the manuscript’s mixed-cooling rack, then move to a separately labelled facility thermal model. The visual goal is to make both heat paths and their shared rejection boundary visible, so that the learner never mistakes a liquid-cooled label for complete removal of room heat.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 15. Declare transformer and fault-current boundaries | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/transformer-fault-boundaries/
+
+A current value without its voltage, power base and network boundary is easy to misuse. This lesson builds a small equivalent circuit in layers, then shows how changing an assumption changes a fault-current screen. The purpose is to expose model limits before equipment selection, not to turn an attractive fault animation into a completed short-circuit study.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
+
+## 17. Separate UPS power, battery energy and trip DC | Datacenter Twin Lab
+
+URL: https://khanlab.co.technology/learn/infrastructure/ups-battery-station-dc/
+
+The battery lesson already distinguishes reserve from ride-through. Now separate three further boundaries: AC output energy, delivered DC energy and nominal end-of-life storage. Then examine the protection DC circuit, where enough ampere-hours can coexist with insufficient voltage at the device that must operate.
+Engineering HOLD
+These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.
 
 ## Check a surviving path | Datacenter Power Lesson 6
 
@@ -509,7 +550,7 @@ Lesson 06 / 12 · N+1 capacity reasoning
 Check a surviving path
 Are two paths enough when either one must carry the whole load?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -554,10 +595,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Check a surviving path.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/n-plus-one/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Check a surviving path.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/n-plus-one/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 5. Add a failed generator7. Expose shared control failures →
 
@@ -570,7 +611,7 @@ Lesson 01 / 12 · kW and kWh
 Power becomes energy
 How much energy does a constant load request in half an hour?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -614,10 +655,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Power becomes energy.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/power-energy/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Power becomes energy.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/power-energy/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← Course index2. Account for distribution losses →
 
@@ -630,7 +671,7 @@ Lesson 09 / 12 · Opening balances
 Track energy before the outage
 Why does the 50 kWh case last longer when it can charge first?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -677,10 +718,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Track energy before the outage.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/precharge/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Track energy before the outage.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/precharge/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 8. Find a single point of failure10. Interrupt a 50 MW AI cluster →
 
@@ -693,7 +734,7 @@ Lesson 12 / 12 · Facility energy planning
 Separate PUE from continuity
 How does assumed PUE change annual energy for the same 50 MW IT load?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -728,10 +769,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Separate PUE from continuity.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/pue/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Separate PUE from continuity.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/pue/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 11. Catch a sub-second service gapBack to all lessons →
 
@@ -744,7 +785,7 @@ Lesson 11 / 12 · Exact event timing
 Catch a sub-second service gap
 Does 57 kWh bridge recovery at 500 seconds? Does 58 kWh?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -791,10 +832,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Catch a sub-second service gap.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/recovery-deadline/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Catch a sub-second service gap.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/recovery-deadline/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 10. Interrupt a 50 MW AI cluster12. Separate PUE from continuity →
 
@@ -807,7 +848,7 @@ Lesson 03 / 12 · Finite storage
 Calculate battery ride-through
 Does half the stored energy give half the ride-through duration?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -854,10 +895,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Calculate battery ride-through.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/ride-through/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Calculate battery ride-through.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/ride-through/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 2. Account for distribution losses4. Bridge generator startup →
 
@@ -870,7 +911,7 @@ Lesson 07 / 12 · Failure domains
 Expose shared control failures
 Can a shared control fault defeat both power paths?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -915,10 +956,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Expose shared control failures.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/shared-controls/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Expose shared control failures.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/shared-controls/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 6. Check a surviving path8. Find a single point of failure →
 
@@ -931,7 +972,7 @@ Lesson 08 / 12 · Common upstream assets
 Find a single point of failure
 What happens to two paths when their common main bus fails?
 
-By Mohammad Rezwan Khan · Engine 1.0.0 · Cite this lesson
+By Mohammad Rezwan Khan · Engine 2.0.1 · Cite this lesson
 
 Run this browser lesson →
 
@@ -976,10 +1017,10 @@ Electrical continuity contract
 Three reference cases, equations and versioned source records
 
 Cite this lesson
-Mohammad Rezwan Khan. “Find a single point of failure.” Datacenter Twin Lab, engine 1.0.0. https://khanlab.co.technology/learn/single-point/
-Documentation source: v1.0.0. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
+Mohammad Rezwan Khan. “Find a single point of failure.” Datacenter Twin Lab, engine 2.0.1. https://khanlab.co.technology/learn/single-point/
+Documentation source: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. For a numerical claim, also retain the completed inputs and the result record; the live lesson can be changed by its controls.
 
-Original material by Mohammad Rezwan Khan, engine 1.0.0. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
+Original material by Mohammad Rezwan Khan, engine 2.0.1. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. Full scope and evidence.
 
 ← 7. Expose shared control failures9. Track energy before the outage →
 
