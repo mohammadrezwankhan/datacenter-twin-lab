@@ -13,6 +13,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   parity-and-visual:
     name: Python / JavaScript parity, responsive and performance observations
@@ -30,6 +34,7 @@ jobs:
           cache-dependency-path: apps/web/package-lock.json
       - name: Install pinned Python API and study dependencies
         run: |
+          python scripts/check_dependency_versions.py --lock-only api test-api studies
           python -m pip install -r requirements-api.lock
           python -m pip install -r requirements-studies.lock
       - name: Install pinned frontend packages
