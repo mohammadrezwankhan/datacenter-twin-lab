@@ -28,6 +28,11 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-api.lock
+            requirements-studies.lock
       - name: Check dependency locks before downloads
         run: python scripts/check_dependency_versions.py --lock-only api test-api studies
       - name: Standard-library core, without optional dependencies
@@ -109,6 +114,10 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements-studies.lock
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
