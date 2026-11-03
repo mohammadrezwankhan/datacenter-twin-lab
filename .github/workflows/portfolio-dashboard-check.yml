@@ -4,6 +4,7 @@ on:
     paths: ['docs/portfolio/**', 'assets/portfolio/**', 'scripts/portfolio/**', '.github/workflows/portfolio-dashboard-check.yml']
   push:
     branches: [main]
+    tags: ['**']
     paths: ['docs/portfolio/**', 'assets/portfolio/**', 'scripts/portfolio/**', '.github/workflows/portfolio-dashboard-check.yml']
 permissions:
   contents: read
