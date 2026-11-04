@@ -6,6 +6,15 @@ CI installs API/study extras together with their locks, runs pip check, and veri
 
 ## Refreshing the API dependency lock
 
+CI checks all direct extra pins against their locks before downloading packages:
+
+```sh
+python scripts/check_dependency_versions.py --lock-only api test-api studies
+```
+
+This offline check catches manifest-only dependency updates early. The existing
+installed-version check, resolver, `pip check` and runtime tests still apply.
+
 When changing a direct dependency of the `api` or `test-api` extras in
 `pyproject.toml`, update `requirements-api.lock` in the same change. The
 committed lock is used for source-checkout API testing and CI; changing only the
