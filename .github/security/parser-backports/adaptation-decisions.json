@@ -1,0 +1,98 @@
+[
+  {
+    "path": "languages/python/ast/AST_python.ml",
+    "reason": "Adapt upstream 667292 ConstrainedType; preserve variadic marker explicitly."
+  },
+  {
+    "path": "languages/python/ast/AST_python.ml",
+    "reason": "Retain main's TypeAlias path and source range; add complete declaration parameters."
+  },
+  {
+    "path": "languages/python/ast/AST_python.ml",
+    "reason": "Upstream 53e29 function parameter threading."
+  },
+  {
+    "path": "languages/python/ast/AST_python.ml",
+    "reason": "Upstream 53e29 class parameter threading."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Retain complete type-only nodes if inspected as expressions; no discarded children."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Selective upstream bound preservation and def/class entity threading; explicit variadic kind."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Extend function tuple."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Preserve function tparams without changing body/argument conversion."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Attach function type parameters."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Extend class tuple."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Preserve class tparams without changing bases/body."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Attach class type parameters."
+  },
+  {
+    "path": "languages/python/generic/Python_to_generic.ml",
+    "reason": "Preserve alias range/body and attach its complete type parameters."
+  },
+  {
+    "path": "languages/python/menhir/Parser_python.mly",
+    "reason": "Authored PEP695 productions; retain body, decorators, defaults and existing lexer tokens."
+  },
+  {
+    "path": "languages/python/menhir/Parser_python.mly",
+    "reason": "Class type-parameter production."
+  },
+  {
+    "path": "languages/python/menhir/Parser_python.mly",
+    "reason": "Generic aliases without reclassifying ordinary type identifiers."
+  },
+  {
+    "path": "languages/python/menhir/Parser_python.mly",
+    "reason": "Upstream 53e29 decorated class tuple threading."
+  },
+  {
+    "path": "languages/python/menhir/Parser_python.mly",
+    "reason": "Upstream 53e29 decorated sync/async function tuple threading."
+  },
+  {
+    "path": "languages/python/tree-sitter/Parse_python_tree_sitter.ml",
+    "reason": "Tuple-arity compatibility only; original tree-sitter grammar and behavior remain unchanged."
+  },
+  {
+    "path": "languages/python/tree-sitter/Parse_python_tree_sitter.ml",
+    "reason": "Tuple-arity compatibility only; type parameters come from existing primary Menhir frontend."
+  },
+  {
+    "path": "languages/python/tree-sitter/Parse_python_tree_sitter.ml",
+    "reason": "Retain decorated class fields with new tuple arity."
+  },
+  {
+    "path": "languages/python/tree-sitter/Parse_python_tree_sitter.ml",
+    "reason": "Retain decorated function fields with new tuple arity."
+  },
+  {
+    "path": "languages/python/menhir/Parsing_hacks_python.ml",
+    "reason": "Authored balanced generic-alias lookahead; no source rewriting/removal."
+  },
+  {
+    "path": "languages/python/menhir/Parsing_hacks_python.ml",
+    "reason": "Promote only a full generic-alias declaration prefix."
+  }
+]

@@ -1,0 +1,208 @@
+{
+  "interpreter": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "meaning": "Independent fixture syntax check only; not native parser qualification",
+  "results": [
+    {
+      "id": "bounded_function_and_defaults",
+      "expectation": "success",
+      "ast_nodes": 32,
+      "syntax_error": null
+    },
+    {
+      "id": "generic_class_method_variadics",
+      "expectation": "success",
+      "ast_nodes": 45,
+      "syntax_error": null
+    },
+    {
+      "id": "aliases_retain_expression_trees",
+      "expectation": "success",
+      "ast_nodes": 38,
+      "syntax_error": null
+    },
+    {
+      "id": "multiline_tuple_bound_and_trailing_comma",
+      "expectation": "success",
+      "ast_nodes": 31,
+      "syntax_error": null
+    },
+    {
+      "id": "async_and_decorated_generics",
+      "expectation": "success",
+      "ast_nodes": 36,
+      "syntax_error": null
+    },
+    {
+      "id": "type_remains_a_soft_keyword",
+      "expectation": "success",
+      "ast_nodes": 78,
+      "syntax_error": null
+    },
+    {
+      "id": "inline_alias_soft_keyword_boundaries",
+      "expectation": "success",
+      "ast_nodes": 28,
+      "syntax_error": null
+    },
+    {
+      "id": "generic_method_flow_before_inside_after",
+      "expectation": "success",
+      "ast_nodes": 79,
+      "syntax_error": null
+    },
+    {
+      "id": "bound_and_alias_calls_remain_searchable",
+      "expectation": "success",
+      "ast_nodes": 34,
+      "syntax_error": null
+    },
+    {
+      "id": "missing_type_bound",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "expected '('",
+        "line": 1,
+        "offset": 11
+      }
+    },
+    {
+      "id": "empty_function_type_parameters",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "expected '('",
+        "line": 1,
+        "offset": 11
+      }
+    },
+    {
+      "id": "empty_alias_type_parameters",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "invalid syntax",
+        "line": 1,
+        "offset": 13
+      }
+    },
+    {
+      "id": "unclosed_alias_type_parameters",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "'[' was never closed",
+        "line": 1,
+        "offset": 12
+      }
+    },
+    {
+      "id": "mismatched_alias_delimiter",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "closing parenthesis ')' does not match opening parenthesis '['",
+        "line": 1,
+        "offset": 28
+      }
+    },
+    {
+      "id": "missing_alias_rhs",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "invalid syntax",
+        "line": 1,
+        "offset": 17
+      }
+    },
+    {
+      "id": "missing_generic_function_body",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "expected an indented block after function definition on line 1",
+        "line": 1,
+        "offset": 32
+      }
+    },
+    {
+      "id": "malformed_body_after_valid_header",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "unmatched ')'",
+        "line": 2,
+        "offset": 12
+      }
+    },
+    {
+      "id": "non_identifier_type_parameter",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "invalid syntax",
+        "line": 1,
+        "offset": 14
+      }
+    },
+    {
+      "id": "unsupported_pep696_default",
+      "expectation": "reject",
+      "ast_nodes": null,
+      "syntax_error": {
+        "message": "invalid syntax. Maybe you meant '==' or ':=' instead of '='?",
+        "line": 1,
+        "offset": 13
+      }
+    },
+    {
+      "id": "upstream_match_as_sink",
+      "expectation": "success",
+      "ast_nodes": 64,
+      "syntax_error": null
+    },
+    {
+      "id": "upstream_match_guard_sink",
+      "expectation": "success",
+      "ast_nodes": 46,
+      "syntax_error": null
+    },
+    {
+      "id": "upstream_match_pattern_binding_sink",
+      "expectation": "success",
+      "ast_nodes": 66,
+      "syntax_error": null
+    },
+    {
+      "id": "repository_tests_test_audit_security",
+      "expectation": "success",
+      "ast_nodes": 1355,
+      "syntax_error": null
+    },
+    {
+      "id": "repository_scripts_reproduce_demand_timing",
+      "expectation": "success",
+      "ast_nodes": 1306,
+      "syntax_error": null
+    },
+    {
+      "id": "repository_scripts_audit_public_site",
+      "expectation": "success",
+      "ast_nodes": 6055,
+      "syntax_error": null
+    },
+    {
+      "id": "repository_datacenter_twin_research_common",
+      "expectation": "success",
+      "ast_nodes": 655,
+      "syntax_error": null
+    },
+    {
+      "id": "repository_datacenter_twin_research_types",
+      "expectation": "success",
+      "ast_nodes": 367,
+      "syntax_error": null
+    }
+  ]
+}

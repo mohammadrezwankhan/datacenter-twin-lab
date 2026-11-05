@@ -1,0 +1,369 @@
+diff --git a/languages/python/ast/AST_python.ml b/languages/python/ast/AST_python.ml
+--- a/languages/python/ast/AST_python.ml
++++ b/languages/python/ast/AST_python.ml
+@@ -160,6 +160,10 @@
+   (* =~ ObjAccess *)
+   | Attribute of
+       expr (* value *) * tok (* . *) * name (* attr *) * expr_context (* ctx *)
++  (* Type-parameter declarations (PEP 695). Bounds retain their complete
++   * expression tree; the splat token distinguishes TypeVarTuple from ParamSpec. *)
++  | ConstrainedType of type_ * tok * expr
++  | TypeParamSplat of tok * name
+   (* sgrep-ext: typing-ext: *)
+   | Ellipsis of tok (* should be only in .pyi, types Dict[str,...], or sgrep *)
+   (* sgrep-ext: *)
+@@ -390,6 +394,9 @@
+   (* should be allowed just at the toplevel *)
+   | FunctionDef of function_definition
+   | ClassDef of class_definition
++  (* python3.12: PEP 695 aliases, including optional generic parameters. *)
++  | TypeAlias of
++      tok (* 'type' *) * name (* alias *) * type_ list bracket option * type_
+ 
+ and case_and_body =
+   | CasesAndBody of case list * stmt list
+@@ -432,6 +439,7 @@
+ and function_definition =
+   tok (* 'def' *)
+   * name (* name *)
++  * type_ list bracket option (* PEP 695 type parameters *)
+   * parameters (* args *)
+   * type_ option
+   * (* return type *)
+@@ -445,6 +453,7 @@
+ and class_definition =
+   tok (* 'class' *)
+   * name (* name *)
++  * type_ list bracket option (* PEP 695 type parameters *)
+   * type_parent list (* bases *)
+   * stmt list (* body *)
+   * decorator list (* decorator_list *)
+diff --git a/languages/python/generic/Python_to_generic.ml b/languages/python/generic/Python_to_generic.ml
+--- a/languages/python/generic/Python_to_generic.ml
++++ b/languages/python/generic/Python_to_generic.ml
+@@ -242,6 +242,11 @@
+   | Attribute (v1, t, v2, _expr_ctx) ->
+       let v1 = expr env v1 and t = info t and v2 = name env v2 in
+       G.DotAccess (v1, t, G.FN (G.Id (v2, G.empty_id_info ()))) |> G.e
++  | ConstrainedType (v1, t, v2) ->
++      G.OtherExpr (("ConstrainedType", t), [ G.T (type_ env v1); G.E (expr env v2) ])
++      |> G.e
++  | TypeParamSplat (t, id) ->
++      G.OtherExpr (("TypeParamSplat", t), [ G.I (name env id) ]) |> G.e
+   | DictOrSet (CompList (t1, v, t2)) ->
+       let v' = list (dictorset_elt env) v in
+       let kind =
+@@ -508,8 +513,36 @@
+        | ParamSlash tok -> G.OtherParam (("SlashParam", tok), []))
+ 
+ and type_ env v =
+-  let v = expr env v in
+-  H.expr_to_type v
++  match v with
++  | ConstrainedType (v1, t, v2) ->
++      G.OtherType (("ConstrainedType", t), [ G.T (type_ env v1); G.T (type_ env v2) ])
++      |> G.t
++  | TypeParamSplat (t, id) ->
++      G.OtherType (("TypeParamSplat", t), [ G.I (name env id) ]) |> G.t
++  | _ ->
++      let v = expr env v in
++      H.expr_to_type v
++
++(* Based on upstream 667292: retain the full bound, not only its name. *)
++and type_parameter env = function
++  | Name (id, _) -> G.tparam_of_id (name env id)
++  | ConstrainedType (Name (id, _), _colon, bound) ->
++      G.tparam_of_id ~tp_bounds:[ type_ env bound ] (name env id)
++  | TypeParamSplat (t, id) ->
++      let kind =
++        if String.equal (Tok.content_of_tok t) "**" then "ParamSpec"
++        else "TypeVarTuple"
++      in
++      G.OtherTypeParam ((kind, t), [ G.I (name env id) ])
++  | t ->
++      let t = type_ env t in
++      G.OtherTypeParam (("OtherTypeParam", unsafe_fake "OtherTypeParam"), [ G.T t ])
++
++(* Upstream 53e29: thread declaration parameters into the generic entity. *)
++and type_parameters_bracket env = function
++  | None -> None
++  | Some (l, types, r) ->
++      Some (l, List_.map (type_parameter env) types, r)
+ 
+ (* TODO: recognize idioms? *)
+ and type_parent env v : G.class_parent =
+@@ -588,7 +621,7 @@
+ 
+ and stmt_aux env x =
+   match x with
+-  | FunctionDef (t, v1, v2, v3, v4, v5) ->
++  | FunctionDef (t, v1, tparams, v2, v3, v4, v5) ->
+       let fkind =
+         match env.context with
+         | InClass -> G.Method
+@@ -596,11 +629,12 @@
+       in
+       let env = { env with context = InFunctionOrMethod } in
+       let v1 = name env v1
++      and tparams = type_parameters_bracket env tparams
+       and v2 = parameters env v2
+       and v3 = option (type_ env) v3
+       and v4 = list_stmt1 env v4
+       and v5 = list (decorator env) v5 in
+-      let ent = G.basic_entity v1 ~attrs:v5 in
++      let ent = { (G.basic_entity v1 ~attrs:v5) with tparams } in
+       let def =
+         {
+           G.fparams = fb v2;
+@@ -610,13 +644,14 @@
+         }
+       in
+       [ G.DefStmt (ent, G.FuncDef def) |> G.s ]
+-  | ClassDef (v0, v1, v2, v3, v4) ->
++  | ClassDef (v0, v1, tparams, v2, v3, v4) ->
+       let env = { env with context = InClass } in
+       let v1 = name env v1
++      and tparams = type_parameters_bracket env tparams
+       and v2 = list (type_parent env) v2
+       and v3 = list_stmt env v3
+       and v4 = list (decorator env) v4 in
+-      let ent = G.basic_entity v1 ~attrs:v4 in
++      let ent = { (G.basic_entity v1 ~attrs:v4) with tparams } in
+       let def =
+         {
+           G.ckind = (G.Class, v0);
+@@ -829,6 +864,16 @@
+   | ImportFrom (t, v1, v2) ->
+       let v1 = module_name env v1 and v2 = list (alias env) v2 in
+       [ G.DirectiveStmt (G.ImportFrom (t, v1, v2) |> G.d) |> G.s ]
++  | TypeAlias (t, v1, tparams, v2) ->
++      let v1 = name env v1
++      and tparams = type_parameters_bracket env tparams
++      and v2 = type_ env v2 in
++      let ent = { (G.basic_entity v1) with tparams } in
++      let st = G.DefStmt (ent, G.TypeDef { G.tbody = G.AliasType v2 }) |> G.s in
++      (* The 'type' keyword is not otherwise part of the generic AST, so set
++       * the range explicitly to cover the whole statement. *)
++      st.s_range <- H.range_of_any_opt (G.Anys [ G.Tk t; G.T v2 ]);
++      [ st ]
+   | Global (t, v1)
+   | NonLocal (t, v1) ->
+       let v1 = list (name env) v1 in
+diff --git a/languages/python/menhir/Parser_python.mly b/languages/python/menhir/Parser_python.mly
+--- a/languages/python/menhir/Parser_python.mly
++++ b/languages/python/menhir/Parser_python.mly
+@@ -141,6 +141,8 @@
+   * out of NAME("match")/NAME("case") only in match-statement contexts
+   * so that plain identifiers "match"/"case" remain valid names. *)
+  MATCH CASE
++ (* python3.12+: another soft keyword, handled the same way as MATCH/CASE. *)
++ TYPE
+  (* python2: *)
+  PRINT EXEC
+ 
+@@ -373,11 +375,23 @@
+ (* Function definition *)
+ (*************************************************************************)
+ (* this rule is referenced in compound_stmt shown later *)
+-funcdef: DEF NAME parameters return_type? ":" suite
+-    { FunctionDef ($1, $2, $3, $4, $6, []) }
+-
+-async_funcdef: ASYNC DEF NAME parameters return_type? ":" suite
+-    { FunctionDef ($2, $3, $4, $5, $7, [] (* TODO $1 *)) }
++funcdef: DEF NAME type_parameters? parameters return_type? ":" suite
++    { FunctionDef ($1, $2, $3, $4, $5, $7, []) }
++
++async_funcdef: ASYNC DEF NAME type_parameters? parameters return_type? ":" suite
++    { FunctionDef ($2, $3, $4, $5, $6, $8, [] (* TODO $1 *)) }
++
++(* Authored Menhir adaptation of the PEP 695 grammar. This extends the
++ * existing primary frontend without replacing its string or match grammar.
++ * PEP 696 default type arguments are outside this adaptation. *)
++type_parameters:
++  | "[" list_comma(type_parameter) "]" { ($1, $2, $3) }
++
++type_parameter:
++  | NAME { Name ($1, Load) }
++  | NAME ":" test { ConstrainedType (Name ($1, Load), $2, $3) }
++  | "*" NAME { TypeParamSplat ($1, $2) }
++  | "**" NAME { TypeParamSplat ($1, $2) }
+ 
+ (* typing-ext: *)
+ return_type:
+@@ -450,8 +464,8 @@
+ (* Class definition *)
+ (*************************************************************************)
+ 
+-classdef: CLASS NAME arglist_paren_opt ":" suite
+-  { ClassDef ($1, $2, $3, $5, []) }
++classdef: CLASS NAME type_parameters? arglist_paren_opt ":" suite
++  { ClassDef ($1, $2, $3, $4, $6, []) }
+ 
+ arglist_paren_opt:
+  | (* empty *) { [] }
+@@ -488,6 +502,8 @@
+   | global_stmt { [$1] }
+   | nonlocal_stmt { [$1] }
+   | assert_stmt { [$1] }
++  (* python3.12+: *)
++  | type_alias_stmt { [$1] }
+   (* python2: *)
+   | print_stmt { [$1] }
+   | exec_stmt { [$1] }
+@@ -553,7 +569,9 @@
+   | ASSERT test          { Assert ($1, $2, None) }
+   | ASSERT test "," test { Assert ($1, $2, Some $4) }
+ 
+-
++(* python3.12+ (PEP 695): TYPE remains a contextual soft keyword. *)
++type_alias_stmt:
++  | TYPE NAME type_parameters? "=" test { TypeAlias ($1, $2, $3, $5) }
+ 
+ compound_stmt:
+   | if_stmt     { $1 }
+@@ -574,17 +592,17 @@
+ decorated:
+   | decorator+ classdef {
+      match $2 with
+-     | ClassDef (t, a, b, c, d) -> ClassDef (t, a, b, c, $1 @ d)
++     | ClassDef (t, a, b, c, d, e) -> ClassDef (t, a, b, c, d, $1 @ e)
+      | _ -> raise Impossible
+    }
+   | decorator+ funcdef {
+      match $2 with
+-     | FunctionDef (t, a, b, c, d, e) -> FunctionDef (t, a, b, c, d, $1 @ e)
++     | FunctionDef (t, a, b, c, d, e, f) -> FunctionDef (t, a, b, c, d, e, $1 @ f)
+      | _ -> raise Impossible
+    }
+   | decorator+ async_funcdef {
+      match $2 with
+-     | FunctionDef (t, a, b, c, d, e) -> FunctionDef (t, a, b, c, d, $1 @ e)
++     | FunctionDef (t, a, b, c, d, e, f) -> FunctionDef (t, a, b, c, d, e, $1 @ f)
+      | _ -> raise Impossible
+   }
+ 
+diff --git a/languages/python/menhir/Parsing_hacks_python.ml b/languages/python/menhir/Parsing_hacks_python.ml
+--- a/languages/python/menhir/Parsing_hacks_python.ml
++++ b/languages/python/menhir/Parsing_hacks_python.ml
+@@ -168,10 +168,73 @@
+ let rewrite_match_case toks = rewrite 0 [] true toks
+ 
+ (*****************************************************************************)
++(* Soft keyword: type (PEP 695 'type' statement)                             *)
++(*****************************************************************************)
++(* Mirrors rewrite_match_case above: rewrite NAME("type") to TYPE only when
++ * it unambiguously heads a `type X = ...` or `type X[T] = ...`
++ * statement. Calls, assignments and subscriptions using the name `type`
++ * remain ordinary identifiers.
++ *)
++
++(* Authored adaptation: consume exactly one balanced type-parameter bracket
++ * before requiring the assignment token. A mismatched or missing delimiter
++ * does not promote the soft keyword. Normal syntax validation still happens
++ * in Menhir; this lookahead never edits or removes source tokens. *)
++let rec after_type_parameters expected xs =
++  match (expected, skip_trivia xs) with
++  | [], xs -> Some xs
++  | _, T.LPAREN _ :: xs -> after_type_parameters (`Paren :: expected) xs
++  | _, T.LBRACK _ :: xs -> after_type_parameters (`Bracket :: expected) xs
++  | _, T.LBRACE _ :: xs -> after_type_parameters (`Brace :: expected) xs
++  | `Paren :: rest, T.RPAREN _ :: xs -> after_type_parameters rest xs
++  | `Bracket :: rest, T.RBRACK _ :: xs -> after_type_parameters rest xs
++  | `Brace :: rest, T.RBRACE _ :: xs -> after_type_parameters rest xs
++  | _, (T.RPAREN _ | T.RBRACK _ | T.RBRACE _ | T.EOF _) :: _
++  | _, [] ->
++      None
++  | _, _ :: xs -> after_type_parameters expected xs
++
++let starts_type_alias xs =
++  match skip_trivia xs with
++  | T.NAME _ :: xs -> (
++      match skip_trivia xs with
++      | T.EQ _ :: _ -> true
++      | T.LBRACK _ :: xs -> (
++          match after_type_parameters [ `Bracket ] xs with
++          | Some xs -> (
++              match skip_trivia xs with
++              | T.EQ _ :: _ -> true
++              | _ -> false)
++          | None -> false)
++      | _ -> false)
++  | _ -> false
++
++let rec rewrite_type_alias_aux prev_bound = function
++  | [] -> []
++  | (T.NAME ("type", ii) as t) :: xs when prev_bound ->
++      if starts_type_alias xs then T.TYPE ii :: rewrite_type_alias_aux false xs
++      else t :: rewrite_type_alias_aux false xs
++  | t :: xs ->
++      let prev_bound' =
++        if is_trivia t then prev_bound
++        else
++          match t with
++          (* `suite` allows a same-line simple_stmt after the colon (e.g.
++           * `if cond: type Alias = int`), so a colon opens a statement
++           * here too, not just NEWLINE/INDENT/DEDENT/";". *)
++          | T.COLON _ -> true
++          | _ -> is_stmt_boundary t
++      in
++      t :: rewrite_type_alias_aux prev_bound' xs
++
++let rewrite_type_alias toks = rewrite_type_alias_aux true toks
++
++(*****************************************************************************)
+ (* Entry point *)
+ (*****************************************************************************)
+ let fix_tokens toks =
+   let toks = rewrite_match_case toks in
++  let toks = rewrite_type_alias toks in
+   let rec aux indent xs =
+     match xs with
+     | [ T.NEWLINE ii; T.EOF _ ] -> add_dedent indent ii xs
+diff --git a/languages/python/menhir/Token_helpers_python.ml b/languages/python/menhir/Token_helpers_python.ml
+--- a/languages/python/menhir/Token_helpers_python.ml
++++ b/languages/python/menhir/Token_helpers_python.ml
+@@ -56,6 +56,7 @@
+   | NONLOCAL ii -> NONLOCAL (f ii)
+   | MATCH ii -> MATCH (f ii)
+   | CASE ii -> CASE (f ii)
++  | TYPE ii -> TYPE (f ii)
+   | ELLIPSES ii -> ELLIPSES (f ii)
+   | LDots ii -> LDots (f ii)
+   | RDots ii -> RDots (f ii)
+diff --git a/languages/python/tree-sitter/Parse_python_tree_sitter.ml b/languages/python/tree-sitter/Parse_python_tree_sitter.ml
+--- a/languages/python/tree-sitter/Parse_python_tree_sitter.ml
++++ b/languages/python/tree-sitter/Parse_python_tree_sitter.ml
+@@ -1464,7 +1464,7 @@
+   in
+   let _colon = (* ":" *) token env v4 in
+   let body = map_suite env v5 in
+-  (tclass, id, parents, body, [])
++  (tclass, id, None, parents, body, [])
+ 
+ (* not in original grammar, but help to factorize boilerplate code *)
+ and map_or_else_as_list env v =
+@@ -1541,11 +1541,11 @@
+       let def =
+         match v2 with
+         | `Class_defi x ->
+-            let a, b, c, d, _ = map_class_definition env x in
+-            ClassDef (a, b, c, d, decorators)
++            let a, b, c, d, e, _ = map_class_definition env x in
++            ClassDef (a, b, c, d, e, decorators)
+         | `Func_defi x ->
+-            let a, b, c, d, e, _ = map_function_definition env x in
+-            FunctionDef (a, b, c, d, e, decorators)
++            let a, b, c, d, e, f, _ = map_function_definition env x in
++            FunctionDef (a, b, c, d, e, f, decorators)
+       in
+       def
+   | `Match_stmt (v1, v2, v3, v4, v5, v6) ->
+@@ -1638,7 +1638,7 @@
+   in
+   let _tcolon = (* ":" *) token env v6 in
+   let body = map_suite env v7 in
+-  (tdef, id, params, topt, body, [])
++  (tdef, id, None, params, topt, body, [])
+ 
+ and map_module_ (env : env) (xs : CST.module_) : stmt list =
+   List.concat_map (map_statement env) xs

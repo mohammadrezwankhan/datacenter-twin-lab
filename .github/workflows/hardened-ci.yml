@@ -53,17 +53,17 @@ jobs:
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rezwan-security-sast/native
-          key: native-scanner-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('.github/security/native_scanner.py', '.github/security/bootstrap.py', '.github/security/native-scanner.json', '.github/security/native-switch.export', '.github/security/requirements.txt', '.github/security/requirements-bootstrap.txt', '.github/security/requirements-build.txt') }}
+          key: native-scanner-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('.github/security/native_scanner.py', '.github/security/bootstrap.py', '.github/security/native-scanner.json', '.github/security/native-switch.export', '.github/security/requirements.txt', '.github/security/requirements-bootstrap.txt', '.github/security/requirements-build.txt', '.github/security/scanner_contracts.py', '.github/security/run.py', '.github/security/parser-backports/**') }}
       - name: Install verified development scanners
         run: python .github/security/bootstrap.py "$SECURITY_SCAN_MODE" --destination "$SECURITY_TOOL_DIR"
+      - name: Run the security gate
+        run: python .github/security/run.py "$SECURITY_SCAN_MODE"
       - name: Cache verified native scanner outputs
         if: matrix.mode == 'sast' && steps.native-scanner-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/rezwan-security-sast/native
-          key: native-scanner-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('.github/security/native_scanner.py', '.github/security/bootstrap.py', '.github/security/native-scanner.json', '.github/security/native-switch.export', '.github/security/requirements.txt', '.github/security/requirements-bootstrap.txt', '.github/security/requirements-build.txt') }}
-      - name: Run the security gate
-        run: python .github/security/run.py "$SECURITY_SCAN_MODE"
+          key: native-scanner-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('.github/security/native_scanner.py', '.github/security/bootstrap.py', '.github/security/native-scanner.json', '.github/security/native-switch.export', '.github/security/requirements.txt', '.github/security/requirements-bootstrap.txt', '.github/security/requirements-build.txt', '.github/security/scanner_contracts.py', '.github/security/run.py', '.github/security/parser-backports/**') }}
       - name: Preserve scanner reports and execution receipts
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

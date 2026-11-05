@@ -87,6 +87,35 @@ class NumericalHelperTests(unittest.TestCase):
         for spine in axes.spine_records.values():
             self.assertEqual(spine.widths, [0.8])
 
+    def test_plot_style_type_parameter_keeps_its_bound_and_declaration_scope(self) -> None:
+        from typing import TypeVar
+
+        from datacenter_twin.research import common
+
+        parameters: tuple[TypeVar, ...] = getattr(common.set_ieee_axes, "__type_params__", ())
+        self.assertEqual(len(parameters), 1)
+        parameter = parameters[0]
+        self.assertIsInstance(parameter, TypeVar)
+        self.assertEqual(parameter.__name__, "AxesType")
+        self.assertIs(parameter.__bound__, common._Axes)
+        self.assertTrue(parameter.__infer_variance__)
+        self.assertNotIn("AxesType", vars(common))
+
+    def test_load_command_alias_resolves_its_real_type_lazily(self) -> None:
+        from collections.abc import Callable
+        from importlib.util import module_from_spec
+        from typing import TypeAliasType
+
+        specification = find_spec("datacenter_twin.research.types")
+        if specification is None or specification.loader is None:
+            self.fail("The research type module must have an executable loader")
+        isolated = module_from_spec(specification)
+        specification.loader.exec_module(isolated)
+        alias = vars(isolated)["LoadCommand"]
+        self.assertIsInstance(alias, TypeAliasType)
+        with patch.object(isolated, "Real", int):
+            self.assertEqual(alias.__value__, int | Callable[[float], int])
+
     def test_research_type_aliases_keep_runtime_and_annotation_contracts(self) -> None:
         from collections.abc import Callable
         from typing import TypeAliasType, get_type_hints

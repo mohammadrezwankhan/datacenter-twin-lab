@@ -14,7 +14,7 @@ import json
 import sys
 from fractions import Fraction
 from pathlib import Path
-from typing import Any, Literal, TypeAliasType, TypedDict
+from typing import Any, Literal, TypedDict
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -40,10 +40,7 @@ class TimingExpectation(TypedDict):
     depletion_s: list[str]
 
 
-# OpenGrep 1.33 cannot parse PEP 695 statements; retain the same Literal alias object.
-ExpectedQuantity = TypeAliasType(  # noqa: UP040
-    "ExpectedQuantity", Literal["unserved_it_kwh", "unserved_duration_s", "battery_final_kwh"]
-)
+type ExpectedQuantity = Literal["unserved_it_kwh", "unserved_duration_s", "battery_final_kwh"]
 
 EXPECTED: dict[str, TimingExpectation] = {
     "early-peak": {

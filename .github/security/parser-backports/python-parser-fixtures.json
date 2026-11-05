@@ -1,0 +1,1025 @@
+{
+  "schema_version": 1,
+  "upstream_base": "092c80faa0817840228349f93eff12a50fb9cf6b",
+  "native_status": "stable-rebase-prepared-uncompiled-unexecuted",
+  "rulesets": {
+    "pep695-flow": {
+      "rules": [
+        {
+          "id": "rezwan-pep695-flow",
+          "languages": [
+            "python"
+          ],
+          "message": "Required parser preservation control",
+          "severity": "WARNING",
+          "mode": "taint",
+          "pattern-sources": [
+            {
+              "pattern": "rezwan_source()"
+            }
+          ],
+          "pattern-sinks": [
+            {
+              "pattern": "rezwan_sink(...)"
+            }
+          ]
+        }
+      ]
+    },
+    "match-flow": {
+      "rules": [
+        {
+          "id": "test",
+          "languages": [
+            "python"
+          ],
+          "message": "Required parser preservation control",
+          "severity": "WARNING",
+          "mode": "taint",
+          "pattern-sources": [
+            {
+              "pattern": "source()"
+            }
+          ],
+          "pattern-sinks": [
+            {
+              "pattern": "sink(...)"
+            }
+          ]
+        }
+      ]
+    },
+    "type-expressions": {
+      "rules": [
+        {
+          "id": "rezwan-bound-visible",
+          "languages": [
+            "python"
+          ],
+          "message": "Bound expression must remain searchable",
+          "severity": "WARNING",
+          "pattern": "rezwan_bound_marker(...)"
+        },
+        {
+          "id": "rezwan-alias-visible",
+          "languages": [
+            "python"
+          ],
+          "message": "Alias expression must remain searchable",
+          "severity": "WARNING",
+          "pattern": "rezwan_alias_marker(...)"
+        }
+      ]
+    }
+  },
+  "fixtures": [
+    {
+      "id": "bounded_function_and_defaults",
+      "source": "@decorate\ndef set_ieee_axes[AxesType: _Axes](ax: AxesType, fontsize: int = 8) -> AxesType:\n    mark_before(ax)\n    mark_after(ax)\n    return ax\n",
+      "source_sha256": "34e85381f6101dd6f7fad73caa781a644623a166aa8e13beb5fdf28b9846f6fe",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "set_ieee_axes",
+          "type_parameters": [
+            {
+              "name": "AxesType",
+              "bounds": [
+                [
+                  "name",
+                  "_Axes"
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [
+            "decorate"
+          ],
+          "body_names": [
+            "mark_before",
+            "mark_after",
+            "ax"
+          ],
+          "parameters": [
+            {
+              "name": "ax",
+              "annotation": [
+                "name",
+                "AxesType"
+              ],
+              "default": null
+            },
+            {
+              "name": "fontsize",
+              "annotation": [
+                "name",
+                "int"
+              ],
+              "default": [
+                "int",
+                8
+              ]
+            }
+          ],
+          "return_type": [
+            "name",
+            "AxesType"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "generic_class_method_variadics",
+      "source": "@decorate_class\nclass Packet[T: Base, *Ts, **P](Base):\n    @decorate_method\n    def convert[U: Sequence[Sequence[int]]](self, value: U, count: int = 8) -> U:\n        preserve(value)\n        return value\n",
+      "source_sha256": "d672f97969e283c89dd2108e70d139c321fc0cc841be5a9c83e88b789d53ba9c",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "Packet",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": [
+                [
+                  "name",
+                  "Base"
+                ]
+              ]
+            },
+            {
+              "kind": "TypeVarTuple",
+              "name": "Ts"
+            },
+            {
+              "kind": "ParamSpec",
+              "name": "P"
+            }
+          ],
+          "decorator_names": [
+            "decorate_class"
+          ],
+          "body_names": [
+            "convert",
+            "preserve",
+            "value"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "convert",
+          "type_parameters": [
+            {
+              "name": "U",
+              "bounds": [
+                [
+                  "subscript",
+                  [
+                    "name",
+                    "Sequence"
+                  ],
+                  [
+                    "subscript",
+                    [
+                      "name",
+                      "Sequence"
+                    ],
+                    [
+                      "name",
+                      "int"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [
+            "decorate_method"
+          ],
+          "body_names": [
+            "preserve",
+            "value"
+          ],
+          "parameters": [
+            {
+              "name": "self",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "value",
+              "annotation": [
+                "name",
+                "U"
+              ],
+              "default": null
+            },
+            {
+              "name": "count",
+              "annotation": [
+                "name",
+                "int"
+              ],
+              "default": [
+                "int",
+                8
+              ]
+            }
+          ],
+          "return_type": [
+            "name",
+            "U"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "aliases_retain_expression_trees",
+      "source": "type Items[T: Bound] = list[T]\ntype MappingAlias = Mapping[str, bytes]\ntype Reply = int | str | None\n",
+      "source_sha256": "2858faa2da23fb56096d16cafa7791c78862c925dc6b6a1b6b6d91f1ef5d5c00",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "alias",
+          "name": "Items",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": [
+                [
+                  "name",
+                  "Bound"
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "subscript",
+            [
+              "name",
+              "list"
+            ],
+            [
+              "name",
+              "T"
+            ]
+          ]
+        },
+        {
+          "kind": "alias",
+          "name": "MappingAlias",
+          "type_parameters": null,
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "slices",
+            [
+              "subscript",
+              [
+                "name",
+                "Mapping"
+              ],
+              [
+                "name",
+                "str"
+              ]
+            ],
+            [
+              "subscript",
+              [
+                "name",
+                "Mapping"
+              ],
+              [
+                "name",
+                "bytes"
+              ]
+            ]
+          ]
+        },
+        {
+          "kind": "alias",
+          "name": "Reply",
+          "type_parameters": null,
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "union",
+            [
+              "union",
+              [
+                "name",
+                "int"
+              ],
+              [
+                "name",
+                "str"
+              ]
+            ],
+            [
+              "none"
+            ]
+          ]
+        }
+      ],
+      "type_alias_count": 3
+    },
+    {
+      "id": "multiline_tuple_bound_and_trailing_comma",
+      "source": "type Multi[\n    T: (int, str),\n    *Ts,\n    **P,\n] = list[T]\n\ndef identity[\n    U: \"Bound\",\n](value: U) -> U:\n    return value\n",
+      "source_sha256": "e8179dfd64c3b5717581174c120f784b070cfc5ba8bfe74bd0c3c6af75b8fddc",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "alias",
+          "name": "Multi",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": [
+                [
+                  "tuple",
+                  [
+                    "name",
+                    "int"
+                  ],
+                  [
+                    "name",
+                    "str"
+                  ]
+                ]
+              ]
+            },
+            {
+              "kind": "TypeVarTuple",
+              "name": "Ts"
+            },
+            {
+              "kind": "ParamSpec",
+              "name": "P"
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "subscript",
+            [
+              "name",
+              "list"
+            ],
+            [
+              "name",
+              "T"
+            ]
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "identity",
+          "type_parameters": [
+            {
+              "name": "U",
+              "bounds": [
+                [
+                  "string",
+                  "Bound"
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [
+            "value"
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "annotation": [
+                "name",
+                "U"
+              ],
+              "default": null
+            }
+          ],
+          "return_type": [
+            "name",
+            "U"
+          ]
+        }
+      ],
+      "type_alias_count": 1
+    },
+    {
+      "id": "async_and_decorated_generics",
+      "source": "@decorate\nasync def retrieve[T: Bound](value: T) -> T:\n    await visit(value)\n    return value\n\ndef forward[T, *Ts, **P](value: T) -> T:\n    return value\n",
+      "source_sha256": "6cfa79ce8d892a2f815758d27c35c63aa4045c38a5d20c8019c4bd6bd098cc3f",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "retrieve",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": [
+                [
+                  "name",
+                  "Bound"
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [
+            "decorate"
+          ],
+          "body_names": [
+            "visit",
+            "value"
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "annotation": [
+                "name",
+                "T"
+              ],
+              "default": null
+            }
+          ],
+          "return_type": [
+            "name",
+            "T"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "forward",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": []
+            },
+            {
+              "kind": "TypeVarTuple",
+              "name": "Ts"
+            },
+            {
+              "kind": "ParamSpec",
+              "name": "P"
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [
+            "value"
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "annotation": [
+                "name",
+                "T"
+              ],
+              "default": null
+            }
+          ],
+          "return_type": [
+            "name",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "type_remains_a_soft_keyword",
+      "source": "builtin = type(1)\ntype = \"ordinary\"\nalias = type\nobj.type = type\nindexed = type[int]\nvalues = [type for type in items]\n\ndef ordinary(type=0):\n    obj.type = type\n    return type\n\nclass SoftNames:\n    type = 7\n    def type(self, type):\n        return type\n\nrendered = f\"value: {type}\"\n",
+      "source_sha256": "31d405fafdd09784f7b97bfc65cebfe95cc38e96739018cee255a80a84318cbd",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "ordinary",
+          "type_parameters": null,
+          "decorator_names": [],
+          "body_names": [
+            "obj",
+            "type"
+          ],
+          "parameters": [
+            {
+              "name": "type",
+              "annotation": null,
+              "default": [
+                "int",
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "SoftNames",
+          "type_parameters": null,
+          "decorator_names": [],
+          "body_names": [
+            "type"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "type",
+          "type_parameters": null,
+          "decorator_names": [],
+          "body_names": [
+            "type"
+          ],
+          "parameters": [
+            {
+              "name": "self",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "type",
+              "annotation": null,
+              "default": null
+            }
+          ]
+        }
+      ],
+      "type_alias_count": 0
+    },
+    {
+      "id": "inline_alias_soft_keyword_boundaries",
+      "source": "type Alias[T] = list[T]; type = \"ordinary\"\nif enabled: type Local[U] = list[U]\n",
+      "source_sha256": "5634fe2b17d708a365ccdef333df13a7accceafcd6668b8dfd435cef695698c7",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "alias",
+          "name": "Alias",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": []
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "subscript",
+            [
+              "name",
+              "list"
+            ],
+            [
+              "name",
+              "T"
+            ]
+          ]
+        },
+        {
+          "kind": "alias",
+          "name": "Local",
+          "type_parameters": [
+            {
+              "name": "U",
+              "bounds": []
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "subscript",
+            [
+              "name",
+              "list"
+            ],
+            [
+              "name",
+              "U"
+            ]
+          ]
+        }
+      ],
+      "type_alias_count": 2
+    },
+    {
+      "id": "generic_method_flow_before_inside_after",
+      "source": "def outside_before():\n    # ruleid: rezwan-pep695-flow\n    rezwan_sink(rezwan_source())\n\nclass Box[T: Bound]:\n    def before(self):\n        # ruleid: rezwan-pep695-flow\n        rezwan_sink(rezwan_source())\n\n    def convert[U: Bound](self, value: U) -> U:\n        contaminated = rezwan_source()\n        # ruleid: rezwan-pep695-flow\n        rezwan_sink(contaminated)\n        # ok: rezwan-pep695-flow\n        rezwan_sink(\"constant\")\n        return value\n\n    def after(self):\n        # ruleid: rezwan-pep695-flow\n        rezwan_sink(rezwan_source())\n\ndef outside_after():\n    # ruleid: rezwan-pep695-flow\n    rezwan_sink(rezwan_source())\n    # ok: rezwan-pep695-flow\n    rezwan_sink(\"constant\")\n",
+      "source_sha256": "cf6c85624daae083a1a4c3bee404f8fee32cc6f588a5ee4337f6dca28fe5c91c",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "Box",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": [
+                [
+                  "name",
+                  "Bound"
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [
+            "before",
+            "convert",
+            "after",
+            "rezwan_source",
+            "rezwan_sink"
+          ]
+        },
+        {
+          "kind": "function",
+          "name": "convert",
+          "type_parameters": [
+            {
+              "name": "U",
+              "bounds": [
+                [
+                  "name",
+                  "Bound"
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [
+            "contaminated",
+            "rezwan_source",
+            "rezwan_sink",
+            "value"
+          ],
+          "parameters": [
+            {
+              "name": "self",
+              "annotation": null,
+              "default": null
+            },
+            {
+              "name": "value",
+              "annotation": [
+                "name",
+                "U"
+              ],
+              "default": null
+            }
+          ],
+          "return_type": [
+            "name",
+            "U"
+          ]
+        }
+      ],
+      "native_ruleset": "pep695-flow",
+      "expected_findings": [
+        {
+          "rule_id": "rezwan-pep695-flow",
+          "line": 3
+        },
+        {
+          "rule_id": "rezwan-pep695-flow",
+          "line": 8
+        },
+        {
+          "rule_id": "rezwan-pep695-flow",
+          "line": 13
+        },
+        {
+          "rule_id": "rezwan-pep695-flow",
+          "line": 20
+        },
+        {
+          "rule_id": "rezwan-pep695-flow",
+          "line": 24
+        }
+      ],
+      "negative_lines": [
+        15,
+        26
+      ]
+    },
+    {
+      "id": "bound_and_alias_calls_remain_searchable",
+      "source": "# ruleid: rezwan-bound-visible\ndef visible[T: rezwan_bound_marker(Sequence[int])](value: T) -> T:\n    return value\n\n# ruleid: rezwan-alias-visible\ntype Visible[T] = rezwan_alias_marker(list[T])\n",
+      "source_sha256": "349873c98688ce862f6f01d09779f91815b2a1bbe91286e34c45fc4483cc0670",
+      "expect_parse": "success",
+      "declarations": [
+        {
+          "kind": "function",
+          "name": "visible",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": [
+                [
+                  "call",
+                  [
+                    "name",
+                    "rezwan_bound_marker"
+                  ],
+                  [
+                    "subscript",
+                    [
+                      "name",
+                      "Sequence"
+                    ],
+                    [
+                      "name",
+                      "int"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [
+            "value"
+          ],
+          "parameters": [
+            {
+              "name": "value",
+              "annotation": [
+                "name",
+                "T"
+              ],
+              "default": null
+            }
+          ],
+          "return_type": [
+            "name",
+            "T"
+          ]
+        },
+        {
+          "kind": "alias",
+          "name": "Visible",
+          "type_parameters": [
+            {
+              "name": "T",
+              "bounds": []
+            }
+          ],
+          "decorator_names": [],
+          "body_names": [],
+          "alias_value": [
+            "call",
+            [
+              "name",
+              "rezwan_alias_marker"
+            ],
+            [
+              "subscript",
+              [
+                "name",
+                "list"
+              ],
+              [
+                "name",
+                "T"
+              ]
+            ]
+          ]
+        }
+      ],
+      "native_ruleset": "type-expressions",
+      "type_alias_count": 1,
+      "expected_findings": [
+        {
+          "rule_id": "rezwan-bound-visible",
+          "line": 2
+        },
+        {
+          "rule_id": "rezwan-alias-visible",
+          "line": 6
+        }
+      ],
+      "negative_lines": []
+    },
+    {
+      "id": "missing_type_bound",
+      "source": "def broken[T:](value: T):\n    return value\n",
+      "source_sha256": "ff0a9502b4b173d5ac7c83adfc34f24af5ed284851ec6175cc21b57e12d59401",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "empty_function_type_parameters",
+      "source": "def broken[](value):\n    return value\n",
+      "source_sha256": "4469dd2308e3839d215f6197b318cdaaad40b6dabc1b7ab6e18508d522172477",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "empty_alias_type_parameters",
+      "source": "type Broken[] = int\n",
+      "source_sha256": "d9701ebfdb22814ade411c423d19aa9e0aa100aee55ee69c0c90730352f983c2",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "unclosed_alias_type_parameters",
+      "source": "type Broken[T = list[T]\n",
+      "source_sha256": "0f6b3db9504cfd28f22fa86bc322cff1c0d8822a793fc837b06a44e5927a8194",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "mismatched_alias_delimiter",
+      "source": "type Broken[T: Sequence[int)]] = list[T]\n",
+      "source_sha256": "b93070b202536d5ae14e3b8612b8aac32aad55c9750b68f0390e2a80bd859c4c",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "missing_alias_rhs",
+      "source": "type Broken[T] =\n",
+      "source_sha256": "5f49cd379d45ea89981904234df8df07a1e15fb91fe767a28e55a82a2b423da2",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "missing_generic_function_body",
+      "source": "def broken[T: Bound](value: T):\n",
+      "source_sha256": "2d703ba49920a8994ad3977300f9c685eca67432557e9a3839af31d2a80ce4f4",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "malformed_body_after_valid_header",
+      "source": "def broken[T: Bound](value: T):\n    return )\n",
+      "source_sha256": "c9009b1187f1ee52a241969a65349a339dd2281b23686032ee4f9c65987d43fb",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "non_identifier_type_parameter",
+      "source": "class Broken[1]:\n    pass\n",
+      "source_sha256": "f97aedc849a3a75778481fcaef9e3b320db304de0901ac07c17d090f015dbcf7",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "unsupported_pep696_default",
+      "source": "type Broken[T = int] = list[T]\n",
+      "source_sha256": "e67d725e5c510ad0cc13bd118da940c3f24be036b94d96e9154d7bbaa37f10b4",
+      "expect_parse": "reject",
+      "declarations": []
+    },
+    {
+      "id": "upstream_match_as_sink",
+      "source": "def foo():\n    x = source()\n    match x:\n        case _ as captured:\n            # ruleid: test\n            sink(captured)\n\ndef bar():\n    x = \"clean\"\n    match x:\n        case _ as captured:\n            # OK:\n            sink(captured)\n\ndef baz():\n    # nested as: only `inner` carries the taint from the list element.\n    xs = [source(), 1]\n    match xs:\n        case [a as inner, b]:\n            # ruleid: test\n            sink(inner)\n",
+      "source_sha256": "14b0c03dd32690a0728562f987645747456fb62a6deb50649abe57c5c374d012",
+      "expect_parse": "success",
+      "declarations": [],
+      "native_ruleset": "match-flow",
+      "upstream_path": "tests/tainting_rules/python/match_as_sink.py",
+      "upstream_commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
+      "expected_findings": [
+        {
+          "rule_id": "test",
+          "line": 6
+        },
+        {
+          "rule_id": "test",
+          "line": 21
+        }
+      ],
+      "negative_lines": [
+        13
+      ]
+    },
+    {
+      "id": "upstream_match_guard_sink",
+      "source": "def foo():\n    x = source()\n    y = 1\n    match y:\n        # ruleid: test\n        case 1 if sink(x):\n            pass\n        # OK:\n        case 2 if sink(\"clean\"):\n            pass\n\ndef bar():\n    match 1:\n        # ruleid: test\n        case _ if sink(source()):\n            pass\n",
+      "source_sha256": "72c770e09d8fdf9a287915c082b0732ff0c960e5cbc9605ba56047d739b3fddd",
+      "expect_parse": "success",
+      "declarations": [],
+      "native_ruleset": "match-flow",
+      "upstream_path": "tests/tainting_rules/python/match_guard_sink.py",
+      "upstream_commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
+      "expected_findings": [
+        {
+          "rule_id": "test",
+          "line": 6
+        },
+        {
+          "rule_id": "test",
+          "line": 15
+        }
+      ],
+      "negative_lines": [
+        9
+      ]
+    },
+    {
+      "id": "upstream_match_pattern_binding_sink",
+      "source": "def foo():\n    # capture pattern: `case x:` binds x to the whole subject.\n    x = source()\n    match x:\n        case captured:\n            # ruleid: test\n            sink(captured)\n\ndef bar():\n    # sequence destructuring: each element inherits the subject's taint.\n    xs = [source(), 1]\n    match xs:\n        case [a, b]:\n            # ruleid: test\n            sink(a)\n\ndef baz():\n    xs = [1, 2]\n    match xs:\n        case [a, b]:\n            # OK:\n            sink(a)\n",
+      "source_sha256": "f503c87c253b400f04d4e43f7c198c155637a3d000f456961cff33ad6fb1c029",
+      "expect_parse": "success",
+      "declarations": [],
+      "native_ruleset": "match-flow",
+      "upstream_path": "tests/tainting_rules/python/match_pattern_binding_sink.py",
+      "upstream_commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
+      "expected_findings": [
+        {
+          "rule_id": "test",
+          "line": 7
+        },
+        {
+          "rule_id": "test",
+          "line": 15
+        }
+      ],
+      "negative_lines": [
+        22
+      ]
+    },
+    {
+      "id": "repository_tests_test_audit_security",
+      "source": "\"\"\"Exercise hostile audit responses through urllib without opening a socket.\"\"\"\n\nfrom __future__ import annotations\n\nimport unittest\nfrom collections.abc import Callable, Iterator\nfrom contextlib import contextmanager\nfrom email.message import Message\nfrom fractions import Fraction\nfrom io import BytesIO\nfrom typing import SupportsIndex, override\nfrom unittest.mock import patch\nfrom urllib import request\nfrom urllib.error import URLError\nfrom urllib.response import addinfourl\n\nfrom scripts import audit_public_site as auditor\n\nBASE = \"https://example.invalid/\"\ntype TransportReply = tuple[int, str | None, BytesIO]\n\n\nclass SimulatedResponse(addinfourl):\n    msg = \"Simulated HTTP response\"\n\n\n@contextmanager\ndef transport(\n    respond: Callable[[request.Request], TransportReply],\n) -> Iterator[list[tuple[str, str]]]:\n    \"\"\"Keep the real opener/redirect processing; replace only network I/O.\"\"\"\n    calls: list[tuple[str, str]] = []\n\n    def open_response(\n        _handler: request.AbstractHTTPHandler, req: request.Request\n    ) -> SimulatedResponse:\n        calls.append((req.get_method(), req.full_url))\n        status, location, body = respond(req)\n        headers = Message()\n        if location is not None:\n            headers[\"Location\"] = location\n        return SimulatedResponse(body, headers, req.full_url, status)\n\n    with (\n        patch.object(request, \"_opener\", None),\n        patch.object(request.HTTPHandler, \"http_open\", open_response),\n        patch.object(request.HTTPSHandler, \"https_open\", open_response),\n    ):\n        yield calls\n\n\nclass AuditRedirectSecurityTests(unittest.TestCase):\n    def test_request_policy_blocks_unsupported_urls_before_transport(self) -> None:\n        urls = (\n            \"file:///simulated-private-file\",\n            \"ftp://example.invalid/asset\",\n            \"https:///missing-host\",\n            \"https://user@example.invalid/\",\n        )\n        with patch.object(auditor, \"build_opener\", side_effect=AssertionError(\"No transport\")):\n            for operation in (auditor.default_fetch, auditor.default_probe):\n                for url in urls:\n                    with (\n                        self.subTest(operation=operation.__name__, url=url),\n                        self.assertRaisesRegex(ValueError, \"HTTP\\\\(S\\\\) without credentials\"),\n                    ):\n                        operation(url)\n\n    def test_existing_http_policy_and_read_only_method_are_preserved(self) -> None:\n        url = \"http://example.invalid/\"\n\n        def respond(req: request.Request) -> TransportReply:\n            self.assertEqual(req.get_method(), \"GET\")\n            return 200, None, BytesIO(b\"synthetic response\")\n\n        with transport(respond) as calls:\n            self.assertEqual(auditor.default_fetch(url)[:3], (200, url, b\"synthetic response\"))\n        self.assertEqual(calls, [(\"GET\", url)])\n\n    def test_unknown_transport_response_and_missing_status_fail_closed(self) -> None:\n        cases = (\n            (object(), \"HTTP response\"),\n            (SimulatedResponse(BytesIO(b\"\"), Message(), BASE), \"HTTP status\"),\n        )\n        for response, message in cases:\n            with self.subTest(message=message), patch.object(auditor, \"build_opener\") as opener:\n                opener.return_value.open.return_value = response\n                with self.assertRaisesRegex(ValueError, message):\n                    auditor.default_probe(BASE)\n\n    def test_fetch_byte_limit_remains_enforced(self) -> None:\n        def respond(_req: request.Request) -> TransportReply:\n            return 200, None, BytesIO(b\"123456789\")\n\n        with (\n            transport(respond),\n            patch.object(auditor, \"MAX_BYTES\", 8),\n            self.assertRaisesRegex(ValueError, \"exceeds 8 byte audit limit\"),\n        ):\n            auditor.default_fetch(BASE)\n\n    def test_fetch_blocks_off_origin_redirect_before_any_second_request(self) -> None:\n        destination = \"http://127.0.0.1:9/private\"\n\n        def respond(req: request.Request) -> TransportReply:\n            if req.full_url == BASE:\n                return 302, destination, BytesIO(b\"\")\n            return 200, None, BytesIO(b\"private response\")\n\n        with transport(respond) as calls:\n            audit = auditor.SiteAudit(BASE)\n            self.assertIsNone(audit.get(BASE))\n        self.assertEqual(calls, [(\"GET\", BASE)])\n        self.assertTrue(any(\"redirect\" in failure.lower() for failure in audit.report.failures))\n\n    def test_probe_blocks_off_origin_redirect_before_any_second_request(self) -> None:\n        def respond(req: request.Request) -> TransportReply:\n            if req.full_url == BASE:\n                return 307, \"https://other.invalid/asset\", BytesIO(b\"\")\n            return 200, None, BytesIO(b\"\")\n\n        with transport(respond) as calls, self.assertRaises((ValueError, URLError)):\n            auditor.default_probe(BASE)\n        self.assertEqual(calls, [(\"HEAD\", BASE)])\n\n    def test_probe_fallback_get_blocks_off_origin_redirect(self) -> None:\n        def respond(req: request.Request) -> TransportReply:\n            if req.get_method() == \"HEAD\":\n                return 405, None, BytesIO(b\"\")\n            if req.full_url == BASE:\n                return 303, \"http://169.254.169.254/simulated\", BytesIO(b\"\")\n            return 200, None, BytesIO(b\"\")\n\n        with transport(respond) as calls, self.assertRaises((ValueError, URLError)):\n            auditor.default_probe(BASE)\n        self.assertEqual(calls, [(\"HEAD\", BASE), (\"GET\", BASE)])\n\n    def test_fetch_allows_same_origin_relative_redirect(self) -> None:\n        def respond(req: request.Request) -> TransportReply:\n            if req.full_url == BASE:\n                return 301, \"/canonical/\", BytesIO(b\"\")\n            return 200, None, BytesIO(b\"allowed response\")\n\n        with transport(respond) as calls:\n            status, final, content, _ = auditor.default_fetch(BASE)\n        self.assertEqual((status, final, content), (200, BASE + \"canonical/\", b\"allowed response\"))\n        self.assertEqual(calls, [(\"GET\", BASE), (\"GET\", BASE + \"canonical/\")])\n\n    def test_probe_preserves_head_across_same_origin_redirect(self) -> None:\n        def respond(req: request.Request) -> TransportReply:\n            if req.full_url == BASE:\n                return 308, \"/canonical/\", BytesIO(b\"\")\n            return 200, None, BytesIO(b\"\")\n\n        with transport(respond) as calls:\n            self.assertEqual(auditor.default_probe(BASE), (200, BASE + \"canonical/\"))\n        self.assertEqual(calls, [(\"HEAD\", BASE), (\"HEAD\", BASE + \"canonical/\")])\n\n    def test_redirect_response_body_is_not_read_outside_fetch_size_limit(self) -> None:\n        class RedirectBody(BytesIO):\n            @override\n            def read(self, _size: SupportsIndex | None = -1, /) -> bytes:\n                raise AssertionError(\"Redirect body must be closed without reading it\")\n\n        def respond(req: request.Request) -> TransportReply:\n            if req.full_url == BASE:\n                return 302, \"/canonical/\", RedirectBody(b\"\")\n            return 200, None, BytesIO(b\"allowed response\")\n\n        with transport(respond):\n            self.assertEqual(auditor.default_fetch(BASE)[2], b\"allowed response\")\n\n    def test_redirect_loop_is_bounded(self) -> None:\n        def respond(_req: request.Request) -> TransportReply:\n            return 302, \"/again/\", BytesIO(b\"\")\n\n        with transport(respond) as calls, self.assertRaises((ValueError, URLError)):\n            auditor.default_fetch(BASE)\n        self.assertLessEqual(len(calls), 11)\n\n\nclass AuditNumericSecurityTests(unittest.TestCase):\n    def test_external_numbers_reject_excessive_exponents(self) -> None:\n        for value in (\"1e10000\", \"1e-10000\", \"0e999999999\"):\n            with self.subTest(value=value), self.assertRaises(ValueError):\n                auditor.rational(value)\n\n    def test_external_numbers_reject_excessive_significands(self) -> None:\n        with self.assertRaises(ValueError):\n            auditor.rational(\"1.\" + \"1\" * 1024)\n\n    def test_retained_high_precision_evidence_remains_exact(self) -> None:\n        value = \"0.\" + \"0\" * 99 + \"1\"\n        self.assertEqual(auditor.rational(value), Fraction(1, 10**100))\n        self.assertEqual(auditor.rational(\"2.4e25\"), 24 * 10**24)\n\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+      "source_sha256": "02ec7157f10f3662f0b28ef64a938e361b24676b171b7543defc7e604f2e35f5",
+      "expect_parse": "success",
+      "declarations": [],
+      "repository_path": "tests/test_audit_security.py"
+    },
+    {
+      "id": "repository_scripts_reproduce_demand_timing",
+      "source": "\"\"\"Reproduce the equal-energy demand-timing tutorial with standard-library Python.\n\nRun from a source checkout. A new output directory receives complete JSON,\nMarkdown and HTML results plus chart rows and a file manifest. The hand checks\nuse rational quantities; rounded display values are never used as inputs.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport hashlib\nimport json\nimport sys\nfrom fractions import Fraction\nfrom pathlib import Path\nfrom typing import Any, Literal, TypedDict\n\nROOT = Path(__file__).resolve().parents[1]\nif str(ROOT) not in sys.path:\n    sys.path.insert(0, str(ROOT))\n\n# Direct-script execution imports this checkout after adding ROOT to sys.path.\nfrom datacenter_twin.continuity import simulate_continuity  # noqa: E402\nfrom datacenter_twin.reporting import render_html, render_markdown  # noqa: E402\nfrom datacenter_twin.topology import SiteScenario  # noqa: E402\n\nINPUTS = ROOT / \"docs/examples/demand-timing\"\nCASES = (\"early-peak\", \"late-peak\", \"shifted-peak\")\nTOLERANCE = Fraction(1, 10**90)\n\n\n# All schedules contain 900 seconds at 1,000 kW and 900 seconds at 500 kW.\n# The battery can deliver 100 * 0.90 * 0.95 = 85.5 kWh at the IT boundary.\nclass TimingExpectation(TypedDict):\n    outage_requested_kwh: Fraction\n    unserved_it_kwh: Fraction\n    unserved_duration_s: Fraction\n    battery_final_kwh: Fraction\n    depletion_s: list[str]\n\n\ntype ExpectedQuantity = Literal[\"unserved_it_kwh\", \"unserved_duration_s\", \"battery_final_kwh\"]\n\nEXPECTED: dict[str, TimingExpectation] = {\n    \"early-peak\": {\n        \"outage_requested_kwh\": Fraction(1000 * 600, 3600),\n        \"unserved_it_kwh\": Fraction(487, 6),\n        \"unserved_duration_s\": Fraction(\"292.2\"),\n        \"battery_final_kwh\": Fraction(0),\n        \"depletion_s\": [\"607.8\"],\n    },\n    \"late-peak\": {\n        \"outage_requested_kwh\": Fraction(500 * 600, 3600),\n        \"unserved_it_kwh\": Fraction(0),\n        \"unserved_duration_s\": Fraction(0),\n        \"battery_final_kwh\": Fraction(1300, 513),\n        \"depletion_s\": [],\n    },\n    \"shifted-peak\": {\n        \"outage_requested_kwh\": Fraction(500 * 500 + 1000 * 100, 3600),\n        \"unserved_it_kwh\": Fraction(211, 18),\n        \"unserved_duration_s\": Fraction(\"42.2\"),\n        \"battery_final_kwh\": Fraction(0),\n        \"depletion_s\": [\"857.8\"],\n    },\n}\n\n\ndef close(actual: str | Fraction, expected: Fraction, label: str) -> None:\n    \"\"\"Allow only the serialization rounding of the 100-digit engine output.\"\"\"\n    if abs(Fraction(actual) - expected) > TOLERANCE:\n        raise ValueError(f\"{label}: {actual} differs from {expected}\")\n\n\ndef load_case(name: str) -> SiteScenario:\n    return SiteScenario.from_dict(json.loads((INPUTS / f\"{name}.json\").read_text()))\n\n\ndef verify_case(name: str, result: dict[str, Any]) -> None:\n    expected = EXPECTED[name]\n    summary = result[\"summary\"]\n    close(summary[\"requested_it_kwh\"], Fraction(375), f\"{name}: total demand\")\n    quantities: tuple[ExpectedQuantity, ...] = (\n        \"unserved_it_kwh\",\n        \"unserved_duration_s\",\n        \"battery_final_kwh\",\n    )\n    for field in quantities:\n        close(summary[field], expected[field], f\"{name}: {field}\")\n    close(\n        summary[\"served_it_kwh\"],\n        Fraction(375) - expected[\"unserved_it_kwh\"],\n        f\"{name}: served energy\",\n    )\n    depletion = [\n        event[\"at_s\"] for event in result[\"events\"] if event[\"action\"] == \"battery_depleted\"\n    ]\n    if depletion != expected[\"depletion_s\"]:\n        raise ValueError(f\"{name}: unexpected depletion events {depletion}\")\n\n    # Integrate the returned power over its actual interval boundaries rather\n    # than trusting a summary or residual field. Depletion can split a step.\n    outage_energy = Fraction(0)\n    requested = served = unserved = Fraction(0)\n    for row in result[\"intervals\"]:\n        start, end = Fraction(row[\"start_s\"]), Fraction(row[\"end_s\"])\n        hours = (end - start) / 3600\n        requested += Fraction(row[\"requested_it_kw\"]) * hours\n        served += Fraction(row[\"served_it_kw\"]) * hours\n        unserved += Fraction(row[\"unserved_it_kw\"]) * hours\n        overlap = max(Fraction(0), min(end, Fraction(900)) - max(start, Fraction(300)))\n        outage_energy += Fraction(row[\"requested_it_kw\"]) * overlap / 3600\n        close(row[\"battery_charge_kw\"], Fraction(0), f\"{name}: charging is disabled\")\n        close(row[\"generator_kw\"], Fraction(0), f\"{name}: no generator dispatch\")\n    close(requested, Fraction(375), f\"{name}: integrated requested energy\")\n    close(served, Fraction(summary[\"served_it_kwh\"]), f\"{name}: integrated served energy\")\n    close(unserved, expected[\"unserved_it_kwh\"], f\"{name}: integrated unserved energy\")\n    close(outage_energy, expected[\"outage_requested_kwh\"], f\"{name}: outage demand\")\n    if summary[\"total_incremental_energy_charge\"] is not None:\n        raise ValueError(f\"{name}: an unspecified tariff must remain unknown\")\n\n\ndef write_results(target: Path) -> dict[str, Any]:\n    # Refuse an existing directory: reruns must not replace a reader's records.\n    target.mkdir(parents=True, exist_ok=False)\n    cases = []\n    rows: list[dict[str, str]] = []\n    for name in CASES:\n        result = simulate_continuity(load_case(name)).to_dict()\n        verify_case(name, result)\n        outputs = {\n            f\"{name}.json\": json.dumps(result, indent=2, ensure_ascii=True) + \"\\n\",\n            f\"{name}.md\": render_markdown(result),\n            f\"{name}.html\": render_html(result),\n        }\n        for filename, text in outputs.items():\n            (target / filename).write_text(text, encoding=\"utf-8\", newline=\"\\n\")\n        rows.extend(\n            {\n                \"case\": name,\n                **{\n                    field: row[field]\n                    for field in (\n                        \"start_s\",\n                        \"end_s\",\n                        \"requested_it_kw\",\n                        \"served_it_kw\",\n                        \"unserved_it_kw\",\n                    )\n                },\n            }\n            for row in result[\"intervals\"]\n        )\n        cases.append(\n            {\n                \"case\": name,\n                \"input_file\": f\"docs/examples/demand-timing/{name}.json\",\n                \"input_file_sha256\": hashlib.sha256(\n                    (INPUTS / f\"{name}.json\").read_bytes()\n                ).hexdigest(),\n                \"input_sha256\": result[\"input_sha256\"],\n                \"run_id\": result[\"run_id\"],\n                \"engine_version\": result[\"engine_version\"],\n                \"summary\": result[\"summary\"],\n                \"hand_expectations\": {\n                    field: str(value) if isinstance(value, Fraction) else value\n                    for field, value in EXPECTED[name].items()\n                },\n            }\n        )\n    with (target / \"chart-rows.csv\").open(\"w\", encoding=\"utf-8\", newline=\"\") as stream:\n        writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator=\"\\n\")\n        writer.writeheader()\n        writer.writerows(rows)\n    manifest = {\n        \"schema_version\": 1,\n        \"scope\": (\n            \"Original synthetic equal-energy timing lesson; software\"\n            \" reproduction, not external review.\"\n        ),\n        \"cases\": cases,\n        \"files\": [\n            {\"path\": path.name, \"sha256\": hashlib.sha256(path.read_bytes()).hexdigest()}\n            for path in sorted(target.iterdir())\n            if path.is_file()\n        ],\n    }\n    (target / \"manifest.json\").write_text(json.dumps(manifest, indent=2) + \"\\n\", encoding=\"utf-8\")\n    return manifest\n\n\ndef main() -> None:\n    parser = argparse.ArgumentParser(description=__doc__)\n    parser.add_argument(\n        \"--output\", type=Path, required=True, help=\"New directory for reproducible outputs\"\n    )\n    args = parser.parse_args()\n    manifest = write_results(args.output)\n    for case in manifest[\"cases\"]:\n        summary = case[\"summary\"]\n        sys.stdout.write(\n            (\n                f\"{case['case']}: requested {summary['requested_it_kwh']} kWh; \"\n                f\"unserved {summary['unserved_it_kwh']} kWh; input {case['input_sha256']}\"\n            )\n            + \"\\n\"\n        )\n\n\nif __name__ == \"__main__\":\n    main()\n",
+      "source_sha256": "7e4c27b3b8ca5cbf796b501f36315d868428ffb2f843e4b9af41742f7952d012",
+      "expect_parse": "success",
+      "declarations": [],
+      "repository_path": "scripts/reproduce_demand_timing.py"
+    },
+    {
+      "id": "repository_scripts_audit_public_site",
+      "source": "#!/usr/bin/env python3\n\"\"\"Audit Datacenter Twin Lab's public crawl graph and v2 evidence bytes.\n\nRead-only GET requests only. No tokens or third-party packages are required.\nUse --strict-seo for release gating. The status JSON always records provenance.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport re\nimport sys\nfrom collections import deque\nfrom collections.abc import Callable, Sequence\nfrom dataclasses import asdict, dataclass, field\nfrom datetime import UTC, datetime\nfrom decimal import Decimal, InvalidOperation\nfrom fractions import Fraction\nfrom hashlib import sha256\nfrom html.parser import HTMLParser\nfrom http.client import HTTPMessage, HTTPResponse\nfrom pathlib import Path, PurePosixPath\nfrom typing import IO, override\nfrom urllib.error import HTTPError, URLError\nfrom urllib.parse import unquote, urljoin, urlsplit, urlunsplit\nfrom urllib.request import HTTPRedirectHandler, Request, build_opener\nfrom urllib.response import addinfourl\n\nROOT = Path(__file__).resolve().parents[1]\nif str(ROOT) not in sys.path:\n    sys.path.insert(0, str(ROOT))\nfrom datacenter_twin import __version__  # noqa: E402\nfrom scripts.xml_guard import XMLParseError, parse_xml  # noqa: E402 -- repository root set above\n\nDEFAULT_BASE = \"https://khanlab.co.technology/\"\nPACKET = f\"/data/evidence/v{__version__}/\"\nSEEDS = (\"/\", \"/learn/\", \"/about/\", \"/evidence/\", \"/studies/emt/\")\nBOTS = (\"GPTBot\", \"ClaudeBot\", \"PerplexityBot\", \"Google-Extended\")\n# The Python reference stores 100-decimal-digit exports. This tolerance is\n# larger than its packet verifier's 1e-90 tolerance but far below display precision.\nLEDGER_TOLERANCE = Fraction(1, 10**85)\nMAX_BYTES = 16 * 1024 * 1024\nMAX_REDIRECTS = 10\n# Retained engine evidence uses up to 100 significant digits and 198 decimal\n# places. Bound external values before Fraction expands a decimal exponent.\nMAX_NUMERIC_TEXT = 512\nMAX_NUMERIC_EXPONENT = 512\n\ntype FetchResult = tuple[int, str, bytes, str]\ntype ProbeResult = tuple[int, str]\ntype AuditResponse = HTTPResponse | addinfourl\n\n\ndef _record(value: object, label: str) -> dict[str, object]:\n    \"\"\"Narrow untrusted JSON objects without discarding their original values.\"\"\"\n    if not isinstance(value, dict):\n        raise ValueError(f\"{label} must be a JSON object\")\n    result: dict[str, object] = {}\n    for key, item in value.items():\n        if not isinstance(key, str):\n            raise ValueError(f\"{label} keys must be strings\")\n        result[key] = item\n    return result\n\n\ndef _items(value: object, label: str) -> list[object]:\n    if not isinstance(value, list):\n        raise ValueError(f\"{label} must be a JSON array\")\n    return list(value)\n\n\ndef _text(value: object, label: str) -> str:\n    if not isinstance(value, str):\n        raise ValueError(f\"{label} must be text\")\n    return value\n\n\nclass PageParser(HTMLParser):\n    def __init__(self) -> None:\n        super().__init__(convert_charrefs=True)\n        self.links: list[str] = []\n        self.ids: set[str] = set()\n        self.canonical: list[str] = []\n        self.meta: dict[str, str] = {}\n        self.jsonld: list[object] = []\n        self.lang: str | None = None\n        self.h1_count = 0\n        self.title = \"\"\n        self.images_without_dimensions: list[str] = []\n        self._title = False\n        self._script = False\n        self._script_text = \"\"\n\n    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:\n        a = dict(attrs)\n        element_id = a.get(\"id\")\n        if element_id:\n            self.ids.add(element_id)\n        if tag == \"html\":\n            self.lang = a.get(\"lang\")\n        if tag == \"title\":\n            self._title = True\n        if tag == \"h1\":\n            self.h1_count += 1\n        href = a.get(\"href\")\n        if tag == \"a\" and href:\n            self.links.append(href)\n        if tag == \"link\" and \"canonical\" in (a.get(\"rel\") or \"\").split():\n            self.canonical.append(a.get(\"href\") or \"\")\n        if tag == \"meta\":\n            key = a.get(\"property\") or a.get(\"name\")\n            if key:\n                self.meta[key.lower()] = a.get(\"content\") or \"\"\n        if tag == \"script\" and a.get(\"type\") == \"application/ld+json\":\n            self._script = True\n            self._script_text = \"\"\n        image_source = a.get(\"src\")\n        if tag == \"img\" and image_source and not (a.get(\"width\") and a.get(\"height\")):\n            self.images_without_dimensions.append(image_source)\n\n    def handle_data(self, data: str) -> None:\n        if self._title:\n            self.title += data\n        if self._script:\n            self._script_text += data\n\n    def handle_endtag(self, tag: str) -> None:\n        if tag == \"title\":\n            self._title = False\n        if tag == \"script\" and self._script:\n            try:\n                self.jsonld.append(json.loads(self._script_text))\n            except json.JSONDecodeError:\n                self.jsonld.append({\"_malformed\": True})\n            self._script = False\n\n\ndef schema_types(value: object) -> set[str]:\n    if isinstance(value, list):\n        return set().union(*(schema_types(x) for x in value)) if value else set()\n    if not isinstance(value, dict):\n        return set()\n    types = value.get(\"@type\", [])\n    found = {types} if isinstance(types, str) else set(types) if isinstance(types, list) else set()\n    return found | schema_types(value.get(\"@graph\", []))\n\n\ndef rational(value: object) -> Fraction:\n    if isinstance(value, bool) or not isinstance(value, (str, int, float, Decimal)):\n        raise ValueError(\"Numeric value must be a finite decimal\")\n    text = str(value)\n    if len(text) > MAX_NUMERIC_TEXT:\n        raise ValueError(\"Numeric evidence exceeds the supported precision limit\")\n    try:\n        number = Decimal(text)\n    except InvalidOperation as exc:\n        raise ValueError(\"Numeric value must be a finite decimal\") from exc\n    exponent = number.as_tuple().exponent\n    if (\n        not number.is_finite()\n        or not isinstance(exponent, int)\n        or abs(exponent) > MAX_NUMERIC_EXPONENT\n    ):\n        raise ValueError(\"Numeric evidence exceeds the supported exponent limit\")\n    return Fraction(number)\n\n\ndef safe_packet_name(name: str) -> bool:\n    path = PurePosixPath(name)\n    return (\n        path.name == name\n        and name not in (\".\", \"..\")\n        and not name.startswith(\".\")\n        and bool(re.fullmatch(r\"[A-Za-z0-9_.-]+\", name))\n    )\n\n\ndef same_origin(a: str, b: str) -> bool:\n    u, v = urlsplit(a), urlsplit(b)\n    return u.scheme == v.scheme and u.netloc.lower() == v.netloc.lower()\n\n\ndef normalized_page(url: str) -> str:\n    p = urlsplit(url)\n    return urlunsplit((p.scheme, p.netloc, p.path or \"/\", \"\", \"\"))\n\n\nclass _NoAutomaticRedirects(HTTPRedirectHandler):\n    @override\n    def redirect_request(\n        self,\n        req: Request,\n        fp: IO[bytes],\n        code: int,\n        msg: str,\n        headers: HTTPMessage,\n        newurl: str,\n    ) -> None:\n        return None\n\n\ndef _validate_http_url(url: str) -> None:\n    parsed = urlsplit(url)\n    if (\n        parsed.scheme not in (\"http\", \"https\")\n        or not parsed.hostname\n        or parsed.username is not None\n        or parsed.password is not None\n    ):\n        raise ValueError(\"Audit URLs must use HTTP(S) without credentials\")\n\n\nclass _AuditRequest(Request):\n    \"\"\"Construct only HTTP(S) requests satisfying the auditor's existing URL policy.\"\"\"\n\n    def __init__(\n        self,\n        url: str,\n        *,\n        method: str | None = None,\n        headers: dict[str, str] | None = None,\n    ) -> None:\n        _validate_http_url(url)\n        super().__init__(url, method=method, headers={} if headers is None else headers)\n\n\ndef _open_same_origin(request: Request) -> AuditResponse:\n    \"\"\"Validate every redirect before I/O and discard redirect bodies unread.\"\"\"\n    origin = request.full_url\n    _validate_http_url(origin)\n    opener = build_opener(_NoAutomaticRedirects())\n    for hop in range(MAX_REDIRECTS + 1):\n        try:\n            response = opener.open(request, timeout=15)\n            if not isinstance(response, (HTTPResponse, addinfourl)):\n                raise ValueError(\"Audit transport did not return an HTTP response\")\n            return response\n        except HTTPError as exc:\n            if exc.code not in (301, 302, 303, 307, 308):\n                raise\n            try:\n                location = exc.headers.get(\"Location\") or exc.headers.get(\"URI\")\n                if not location:\n                    raise\n                target = urljoin(request.full_url, location)\n                if not same_origin(origin, target):\n                    raise ValueError(f\"Off-origin redirect blocked: {request.full_url} -> {target}\")\n                if hop == MAX_REDIRECTS:\n                    raise ValueError(\"Audit redirect limit exceeded\")\n            finally:\n                # urllib's default redirect handler reads the entire response\n                # body before redirecting, outside default_fetch's byte limit.\n                exc.close()\n            request = _AuditRequest(\n                target, method=request.get_method(), headers=dict(request.header_items())\n            )\n    raise ValueError(\"Audit redirect limit exceeded\")\n\n\ndef _response_status(response: AuditResponse) -> int:\n    status = response.status\n    if status is None:\n        raise ValueError(\"Audit response has no HTTP status\")\n    return status\n\n\ndef default_probe(url: str) -> ProbeResult:\n    \"\"\"Validate linked downloadable assets without transferring large reports/PDFs.\n\n    For servers rejecting HEAD, a one-byte ranged GET establishes reachability.\n    A 206 status then means partial-content existence, not a full GET HTTP-200 test.\n    \"\"\"\n    request = _AuditRequest(\n        url, method=\"HEAD\", headers={\"User-Agent\": \"DatacenterTwinLab-ReadOnlyQA/1.0\"}\n    )\n    try:\n        with _open_same_origin(request) as response:\n            return _response_status(response), response.geturl()\n    except HTTPError as exc:\n        if exc.code not in (405, 501):\n            raise\n        exc.close()\n    request = _AuditRequest(\n        url, headers={\"User-Agent\": \"DatacenterTwinLab-ReadOnlyQA/1.0\", \"Range\": \"bytes=0-0\"}\n    )\n    with _open_same_origin(request) as response:\n        return _response_status(response), response.geturl()\n\n\ndef default_fetch(url: str) -> FetchResult:\n    request = _AuditRequest(\n        url, headers={\"User-Agent\": \"DatacenterTwinLab-ReadOnlyQA/1.0\", \"Accept\": \"*/*\"}\n    )\n    with _open_same_origin(request) as response:\n        size = 0\n        parts: list[bytes] = []\n        while True:\n            block = response.read(256 * 1024)\n            if not block:\n                break\n            size += len(block)\n            if size > MAX_BYTES:\n                raise ValueError(f\"Resource exceeds {MAX_BYTES} byte audit limit\")\n            parts.append(block)\n        return (\n            _response_status(response),\n            response.geturl(),\n            b\"\".join(parts),\n            response.headers.get(\"Content-Type\", \"\"),\n        )\n\n\n@dataclass\nclass Report:\n    base_url: str\n    generated_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())\n    status: str = \"incomplete\"\n    checked_pages: list[str] = field(default_factory=list)\n    checked_artifacts: dict[str, str] = field(default_factory=dict)\n    checked_linked_files: list[str] = field(default_factory=list)\n    lesson_pages: list[str] = field(default_factory=list)\n    sitemap_pages: list[str] = field(default_factory=list)\n    checks: dict[str, object] = field(default_factory=dict)\n    failures: list[str] = field(default_factory=list)\n    warnings: list[str] = field(default_factory=list)\n    methodology: str = (\n        \"HTML crawl, same-origin link HEAD probes, and raw-byte SHA-256; \"\n        \"NOT Lighthouse or a browser audit\"\n    )\n\n    def fail(self, message: str) -> None:\n        self.failures.append(message)\n\n    def note(self, message: str) -> None:\n        self.warnings.append(message)\n\n\nclass SiteAudit:\n    def __init__(\n        self,\n        base: str = DEFAULT_BASE,\n        *,\n        strict_seo: bool = False,\n        max_pages: int = 200,\n        max_files: int = 500,\n        catalog_path: Path | str | None = None,\n        fetch: Callable[[str], FetchResult] = default_fetch,\n        probe: Callable[[str], ProbeResult] = default_probe,\n    ) -> None:\n        if not base.endswith(\"/\"):\n            base += \"/\"\n        self.base = base\n        self.strict_seo = strict_seo\n        self.max_pages = max_pages\n        self.max_files = max_files\n        self.catalog_path = Path(catalog_path) if catalog_path else None\n        self.fetcher = fetch\n        self.prober = probe\n        self.linked_files: set[str] = set()\n        self.report = Report(base_url=base)\n        self.pages: dict[str, PageParser] = {}\n        self.objects: dict[str, object] = {}\n        self.fetched: dict[str, bytes] = {}\n\n    def seo_issue(self, message: str) -> None:\n        (self.report.fail if self.strict_seo else self.report.note)(message)\n\n    def get(self, url: str) -> bytes | None:\n        if url in self.fetched:\n            return self.fetched[url]\n        if not same_origin(self.base, url):\n            self.report.fail(f\"Cross-origin fetch blocked: {url}\")\n            return None\n        try:\n            status, final, contents, _content_type = self.fetcher(url)\n            if status != 200:\n                self.report.fail(f\"HTTP {status}: {url}\")\n                return None\n            if not same_origin(self.base, final):\n                self.report.fail(f\"Unexpected off-origin redirect: {url} -> {final}\")\n                return None\n            self.fetched[url] = contents\n            return contents\n        except (HTTPError, URLError, OSError, ValueError, TimeoutError) as exc:\n            self.report.fail(f\"Cannot fetch {url}: {exc}\")\n            return None\n\n    def crawl(self) -> None:\n        todo = deque(urljoin(self.base, route.lstrip(\"/\")) for route in SEEDS)\n        seen: set[str] = set()\n        while todo and len(seen) < self.max_pages:\n            url = normalized_page(todo.popleft())\n            if url in seen:\n                continue\n            seen.add(url)\n            raw = self.get(url)\n            if raw is None:\n                continue\n            page = PageParser()\n            page.feed(raw.decode(\"utf-8\", errors=\"replace\"))\n            self.pages[url] = page\n            self.report.checked_pages.append(url)\n            path = urlsplit(url).path\n            if path.startswith(\"/learn/\") and path != \"/learn/\":\n                self.report.lesson_pages.append(url)\n            if not page.lang:\n                self.seo_issue(f\"Missing html lang: {url}\")\n            if not page.title.strip():\n                self.seo_issue(f\"Missing title: {url}\")\n            if page.h1_count != 1:\n                self.seo_issue(f\"Expected one H1, got {page.h1_count}: {url}\")\n            if not page.canonical or len(page.canonical) != 1:\n                self.seo_issue(f\"Expected exactly one canonical: {url}\")\n            else:\n                target = urljoin(url, page.canonical[0])\n                if not same_origin(self.base, target):\n                    self.seo_issue(f\"Canonical leaves owner domain: {url} -> {target}\")\n                elif path.startswith(\"/learn/\") and normalized_page(target) != url:\n                    self.seo_issue(f\"Lesson canonical does not identify itself: {url} -> {target}\")\n            for key in (\"description\", \"og:title\", \"og:description\", \"og:image\", \"twitter:card\"):\n                if not page.meta.get(key):\n                    self.seo_issue(f\"Missing {key}: {url}\")\n            types = set().union(*(schema_types(x) for x in page.jsonld)) if page.jsonld else set()\n            if any(isinstance(x, dict) and x.get(\"_malformed\") for x in page.jsonld):\n                self.seo_issue(f\"Malformed JSON-LD: {url}\")\n            if path == \"/\" and \"SoftwareApplication\" not in types:\n                self.seo_issue(f\"Expected SoftwareApplication schema: {url}\")\n            if path == \"/learn/\" and \"Course\" not in types:\n                self.seo_issue(f\"Expected Course schema: {url}\")\n            if (\n                path.startswith(\"/learn/\")\n                and path != \"/learn/\"\n                and not types.intersection({\"LearningResource\", \"TechArticle\", \"Article\"})\n            ):\n                self.seo_issue(f\"Expected lesson LearningResource/TechArticle schema: {url}\")\n            if path.startswith(\"/learn/\") and path != \"/learn/\" and \"TechArticle\" not in types:\n                self.seo_issue(f\"Expected lesson TechArticle schema: {url}\")\n            if page.images_without_dimensions:\n                self.seo_issue(\n                    f\"{len(page.images_without_dimensions)} img without intrinsic dimensions: {url}\"\n                )\n            for href in page.links:\n                dest = urljoin(url, href)\n                if not same_origin(self.base, dest):\n                    continue\n                path_dest = unquote(urlsplit(dest).path)\n                if path_dest.startswith(PACKET) or path_dest.startswith(\"/data/\"):\n                    self.linked_files.add(normalized_page(dest))\n                    continue\n                if re.search(\n                    r\"\\.(?:html?|xml|txt|md|json|pdf|png|jpe?g|webp|avif|svg|woff2?|js|css|zip)$\",\n                    path_dest,\n                    re.I,\n                ):\n                    if path_dest.lower().endswith((\".html\", \".htm\")):\n                        todo.append(dest)\n                    else:\n                        self.linked_files.add(normalized_page(dest))\n                    continue\n                if len(seen) + len(todo) < self.max_pages * 3:\n                    todo.append(dest)\n        if todo:\n            self.report.note(f\"Crawl truncated at {self.max_pages} pages; remaining: {len(todo)}\")\n        if len(self.report.lesson_pages) < 24:\n            self.seo_issue(f\"Only {len(self.report.lesson_pages)} / 24 lesson pages discovered\")\n        # When running inside the repository, use the source-of-truth curriculum\n        # instead of accepting any arbitrary collection of 24 pages.\n        catalog = self.catalog_path\n        if catalog is None and not urlsplit(self.base).netloc.lower().endswith(\".invalid\"):\n            repo_catalog = (\n                Path(__file__).resolve().parents[1] / \"apps\" / \"web\" / \"src\" / \"course-catalog.json\"\n            )\n            if repo_catalog.is_file():\n                catalog = repo_catalog\n        if catalog and Path(catalog).is_file():\n            try:\n                catalog_items = _items(\n                    json.loads(Path(catalog).read_text(encoding=\"utf8\")), \"course catalog\"\n                )\n                expected = {\n                    normalized_page(\n                        urljoin(\n                            self.base,\n                            _text(_record(item, \"catalog lesson\")[\"readingRoute\"], \"readingRoute\"),\n                        )\n                    )\n                    for item in catalog_items\n                }\n                self.report.checks[\"catalog_lessons\"] = len(expected)\n                for missing in sorted(expected - set(self.report.lesson_pages)):\n                    self.report.fail(f\"Course catalog lesson not linked/crawlable: {missing}\")\n            except (ValueError, TypeError, KeyError) as exc:\n                self.report.fail(f\"Cannot validate source curriculum catalog: {exc}\")\n        self.report.lesson_pages.sort()\n        self.report.checked_pages.sort()\n        self.report.checks[\"html_pages\"] = len(self.report.checked_pages)\n        self.report.checks[\"lessons_discovered\"] = len(self.report.lesson_pages)\n\n    def linked_assets(self) -> None:\n        \"\"\"Check referenced same-site downloadable files; do not fetch external origins.\"\"\"\n        files = sorted(self.linked_files)\n        if len(files) > self.max_files:\n            self.report.fail(\n                f\"Linked asset verification limit reached: {len(files)} > {self.max_files}\"\n            )\n        for url in files[: self.max_files]:\n            if url in self.fetched:\n                self.report.checked_linked_files.append(url)\n                continue\n            try:\n                status, final = self.prober(url)\n                if status not in (200, 206) or not same_origin(self.base, final):\n                    self.report.fail(\n                        f\"Linked file unreachable or redirected away: \"\n                        f\"HTTP {status} {url} -> {final}\"\n                    )\n                else:\n                    self.report.checked_linked_files.append(url)\n            except (HTTPError, URLError, OSError, ValueError, TimeoutError) as exc:\n                self.report.fail(f\"Broken same-site linked file: {url}: {exc}\")\n        self.report.checks[\"linked_files_checked\"] = len(self.report.checked_linked_files)\n\n    def sitemap(self) -> None:\n        url = urljoin(self.base, \"sitemap.xml\")\n        raw = self.get(url)\n        if raw is None:\n            return\n        try:\n            root = parse_xml(raw)\n            urls = []\n            for entry in root.findall(\".//{*}url\"):\n                loc = entry.findtext(\"{*}loc\")\n                lastmod = entry.findtext(\"{*}lastmod\")\n                if loc:\n                    urls.append(normalized_page(loc))\n                    if not same_origin(loc, self.base):\n                        self.seo_issue(f\"Sitemap off-origin: {loc}\")\n                    if not lastmod:\n                        self.seo_issue(f\"Sitemap missing lastmod: {loc}\")\n            self.report.sitemap_pages = sorted(set(urls))\n            if not urls:\n                self.seo_issue(\"No url entries found in sitemap.xml\")\n            missing = sorted(set(self.report.lesson_pages) - set(urls))\n            for lesson in missing:\n                self.seo_issue(f\"Lesson absent from sitemap: {lesson}\")\n            self.report.checks[\"sitemap_urls\"] = len(urls)\n        except XMLParseError as exc:\n            self.report.fail(f\"Invalid sitemap XML: {exc}\")\n\n    def robots(self) -> None:\n        raw = self.get(urljoin(self.base, \"robots.txt\"))\n        if raw is None:\n            return\n        content = raw.decode(\"utf-8\", errors=\"replace\")\n        if not re.search(r\"(?im)^\\s*sitemap\\s*:\", content):\n            self.seo_issue(\"robots.txt lacks a Sitemap directive\")\n        for bot in BOTS:\n            if not re.search(r\"(?im)^\\s*user-agent\\s*:\\s*\" + re.escape(bot) + r\"\\s*$\", content):\n                self.report.note(\n                    f\"No explicit {bot} robots block (this is a publisher policy choice)\"\n                )\n\n    @staticmethod\n    def verify_ledger(run: object) -> list[str]:\n        record = _record(run, \"run\")\n        issues: list[str] = []\n        sums = {\n            key: Fraction(0)\n            for key in (\n                \"requested_it_kwh\",\n                \"served_it_kwh\",\n                \"unserved_it_kwh\",\n                \"grid_kwh\",\n                \"generator_kwh\",\n                \"battery_stored_change_kwh\",\n                \"distribution_loss_kwh\",\n                \"battery_charge_loss_kwh\",\n                \"battery_discharge_loss_kwh\",\n            )\n        }\n        for i, value in enumerate(_items(record[\"intervals\"], \"run.intervals\")):\n            row = _record(value, f\"run.intervals[{i}]\")\n            energy_values = _record(row[\"energy\"], f\"run.intervals[{i}].energy\")\n            energy = {key: rational(energy_values[key]) for key in sums}\n            for key in sums:\n                sums[key] += energy[key]\n            delta = rational(row[\"battery_end_kwh\"]) - rational(row[\"battery_start_kwh\"])\n            req = energy[\"requested_it_kwh\"] - energy[\"served_it_kwh\"] - energy[\"unserved_it_kwh\"]\n            supply = (\n                energy[\"grid_kwh\"]\n                + energy[\"generator_kwh\"]\n                - sum(\n                    (\n                        energy[k]\n                        for k in (\n                            \"served_it_kwh\",\n                            \"battery_stored_change_kwh\",\n                            \"distribution_loss_kwh\",\n                            \"battery_charge_loss_kwh\",\n                            \"battery_discharge_loss_kwh\",\n                        )\n                    ),\n                    Fraction(0),\n                )\n            )\n            if (\n                abs(req) > LEDGER_TOLERANCE\n                or abs(supply) > LEDGER_TOLERANCE\n                or abs(delta - energy[\"battery_stored_change_kwh\"]) > LEDGER_TOLERANCE\n            ):\n                issues.append(f\"interval {i} violates exact energy partitions\")\n        req_total = sums[\"requested_it_kwh\"] - sums[\"served_it_kwh\"] - sums[\"unserved_it_kwh\"]\n        if abs(req_total) > LEDGER_TOLERANCE:\n            issues.append(\"whole-run IT requested partition mismatch\")\n        summary = _record(record[\"summary\"], \"run.summary\")\n        issues.extend(\n            f\"run.summary.{metric} disagrees with interval totals\"\n            for metric in (\"requested_it_kwh\", \"served_it_kwh\", \"unserved_it_kwh\")\n            if abs(sums[metric] - rational(summary[metric])) > LEDGER_TOLERANCE\n        )\n        return issues\n\n    def verify_cases(self, manifest: dict[str, object], docs: dict[str, bytes]) -> None:\n        for case_value in _items(manifest.get(\"cases\", []), \"manifest.cases\"):\n            name = \"(unknown)\"\n            try:\n                case = _record(case_value, \"manifest case\")\n                name = _text(case.get(\"case_id\", \"(unknown)\"), \"case_id\")\n                scenario_file = _text(case[\"scenario_file\"], \"scenario_file\")\n                run_file = _text(case[\"run_file\"], \"run_file\")\n                input_sha256 = _text(case[\"input_sha256\"], \"input_sha256\")\n                scenario = _record(json.loads(docs[scenario_file]), \"scenario\")\n                run = _record(json.loads(docs[run_file]), \"run\")\n                if run[\"scenario\"] != scenario:\n                    self.report.fail(f\"{name}: scenario file differs from run scenario\")\n                if run[\"input_sha256\"] != case[\"input_sha256\"]:\n                    self.report.fail(f\"{name}: run input SHA does not match manifest case\")\n                if run[\"run_id\"] != case[\"run_id\"]:\n                    self.report.fail(f\"{name}: run ID does not match manifest case\")\n                if scenario[\"id\"] != case[\"scenario_id\"]:\n                    self.report.fail(f\"{name}: scenario ID does not match manifest case\")\n                if input_sha256 not in scenario_file or input_sha256 not in run_file:\n                    self.report.fail(f\"{name}: filenames omit input SHA\")\n                if _record(case.get(\"ledger\", {}), \"case ledger\").get(\"status\") != \"pass\":\n                    self.report.fail(f\"{name}: manifest ledger status is not pass\")\n                for msg in self.verify_ledger(run):\n                    self.report.fail(f\"{name}: {msg}\")\n                for check_value in _items(case.get(\"checks\", []), \"case checks\"):\n                    check = _record(check_value, \"case check\")\n                    if (\n                        check.get(\"status\") != \"match\"\n                        or abs(rational(check[\"expected\"]) - rational(check[\"observed\"]))\n                        > LEDGER_TOLERANCE\n                    ):\n                        self.report.fail(f\"{name}: manifest check failed: {check.get('metric')}\")\n                if name.startswith(\"canonical-1mw-\"):\n                    scenario_events = [\n                        _record(value, \"scenario event\")\n                        for value in _items(scenario[\"events\"], \"scenario.events\")\n                    ]\n                    run_events = [\n                        _record(value, \"run event\") for value in _items(run[\"events\"], \"run.events\")\n                    ]\n                    start = next(\n                        rational(e[\"at_s\"])\n                        for e in scenario_events\n                        if e[\"action\"] == \"asset_down\" and e[\"target\"] == \"utility\"\n                    )\n                    recover = next(\n                        rational(e[\"at_s\"])\n                        for e in scenario_events\n                        if e[\"action\"] == \"asset_up\" and e[\"target\"] == \"utility\"\n                    )\n                    expected_duration = (\n                        rational(scenario[\"battery_initial_kwh\"])\n                        * rational(scenario[\"battery_discharge_efficiency\"])\n                        * rational(scenario[\"distribution_efficiency\"])\n                        / rational(scenario[\"it_demand_kw\"])\n                        * 3600\n                    )\n                    actual_depleted = next(\n                        rational(e[\"at_s\"]) for e in run_events if e[\"action\"] == \"battery_depleted\"\n                    )\n                    if abs(actual_depleted - (start + expected_duration)) > LEDGER_TOLERANCE:\n                        self.report.fail(f\"{name}: independent ride-through event mismatch\")\n                    unserved = (\n                        max(Fraction(0), recover - actual_depleted)\n                        * rational(scenario[\"it_demand_kw\"])\n                        / 3600\n                    )\n                    if (\n                        abs(\n                            rational(_record(run[\"summary\"], \"run.summary\")[\"unserved_it_kwh\"])\n                            - unserved\n                        )\n                        > LEDGER_TOLERANCE\n                    ):\n                        self.report.fail(f\"{name}: independent unserved energy mismatch\")\n            except (KeyError, ValueError, StopIteration, TypeError, json.JSONDecodeError) as exc:\n                self.report.fail(f\"{name}: cannot verify run/scenario: {exc}\")\n\n    def evidence(self) -> None:\n        prefix = urljoin(self.base, PACKET.lstrip(\"/\"))\n        raw = self.get(prefix + \"manifest.json\")\n        if raw is None:\n            return\n        try:\n            manifest = _record(json.loads(raw), \"manifest\")\n            artifacts = _record(manifest[\"artifacts\"], \"manifest.artifacts\")\n            if not artifacts or len(artifacts) > 32:\n                raise ValueError(\"Unexpected artifact count\")\n            docs: dict[str, bytes] = {}\n            for name, attrs_value in artifacts.items():\n                attrs = _record(attrs_value, f\"artifact {name}\")\n                if not safe_packet_name(name):\n                    self.report.fail(f\"Unsafe packet filename: {name}\")\n                    continue\n                content = self.get(prefix + name)\n                if content is None:\n                    continue\n                actual = sha256(content).hexdigest()\n                expected = _text(attrs.get(\"sha256\", \"\"), \"artifact sha256\")\n                if not re.fullmatch(r\"[0-9a-f]{64}\", expected):\n                    self.report.fail(f\"Invalid manifest SHA-256 for {name}\")\n                elif actual != expected:\n                    self.report.fail(\n                        f\"Artifact SHA-256 mismatch: {name}, expected {expected}, observed {actual}\"\n                    )\n                else:\n                    self.report.checked_artifacts[name] = actual\n                docs[name] = content\n            if len(docs) == len(artifacts):\n                self.verify_cases(manifest, docs)\n            else:\n                self.report.fail(\"Not all evidence packet files were retrievable\")\n            self.report.checks[\"manifest_engine_version\"] = manifest.get(\"engine_version\")\n            self.report.checks[\"artifacts_verified\"] = len(self.report.checked_artifacts)\n            self.report.checks[\"cases_declared\"] = len(_items(manifest.get(\"cases\", []), \"cases\"))\n            self.report.checks[\"manifest_digest\"] = sha256(raw).hexdigest()\n        except (ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:\n            self.report.fail(f\"Invalid evidence manifest: {exc}\")\n\n    def execute(self) -> Report:\n        self.crawl()\n        self.linked_assets()\n        self.sitemap()\n        self.robots()\n        self.evidence()\n        self.report.status = (\n            \"fail\"\n            if self.report.failures\n            else \"pass-with-warnings\"\n            if self.report.warnings\n            else \"pass\"\n        )\n        return self.report\n\n\ndef main(argv: Sequence[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\"--base\", default=DEFAULT_BASE, help=\"Owner-controlled deployment origin\")\n    ap.add_argument(\"--out\", type=Path, default=Path(\"outputs/public-site-audit.json\"))\n    ap.add_argument(\"--max-pages\", type=int, default=200)\n    ap.add_argument(\n        \"--max-files\", type=int, default=500, help=\"Bound same-origin linked file HEAD probes\"\n    )\n    ap.add_argument(\n        \"--strict-seo\",\n        action=\"store_true\",\n        help=\"Treat missing metadata, schema and sitemap entries as failures\",\n    )\n    ap.add_argument(\"--catalog\", type=Path, default=None, help=\"Path to course-catalog.json\")\n    args = ap.parse_args(argv)\n    if args.max_pages < 5 or args.max_pages > 1000:\n        ap.error(\"max-pages must be 5..1000\")\n    if args.max_files < 1 or args.max_files > 5000:\n        ap.error(\"max-files must be 1..5000\")\n    result = SiteAudit(\n        args.base,\n        strict_seo=args.strict_seo,\n        max_pages=args.max_pages,\n        max_files=args.max_files,\n        catalog_path=args.catalog,\n    ).execute()\n    args.out.parent.mkdir(parents=True, exist_ok=True)\n    args.out.write_text(\n        json.dumps(asdict(result), indent=2, sort_keys=True) + \"\\n\", encoding=\"utf8\"\n    )\n    sys.stdout.write(\n        f\"{result.status}: {len(result.checked_pages)} HTML pages, \"\n        f\"{len(result.lesson_pages)} lessons, {len(result.checked_linked_files)} linked files, \"\n        f\"{len(result.checked_artifacts)} SHA-256 artifacts, {len(result.failures)} failures, \"\n        f\"{len(result.warnings)} warnings; report={args.out}\\n\"\n    )\n    for message in result.failures:\n        sys.stderr.write(f\"FAIL: {message}\\n\")\n    return 1 if result.failures else 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n",
+      "source_sha256": "6577709ae49294ae1a461304e0634853fb6437766474b37f023b1710443dece7",
+      "expect_parse": "success",
+      "declarations": [],
+      "repository_path": "scripts/audit_public_site.py"
+    },
+    {
+      "id": "repository_datacenter_twin_research_common",
+      "source": "# Adapted from user-supplied python_equivalent archive (SHA-256\n# c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps\n# these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace\n# were supplied; no MATLAB/measurement validation is claimed.\n\"\"\"Shared numerical helpers for the MATLAB-to-Python conversions.\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections.abc import Callable, Mapping\nfrom types import SimpleNamespace\nfrom typing import Protocol\n\nimport numpy as np\nfrom numpy.typing import ArrayLike, NDArray\n\n\ndef ns(**kwargs: object) -> SimpleNamespace:\n    return SimpleNamespace(**kwargs)\n\n\ndef safe_div(a: float | np.float64, b: float | np.float64, eps: float = 1e-9) -> float | np.float64:\n    \"\"\"Scalar safe division matching the MATLAB guards used in the models.\"\"\"\n    b = float(b)\n    if abs(b) < eps:\n        b = eps if b >= 0 else -eps\n    return a / b\n\n\ndef numeric_jacobian(\n    fun: Callable[[NDArray[np.float64]], ArrayLike],\n    x0: ArrayLike,\n    rel_step: float = 1e-7,\n) -> NDArray[np.float64]:\n    x0 = np.asarray(x0, dtype=float)\n    f0 = np.asarray(fun(x0), dtype=float).reshape(-1)\n    jacobian = np.zeros((f0.size, x0.size), dtype=float)\n    for i in range(x0.size):\n        x1 = x0.copy()\n        h = rel_step * (1.0 + abs(x0[i]))\n        x1[i] += h\n        jacobian[:, i] = (np.asarray(fun(x1), dtype=float).reshape(-1) - f0) / h\n    return jacobian\n\n\ndef pi_bw_tuning(\n    loop_type: str,\n    fbw: float,\n    zeta: float,\n    param1: float,\n    omega_b: float,\n    param2: float = 0.0,\n) -> tuple[float, float]:\n    wn = 2.0 * np.pi * fbw\n    lt = str(loop_type).lower()\n    if lt in {\"v\", \"voltage\"}:\n        kp = 2.0 * zeta * wn * (param1 / omega_b)\n    elif lt in {\"c\", \"current\"}:\n        kp = 2.0 * zeta * wn * (param1 / omega_b) - param2\n    else:\n        raise ValueError(f\"Unknown loop_type: {loop_type}\")\n    ki = wn**2 * (param1 / omega_b)\n    return kp, ki\n\n\ndef pll_bw_tuning(fbw: float, zeta: float, fb: float = 60.0) -> tuple[float, float]:\n    wn = 2.0 * np.pi * fbw\n    omega_b = 2.0 * np.pi * fb\n    return 2.0 * zeta * wn / omega_b, wn**2 / omega_b\n\n\ndef matlab_hann(n: int) -> NDArray[np.float64]:\n    \"\"\"Periodic/symmetric distinction is immaterial here; MATLAB hann(N) is symmetric.\"\"\"\n    if n <= 1:\n        return np.ones(n)\n    return np.hanning(n)\n\n\nclass _Spine(Protocol):\n    def set_linewidth(self, width: float) -> None: ...\n\n\nclass _Axes(Protocol):\n    spines: Mapping[str, _Spine]\n\n    def grid(self, visible: bool, *, alpha: float) -> None: ...\n\n    def tick_params(self, *, direction: str, width: float, labelsize: int) -> None: ...\n\n\ndef set_ieee_axes[AxesType: _Axes](ax: AxesType, fontsize: int = 8) -> AxesType:\n    ax.grid(True, alpha=0.18)\n    ax.tick_params(direction=\"out\", width=0.8, labelsize=fontsize)\n    for spine in ax.spines.values():\n        spine.set_linewidth(0.8)\n    return ax\n",
+      "source_sha256": "4b21255209e8deff095f281312178209c729ef5fd3fb67cf8a4ec89bb8c6ac5a",
+      "expect_parse": "success",
+      "declarations": [],
+      "repository_path": "datacenter_twin/research/common.py"
+    },
+    {
+      "id": "repository_datacenter_twin_research_types",
+      "source": "\"\"\"Array and result contracts for the supplied numerical research models.\"\"\"\n\nfrom __future__ import annotations\n\nfrom collections.abc import Callable\nfrom typing import NotRequired, TypedDict\n\nimport numpy as np\nfrom numpy.typing import NDArray\nfrom scipy.optimize import OptimizeResult\n\ntype FloatArray = NDArray[np.float64]\ntype ComplexArray = NDArray[np.complex128]\ntype Real = float | np.float64\ntype Complex = complex | np.complex128\ntype LoadCommand = Real | Callable[[float], Real]\n\n\nclass DCReferences(TypedDict):\n    p_load: Real\n    B_shunt: Real\n\n\nclass GFMReferences(TypedDict):\n    pref0: Real\n    qref0: Real\n    ome_ref0: Real\n    v_ref0: Real\n    Vf_qss: Complex\n    Vcv_qss: Complex\n\n\nclass GFLReferences(TypedDict):\n    wref0: Real\n    vref0: Real\n    pref0: Real\n    qref0: Real\n\n\nclass SMReferences(TypedDict):\n    vref: Real\n    pref: Real\n    ws: Real\n\n\nclass InitializationInfo(TypedDict):\n    exitflag: int\n    output: OptimizeResult[object]\n    residual_inf: NotRequired[float]\n    fval_inf: NotRequired[float]\n\n\nclass Metric(TypedDict):\n    label: str\n    value: float | None\n    unit: str\n\n\nclass Mode(TypedDict):\n    real: float\n    imag: float\n    frequency_hz: float\n    damping: float | None\n    dominant_state: str\n    dominant_group: NotRequired[str]\n    stable: bool\n\n\nclass StudyResult(TypedDict):\n    study_id: str\n    model: str\n    config: dict[str, float]\n    solver: dict[str, object]\n    assumptions: list[str]\n    metrics: list[Metric]\n    charts: list[dict[str, object]]\n    diagnostics: dict[str, object]\n    modes: NotRequired[list[Mode]]\n",
+      "source_sha256": "0c8b546eb2a7e49924fdcad27ad74328204c98fadf83eb1d74d1998ce6a7a6f6",
+      "expect_parse": "success",
+      "declarations": [],
+      "repository_path": "datacenter_twin/research/types.py"
+    }
+  ],
+  "upstream_fixture_receipts": [
+    {
+      "path": "tests/tainting_rules/python/match_as_sink.py",
+      "sha256": "14b0c03dd32690a0728562f987645747456fb62a6deb50649abe57c5c374d012",
+      "url": "https://github.com/opengrep/opengrep/blob/092c80faa0817840228349f93eff12a50fb9cf6b/tests/tainting_rules/python/match_as_sink.py"
+    },
+    {
+      "path": "tests/tainting_rules/python/match_guard_sink.py",
+      "sha256": "72c770e09d8fdf9a287915c082b0732ff0c960e5cbc9605ba56047d739b3fddd",
+      "url": "https://github.com/opengrep/opengrep/blob/092c80faa0817840228349f93eff12a50fb9cf6b/tests/tainting_rules/python/match_guard_sink.py"
+    },
+    {
+      "path": "tests/tainting_rules/python/match_pattern_binding_sink.py",
+      "sha256": "f503c87c253b400f04d4e43f7c198c155637a3d000f456961cff33ad6fb1c029",
+      "url": "https://github.com/opengrep/opengrep/blob/092c80faa0817840228349f93eff12a50fb9cf6b/tests/tainting_rules/python/match_pattern_binding_sink.py"
+    }
+  ],
+  "repository_fixture_receipts": [
+    {
+      "path": "tests/test_audit_security.py",
+      "sha256": "02ec7157f10f3662f0b28ef64a938e361b24676b171b7543defc7e604f2e35f5"
+    },
+    {
+      "path": "scripts/reproduce_demand_timing.py",
+      "sha256": "7e4c27b3b8ca5cbf796b501f36315d868428ffb2f843e4b9af41742f7952d012"
+    },
+    {
+      "path": "scripts/audit_public_site.py",
+      "sha256": "6577709ae49294ae1a461304e0634853fb6437766474b37f023b1710443dece7"
+    },
+    {
+      "path": "datacenter_twin/research/common.py",
+      "sha256": "4b21255209e8deff095f281312178209c729ef5fd3fb67cf8a4ec89bb8c6ac5a"
+    },
+    {
+      "path": "datacenter_twin/research/types.py",
+      "sha256": "0c8b546eb2a7e49924fdcad27ad74328204c98fadf83eb1d74d1998ce6a7a6f6"
+    }
+  ]
+}

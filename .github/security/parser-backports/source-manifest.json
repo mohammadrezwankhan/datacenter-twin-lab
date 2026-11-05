@@ -1,0 +1,176 @@
+{
+  "schema_version": 1,
+  "upstream_base": "092c80faa0817840228349f93eff12a50fb9cf6b",
+  "upstream_url": "https://github.com/opengrep/opengrep/tree/092c80faa0817840228349f93eff12a50fb9cf6b",
+  "status": "stable-rebase-review-frozen-uncompiled-unexecuted",
+  "not_an_unchanged_official_release": true,
+  "adaptation": "Official merged PR845 simple-alias production patch plus reviewed authored Menhir PEP695 declaration-parameter backport; retains stable CLI and all unrelated stable semantics",
+  "specification_url": "https://peps.python.org/pep-0695/",
+  "upstream_patch_sources": [
+    {
+      "file": "667292117cd8a70b7750c9f1545ee85ddaab9083.patch",
+      "url": "https://github.com/semgrep/semgrep/commit/667292117cd8a70b7750c9f1545ee85ddaab9083.patch",
+      "bytes": 82119,
+      "sha256": "bbe66e63fed940578144ee90929547e304c733fd347597a50249cd7440d373d2"
+    },
+    {
+      "file": "53e29c30eef5aecfb4e466806d7290194c5a0823.patch",
+      "url": "https://github.com/semgrep/semgrep/commit/53e29c30eef5aecfb4e466806d7290194c5a0823.patch",
+      "bytes": 12176,
+      "sha256": "2ea6252e64470992e3a744ced54c1bda939e0c116cc82d4203ab004f2869e2a4"
+    }
+  ],
+  "patch": {
+    "path": "python-pep695-menhir.patch",
+    "sha256": "07514ee5a99a722e4a7d87eb359b94071e0033929446b17f22f3d6a1474ecb67",
+    "bytes": 14532
+  },
+  "production_files": [
+    {
+      "path": "languages/python/ast/AST_python.ml",
+      "before_sha256": "cfc7d54219798ed5e95ac7d47a9241a40b2427b05f75913168b65255aa920461",
+      "after_sha256": "da20849f41d75bca54db3e5b27c74d348847b4f484109dd094cfff6b9123c412",
+      "before_bytes": 19162,
+      "after_bytes": 19685
+    },
+    {
+      "path": "languages/python/generic/Python_to_generic.ml",
+      "before_sha256": "1276342f612a222346f4041c088c36134fd1acf77a9211c8d9d7368e1e45fab7",
+      "after_sha256": "4671345daeac0749e8086ac24bd056f63e9578536d07cb4dd5821fa72431b60c",
+      "before_bytes": 35157,
+      "after_bytes": 37171
+    },
+    {
+      "path": "languages/python/menhir/Parser_python.mly",
+      "before_sha256": "06596051276ec06e0da66433b0b495829847b2ded69b620a64b6365ad968657b",
+      "after_sha256": "5619a0cb9e188bde67bed776376de8ea6699b19a7e31eddb27e5d1b8e6976fa8",
+      "before_bytes": 38801,
+      "after_bytes": 39652
+    },
+    {
+      "path": "languages/python/menhir/Parsing_hacks_python.ml",
+      "before_sha256": "2b7fa27ba2affbefc461a6e9902bf724359ffbcced20b99628b8e635951af465",
+      "after_sha256": "3d5725729a170b17b52f33c6c3155f228ed56f764a35f3bd5ad8901696a37529",
+      "before_bytes": 7012,
+      "after_bytes": 9699
+    },
+    {
+      "path": "languages/python/menhir/Token_helpers_python.ml",
+      "before_sha256": "6e23a828d1ba8c8c1bd42564c9ce306ec9f2a1f5f8319a9453548f4014db97fe",
+      "after_sha256": "2ec3efa98a03790eed4e9b650bb80b7263dba908d001dbf6b1265322b948e486",
+      "before_bytes": 4537,
+      "after_bytes": 4564
+    },
+    {
+      "path": "languages/python/tree-sitter/Parse_python_tree_sitter.ml",
+      "before_sha256": "3f68b72feb1e83f75b67017e52459a41e2a9cb2104c862397d337590f15d32a5",
+      "after_sha256": "9468c410f7b2f81e587e1c4f80b4546e211f4062fb5772db647c69793e88eaad",
+      "before_bytes": 56744,
+      "after_bytes": 56768
+    }
+  ],
+  "build_source_overlay": [
+    {
+      "path": "tools/rezwan_python_parser_controls/dune",
+      "sha256": "b47205b16ec54e97b4146993bb426fc65502b03f384987ef94118a448f3c99ed",
+      "bytes": 163,
+      "preimage": "absent",
+      "source_path": "overlay/tools/rezwan_python_parser_controls/dune",
+      "mode": "100644"
+    },
+    {
+      "path": "tools/rezwan_python_parser_controls/python_parser_controls.ml",
+      "sha256": "9eb2d65fb506fe3cfd51af198128aec9cd07807557e5db7fe9c4b60bd3bb852f",
+      "bytes": 10225,
+      "preimage": "absent",
+      "source_path": "overlay/tools/rezwan_python_parser_controls/python_parser_controls.ml",
+      "mode": "100644"
+    }
+  ],
+  "fixtures": {
+    "path": "python-parser-fixtures.json",
+    "sha256": "6a3fc192e703b09a53ad1823ae20ab3ef71dc452d86c975c172c0452e1122753",
+    "bytes": 86959,
+    "total": 27,
+    "valid": 17,
+    "malformed": 10,
+    "native_canary_files": 5,
+    "exact_expected_native_findings": 13,
+    "marked_safe_lines": 5
+  },
+  "evidence": [
+    {
+      "path": "adaptation-decisions.json",
+      "sha256": "86996ffd58f76b8234ecde3605177a8424e50f4c4fff2211e3283818b81598f1",
+      "bytes": 3485
+    },
+    {
+      "path": "fixture-oracle.json",
+      "sha256": "d6a5b667c8e9c949a0430ca26fe9fde99f60092d8fe54d4cb880b350870790f8",
+      "bytes": 5004
+    },
+    {
+      "path": "clean-apply-receipt.json",
+      "sha256": "dbbc2ed8123d561d334aefdc84a00455305fc0cd178cf1229d6392a028e351a5",
+      "bytes": 657
+    },
+    {
+      "path": "README.md",
+      "sha256": "48516ff97eb8f169652dc793cabce8c46cd272142ee91fdb5b9f544332bedb33",
+      "bytes": 3161
+    },
+    {
+      "path": "repository-fixture-binding.json",
+      "sha256": "0c089c7898fd6a60e983594f4bb6c7ab9572c59af190a2eb74d2fd62820d8926",
+      "bytes": 1792
+    },
+    {
+      "path": "fixture-oracle-current.json",
+      "sha256": "9487f3352c215dd0f6c937ffcb81758afda52d6b045eb3a9c32f01e8bee6c16f",
+      "bytes": 5763
+    }
+  ],
+  "qualification": {
+    "dune_target": "tools/rezwan_python_parser_controls/python_parser_controls.exe",
+    "argv": [
+      "<built-executable>",
+      "<absolute-python-parser-fixtures.json>"
+    ],
+    "require_before_acceptance_or_cache_reuse": true,
+    "local_native_build": "not performed; no OCaml compiler available in review environment",
+    "local_native_controls": "unexecuted",
+    "hosted_compile_ast_controls_native_scan_controls_required": true,
+    "full_current_head_repository_scan_required": true,
+    "same_frozen_switch_as_patched_stable_core": true,
+    "cli": "Existing pinned PythonCLI with patched stable core; full-native CLI migration excluded"
+  },
+  "preserved": {
+    "python_tree_sitter_grammar_asset": true,
+    "parser_order": true,
+    "match_case_guard_pattern_conversion": true,
+    "string_and_fstring_decoding": true,
+    "normal_parameter_and_default_conversion": true,
+    "application_sources": true,
+    "scanner_rules_limits_and_error_gates": true,
+    "stable_release_nonparser_semantics": true,
+    "stable_cli_and_core_pairing": true,
+    "stable_dependency_closure": true
+  },
+  "explicitly_outside_scope": [
+    "PEP 696 type-parameter defaults",
+    "complete Python 3.13/3.14 syntax support"
+  ],
+  "upstream_prerequisite": {
+    "url": "https://github.com/opengrep/opengrep/pull/845",
+    "head_commit": "c6340584118267a55b0a33c0ceb2dd26fc4e7d80",
+    "merge_commit": "8bb8e37f5249ab2d101c3cef5e056e571f503311",
+    "production_patch_sha256": "7a03af86e14713977ae2ac364772346cda5946ebb2be3c3e038f6a7c7488d909",
+    "production_file_count": 5
+  },
+  "previous_authored_patch": {
+    "sha256": "f9193bb8f9a3afc917a09a4fc6e545c77959e7aec93b4a311895e2e8b056d6e4",
+    "base": "750a84ed61cc2f8a06717da4e20d029e3173d84e",
+    "bytes": 13410
+  },
+  "binding_limit": "Repository fixture sources bound to current restored five files at timestamp in repository-fixture-binding.json; recheck every file against final candidate before freeze."
+}

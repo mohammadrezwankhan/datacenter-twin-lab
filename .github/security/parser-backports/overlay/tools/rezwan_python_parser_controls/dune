@@ -1,0 +1,10 @@
+(executable
+ (name python_parser_controls)
+ (libraries
+  parser_python.menhir
+  parser_python.ast_generic
+  ast_generic
+  commons
+  lib_parsing
+  fpath
+  yojson))

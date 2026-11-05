@@ -1,0 +1,45 @@
+{
+  "bound_at": "2026-11-05T21:34:02.726083+00:00",
+  "worktree": "/workspace/scratch/85c0715da196/recovery/datacenter-lint",
+  "repository_fixture_count": 5,
+  "binding": [
+    {
+      "path": "tests/test_audit_security.py",
+      "old_fixture_sha256": "02ec7157f10f3662f0b28ef64a938e361b24676b171b7543defc7e604f2e35f5",
+      "new_source_sha256": "02ec7157f10f3662f0b28ef64a938e361b24676b171b7543defc7e604f2e35f5",
+      "changed": false,
+      "bytes": 8308
+    },
+    {
+      "path": "scripts/reproduce_demand_timing.py",
+      "old_fixture_sha256": "528f5fecff5da54fbae3bf1346287719a3fc4fd1d9ff259f8aed87cee8db3198",
+      "new_source_sha256": "7e4c27b3b8ca5cbf796b501f36315d868428ffb2f843e4b9af41742f7952d012",
+      "changed": true,
+      "bytes": 8202
+    },
+    {
+      "path": "scripts/audit_public_site.py",
+      "old_fixture_sha256": "6577709ae49294ae1a461304e0634853fb6437766474b37f023b1710443dece7",
+      "new_source_sha256": "6577709ae49294ae1a461304e0634853fb6437766474b37f023b1710443dece7",
+      "changed": false,
+      "bytes": 34237
+    },
+    {
+      "path": "datacenter_twin/research/common.py",
+      "old_fixture_sha256": "4b21255209e8deff095f281312178209c729ef5fd3fb67cf8a4ec89bb8c6ac5a",
+      "new_source_sha256": "4b21255209e8deff095f281312178209c729ef5fd3fb67cf8a4ec89bb8c6ac5a",
+      "changed": false,
+      "bytes": 2942
+    },
+    {
+      "path": "datacenter_twin/research/types.py",
+      "old_fixture_sha256": "0c8b546eb2a7e49924fdcad27ad74328204c98fadf83eb1d74d1998ce6a7a6f6",
+      "new_source_sha256": "0c8b546eb2a7e49924fdcad27ad74328204c98fadf83eb1d74d1998ce6a7a6f6",
+      "changed": false,
+      "bytes": 1585
+    }
+  ],
+  "declaration_oracle_and_expected_findings_unchanged": true,
+  "worktree_writes": false,
+  "runtime_tests_performed": false
+}
