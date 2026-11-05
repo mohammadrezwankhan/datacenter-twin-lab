@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "projects": [
+    ".[api,test-api,studies]"
+  ],
+  "requirements": [
+    "requirements-api.lock",
+    "requirements-studies.lock"
+  ],
+  "python_paths": [],
+  "test_targets": [
+    "tests",
+    ".github/security/test_contracts.py",
+    ".github/security/test_native_scanner.py"
+  ],
+  "coverage_sources": [
+    "datacenter_twin",
+    "scripts",
+    ".github/security"
+  ],
+  "coverage_kind": "numerical-core",
+  "numerical_core_sources": [
+    "datacenter_twin"
+  ],
+  "browser_project_directories": [
+    "apps/web"
+  ]
+}

@@ -10,13 +10,14 @@ trace or external validation claim.
 from __future__ import annotations
 
 from copy import deepcopy
-from types import SimpleNamespace as NS
+from types import SimpleNamespace
+from typing import TypedDict
 
 import numpy as np
 from scipy.linalg import eig
 from scipy.optimize import root
 
-from .common import numeric_jacobian, pi_bw_tuning
+from .common import pi_bw_tuning
 from .datacenter_init_from_pf_qss import datacenter_init_from_pf_qss, qss_equations
 from .datacenter_port_model import datacenter_port_model
 from .gfl_init_from_pf_qss_newton import gfl_init_from_pf_qss_newton
@@ -25,10 +26,34 @@ from .gfm_init_from_pf_qss_newton import gfm_init_from_pf_qss_newton
 from .gfm_port_model import gfm_port_model
 from .sm_init_from_pf_fsolve import sm_init_from_pf_fsolve
 from .sm_port_model import sm_port_model
+from .types import (
+    Complex,
+    ComplexArray,
+    DCReferences,
+    FloatArray,
+    GFLReferences,
+    GFMReferences,
+    Mode,
+    SMReferences,
+)
 
 
-def _sm_params(fb: float) -> NS:
-    return NS(
+class NetworkAdmittance(TypedDict):
+    Yeq: ComplexArray
+
+
+class PowerFlow(NetworkAdmittance):
+    V: ComplexArray
+    Vp: ComplexArray
+    Ip: ComplexArray
+    S3: Complex
+    pf_mismatch_inf: float
+    base_mva: float
+    scale: float
+
+
+def _sm_params(fb: float) -> SimpleNamespace:
+    return SimpleNamespace(
         omega_b=2 * np.pi * fb,
         ws=1.0,
         xd=0.1460,
@@ -53,37 +78,37 @@ def _sm_params(fb: float) -> NS:
     )
 
 
-def _gfm_params(fb: float) -> NS:
+def _gfm_params(fb: float) -> SimpleNamespace:
     ob, wc_v, wc_i, cf, lf = 2 * np.pi * fb, 2 * np.pi * 80, 2 * np.pi * 200, 0.074, 0.08
-    return NS(
-        base=NS(ome_sys=1.0, ome_b=ob),
-        filt=NS(lf=lf, rf=0.003, cf=cf, lg=0.2, rg=0.01),
-        droop=NS(Kp=0.02, ome_z=20.0, Kq=0.05, ome_f=50.0),
-        virt=NS(rv=0.0, lv=0.2),
-        inner=NS(
+    return SimpleNamespace(
+        base=SimpleNamespace(ome_sys=1.0, ome_b=ob),
+        filt=SimpleNamespace(lf=lf, rf=0.003, cf=cf, lg=0.2, rg=0.01),
+        droop=SimpleNamespace(Kp=0.02, ome_z=20.0, Kq=0.05, ome_f=50.0),
+        virt=SimpleNamespace(rv=0.0, lv=0.2),
+        inner=SimpleNamespace(
             kpv=4 * wc_v * cf / ob,
             kiv=wc_v**2 * cf / ob,
             kpc=1.414 * wc_i * lf / ob,
             kic=wc_i**2 * lf / ob,
         ),
-        dc=NS(Vdc=1.0),
+        dc=SimpleNamespace(Vdc=1.0),
     )
 
 
-def _gfl_params(base_mva: float, fb: float) -> NS:
-    b = NS(baseMVA=base_mva, fb_hz=fb, ome_b=2 * np.pi * fb, ome_sys=1.0)
-    return NS(
+def _gfl_params(base_mva: float, fb: float) -> SimpleNamespace:
+    b = SimpleNamespace(baseMVA=base_mva, fb_hz=fb, ome_b=2 * np.pi * fb, ome_sys=1.0)
+    return SimpleNamespace(
         base=b,
-        filt=NS(lf=0.08, rf=0.003, cf=0.074, lg=0.1, rg=0.01),
-        pll=NS(kp=0.05, ki=1.42, ome_lp=376.99),
-        outer=NS(Kp_p=0.01, Ki_p=0.12, Kp_q=0.01, Ki_q=0.12, ome_z=41.47, ome_f=41.47),
-        inner=NS(kpc=0.15, kic=0.267, kffv=0.0, lf=0.08),
-        dc=NS(Vdc=1.0),
+        filt=SimpleNamespace(lf=0.08, rf=0.003, cf=0.074, lg=0.1, rg=0.01),
+        pll=SimpleNamespace(kp=0.05, ki=1.42, ome_lp=376.99),
+        outer=SimpleNamespace(Kp_p=0.01, Ki_p=0.12, Kp_q=0.01, Ki_q=0.12, ome_z=41.47, ome_f=41.47),
+        inner=SimpleNamespace(kpc=0.15, kic=0.267, kffv=0.0, lf=0.08),
+        dc=SimpleNamespace(Vdc=1.0),
     )
 
 
-def _dc_params(fb: float) -> NS:
-    dc = NS(
+def _dc_params(fb: float) -> SimpleNamespace:
+    dc = SimpleNamespace(
         fb=fb,
         omega_b=2 * np.pi * fb,
         omega_s=1.0,
@@ -114,7 +139,7 @@ def _dc_params(fb: float) -> NS:
     return dc
 
 
-def _power_flow(scale: float):
+def _power_flow(scale: float) -> PowerFlow:
     base = 100.0
     bus = np.array(
         [
@@ -173,13 +198,16 @@ def _power_flow(scale: float):
     pq = np.flatnonzero(bus[:, 1] == 1)
     x0 = np.r_[np.angle(v[pvpq]), np.abs(v[pq])]
 
-    def mismatch(x):
+    def mismatch(x: FloatArray) -> FloatArray:
         va, vm = np.angle(v).copy(), np.abs(v).copy()
         va[pvpq] = x[: len(pvpq)]
         vm[pq] = x[len(pvpq) :]
         trial = vm * np.exp(1j * va)
         s = trial * np.conj(ybus @ trial)
-        return np.r_[pg[pvpq] - pd[pvpq] - s[pvpq].real, qg[pq] - qd[pq] - s[pq].imag]
+        residual: FloatArray = np.r_[
+            pg[pvpq] - pd[pvpq] - s[pvpq].real, qg[pq] - qd[pq] - s[pq].imag
+        ]
+        return residual
 
     pf = root(mismatch, x0, method="hybr", options={"xtol": 1e-12, "maxfev": 3000})
     mismatch_inf = float(np.linalg.norm(mismatch(pf.x), np.inf))
@@ -223,20 +251,34 @@ def _power_flow(scale: float):
     }
 
 
-def _pack_v(v: np.ndarray) -> np.ndarray:
+def _pack_v(v: ComplexArray) -> FloatArray:
     out = np.empty(2 * len(v))
     out[0::2], out[1::2] = np.real(v), np.imag(v)
     return out
 
 
-def _unpack_v(v: np.ndarray) -> np.ndarray:
+def _unpack_v(v: FloatArray) -> ComplexArray:
     v = np.asarray(v, dtype=float)
     return v[0::2] + 1j * v[1::2]
 
 
 def _dae_rhs(
-    t, y, nx_sm, nx_gfm, nx_gfl, nx_dc, sm, gfm, gfl, dc, refs_sm, refs_gfm, refs_gfl, refs_dc, net
-):
+    t: float,
+    y: FloatArray,
+    nx_sm: int,
+    nx_gfm: int,
+    nx_gfl: int,
+    nx_dc: int,
+    sm: SimpleNamespace,
+    gfm: SimpleNamespace,
+    gfl: SimpleNamespace,
+    dc: SimpleNamespace,
+    refs_sm: SMReferences,
+    refs_gfm: GFMReferences,
+    refs_gfl: GFLReferences,
+    refs_dc: DCReferences,
+    net: NetworkAdmittance,
+) -> FloatArray:
     nx = nx_sm + nx_gfm + nx_gfl + nx_dc
     x = np.asarray(y[:nx], dtype=float)
     vp = _unpack_v(y[nx:])
@@ -264,14 +306,16 @@ def _dae_rhs(
     i += nx_gfl
     dx4, i4, _ = datacenter_port_model(t, x[i : i + nx_dc], vp[3], dc, rt, omega_sm)
     g = np.array([i1, i2, i3, i4]) - net["Yeq"] @ vp
-    return np.r_[dx1, dx2, dx3, dx4, -np.real(g), -np.imag(g)]
+    residual: FloatArray = np.r_[dx1, dx2, dx3, dx4, -np.real(g), -np.imag(g)]
+    return residual
 
 
-def _port_powers(vp: np.ndarray, yeq: np.ndarray) -> np.ndarray:
+def _port_powers(vp: ComplexArray, yeq: ComplexArray) -> FloatArray:
     # Generator port injections are positive; the data-center port is shown as
     # consumed power to match the supplied case9 plotting convention.
-    power = np.real(vp * np.conj(yeq @ vp))
-    return power * np.array([1.0, 1.0, 1.0, -1.0])
+    power: FloatArray = np.real(vp * np.conj(yeq @ vp))
+    signs: FloatArray = np.array([1.0, 1.0, 1.0, -1.0])
+    return power * signs
 
 
 def run_grid_network(config: dict[str, float]) -> dict[str, object]:
@@ -281,8 +325,8 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
     sm, gfm, gfl, dc = _sm_params(fb), _gfm_params(fb), _gfl_params(100.0, fb), _dc_params(fb)
     xsm, sm, refs_sm, _ = sm_init_from_pf_fsolve(net["Vp"][0], net["Ip"][0], sm)
     xgfm, refs_gfm = gfm_init_from_pf_qss_newton(net["Vp"][1], net["Ip"][1], gfm)
-    xgfl, gfl, refs_gfl, info_gfl = gfl_init_from_pf_qss_newton(net["Vp"][2], net["Ip"][2], gfl)
-    xdc, refs_dc, info_dc = datacenter_init_from_pf_qss(net["Vp"][3], net["Ip"][3], dc)
+    xgfl, gfl, refs_gfl, _info_gfl = gfl_init_from_pf_qss_newton(net["Vp"][2], net["Ip"][2], gfl)
+    xdc, refs_dc, _info_dc = datacenter_init_from_pf_qss(net["Vp"][3], net["Ip"][3], dc)
     residual_sm = float(
         np.linalg.norm(sm_port_model(0.0, xsm, net["Vp"][0], sm, refs_sm["pref"])[0], np.inf)
     )
@@ -326,13 +370,14 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
             "Case-9 device initialization failed its recomputed residual checks: "
             + repr(init_residuals)
         )
-    lengths = list(map(len, (xsm, xgfm, xgfl, xdc)))
+    lengths = (len(xsm), len(xgfm), len(xgfl), len(xdc))
     nx = sum(lengths)
     x0 = np.r_[xsm, xgfm, xgfl, xdc]
     y0 = np.r_[x0, _pack_v(net["Vp"])]
     refs = (refs_sm, refs_gfm, refs_gfl, refs_dc)
     models = (sm, gfm, gfl, dc)
-    args = (*lengths, *models, *refs, {"Yeq": net["Yeq"]})
+    admittance: NetworkAdmittance = {"Yeq": net["Yeq"]}
+    args = (*lengths, *models, *refs, admittance)
     residual_y0 = _dae_rhs(0.0, y0, *args)
     residual_alg = float(np.linalg.norm(residual_y0[nx:], np.inf))
     if not np.isfinite(residual_alg) or residual_alg >= 1e-5:
@@ -357,11 +402,10 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
     asys = am - bm @ np.linalg.solve(dm, cm)
     asys_red = asys[1:, 1:]  # remove the synchronous-machine angle reference
 
-    perturbed_refs = list(refs)
-    dc_perturbed = dict(refs_dc)
+    dc_perturbed = refs_dc.copy()
     dc_perturbed["p_load"] += eps
-    perturbed_refs[3] = dc_perturbed
-    fu = _dae_rhs(0.0, y0, *(*lengths, *models, *perturbed_refs, {"Yeq": net["Yeq"]}))
+    perturbed_refs = (refs_sm, refs_gfm, refs_gfl, dc_perturbed)
+    fu = _dae_rhs(0.0, y0, *(*lengths, *models, *perturbed_refs, admittance))
     fu = (fu - f0) / eps
     em, ealg = fu[:nx], fu[nx:]
     bsys = em - bm @ np.linalg.solve(dm, ealg)
@@ -383,11 +427,9 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
 
     # Check the signs in the Schur-reduced algebraic input term against a
     # separately solved perturbed network voltage at fixed dynamic states.
-    def algebraic_at_voltage(packed_voltage):
+    def algebraic_at_voltage(packed_voltage: FloatArray) -> FloatArray:
         trial_y = np.r_[x0, packed_voltage]
-        return _dae_rhs(0.0, trial_y, *(*lengths, *models, *perturbed_refs, {"Yeq": net["Yeq"]}))[
-            nx:
-        ]
+        return _dae_rhs(0.0, trial_y, *(*lengths, *models, *perturbed_refs, admittance))[nx:]
 
     vpert = root(
         algebraic_at_voltage,
@@ -406,7 +448,8 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
     )
     if not np.isfinite(direct_error) or direct_error > 1e-4:
         raise ValueError(
-            f"Case-9 Schur-reduced feedthrough sign/derivative check failed (relative error {direct_error:.3g})."
+            "Case-9 Schur-reduced feedthrough sign/derivative check failed "
+            f"(relative error {direct_error:.3g})."
         )
     eigenvalues, left, right = eig(asys_red, left=True, right=True, check_finite=True)
     order = np.array(
@@ -446,7 +489,7 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
         ),
         ("Data center", range(lengths[0] - 1 + lengths[1] + lengths[2], asys_red.shape[0])),
     ]
-    mode_list = []
+    mode_list: list[Mode] = []
     for k, lam in enumerate(eigenvalues):
         scores = [(name, float(np.sum(participation[list(idx), k]))) for name, idx in state_groups]
         real, imag = float(lam.real), float(lam.imag)
@@ -484,20 +527,46 @@ def run_grid_network(config: dict[str, float]) -> dict[str, object]:
     bus_ang = np.angle(net["V"]) * 180.0 / np.pi
     return {
         "study_id": "grid-network",
-        "model": "Supplied modified IEEE 9-bus network with synchronous machine, GFM, GFL, and 21-state data-center port",
+        "model": (
+            "Supplied modified IEEE 9-bus network with synchronous"
+            " machine, GFM, GFL, and 21-state data-center port"
+        ),
         "config": dict(config),
         "solver": {
-            "method": "SciPy hybrid power flow; supplied nonlinear device initializers; algebraic Schur reduction; SciPy left/right eig",
+            "method": (
+                "SciPy hybrid power flow; supplied nonlinear device"
+                " initializers; algebraic Schur reduction; SciPy left/right"
+                " eig"
+            ),
             "power_flow_mismatch_inf": net["pf_mismatch_inf"],
             "device_residual_tolerance_inf": 1e-5,
             "poa_frequency_points": len(freq),
         },
         "assumptions": [
-            "The 9-bus load, generator, and branch data follow the supplied case9.py variant; scale multiplies its listed loads and generator setpoints.",
-            "The supplied case9-specific data-center controller parameters are retained; they differ from the archive's standalone defaults.",
-            "The dynamic reduction removes the synchronous-machine angle reference state, as in the supplied case9 workflow.",
-            "Only power flow, device initialization, modal analysis, and POA are implemented here. GPU_data.csv was absent, so measured-profile time simulation is not included.",
-            "Positive power for the data-center port is reported as consumption; the other three ports use positive network injection.",
+            (
+                "The 9-bus load, generator, and branch data follow the"
+                " supplied case9.py variant; scale multiplies its listed"
+                " loads and generator setpoints."
+            ),
+            (
+                "The supplied case9-specific data-center controller"
+                " parameters are retained; they differ from the archive's"
+                " standalone defaults."
+            ),
+            (
+                "The dynamic reduction removes the synchronous-machine angle"
+                " reference state, as in the supplied case9 workflow."
+            ),
+            (
+                "Only power flow, device initialization, modal analysis, and"
+                " POA are implemented here. GPU_data.csv was absent, so"
+                " measured-profile time simulation is not included."
+            ),
+            (
+                "Positive power for the data-center port is reported as"
+                " consumption; the other three ports use positive network"
+                " injection."
+            ),
         ],
         "metrics": [
             {

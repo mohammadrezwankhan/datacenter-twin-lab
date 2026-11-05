@@ -137,7 +137,7 @@ The browser app presents educational power-continuity scenarios, a separate simp
 Name: ${options.course.name}
 Canonical Course ID: ${options.course['@id']}
 Course page: ${options.course.url}
-Free lessons: ${options.course.hasPart.length}
+Free lessons: ${String(options.course.hasPart.length)}
 
 ${lessons}
 

@@ -24,6 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
       - name: Check out dashboard source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -54,7 +58,7 @@ jobs:
           PY
 
   deploy:
-    if: ${{ 'existing-workflow' == 'workflow' && github.ref == 'refs/heads/main' }}
+    if: false # Deployment is handled by the existing Pages publisher.
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -66,6 +70,10 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
       - name: Check out dashboard source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

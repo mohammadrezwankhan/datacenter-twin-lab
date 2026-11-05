@@ -1,23 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ENGINE_VERSION } from './js-engine/version';
+import { evidenceIndex, type EvidenceIndex } from './evidence-index';
 import './evidence-hub.css';
-
-type EvidenceIndex = {
-  version: string;
-  manifest_path: string;
-  receipt_path: string;
-  cases: {
-    id: string;
-    title: string;
-    input_sha256: string;
-    run_id: string;
-    run_path: string;
-    scenario_path: string;
-    report_path: string;
-    equation: string;
-    outcome: string;
-  }[];
-};
 
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const suppliedRevision = import.meta.env.VITE_PUBLIC_SOURCE_REVISION || '';
@@ -36,17 +20,18 @@ export function EvidenceHub() {
           throw new Error(
             'The evidence index could not be loaded. Open the source evidence page below.',
           );
-        const value = (await response.json()) as EvidenceIndex;
-        if (value.version !== ENGINE_VERSION || value.cases?.length !== 3)
-          throw new Error(
-            'Evidence version does not match this build. Use the versioned source packet.',
-          );
-        setIndex(value);
+        const value: unknown = await response.json();
+        setIndex(evidenceIndex(value, ENGINE_VERSION));
       })
-      .catch((cause: Error) => {
-        if (!controller.signal.aborted) setError(cause.message);
+      .catch((cause: unknown) => {
+        if (!controller.signal.aborted)
+          setError(
+            cause instanceof Error ? cause.message : 'The evidence index could not be loaded.',
+          );
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return (

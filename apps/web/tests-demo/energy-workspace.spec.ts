@@ -1,16 +1,19 @@
+import { requiredPresent } from '../src/required-value';
 import { test, expect, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { facilityProfiles, scenarioModes } from '../src/facility-profiles';
+import { continuityResultValue } from './continuity-contract';
+import { jsonObject } from './json-contracts';
 
 async function exportRun(page: Page) {
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
-  return JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  return continuityResultValue(jsonObject(await readFile(await (await download).path(), 'utf8')));
 }
 
-function nativeRun(scenario: unknown) {
-  return JSON.parse(
+function nativeRun(scenario: unknown): unknown {
+  const result: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -25,6 +28,7 @@ function nativeRun(scenario: unknown) {
       },
     ),
   );
+  return result;
 }
 
 test('all facility and pressure selections export native-equal runs', async ({ page }) => {
@@ -73,10 +77,18 @@ test('half reserve and equipment edits produce new results with unchanged export
   await expect(page.getByRole('button', { name: 'Run scenario' })).toBeEnabled();
   result = await exportRun(page);
   expect(
-    result.scenario.assets.find((asset: { id: string }) => asset.id === 'battery').capacity_kw,
+    requiredPresent(
+      result.scenario.assets.find((asset) => asset.id === 'battery'),
+      'battery asset',
+    ).capacity_kw,
   ).toBe('40000');
   expect(
-    Number(result.intervals.find((row: { start_s: string }) => row.start_s === '300').served_it_kw),
+    Number(
+      requiredPresent(
+        result.intervals.find((row) => row.start_s === '300'),
+        'outage interval',
+      ).served_it_kw,
+    ),
   ).toBe(38000);
   expect(result).toEqual(nativeRun(result.scenario));
   await page.getByLabel('Battery energy capacity (kWh)', { exact: true }).fill('1');
@@ -119,7 +131,10 @@ test('scene is visible and keyboard operable at desktop, tablet and phone widths
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    await page.screenshot({ path: testInfo.outputPath(`workspace-${width}.png`), fullPage: true });
+    await page.screenshot({
+      path: testInfo.outputPath(`workspace-${String(width)}.png`),
+      fullPage: true,
+    });
   }
 });
 
@@ -134,7 +149,10 @@ test('scene pointer tilt follows motion preferences while explicit view controls
   const movePointerOverStage = async (xRatio = 0.85, yRatio = 0.2) => {
     const bounds = await stage.boundingBox();
     expect(bounds).not.toBeNull();
-    await page.mouse.move(bounds!.x + bounds!.width * xRatio, bounds!.y + bounds!.height * yRatio);
+    await page.mouse.move(
+      requiredPresent(bounds, 'bounds').x + requiredPresent(bounds, 'bounds').width * xRatio,
+      requiredPresent(bounds, 'bounds').y + requiredPresent(bounds, 'bounds').height * yRatio,
+    );
   };
   const pointerTilt = () =>
     stage.evaluate((element) => [

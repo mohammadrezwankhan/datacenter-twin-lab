@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
 import { Cable, Device, SceneDiagram } from './primitives';
@@ -20,7 +21,7 @@ export default function TransformerScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="transformer"
       title="Layered equivalent circuit"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >
@@ -64,7 +65,7 @@ export default function TransformerScene({ result, step }: SceneProps) {
       </text>
       <rect x="235" y="116" width="210" height="46" rx="8" fill="#142736" stroke="#496273" />
       <text x="340" y="145" textAnchor="middle" fill="#edf4fa" fontSize="14">
-        Base · {rows[2].value}
+        Base · {requiredValue(rows[2], 'rows[2]').value}
       </text>
       {step >= 2 && (
         <g>
@@ -77,7 +78,7 @@ export default function TransformerScene({ result, step }: SceneProps) {
           />
           <rect x="702" y="112" width="218" height="48" rx="8" fill="#302427" stroke="#ff9e8b" />
           <text x="811" y="142" textAnchor="middle" fill="#ffb4a7" fontSize="14">
-            Model RMS · {rows[3].value}
+            Model RMS · {requiredValue(rows[3], 'rows[3]').value}
           </text>
         </g>
       )}

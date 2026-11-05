@@ -1,7 +1,7 @@
 const englishFormatters = new Map<string, Intl.NumberFormat>();
 
 function formatterFor(minimumFractionDigits: number, maximumFractionDigits: number) {
-  const key = `${minimumFractionDigits}:${maximumFractionDigits}`;
+  const key = `${String(minimumFractionDigits)}:${String(maximumFractionDigits)}`;
   let formatter = englishFormatters.get(key);
   if (!formatter) {
     formatter = new Intl.NumberFormat('en', {

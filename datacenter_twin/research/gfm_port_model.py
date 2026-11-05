@@ -1,10 +1,29 @@
-# Adapted from user-supplied python_equivalent archive (SHA-256 c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace were supplied; no MATLAB/measurement validation is claimed.
+# Adapted from user-supplied python_equivalent archive (SHA-256
+# c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps
+# these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace
+# were supplied; no MATLAB/measurement validation is claimed.
 """Python equivalent of gfm_port_model.m."""
+
 from __future__ import annotations
+
+from types import SimpleNamespace
+
 import numpy as np
 
+from .types import Complex, FloatArray, Real
 
-def gfm_port_model(t, x, Vport, gfm, pref_cmd, qref_cmd, ome_ref, v_ref, omega_sys=None):
+
+def gfm_port_model(
+    _t: float,
+    x: FloatArray,
+    vport: Complex,
+    gfm: SimpleNamespace,
+    pref_cmd: Real,
+    qref_cmd: Real,
+    ome_ref: Real,
+    v_ref: Real,
+    omega_sys: Real | None = None,
+) -> tuple[FloatArray, Complex, dict[str, Real]]:
     if omega_sys is None:
         omega_sys = gfm.base.ome_sys
     b, f, dr, vi, inner, dc = gfm.base, gfm.filt, gfm.droop, gfm.virt, gfm.inner, gfm.dc
@@ -12,10 +31,10 @@ def gfm_port_model(t, x, Vport, gfm, pref_cmd, qref_cmd, ome_ref, v_ref, omega_s
     ir_cv, ii_cv, vr_f, vi_f, ir_f, ii_f, the, pm, qm, xi_d, xi_q, gam_d, gam_q = x
 
     sn, cs = np.sin(the + np.pi / 2), np.cos(the + np.pi / 2)
-    T = np.array([[sn, -cs], [cs, sn]])
-    vd_f, vq_f = T @ np.array([vr_f, vi_f])
-    id_f, iq_f = T @ np.array([ir_f, ii_f])
-    id_cv, iq_cv = T @ np.array([ir_cv, ii_cv])
+    rotation = np.array([[sn, -cs], [cs, sn]])
+    vd_f, vq_f = rotation @ np.array([vr_f, vi_f])
+    id_f, iq_f = rotation @ np.array([ir_f, ii_f])
+    id_cv, iq_cv = rotation @ np.array([ir_cv, ii_cv])
 
     ome_oc = ome_ref + dr.Kp * (pref_cmd - pm)
     v_oc = v_ref + dr.Kq * (qref_cmd - qm)
@@ -45,8 +64,8 @@ def gfm_port_model(t, x, Vport, gfm, pref_cmd, qref_cmd, ome_ref, v_ref, omega_s
     )
     xdot[4:6] = (b.ome_b / f.lg) * np.array(
         [
-            vr_f - np.real(Vport) - f.rg * ir_f + omega_sys * f.lg * ii_f,
-            vi_f - np.imag(Vport) - f.rg * ii_f - omega_sys * f.lg * ir_f,
+            vr_f - np.real(vport) - f.rg * ir_f + omega_sys * f.lg * ii_f,
+            vi_f - np.imag(vport) - f.rg * ii_f - omega_sys * f.lg * ir_f,
         ]
     )
     xdot[6] = b.ome_b * (ome_oc - omega_sys)
@@ -55,6 +74,6 @@ def gfm_port_model(t, x, Vport, gfm, pref_cmd, qref_cmd, ome_ref, v_ref, omega_s
         dr.ome_f * ((-vr_f * ii_f + vi_f * ir_f) - qm),
     ]
     xdot[9:13] = [vd_vi_ref - vd_f, vq_vi_ref - vq_f, id_cv_ref - id_cv, iq_cv_ref - iq_cv]
-    Iport = ir_f + 1j * ii_f
-    aux = dict(ome_oc=ome_oc, v_oc=v_oc, p_inst=pm, q_inst=qm)
-    return xdot, Iport, aux
+    iport = ir_f + 1j * ii_f
+    aux = {"ome_oc": ome_oc, "v_oc": v_oc, "p_inst": pm, "q_inst": qm}
+    return xdot, iport, aux

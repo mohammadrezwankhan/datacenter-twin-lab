@@ -1,0 +1,112 @@
+{
+  "reviewed_on": "2026-11-05",
+  "binary_verification": "Downloaded bytes matched official release checksum entries; not a claim of independent signature verification",
+  "python_tools": {
+    "zizmor": "1.31.1",
+    "pip-audit": "2.10.1",
+    "opengrep": "1.33.1 (complete Python CLI built from pinned upstream source)"
+  },
+  "sources": [
+    "https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1",
+    "https://github.com/rhysd/actionlint/releases/tag/v1.7.12",
+    "https://github.com/aquasecurity/trivy/releases/tag/v0.76.1",
+    "https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23",
+    "https://github.com/step-security/harden-runner/releases/tag/v2.22.3",
+    "https://github.com/github/codeql-action/releases/tag/v4.39.1",
+    "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference",
+    "https://github.com/pypa/pip-audit",
+    "https://semgrep.dev/p/security-audit",
+    "https://pypi.org/pypi/semgrep/1.183.0/json",
+    "https://pypi.org/pypi/zizmor/1.31.1/json",
+    "https://pypi.org/pypi/pip-audit/2.10.1/json",
+    "https://github.com/opengrep/opengrep/tree/092c80faa0817840228349f93eff12a50fb9cf6b",
+    "https://github.com/ocaml/ocaml/releases/tag/5.5.2",
+    "https://github.com/ocaml/opam/releases/tag/2.5.2",
+    "https://github.com/PCRE2Project/pcre2/commit/ee7b43963d9a6a95c1745fa8ff1b56625d7b1dc3",
+    "https://google.github.io/osv.dev/api/",
+    "https://github.com/actions/cache/releases/tag/v6.1.0",
+    "https://opam.ocaml.org/doc/Manual.html#config",
+    "https://packages.ubuntu.com/stonking/amd64/bubblewrap/download",
+    "https://opam.ocaml.org/doc/FAQ.html#Why-does-opam-require-bwrap",
+    "https://packages.ubuntu.com/stonking/bubblewrap",
+    "https://archive.ubuntu.com/ubuntu/dists/stonking/InRelease",
+    "https://ubuntu.com/security/CVE-2026-87766",
+    "https://ubuntu.com/security/notices/USN-8779-2",
+    "https://github.com/containers/bubblewrap/releases/tag/v0.12.0",
+    "https://packages.ubuntu.com/noble-updates/apparmor-profiles",
+    "https://archive.ubuntu.com/ubuntu/dists/noble-updates/InRelease",
+    "https://github.com/containers/bubblewrap/blob/2a76602a8c71f36c1527cf9fc3417d9149822e0c/bubblewrap.c",
+    "https://github.com/openai/codex-security/blob/main/github-action/scripts/setup-ubuntu-sandbox.sh",
+    "https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/configure-system.sh",
+    "https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/install-docker.sh",
+    "https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/install-nodejs.sh",
+    "https://github.com/ocaml/opam-repository/blob/7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9/packages/ocaml-variants/ocaml-variants.5.5.2%2Boptions/opam",
+    "https://github.com/ocaml/opam-repository/blob/7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9/packages/ocaml-option-no-compression/ocaml-option-no-compression.1/opam"
+  ],
+  "new_actions": {
+    "step-security/harden-runner": {
+      "version": "v2.22.3",
+      "sha": "46b06cea07f9e64621fdf066ba77ac6915163d43"
+    },
+    "github/codeql-action": {
+      "version": "v4.39.1",
+      "sha": "9b3254085494b55a0f7c4c2b3d2d52cc712ce370"
+    },
+    "actions/cache": {
+      "version": "v6.1.0",
+      "sha": "55cc8345863c7cc4c66a329aec7e433d2d1c52a9"
+    }
+  },
+  "cooldown": {
+    "version_updates_days": 7,
+    "security_updates": "Exempt per GitHub documentation; no cooldown bypass parameter"
+  },
+  "pending_external_validation": [
+    "Actual GitHub Actions executions",
+    "CodeQL availability and upload authorization",
+    "MATLAB execution on runners where configured",
+    "SonarQube Cloud project provisioning and quality gate"
+  ],
+  "native_scanner": {
+    "manifest": "native-scanner.json",
+    "switch_lock": "native-switch.export",
+    "source_commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
+    "ocaml": "5.5.2",
+    "opam": "2.5.2",
+    "pcre2_commit": "ee7b43963d9a6a95c1745fa8ff1b56625d7b1dc3",
+    "pcre2_source_version": "10.50~DEV (accepted upstream development commit, not a released tarball)",
+    "python_packages": 47,
+    "native_opam_packages": 182,
+    "native_audit_queries": 237,
+    "audit_policy": "Every returned advisory, missing result or unfinished response fails; no ignored IDs or dependency overrides",
+    "platform": "Ubuntu 24.04 x86_64, Python 3.12",
+    "cache_policy": "Verified wheel and native libraries only, bound to source/build locks and builder code; fresh dependency audit on reuse",
+    "bundled_runtime": "GMP, libev and tree-sitter are pinned Ubuntu/source inputs; the runner supplies its Ubuntu C/C++ runtime",
+    "timeout_evidence": "native-build-timings.json: measured local phases and explicit margin; actual hosted cold run still required",
+    "opam_sources": "Full switch metadata, mandatory SHA256/SHA512 verification, official content-addressed mirror and upstream fallback; both dev commits use byte-equivalent SHA256 archives",
+    "sandbox": "Hash-verified Ubuntu 26.10 bubblewrap 0.12.0-1, whose declared runtime minima are satisfied by Ubuntu 24.04, extracted privately. Audit exact distribution identity and upstream commit; verify executable hash, linked libraries, all three opam wrappers and actual sandbox execution. No fallback to an unsandboxed build.",
+    "sandbox_runtime": "Uses the Ubuntu runner libc, libcap and SELinux runtime. On GitHub-hosted Ubuntu 24.04 only, install the exact verified helper at a dedicated root-owned path and load a hash-verified Ubuntu-derived AppArmor profile limited to that helper. Preserve child capability denial and global kernel restrictions; require the actual child stack, zero effective/permitted capabilities and NoNewPrivs=1. No package scripts or system Bubblewrap changes.",
+    "sandbox_policy": "Ubuntu 24.04 apparmor-profiles 4.0.1really4.0.1-0ubuntu0.24.04.9; package SHA256 90b02aa006eea7702cd4e851343e469e41365dda42145a3cb035de1d6c773b8c, original profile SHA256 11d39094f044f0cda0febb3ad517b830301da6b2ce929664af09ee9e4dd264f9. Signed archive index verified. Only attachment, paired names, narrower parent capabilities and removal of optional local overrides differ.",
+    "sandbox_helper_path": "/usr/libexec/rezwan-native-sandbox/bin/bwrap",
+    "sandbox_helper_placement": "Qualified image ubuntu-24.04 20261101.360.1 (runner-images ubuntu24/20261101.360, commit add4380b0d6685806e9192c33c37359ee0aa4023) makes /opt world-writable. Its root-run Docker installation uses /usr/libexec. Every existing ancestor still must pass the original root-ownership, non-symlink and non-writable checks; no existing directory ownership or permissions are changed to make a path acceptable.",
+    "compiler_configuration": {
+      "variant": "ocaml-variants.5.5.2+options",
+      "option": "ocaml-option-no-compression.1",
+      "compiler_source_unchanged": "ocaml-compiler.5.5.2, SHA256 bb3ffef5e4fce4f04915b9f254f570663311e1f227fd669aa87a5ef7de9a1523",
+      "opam_repository_commit": "7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9",
+      "metadata": [
+        {
+          "package": "ocaml-variants.5.5.2+options",
+          "blob_sha": "e1ea19226f58af87e4f0c46241273bd52db6076d",
+          "sha256": "2c93cf0d250e65b2071762a8257cc733c0581cc06fffa37375075bd55fc131cf"
+        },
+        {
+          "package": "ocaml-option-no-compression.1",
+          "blob_sha": "e6d4be243d1736c04bc12174e33b801b134fe4c7",
+          "sha256": "fc5d59e1023895a13cc8e0d4bbc8d1ebe00788c5fc703247274184859c0988e9"
+        }
+      ],
+      "verification": "Record ocamlc -config after the frozen import; require version 5.5.2 and a present, unambiguous empty compression_c_libraries field. The original library closure still rejects libzstd and every unknown dependency."
+    }
+  }
+}

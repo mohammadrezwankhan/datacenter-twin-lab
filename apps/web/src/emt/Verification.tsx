@@ -16,7 +16,7 @@ export function EmtVerification({ result }: { result: EmtResult }) {
     const controller = new AbortController();
     setStatus('Loading the optional Python runtime and checking every sample…');
     setProgress({ stage: 'starting', message: 'Starting the Python reference check' });
-    (async () => {
+    void (async () => {
       try {
         const { pythonRequest } = await import('../python-client');
         const reference = await pythonRequest<EmtResult>(
@@ -30,7 +30,7 @@ export function EmtVerification({ result }: { result: EmtResult }) {
         if (controller.signal.aborted) return;
         const difference = compareEmt(result, reference);
         setStatus(
-          `Python agrees across all ${result.rows.length} samples, inputs and summary values. Maximum numeric difference ${difference.toExponential(2)}; absolute tolerance 1e-7 in each stated unit.`,
+          `Python agrees across all ${String(result.rows.length)} samples, inputs and summary values. Maximum numeric difference ${difference.toExponential(2)}; absolute tolerance 1e-7 in each stated unit.`,
         );
         setProgress(null);
       } catch (cause) {
@@ -41,14 +41,22 @@ export function EmtVerification({ result }: { result: EmtResult }) {
         }
       }
     })();
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [enabled, result]);
   if (import.meta.env.MODE !== 'demo') return null;
   return (
     <section className="emt-panel" aria-label="Reference Python check">
       <h2>Check the reference implementation</h2>
       <label>
-        <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />{' '}
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => {
+            setEnabled(e.target.checked);
+          }}
+        />{' '}
         Verify EMT against Python
       </label>
       <p>

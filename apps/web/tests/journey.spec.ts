@@ -1,3 +1,13 @@
+import {
+  continuityValue,
+  objectValue,
+  stringValue,
+  scenarioValue,
+  jsonObject,
+} from '../tests-demo/json-contracts';
+import { evidenceIndex } from '../src/evidence-index';
+import { ENGINE_VERSION } from '../src/js-engine/version';
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs/promises';
 
@@ -14,19 +24,19 @@ test('visual demand timeline runs through the local Python API with preserved av
     (value) => value.url().endsWith('/api/v1/simulations') && value.request().method() === 'POST',
   );
   await page.getByRole('button', { name: 'Run edited timeline', exact: true }).click();
-  const result = await (await response).json();
+  const result = continuityValue(await (await response).json());
   // 1000 kW for 300 s + 500 kW for 1500 s = 291 2/3 kWh requested.
   expect(Number(result.summary.requested_it_kwh)).toBeCloseTo(
     (1000 * 300) / 3600 + (500 * 1500) / 3600,
     9,
   );
-  expect(
-    result.scenario.events.some((event: { action: string }) => event.action === 'asset_down'),
-  ).toBe(true);
-  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${result.run_id.slice(0, 12)}`);
+  expect(result.scenario.events.some((event) => event.action === 'asset_down')).toBe(true);
+  await expect(page.getByTestId('run-id')).toHaveText(
+    `RUN ${stringValue(result.run_id).slice(0, 12)}`,
+  );
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run', exact: true }).click();
-  expect(JSON.parse(await fs.readFile((await (await pending).path())!, 'utf8'))).toEqual(result);
+  expect(JSON.parse(await fs.readFile(await (await pending).path(), 'utf8'))).toEqual(result);
 });
 
 test('a saved scenario is recalculated by the local Python dashboard after preview', async ({
@@ -34,7 +44,9 @@ test('a saved scenario is recalculated by the local Python dashboard after previ
 }) => {
   await page.goto('/');
   await expect(page.getByTestId('served-power')).toBeVisible();
-  const scenario = await (await page.request.get('/api/v1/demo?preset=generator_failure')).json();
+  const scenario = scenarioValue(
+    await (await page.request.get('/api/v1/demo?preset=generator_failure')).json(),
+  );
   scenario.battery_initial_kwh = '50';
   scenario.battery_charge_kw = '0';
   await page.getByRole('button', { name: 'Import scenario', exact: true }).click();
@@ -45,20 +57,25 @@ test('a saved scenario is recalculated by the local Python dashboard after previ
     buffer: Buffer.from(JSON.stringify(scenario)),
   });
   await expect(page.getByTestId('scenario-file-preview')).toContainText('Ready to run');
-  await expect(page.getByTestId('run-id')).toHaveText(previous!);
+  await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
   const response = page.waitForResponse(
     (value) => value.url().endsWith('/api/v1/simulations') && value.request().method() === 'POST',
   );
   await page.getByRole('button', { name: 'Run imported scenario', exact: true }).click();
-  const run = await (await response).json();
+  const run = continuityValue(await (await response).json());
   expect(run.scenario).toEqual(scenario);
   expect(
-    run.events.find((event: { action: string }) => event.action === 'battery_depleted').at_s,
+    requiredPresent(
+      run.events.find((event) => event.action === 'battery_depleted'),
+      'battery depletion event',
+    ).at_s,
   ).toBe('453.9');
-  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${run.run_id.slice(0, 12)}`);
+  await expect(page.getByTestId('run-id')).toHaveText(
+    `RUN ${stringValue(run.run_id).slice(0, 12)}`,
+  );
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run', exact: true }).click();
-  expect(JSON.parse(await fs.readFile((await (await pending).path())!, 'utf8'))).toEqual(run);
+  expect(JSON.parse(await fs.readFile(await (await pending).path(), 'utf8'))).toEqual(run);
 });
 
 test('demand changes power, cost, warnings and exported provenance in the same run', async ({
@@ -78,17 +95,21 @@ test('demand changes power, cost, warnings and exported provenance in the same r
     (r) => r.url().endsWith('/api/v1/simulations') && r.request().method() === 'POST',
   );
   await page.getByRole('button', { name: 'Run scenario' }).click();
-  const run = await (await response).json();
+  const run = continuityValue(await (await response).json());
   await expect(page.getByTestId('served-power')).toHaveText('1,200 kW');
   await expect(page.getByTestId('source-power')).toHaveText('1,263.2 kW');
   await expect(page.getByTestId('grid-cost')).toHaveText('0.35 USD');
   await expect(page.getByTestId('warnings')).toContainText('it envelope exceeded');
   expect(run.scenario.it_demand_kw).toBe('1200');
-  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${run.run_id.slice(0, 12)}`);
+  await expect(page.getByTestId('run-id')).toHaveText(
+    `RUN ${stringValue(run.run_id).slice(0, 12)}`,
+  );
   expect(await page.getByTestId('run-id').innerText()).not.toBe(firstRun);
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
-  const exported = JSON.parse(await fs.readFile((await (await download).path())!, 'utf-8'));
+  const exported = continuityValue(
+    jsonObject(await fs.readFile(await (await download).path(), 'utf-8')),
+  );
   expect(exported).toEqual(run);
   expect(exported.scenario.source_ids).toContain('DEMO-ELECTRICAL-002');
   expect(errors).toEqual([]);
@@ -155,18 +176,30 @@ test('local dashboard serves the complete research evidence', async ({ page }) =
   await expect(page.getByRole('heading', { name: 'One 700 kW surviving path' })).toBeVisible();
   const indexResponse = await page.request.get('/evidence-index.json');
   expect(indexResponse.headers()['content-type']).toContain('application/json');
-  const index = await indexResponse.json();
+  const index = evidenceIndex(await indexResponse.json(), ENGINE_VERSION);
   for (const item of index.cases) {
     const result = await page.request.get(`/${item.run_path}`);
     expect(result.ok()).toBe(true);
-    expect((await result.json()).input_sha256).toBe(item.input_sha256);
+    expect(objectValue(await result.json()).input_sha256).toBe(item.input_sha256);
     expect((await page.request.get(`/${item.report_path}`)).ok()).toBe(true);
   }
   const video = page.locator('video');
-  expect((await page.request.get((await video.locator('source').getAttribute('src'))!)).ok()).toBe(
-    true,
+  expect(
+    (
+      await page.request.get(
+        requiredPresent(
+          await video.locator('source').getAttribute('src'),
+          "(await video.locator('source').getAttribute('src'))",
+        ),
+      )
+    ).ok(),
+  ).toBe(true);
+  const captions = await page.request.get(
+    requiredPresent(
+      await video.locator('track').getAttribute('src'),
+      "(await video.locator('track').getAttribute('src'))",
+    ),
   );
-  const captions = await page.request.get((await video.locator('track').getAttribute('src'))!);
   expect(await captions.text()).toContain('WEBVTT');
 });
 
@@ -189,7 +222,9 @@ for (const viewport of [
   { width: 768, height: 1024 },
   { width: 390, height: 844 },
 ]) {
-  test(`responsive layout and keyboard navigation ${viewport.width}px`, async ({ page }, info) => {
+  test(`responsive layout and keyboard navigation ${String(viewport.width)}px`, async ({
+    page,
+  }, info) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await expect(page.getByTestId('served-power')).toBeVisible();
@@ -208,7 +243,7 @@ for (const viewport of [
     ).toBe(true);
     await page.getByRole('button', { name: 'Overview', exact: true }).click();
     await page.screenshot({
-      path: info.outputPath(`overview-${viewport.width}.png`),
+      path: info.outputPath(`overview-${String(viewport.width)}.png`),
       fullPage: true,
     });
   });

@@ -36,7 +36,7 @@ for (const profile of MATRIX) {
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('response', (response) => {
       if (response.status() >= 400 && response.url().startsWith(new URL(baseURL).origin))
-        errors.push(`HTTP ${response.status()}: ${response.url()}`);
+        errors.push(`HTTP ${String(response.status())}: ${response.url()}`);
     });
     const readings: unknown[] = [];
     try {

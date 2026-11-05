@@ -1,3 +1,4 @@
+import { requiredPresent } from '../required-value';
 import { compareUnicode } from './canonical';
 import { decimalText, InputError, Rational } from './decimal';
 import type { Asset, Dependency, ScenarioEvent, SiteScenario } from './types';
@@ -33,7 +34,7 @@ function decimal(value: unknown, name: string, positive = false): Rational {
 
 function integer(value: unknown, name: string, low: number, high: number): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < low || value > high)
-    throw new InputError(`${name}: expected an integer from ${low} to ${high}`);
+    throw new InputError(`${name}: expected an integer from ${String(low)} to ${String(high)}`);
   return value;
 }
 
@@ -104,18 +105,23 @@ function topo(scenarioAssets: Asset[], dependencies: Dependency[], relation: str
   const outgoing = new Map<string, string[]>(Array.from(ids, (id) => [id, []]));
   for (const edge of dependencies) {
     if (edge.relation !== relation) continue;
-    incoming.set(edge.target, incoming.get(edge.target)! + 1);
-    outgoing.get(edge.source)!.push(edge.target);
+    incoming.set(
+      edge.target,
+      requiredPresent(incoming.get(edge.target), 'incoming.get(edge.target)') + 1,
+    );
+    requiredPresent(outgoing.get(edge.source), 'outgoing.get(edge.source)').push(edge.target);
   }
   const queue = Array.from(ids)
     .filter((id) => incoming.get(id) === 0)
     .sort(compareUnicode);
   const result: string[] = [];
   while (queue.length) {
-    const current = queue.shift()!;
+    const current = requiredPresent(queue.shift(), 'queue.shift()');
     result.push(current);
-    for (const target of outgoing.get(current)!.slice().sort(compareUnicode)) {
-      const count = incoming.get(target)! - 1;
+    for (const target of requiredPresent(outgoing.get(current), 'outgoing.get(current)')
+      .slice()
+      .sort(compareUnicode)) {
+      const count = requiredPresent(incoming.get(target), 'incoming.get(target)') - 1;
       incoming.set(target, count);
       if (count === 0) {
         queue.push(target);
@@ -219,7 +225,10 @@ export function validateScenario(input: unknown): SiteScenario {
     if (assets.filter((item) => item.kind === kind).length !== 1)
       throw new InputError(`This model requires exactly one ${kind} asset`);
   }
-  const batteryAsset = assets.find((item) => item.kind === 'battery')!;
+  const batteryAsset = requiredPresent(
+    assets.find((item) => item.kind === 'battery'),
+    "assets.find((item) => item.kind === 'battery')",
+  );
   if (batteryCharge.compare(Rational.fromDecimal(batteryAsset.capacity_kw)) > 0)
     throw new InputError('battery_charge_kw exceeds the battery electrical power rating');
   const domains = new Set(assets.flatMap((item) => item.failure_domains));
@@ -232,13 +241,16 @@ export function validateScenario(input: unknown): SiteScenario {
     seen.add(key);
     if (
       edge.relation === 'feeds' &&
-      (['utility', 'generator', 'battery'].includes(byId.get(edge.target)!.kind) ||
-        byId.get(edge.source)!.kind === 'load')
+      (['utility', 'generator', 'battery'].includes(
+        requiredPresent(byId.get(edge.target), 'byId.get(edge.target)').kind,
+      ) ||
+        requiredPresent(byId.get(edge.source), 'byId.get(edge.source)').kind === 'load')
     )
       throw new InputError('Feeds must lead from sources toward the load');
     if (
       edge.relation === 'charges' &&
-      (byId.get(edge.target)!.kind !== 'battery' || byId.get(edge.source)!.kind !== 'bus')
+      (requiredPresent(byId.get(edge.target), 'byId.get(edge.target)').kind !== 'battery' ||
+        requiredPresent(byId.get(edge.source), 'byId.get(edge.source)').kind !== 'bus')
     )
       throw new InputError('Charging connections must lead from a bus to the battery');
   }
@@ -246,8 +258,14 @@ export function validateScenario(input: unknown): SiteScenario {
     throw new InputError('Provide exactly one explicit bus-to-battery charging connection');
   topo(assets, dependencies, 'feeds');
   topo(assets, dependencies, 'requires');
-  const load = assets.find((item) => item.kind === 'load')!.id;
-  const chargingBus = dependencies.find((edge) => edge.relation === 'charges')!.source;
+  const load = requiredPresent(
+    assets.find((item) => item.kind === 'load'),
+    "assets.find((item) => item.kind === 'load')",
+  ).id;
+  const chargingBus = requiredPresent(
+    dependencies.find((edge) => edge.relation === 'charges'),
+    "dependencies.find((edge) => edge.relation === 'charges')",
+  ).source;
   for (const source of assets.filter((item) =>
     ['utility', 'generator', 'battery'].includes(item.kind),
   )) {

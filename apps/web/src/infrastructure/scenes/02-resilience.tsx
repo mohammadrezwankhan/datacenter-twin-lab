@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import { useState } from 'react';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
@@ -29,7 +30,7 @@ export default function ResilienceScene({ result, step }: SceneProps) {
     Array.from({ length: installed }, (_, index) => {
       const out = index < unavailable;
       return (
-        <g key={`${prefix}-${index}`} opacity={out ? '.38' : '1'}>
+        <g key={`${prefix}-${String(index)}`} opacity={out ? '.38' : '1'}>
           <rect
             x={x + index * 31}
             y={y}
@@ -43,7 +44,11 @@ export default function ResilienceScene({ result, step }: SceneProps) {
             {index + 1}
           </text>
           {out && (
-            <path d={`M${x + index * 31 + 4} ${y + 29}l16-24`} stroke="#ff9e8b" strokeWidth="2" />
+            <path
+              d={`M${String(x + index * 31 + 4)} ${String(y + 29)}l16-24`}
+              stroke="#ff9e8b"
+              strokeWidth="2"
+            />
           )}
         </g>
       );
@@ -60,7 +65,9 @@ export default function ResilienceScene({ result, step }: SceneProps) {
             type="button"
             key={state}
             aria-pressed={reviewState === state}
-            onClick={() => setReviewState(state)}
+            onClick={() => {
+              setReviewState(state);
+            }}
           >
             {state}
           </button>
@@ -68,12 +75,13 @@ export default function ResilienceScene({ result, step }: SceneProps) {
       </div>
       <p className="infra-scene-local-note" role="status">
         {reviewState} review focus. This selector does not change the applied capacity result;
-        change the declared inputs and run to recalculate. Current applied margin: {rows[1].value}.
+        change the declared inputs and run to recalculate. Current applied margin:{' '}
+        {requiredValue(rows[1], 'rows[1]').value}.
       </p>
       <SceneDiagram
         id="resilience"
         title="Separate A/B capacity paths"
-        description={`${pathExplanation} Selected review focus: ${reviewState}; capacity remains bound to the completed run.`}
+        description={`${String(pathExplanation)} Selected review focus: ${reviewState}; capacity remains bound to the completed run.`}
         rows={rows}
         flat={false}
       >
@@ -145,7 +153,7 @@ export default function ResilienceScene({ result, step }: SceneProps) {
           fuel / controls / cooling
         </text>
         <text x="708" y="414" fill="#a0b1c3" fontSize="13">
-          Margin · {rows[1].value}
+          Margin · {requiredValue(rows[1], 'rows[1]').value}
         </text>
       </SceneDiagram>
     </div>

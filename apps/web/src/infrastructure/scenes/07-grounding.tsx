@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
 import { SceneDiagram } from './primitives';
@@ -28,7 +29,7 @@ export default function GroundingScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="grounding"
       title="Grounding, power quality and return path"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >

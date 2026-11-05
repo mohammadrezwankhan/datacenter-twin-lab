@@ -34,3 +34,36 @@ version = {attr = "datacenter_twin.__version__"}
 
 [tool.setuptools.package-data]
 datacenter_twin = ["resources/*.json", "web/*", "web/assets/*", "web/data/evidence/*/*"]
+
+[dependency-groups]
+dev = [
+  "ruff==0.17.3",
+  "mypy==2.4.1",
+  "pytest==9.2.0",
+  "pytest-cov==7.1.0",
+  "hypothesis==6.140.3",
+  "scipy-stubs==1.18.1.1",
+  "matplotlib==3.11.2",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "S", "A", "C4", "DTZ", "T20", "SIM", "RET", "ARG", "PTH", "PERF", "RUF"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+disallow_any_generics = true
+warn_return_any = true
+warn_unreachable = true
+show_error_codes = true
+explicit_package_bases = true
+files = ["datacenter_twin", "tests", "scripts", ".github/security"]
+
+[tool.coverage.run]
+# pytest-cov 7 delegates subprocess measurement to coverage.py.
+# Existing CLI tests must contribute their executed source to the same core denominator.
+patch = ["subprocess"]

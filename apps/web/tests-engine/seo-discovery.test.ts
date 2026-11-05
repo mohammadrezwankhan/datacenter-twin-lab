@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import site from '../site.config.json' with { type: 'json' };
+const { default: site } = await import('../site.config.json', { with: { type: 'json' } });
 import { courseCatalog } from '../src/curriculum.ts';
 import { ENGINE_VERSION } from '../src/js-engine/version.ts';
 import {
@@ -21,7 +21,7 @@ const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const course = createCourseSchema({
   base,
   name: 'Power Systems for Datacenter Engineers',
-  description: `Learn datacenter continuity and Infrastructure Engineering with ${courseCatalog.length} free browser lessons, EMT and power-dynamics studies. Inspect assumptions, run educational screens and reproduce the evidence.`,
+  description: `Learn datacenter continuity and Infrastructure Engineering with ${String(courseCatalog.length)} free browser lessons, EMT and power-dynamics studies. Inspect assumptions, run educational screens and reproduce the evidence.`,
   author,
   license: `${repository}/blob/v${ENGINE_VERSION}/LICENSE`,
   lessons: courseCatalog,
@@ -44,7 +44,7 @@ const documents = buildDiscoveryDocuments({
   softwareApplication,
 });
 
-test('course discovery entries exactly follow the current canonical curriculum', () => {
+void test('course discovery entries exactly follow the current canonical curriculum', () => {
   assert.equal(course['@id'], `${base}learn/#course`);
   assert.deepEqual(
     course.hasPart,
@@ -66,14 +66,14 @@ test('course discovery entries exactly follow the current canonical curriculum',
   assert.doesNotMatch(documents.llmsText, /12[- ]lesson|12 lessons/i);
 });
 
-test('JSON discovery graph reuses canonical site entities and current engine version', () => {
+void test('JSON discovery graph reuses canonical site entities and current engine version', () => {
   assert.equal(author['@id'], 'https://mrkhan.co.technology/#person');
   assert.equal(author.url, 'https://mrkhan.co.technology/');
 
   const json = JSON.parse(documents.knowledgeGraphJson) as {
     '@graph': Array<Record<string, unknown>>;
   };
-  const jsonld = JSON.parse(documents.knowledgeGraphJsonLd);
+  const jsonld: unknown = JSON.parse(documents.knowledgeGraphJsonLd);
   assert.deepEqual(jsonld, json);
 
   const person = json['@graph'].find((entity) => entity['@type'] === 'Person');
@@ -85,7 +85,7 @@ test('JSON discovery graph reuses canonical site entities and current engine ver
   assert.equal(documents.llmsText.includes(`Software version: ${ENGINE_VERSION}`), true);
 });
 
-test('discovery copy states the synthetic model scope without asserting unsupported EMT behavior', () => {
+void test('discovery copy states the synthetic model scope without asserting unsupported EMT behavior', () => {
   const graph = JSON.parse(documents.knowledgeGraphJson) as {
     '@graph': Array<Record<string, unknown>>;
   };

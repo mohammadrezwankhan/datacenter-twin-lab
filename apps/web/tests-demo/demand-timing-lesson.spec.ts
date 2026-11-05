@@ -1,3 +1,4 @@
+import { continuityValue, jsonObject } from './json-contracts';
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { nativeRun } from './course-test-helpers';
@@ -28,15 +29,13 @@ test('equal-energy teaching inputs reproduce full native and optional Python res
     await expect(page.getByRole('button', { name: 'Run scenario', exact: true })).toBeEnabled();
     const pending = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Export run', exact: true }).click();
-    const run = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+    const run = continuityValue(jsonObject(await readFile(await (await pending).path(), 'utf8')));
     expect(run.scenario).toEqual(JSON.parse(bytes.toString('utf8')));
     expect(run).toEqual(nativeRun(run));
     expect(run.summary.requested_it_kwh).toBe('375');
     expect(Number(run.summary.unserved_it_kwh)).toBeCloseTo(shortfall, 10);
     expect(
-      run.events
-        .filter((event: { action: string }) => event.action === 'battery_depleted')
-        .map((event: { at_s: string }) => event.at_s),
+      run.events.filter((event) => event.action === 'battery_depleted').map((event) => event.at_s),
     ).toEqual(depletion);
 
     await page.getByLabel('Verify against Python').check();

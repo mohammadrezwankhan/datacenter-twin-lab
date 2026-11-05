@@ -1,11 +1,14 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import type { ResearchResult } from '../src/research/types';
+import { arrayValue, jsonObject, objectValue, stringValue } from './json-contracts';
+import { researchResultValue } from './research-contract';
 
-function native(result: ResearchResult): ResearchResult {
-  return JSON.parse(
+function native(result: ResearchResult): unknown {
+  const output: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -21,6 +24,7 @@ function native(result: ResearchResult): ResearchResult {
       },
     ),
   );
+  return output;
 }
 
 // BLAS/compiler builds can change adaptive solver work counts. Compare the
@@ -35,7 +39,9 @@ function compare(a: unknown, b: unknown, path = ''): void {
     expect(Math.abs(a - b), path).toBeLessThanOrEqual(2e-5 * Math.max(1, Math.abs(b)));
   } else if (Array.isArray(a) && Array.isArray(b)) {
     expect(a.length, path).toBe(b.length);
-    a.forEach((value, i) => compare(value, b[i], `${path}[${i}]`));
+    a.forEach((value, i) => {
+      compare(value, b[i], `${path}[${String(i)}]`);
+    });
   } else if (a && b && typeof a === 'object' && typeof b === 'object') {
     expect(Object.keys(a).sort(), path).toEqual(Object.keys(b).sort());
     for (const key of Object.keys(a))
@@ -54,37 +60,79 @@ test('power dynamics runtime versions match the selected Pyodide lock', async ({
 }, info) => {
   // Use the same locally staged runtime as the application. No CDN fallback can
   // conceal a missing wheel or a package imported from the wrong distribution.
-  const allowedOrigin = `${new URL(baseURL!).origin}/`;
+  const allowedOrigin = `${new URL(requiredPresent(baseURL, 'baseURL')).origin}/`;
   await context.route('**/*', (route) =>
     route.request().url().startsWith(allowedOrigin) ? route.continue() : route.abort(),
   );
   await page.goto('./?study=load-step');
-  const expected = JSON.parse(await readFile('package.json', 'utf8')).devDependencies.pyodide;
+  const expected = stringValue(
+    objectValue(jsonObject(await readFile('package.json', 'utf8')).devDependencies).pyodide,
+  );
   const versions = await page.evaluate(async () => {
     const base = new URL('./', location.href);
     const runtime = new URL('pyodide/', base).href;
+    const fetchJson = async (url: string | URL): Promise<unknown> => {
+      const response = await fetch(url);
+      const value: unknown = await response.json();
+      return value;
+    };
     const [lock, engine, research] = await Promise.all([
-      fetch(`${runtime}pyodide-lock.json`).then((response) => response.json()),
-      fetch(new URL('engine-manifest.json', base)).then((response) => response.json()),
-      fetch(new URL('research-manifest.json', base)).then((response) => response.json()),
+      fetchJson(`${runtime}pyodide-lock.json`),
+      fetchJson(new URL('engine-manifest.json', base)),
+      fetchJson(new URL('research-manifest.json', base)),
     ]);
-    const { loadPyodide } = await import(`${runtime}pyodide.mjs`);
-    const py = await loadPyodide({ indexURL: runtime });
+    const module: unknown = await import(`${runtime}pyodide.mjs`);
+    if (
+      module === null ||
+      typeof module !== 'object' ||
+      !('loadPyodide' in module) ||
+      typeof module.loadPyodide !== 'function'
+    ) {
+      throw new TypeError('The staged runtime must provide loadPyodide');
+    }
+    const loadPyodide = module.loadPyodide as (options: { indexURL: string }) => unknown;
+    const loaded: unknown = await loadPyodide({ indexURL: runtime });
+    type Runtime = {
+      version: string;
+      loadPackage: (names: string[]) => unknown;
+      runPython: (source: string) => unknown;
+    };
+    if (
+      loaded === null ||
+      typeof loaded !== 'object' ||
+      !('version' in loaded) ||
+      typeof loaded.version !== 'string' ||
+      !('loadPackage' in loaded) ||
+      typeof loaded.loadPackage !== 'function' ||
+      !('runPython' in loaded) ||
+      typeof loaded.runPython !== 'function'
+    ) {
+      throw new TypeError('The staged runtime must provide version, loadPackage, and runPython');
+    }
+    const py = loaded as Runtime;
     await py.loadPackage(['numpy', 'scipy']);
-    const imported = JSON.parse(
-      py.runPython(
-        'import json,numpy,scipy\njson.dumps({"numpy":numpy.__version__,"scipy":scipy.__version__})',
-      ),
+    const serialized = py.runPython(
+      'import json,numpy,scipy\njson.dumps({"numpy":numpy.__version__,"scipy":scipy.__version__})',
     );
+    if (typeof serialized !== 'string')
+      throw new TypeError('Python version metadata must be JSON text');
+    const imported: unknown = JSON.parse(serialized);
     return { loaded: py.version, lock, engine, research, imported };
   });
   expect(versions.loaded).toBe(expected);
-  expect(versions.engine.pyodide_version).toBe(expected);
+  expect(objectValue(versions.engine).pyodide_version).toBe(expected);
+  const packages = objectValue(objectValue(versions.lock).packages);
+  const imported = objectValue(versions.imported);
+  const runtime = arrayValue(objectValue(versions.research).runtime);
   for (const name of ['numpy', 'scipy']) {
-    const locked = versions.lock.packages[name];
-    expect(versions.imported[name]).toBe(locked.version);
-    expect(versions.research.runtime).toContainEqual(
-      expect.objectContaining({ name, version: locked.version, sha256: locked.sha256 }),
+    const locked = objectValue(packages[name]);
+    expect(stringValue(imported[name])).toBe(stringValue(locked.version));
+    expect(runtime).toContainEqual(
+      expect.objectContaining({
+        name,
+        version: stringValue(locked.version),
+        sha256: stringValue(locked.sha256),
+      }),
     );
   }
   await info.attach('loaded-runtime-versions.json', {
@@ -119,7 +167,7 @@ test('load-step rejects equal or decreasing loads before downloading the runtime
   for (const [before, after] of [
     ['0.3', '0.4'],
     ['0.7', '0.8'],
-  ]) {
+  ] as const) {
     await initial.fill(before);
     await final.fill(after);
     await expect(run).toBeEnabled();
@@ -133,6 +181,7 @@ test('load-step rejects equal or decreasing loads before downloading the runtime
 for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', 'grid-network']) {
   test(`power dynamics ${id} runs locally and matches native numerical outputs`, async ({
     page,
+    baseURL,
   }, info) => {
     const requests: string[] = [];
     page.on('request', (request) => requests.push(request.url()));
@@ -160,9 +209,9 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
     await expect(page.getByText('Applied result', { exact: true })).toBeVisible();
     const pending = page.waitForEvent('download');
     await page.getByTestId('research-export-json').click();
-    const result = JSON.parse(
-      await readFile((await (await pending).path())!, 'utf8'),
-    ) as ResearchResult;
+    const result = researchResultValue(
+      jsonObject(await readFile(await (await pending).path(), 'utf8')),
+    );
     expect(result.study_id).toBe(id);
     const reference = native(result);
     // Preserve both complete results so compiled-runtime differences can be
@@ -177,11 +226,11 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
     expect(
       requests
         .filter((url) => /\.whl/.test(url))
-        .every((url) => url.startsWith('http://127.0.0.1:4174/')),
+        .every((url) => url.startsWith(`${new URL(requiredPresent(baseURL, 'baseURL')).origin}/`)),
     ).toBe(true);
     const csv = page.waitForEvent('download');
     await page.getByTestId('research-export-csv').click();
-    const text = await readFile((await (await csv).path())!, 'utf8');
+    const text = await readFile(await (await csv).path(), 'utf8');
     const points = result.charts.reduce(
       (sum, chart) => sum + chart.x.length * chart.lines.length,
       0,
@@ -216,7 +265,9 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   await expect(page.getByText('Showing prior applied run', { exact: true })).toBeVisible();
   const priorDownload = page.waitForEvent('download');
   await page.getByTestId('research-export-json').click();
-  const prior = JSON.parse(await readFile((await (await priorDownload).path())!, 'utf8'));
+  const prior = researchResultValue(
+    jsonObject(await readFile(await (await priorDownload).path(), 'utf8')),
+  );
   expect(prior.config.load_initial_pu).toBe(0.5);
   expect(prior.config.load_final_pu).toBe(0.6);
   await page.getByTestId('research-input-load_initial_pu').fill('0.5');
@@ -224,7 +275,9 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   await expect(page.getByTestId('research-run')).toBeDisabled();
   const pending = page.waitForEvent('download');
   await page.getByTestId('research-export-json').click();
-  const result = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  const result = researchResultValue(
+    jsonObject(await readFile(await (await pending).path(), 'utf8')),
+  );
   expect(result.config.dc_capacitance_pu).toBe(2);
   await page.getByTestId('research-input-dc_capacitance_pu').fill('3');
   await page.getByTestId('research-run').click();
@@ -232,9 +285,9 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   await expect(page.getByTestId('research-run')).toBeEnabled();
   const changed = page.waitForEvent('download');
   await page.getByTestId('research-export-json').click();
-  const updated = JSON.parse(
-    await readFile((await (await changed).path())!, 'utf8'),
-  ) as ResearchResult;
+  const updated = researchResultValue(
+    jsonObject(await readFile(await (await changed).path(), 'utf8')),
+  );
   expect(updated.config.dc_capacitance_pu).toBe(3);
   compare(updated, native(updated));
 });

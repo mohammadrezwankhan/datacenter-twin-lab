@@ -1,3 +1,4 @@
+import { requiredPresent } from './required-value';
 import type { RuntimeProgress as RuntimeProgressState } from './runtime-progress';
 import './runtime-progress.css';
 
@@ -12,7 +13,7 @@ const stageLabel: Record<RuntimeProgressState['stage'], string> = {
 };
 
 function bytes(value: number) {
-  if (value < 1024) return `${value} bytes`;
+  if (value < 1024) return `${String(value)} bytes`;
   const units = ['KiB', 'MiB', 'GiB'];
   let amount = value / 1024;
   let unit = units[0];
@@ -20,7 +21,7 @@ function bytes(value: number) {
     amount /= 1024;
     unit = units[index + 1];
   }
-  return `${amount.toFixed(amount >= 10 ? 0 : 1)} ${unit}`;
+  return `${amount.toFixed(amount >= 10 ? 0 : 1)} ${String(unit)}`;
 }
 
 export function RuntimeProgress({
@@ -33,11 +34,16 @@ export function RuntimeProgress({
   if (!progress) return null;
   const hasKnownAssetTotal =
     Number.isFinite(progress.totalBytes) &&
-    progress.totalBytes! > 0 &&
+    requiredPresent(progress.totalBytes, 'progress.totalBytes') > 0 &&
     Number.isFinite(progress.loadedBytes) &&
-    progress.loadedBytes! <= progress.totalBytes!;
+    requiredPresent(progress.loadedBytes, 'progress.loadedBytes') <=
+      requiredPresent(progress.totalBytes, 'progress.totalBytes');
   const currentFilePercent = hasKnownAssetTotal
-    ? Math.round((progress.loadedBytes! / progress.totalBytes!) * 100)
+    ? Math.round(
+        (requiredPresent(progress.loadedBytes, 'progress.loadedBytes') /
+          requiredPresent(progress.totalBytes, 'progress.totalBytes')) *
+          100,
+      )
     : undefined;
 
   return (
@@ -55,13 +61,14 @@ export function RuntimeProgress({
             <>
               <progress
                 aria-label="Current file download"
-                aria-valuetext={`${bytes(progress.loadedBytes!)} of ${bytes(progress.totalBytes!)}`}
+                aria-valuetext={`${bytes(progress.loadedBytes)} of ${bytes(requiredPresent(progress.totalBytes, 'progress.totalBytes'))}`}
                 value={progress.loadedBytes}
                 max={progress.totalBytes}
               />
               <small>
                 Current file: {currentFilePercent}% ({bytes(progress.loadedBytes)} of{' '}
-                {bytes(progress.totalBytes!)}) · overall total unknown
+                {bytes(requiredPresent(progress.totalBytes, 'progress.totalBytes'))}) · overall
+                total unknown
               </small>
             </>
           ) : (

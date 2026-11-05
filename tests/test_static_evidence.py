@@ -2,11 +2,10 @@
 
 import importlib.util
 import os
-from pathlib import Path
 import tempfile
 import unittest
+from pathlib import Path
 from unittest.mock import patch
-
 
 HAS_API = (
     importlib.util.find_spec("fastapi") is not None
@@ -16,13 +15,14 @@ HAS_API = (
 
 @unittest.skipUnless(HAS_API, "Install api and test-api extras for static-file checks")
 class InstalledEvidenceTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         from fastapi.testclient import TestClient
+
         from datacenter_twin.api import create_app
 
         # Use the native extended path only to create and clean the Windows fixture.
         # The application receives a normal module path, as it does after installation.
-        temp_root = os.path.abspath(tempfile.gettempdir())
+        temp_root = os.path.normpath(Path(tempfile.gettempdir()).absolute())
         if os.name == "nt":
             temp_root = "\\\\?\\" + temp_root
         self.workspace = tempfile.TemporaryDirectory(prefix="dtl-static-", dir=temp_root)
@@ -39,21 +39,23 @@ class InstalledEvidenceTests(unittest.TestCase):
         report = evidence / self.filename
         report.write_bytes(self.expected)
         self.assertGreater(len(str(report).removeprefix("\\\\?\\")), 260)
-        (package / "private.txt").write_text("must remain outside the served directory", encoding="utf-8")
+        (package / "private.txt").write_text(
+            "must remain outside the served directory", encoding="utf-8"
+        )
 
         module_path = str(package / "api.py").removeprefix("\\\\?\\")
         with patch("datacenter_twin.api.__file__", module_path):
             self.client = TestClient(create_app())
         self.addCleanup(self.client.close)
 
-    def test_installed_report_beyond_windows_max_path_is_served(self):
+    def test_installed_report_beyond_windows_max_path_is_served(self) -> None:
         response = self.client.get("/data/evidence/v0.4.0rc1/" + self.filename)
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.content, self.expected)
         self.assertEqual(response.headers["x-content-type-options"], "nosniff")
         self.assertTrue(response.headers["content-type"].startswith("text/html"))
 
-    def test_extended_directory_keeps_parent_files_outside_the_dashboard(self):
+    def test_extended_directory_keeps_parent_files_outside_the_dashboard(self) -> None:
         self.assertEqual(self.client.get("/").status_code, 200)
         for target in ("/%2e%2e/private.txt", "/data/%2e%2e/%2e%2e/private.txt"):
             with self.subTest(target=target):

@@ -3,7 +3,7 @@
   "version": "0.180.0",
   "files": {
     "build/three.module.js": "c8211c69345d2e9949dc7a8ac969380497aa0600a5a8ac6a459c8cd02dd9cb8a",
-    "build/three.core.js": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20",
+    "build/three.core.js": "bb96e86e700014d4c87c63bf007167da9773c929dc45daf86ee99973ae74f0a5",
     "examples/jsm/postprocessing/EffectComposer.js": "4b8c855f28eed2570bed898adc0ab89c585a8a281ecb6d905c09d00697f9f50a",
     "examples/jsm/postprocessing/RenderPass.js": "fd91229aacc5830e3984b0f2bdefcf566163ea028f4c1f1ab233fa6665a133ac",
     "examples/jsm/postprocessing/UnrealBloomPass.js": "d92742959879b461f25348b2abddc7ca0d48527e7718340bcfa29fa771e2799a",
@@ -14,5 +14,12 @@
     "examples/jsm/postprocessing/Pass.js": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5",
     "examples/jsm/shaders/LuminosityHighPassShader.js": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e",
     "examples/jsm/shaders/OutputShader.js": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2"
-  }
+  },
+  "localPatches": [
+    {
+      "file": "build/three.core.js",
+      "upstreamSha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20",
+      "change": "generateUUID uses Web Crypto getRandomValues with no weak fallback; UUID format and other Three.js behavior are unchanged."
+    }
+  ]
 }

@@ -2,21 +2,24 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
-from types import SimpleNamespace as NS
+from collections.abc import Callable
+from types import SimpleNamespace
 
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.integrate._ivp.ivp import OdeResult
 from scipy.linalg import eig
 from scipy.optimize import root
 
+from ..spectrum import spectrum
 from .common import numeric_jacobian, pi_bw_tuning, pll_bw_tuning
 from .sdcib_core import IDX, STATE_NAMES, odefun_rhs_reduced, output_ppcc, run_newton_solver
+from .types import FloatArray, Metric, Mode, Real, StudyResult
 
 
-def make_parameters(config: dict[str, float]) -> tuple[NS, NS]:
+def make_parameters(config: dict[str, float]) -> tuple[SimpleNamespace, SimpleNamespace]:
     """Build the SDCIB.m baseline and retune only the exposed study inputs."""
-    p = NS()
+    p = SimpleNamespace()
     p.fb = 60.0
     p.omega_b = 2.0 * np.pi * p.fb
     p.omega_s = 1.0
@@ -30,14 +33,14 @@ def make_parameters(config: dict[str, float]) -> tuple[NS, NS]:
     p.c_psu, p.r_psu, p.vpsu_ref = 2.0, 0.005, 1.0
     p.c_eq, p.veq_ref = 0.2, 0.5
     p.p_load0 = config.get("load_initial_pu", config.get("load_pu", 0.5))
-    tg = NS(
-        pll=NS(fbw=20.0, zeta=0.707),
-        dc_afe=NS(fbw=5.0, zeta=1.0),
-        c_afe=NS(fbw=200.0, zeta=0.707),
-        v_vsi=NS(fbw=config["vsi_bandwidth_hz"], zeta=1.0),
-        c_vsi=NS(fbw=400.0, zeta=1.0),
-        v_psu=NS(fbw=10.0, zeta=1.0),
-        v_eq=NS(fbw=100.0, zeta=1.0),
+    tg = SimpleNamespace(
+        pll=SimpleNamespace(fbw=20.0, zeta=0.707),
+        dc_afe=SimpleNamespace(fbw=5.0, zeta=1.0),
+        c_afe=SimpleNamespace(fbw=200.0, zeta=0.707),
+        v_vsi=SimpleNamespace(fbw=config["vsi_bandwidth_hz"], zeta=1.0),
+        c_vsi=SimpleNamespace(fbw=400.0, zeta=1.0),
+        v_psu=SimpleNamespace(fbw=10.0, zeta=1.0),
+        v_eq=SimpleNamespace(fbw=100.0, zeta=1.0),
     )
     p.kp_dc_afe, p.ki_dc_afe = pi_bw_tuning(
         "voltage", tg.dc_afe.fbw, tg.dc_afe.zeta, p.c_dc, p.omega_b
@@ -59,7 +62,7 @@ def make_parameters(config: dict[str, float]) -> tuple[NS, NS]:
     return p, tg
 
 
-def initial_guess(p: NS) -> np.ndarray:
+def initial_guess(p: SimpleNamespace) -> FloatArray:
     x = np.zeros(len(STATE_NAMES))
     x[IDX["vdc_ups"]] = p.vdc_ups_ref
     x[IDX["vU_vsi"]] = p.vu_vsi_ref
@@ -76,10 +79,13 @@ def initial_guess(p: NS) -> np.ndarray:
     return x
 
 
-def equilibrium(p: NS, x0: np.ndarray | None = None) -> tuple[np.ndarray, float, int]:
+def equilibrium(p: SimpleNamespace, x0: FloatArray | None = None) -> tuple[FloatArray, float, int]:
     """Solve and independently verify the supplied model's equilibrium."""
     x0 = initial_guess(p) if x0 is None else np.asarray(x0, dtype=float).copy()
-    rhs = lambda x: odefun_rhs_reduced(0.0, x, p, lambda _t: p.p_load0, IDX)[0]
+
+    def rhs(x: FloatArray) -> FloatArray:
+        return odefun_rhs_reduced(0.0, x, p, lambda _t: p.p_load0, IDX)[0]
+
     # This is the archive's damped Newton method. Its returned norm can be
     # stale when it exits on a small step, so always recompute it here.
     x, _stale_norm = run_newton_solver(
@@ -110,9 +116,13 @@ def equilibrium(p: NS, x0: np.ndarray | None = None) -> tuple[np.ndarray, float,
     return x, residual_inf, fallback_nfev
 
 
-def linearize(p: NS, xeq: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, float]:
-    rhs = lambda x, load: odefun_rhs_reduced(0.0, x, p, lambda _t: load, IDX)[0]
-    A = numeric_jacobian(lambda x: rhs(x, p.p_load0), xeq, rel_step=1e-7)
+def linearize(
+    p: SimpleNamespace, xeq: FloatArray
+) -> tuple[FloatArray, FloatArray, FloatArray, float, float]:
+    def rhs(x: FloatArray, load: Real) -> FloatArray:
+        return odefun_rhs_reduced(0.0, x, p, lambda _t: load, IDX)[0]
+
+    state_matrix = numeric_jacobian(lambda x: rhs(x, p.p_load0), xeq, rel_step=1e-7)
     du = 1e-6 * (1.0 + abs(p.p_load0))
     b = (rhs(xeq, p.p_load0 + du) - rhs(xeq, p.p_load0)) / du
     p0 = output_ppcc(xeq, p, p.p_load0, IDX)
@@ -120,22 +130,22 @@ def linearize(p: NS, xeq: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarra
         lambda x: np.array([output_ppcc(x, p, p.p_load0, IDX)]), xeq, rel_step=1e-7
     ).reshape(-1)
     d = (output_ppcc(xeq, p, p.p_load0 + du, IDX) - p0) / du
-    return A, b, c, float(d), float(p0)
+    return state_matrix, b, c, float(d), float(p0)
 
 
-def _metrics(items: list[tuple[str, float | None, str]]) -> list[dict[str, object]]:
+def _metrics(items: list[tuple[str, float | None, str]]) -> list[Metric]:
     return [{"label": label, "value": value, "unit": unit} for label, value, unit in items]
 
 
 def _base_result(
     study_id: str,
     config: dict[str, float],
-    xeq: np.ndarray,
+    xeq: FloatArray,
     residual: float,
-    nfev: int,
-    p: NS,
+    _nfev: int,
+    _p: SimpleNamespace,
     pcc0: float,
-) -> dict[str, object]:
+) -> StudyResult:
     return {
         "study_id": study_id,
         "model": "Supplied 21-state reduced SDCIB (VSI + data-center equivalent load)",
@@ -146,9 +156,20 @@ def _base_result(
             "atol": 1e-8,
         },
         "assumptions": [
-            "Per-unit electrical quantities and seconds; the grid reactance control retains the supplied SDCIB X/R ratio of 9.5.",
-            "The imported Python equations are used as supplied, with only the documented controls retuned.",
-            "The provided archive has no MATLAB originals or GPU_data.csv, so no MATLAB-trace or measured-GPU comparison is represented.",
+            (
+                "Per-unit electrical quantities and seconds; the grid"
+                " reactance control retains the supplied SDCIB X/R ratio of"
+                " 9.5."
+            ),
+            (
+                "The imported Python equations are used as supplied, with"
+                " only the documented controls retuned."
+            ),
+            (
+                "The provided archive has no MATLAB originals or"
+                " GPU_data.csv, so no MATLAB-trace or measured-GPU comparison"
+                " is represented."
+            ),
         ],
         "metrics": _metrics(
             [
@@ -165,11 +186,18 @@ def _base_result(
     }
 
 
-def _sample_solver(fun, t0: float, t1: float, sample_t: np.ndarray, max_step: float):
+def _sample_solver(
+    fun: Callable[[float, FloatArray], FloatArray],
+    initial_state: FloatArray,
+    t0: float,
+    t1: float,
+    sample_t: FloatArray,
+    max_step: float,
+) -> OdeResult[np.float64]:
     sol = solve_ivp(
         fun,
         (t0, t1),
-        fun.x0,
+        initial_state,
         method="BDF",
         t_eval=sample_t,
         rtol=1e-6,
@@ -196,16 +224,20 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
         times = np.linspace(0.0, t_end, 201)
         post_times = times[times >= t_step]
         p.p_load0 = initial
+
         # Rebuild exactly at the selected initial load; the initial helper above
         # already used it, but assigning here documents the held input.
-        rhs = lambda t, x: odefun_rhs_reduced(t, x, p, lambda _tt: final, IDX)[0]
-        rhs.x0 = xeq
-        sol = _sample_solver(rhs, t_step, t_end, post_times, max_step=0.002)
+        def step_rhs(t: float, x: FloatArray) -> FloatArray:
+            return odefun_rhs_reduced(t, x, p, lambda _tt: final, IDX)[0]
+
+        sol = _sample_solver(step_rhs, xeq, t_step, t_end, post_times, max_step=0.002)
         states = np.tile(xeq, (len(times), 1))
         states[np.searchsorted(times, t_step) :] = sol.y.T
         p_load = np.where(times < t_step, initial, final)
-        pcc = np.array([output_ppcc(state, p, load, IDX) for state, load in zip(states, p_load)])
-        _A, _b, _c, _d, pcc0 = linearize(p, xeq)
+        pcc = np.array(
+            [output_ppcc(state, p, load, IDX) for state, load in zip(states, p_load, strict=True)]
+        )
+        _state_matrix, _b, _c, _d, pcc0 = linearize(p, xeq)
         result["solver"] = {
             "method": "damped Newton equilibrium; SciPy BDF (split at load step)",
             "rtol": 1e-6,
@@ -249,13 +281,14 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
             }
         )
         result["assumptions"].append(
-            "The pre-step response is held at the solved equilibrium; the 0.2 s step raises load to its configured final value."
+            "The pre-step response is held at the solved equilibrium; the"
+            " 0.2 s step raises load to its configured final value."
         )
-        return result
+        return dict(result)
 
     if study_id == "modal":
-        A, b, c, d, _pcc0 = linearize(p, xeq)
-        eigenvalues, left, right = eig(A, left=True, right=True, check_finite=True)
+        state_matrix, b, c, d, _pcc0 = linearize(p, xeq)
+        eigenvalues, left, right = eig(state_matrix, left=True, right=True, check_finite=True)
         order = np.array(
             sorted(
                 range(len(eigenvalues)),
@@ -272,10 +305,14 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
                 f"Modal eigenvectors are ill-conditioned (condition number {eig_cond:.3g})."
             )
         left_resid = float(
-            np.linalg.norm(A.T @ left - left * np.conj(eigenvalues)[None, :], np.inf)
+            np.linalg.norm(state_matrix.T @ left - left * np.conj(eigenvalues)[None, :], np.inf)
         )
-        right_resid = float(np.linalg.norm(A @ right - right * eigenvalues[None, :], np.inf))
-        if max(left_resid, right_resid) > 1e-5 * max(1.0, float(np.linalg.norm(A, np.inf))):
+        right_resid = float(
+            np.linalg.norm(state_matrix @ right - right * eigenvalues[None, :], np.inf)
+        )
+        if max(left_resid, right_resid) > 1e-5 * max(
+            1.0, float(np.linalg.norm(state_matrix, np.inf))
+        ):
             raise ValueError("Modal left/right eigenvector residual check failed.")
         participation = np.abs(right * np.conj(left))
         for k in range(len(eigenvalues)):
@@ -289,7 +326,7 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
             ("PSU", range(17, 19)),
             ("Equivalent load", range(19, 21)),
         ]
-        modes = []
+        modes: list[Mode] = []
         for k, lam in enumerate(eigenvalues):
             dominant_idx = int(np.argmax(participation[:, k]))
             group_scores = [
@@ -309,10 +346,13 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
                 }
             )
         freq = np.logspace(-1.0, 3.0, 160)
-        identity = np.eye(A.shape[0])
+        identity = np.eye(state_matrix.shape[0])
         gain = np.array(
             [
-                abs((c @ np.linalg.solve(1j * 2.0 * np.pi * f * identity - A, b)).item() + d)
+                abs(
+                    (c @ np.linalg.solve(1j * 2.0 * np.pi * f * identity - state_matrix, b)).item()
+                    + d
+                )
                 for f in freq
             ]
         )
@@ -320,7 +360,10 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
             raise ValueError("Frequency response contains a non-finite value.")
         peak_i = int(np.argmax(gain))
         result["solver"] = {
-            "method": "damped Newton equilibrium; forward finite-difference Jacobian; SciPy left/right eig",
+            "method": (
+                "damped Newton equilibrium; forward finite-difference"
+                " Jacobian; SciPy left/right eig"
+            ),
             "jacobian_step_relative": 1e-7,
         }
         result["metrics"] = _metrics(
@@ -353,7 +396,7 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
             {
                 "equilibrium_state": xeq.tolist(),
                 "equilibrium_residual_inf": residual,
-                "jacobian_shape": list(A.shape),
+                "jacobian_shape": list(state_matrix.shape),
                 "left_eigenvector_residual_inf": left_resid,
                 "right_eigenvector_residual_inf": right_resid,
                 "eigenvector_condition_number": eig_cond,
@@ -362,9 +405,11 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
             }
         )
         result["assumptions"].append(
-            "The POA peak is the largest point on a 160-point logarithmic frequency grid from 0.1 to 1000 Hz, not a continuous optimum."
+            "The POA peak is the largest point on a 160-point logarithmic"
+            " frequency grid from 0.1 to 1000 Hz, not a continuous"
+            " optimum."
         )
-        return result
+        return dict(result)
 
     if study_id == "forced-response":
         frequency = config["forcing_frequency_hz"]
@@ -372,32 +417,27 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
         duration = 2.0
         times = np.linspace(0.0, duration, 801)
 
-        def load_at(t: float) -> float:
-            return p.p_load0 + amplitude * np.sin(2.0 * np.pi * frequency * t)
+        initial_load: float = p.p_load0
 
-        rhs = lambda t, x: odefun_rhs_reduced(t, x, p, load_at, IDX)[0]
-        rhs.x0 = xeq
+        def load_at(t: float) -> float:
+            sine: np.float64 = np.sin(2.0 * np.pi * frequency * t)
+            return initial_load + amplitude * sine
+
+        def forced_rhs(t: float, x: FloatArray) -> FloatArray:
+            return odefun_rhs_reduced(t, x, p, load_at, IDX)[0]
+
         max_step = min(0.002, 1.0 / (20.0 * frequency))
-        sol = _sample_solver(rhs, 0.0, duration, times, max_step=max_step)
+        sol = _sample_solver(forced_rhs, xeq, 0.0, duration, times, max_step=max_step)
         states = sol.y.T
         p_load = np.array([load_at(float(t)) for t in times])
-        pcc = np.array([output_ppcc(state, p, load, IDX) for state, load in zip(states, p_load)])
+        pcc = np.array(
+            [output_ppcc(state, p, load, IDX) for state, load in zip(states, p_load, strict=True)]
+        )
 
         # Correctly normalized, one-sided Hann-window spectrum of the known
         # synthetic input and the simulated PCC output.
-        def spectrum(signal: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-            centered = signal - float(np.mean(signal))
-            window = np.hanning(len(centered))
-            coeff = np.fft.rfft(centered * window)
-            amp = np.abs(coeff) / (len(centered) * float(np.mean(window)))
-            if len(centered) % 2 == 0:
-                amp[1:-1] *= 2.0
-            else:
-                amp[1:] *= 2.0
-            return np.fft.rfftfreq(len(centered), d=duration / (len(centered) - 1)), amp
-
-        fs, input_amp = spectrum(p_load)
-        _, output_amp = spectrum(pcc)
+        fs, input_amp = spectrum(p_load, duration)
+        _, output_amp = spectrum(pcc, duration)
         peak_mask = fs > 0.0
         peak_idx = int(np.argmax(output_amp[peak_mask])) + 1
         result["solver"] = {
@@ -467,11 +507,13 @@ def run_sdcib_study(study_id: str, config: dict[str, float]) -> dict[str, object
             }
         )
         result["assumptions"].append(
-            "This is a generated sinusoidal input, not an uploaded, measured, or GPU workload trace."
+            "This is a generated sinusoidal input, not an uploaded,"
+            " measured, or GPU workload trace."
         )
         result["assumptions"].append(
-            "The FFT uses 801 uniform samples over 2 s, a Hann window, mean removal, and single-sided amplitude normalization."
+            "The FFT uses 801 uniform samples over 2 s, a Hann window,"
+            " mean removal, and single-sided amplitude normalization."
         )
-        return result
+        return dict(result)
 
     raise ValueError(f"Unsupported SDCIB study {study_id!r}.")

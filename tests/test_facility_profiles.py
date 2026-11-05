@@ -1,15 +1,15 @@
+import json
+import unittest
 from decimal import Decimal
 from fractions import Fraction
 from importlib.resources import files
-import json
-import unittest
 
 from datacenter_twin.continuity import simulate_continuity
 from datacenter_twin.demo import FACILITY_PRESETS, FACILITY_PROFILES, PRESETS, demo_scenario
 
 
 class FacilityProfileTests(unittest.TestCase):
-    def test_new_assumptions_resolve_to_packaged_source_records(self):
+    def test_new_assumptions_resolve_to_packaged_source_records(self) -> None:
         catalog = json.loads(
             files("datacenter_twin").joinpath("resources/catalog.json").read_text(encoding="utf-8")
         )
@@ -23,14 +23,14 @@ class FacilityProfileTests(unittest.TestCase):
                         self.assertIn("SYN-ENERGY-WORKSPACE-001", scenario.source_ids)
 
     @staticmethod
-    def fraction(value):
+    def fraction(value: str | int | float | Decimal) -> Fraction:
         return Fraction(Decimal(value))
 
-    def assert_fraction_close(self, actual, expected):
+    def assert_fraction_close(self, actual: str, expected: Fraction) -> None:
         # Engine quantities are rendered under the stated 100-digit context.
         self.assertLess(abs(self.fraction(actual) - expected), Fraction(1, 10**90))
 
-    def test_four_profiles_scale_power_and_finite_battery_in_units(self):
+    def test_four_profiles_scale_power_and_finite_battery_in_units(self) -> None:
         expected_loads_mw = {
             "ai_cluster_50mw": 50,
             "hyperscale_200mw": 200,
@@ -57,7 +57,7 @@ class FacilityProfileTests(unittest.TestCase):
                 self.assertEqual(scenario.distribution_efficiency, Decimal("0.95"))
                 self.assertEqual(scenario.battery_discharge_efficiency, Decimal("0.90"))
 
-    def test_existing_seven_presets_stay_and_ai_default_is_the_profile_outage(self):
+    def test_existing_seven_presets_stay_and_ai_default_is_the_profile_outage(self) -> None:
         old_ids = {
             "normal",
             "utility_loss",
@@ -77,7 +77,7 @@ class FacilityProfileTests(unittest.TestCase):
             12,
         )
 
-    def test_outage_presets_have_307_8_second_ride_through_and_recover_at_900_s(self):
+    def test_outage_presets_have_307_8_second_ride_through_and_recover_at_900_s(self) -> None:
         for profile_id, modes in FACILITY_PRESETS.items():
             with self.subTest(profile=profile_id):
                 scenario = demo_scenario(modes["outage"])
@@ -93,16 +93,18 @@ class FacilityProfileTests(unittest.TestCase):
                     ],
                 )
                 self.assertEqual(
-                    next(event["at_s"] for event in run["events"] if event["action"] == "battery_depleted"),
+                    next(
+                        event["at_s"]
+                        for event in run["events"]
+                        if event["action"] == "battery_depleted"
+                    ),
                     "607.8",
                 )
                 self.assertEqual(run["summary"]["unserved_duration_s"], "292.2")
                 expected_unserved_kwh = Fraction(scenario.it_demand_kw) * Fraction(1461, 5) / 3600
-                self.assert_fraction_close(
-                    run["summary"]["unserved_it_kwh"], expected_unserved_kwh
-                )
+                self.assert_fraction_close(run["summary"]["unserved_it_kwh"], expected_unserved_kwh)
 
-    def test_load_step_presets_are_piecewise_power_inputs_at_stated_seconds(self):
+    def test_load_step_presets_are_piecewise_power_inputs_at_stated_seconds(self) -> None:
         for profile_id, modes in FACILITY_PRESETS.items():
             with self.subTest(profile=profile_id):
                 scenario = demo_scenario(modes["ramp"])
@@ -112,7 +114,7 @@ class FacilityProfileTests(unittest.TestCase):
                 self.assertEqual(scenario.step_s, 10)
                 self.assertEqual(scenario.it_capacity_kw, load_kw * Decimal("1.1"))
                 self.assertEqual(
-                    [(event.at_s, event.action, Decimal(event.value_kw)) for event in scenario.events],
+                    [(event.at_s, event.action, event.value_kw) for event in scenario.events],
                     [
                         (300, "set_demand", load_kw * Decimal("0.8")),
                         (600, "set_demand", load_kw * Decimal("1.1")),
@@ -128,7 +130,9 @@ class FacilityProfileTests(unittest.TestCase):
                 self.assertEqual(run["summary"]["unserved_duration_s"], "0")
                 self.assertLessEqual(run["summary"]["interval_count"], 185)
 
-    def test_extended_reserve_bridges_three_hours_and_half_reserve_depletes_by_hand_math(self):
+    def test_extended_reserve_bridges_three_hours_and_half_reserve_depletes_by_hand_math(
+        self,
+    ) -> None:
         for profile_id, modes in FACILITY_PRESETS.items():
             with self.subTest(profile=profile_id):
                 scenario = demo_scenario(modes["reserve"])
@@ -143,19 +147,15 @@ class FacilityProfileTests(unittest.TestCase):
                 self.assertEqual(scenario.battery_initial_kwh, load_kw * 4)
                 self.assertEqual(scenario.battery_capacity_kwh, load_kw * 4)
                 self.assertEqual(scenario.battery_charge_kw, 0)
-                self.assertNotIn(
-                    "battery_depleted", [event["action"] for event in run["events"]]
-                )
+                self.assertNotIn("battery_depleted", [event["action"] for event in run["events"]])
                 self.assertEqual(run["summary"]["unserved_duration_s"], "0")
                 self.assertEqual(run["summary"]["unserved_it_kwh"], "0")
-                # 4 h opening energy less 3 h / (0.90 × 0.95) discharge loss.
+                # 4 h opening energy less 3 h / (0.90 * 0.95) discharge loss.
                 expected_final_kwh = Fraction(load_kw) * Fraction(28, 57)
-                self.assert_fraction_close(
-                    run["summary"]["battery_final_kwh"], expected_final_kwh
-                )
+                self.assert_fraction_close(run["summary"]["battery_final_kwh"], expected_final_kwh)
                 self.assertLessEqual(run["summary"]["interval_count"], 245)
 
-                # 3 h / (0.90 discharge × 0.95 distribution) uses 200/57 h gross.
+                # 3 h / (0.90 discharge * 0.95 distribution) uses 200/57 h gross.
                 half_reserve = scenario.__class__.from_dict(
                     {
                         **scenario.to_dict(),
@@ -168,7 +168,7 @@ class FacilityProfileTests(unittest.TestCase):
                     for event in half_run["events"]
                     if event["action"] == "battery_depleted"
                 )
-                self.assertEqual(depletion, "6456")  # 300 s + 1.71 h × 3600.
+                self.assertEqual(depletion, "6456")  # 300 s + 1.71 h * 3600.
                 self.assertEqual(half_run["summary"]["unserved_duration_s"], "4644")
                 self.assertEqual(
                     Fraction(half_run["summary"]["unserved_duration_s"]),

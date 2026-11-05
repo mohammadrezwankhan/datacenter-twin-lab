@@ -1,3 +1,5 @@
+import { emtResultValue } from './emt-contract';
+import { jsonObject } from './json-contracts';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
@@ -19,22 +21,24 @@ test('EMT study exports applied inputs, preserves drafts and verifies every samp
     if (run) await page.getByTestId('emt-run').click();
     const pending = page.waitForEvent('download');
     await page.getByTestId('emt-export-json').click();
-    const exported = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
-    const result = exported.result ?? exported;
+    const exported = jsonObject(await readFile(await (await pending).path(), 'utf8'));
+    const result = emtResultValue(exported.result ?? exported);
     expect(result.config.capacitance_mf).toBe(expected);
-    const native = JSON.parse(
-      execFileSync(
-        process.env.TWIN_PYTHON || 'python',
-        [
-          '-c',
-          'import json,sys;from datacenter_twin.emt import simulate_emt;print(json.dumps(simulate_emt(json.load(sys.stdin))))',
-        ],
-        {
-          cwd: '../..',
-          input: JSON.stringify(result.config),
-          encoding: 'utf8',
-          maxBuffer: 8 * 1024 * 1024,
-        },
+    const native = emtResultValue(
+      jsonObject(
+        execFileSync(
+          process.env.TWIN_PYTHON || 'python',
+          [
+            '-c',
+            'import json,sys;from datacenter_twin.emt import simulate_emt;print(json.dumps(simulate_emt(json.load(sys.stdin))))',
+          ],
+          {
+            cwd: '../..',
+            input: JSON.stringify(result.config),
+            encoding: 'utf8',
+            maxBuffer: 8 * 1024 * 1024,
+          },
+        ),
       ),
     );
     expect(compareEmt(result, native)).toBeLessThanOrEqual(1e-7);

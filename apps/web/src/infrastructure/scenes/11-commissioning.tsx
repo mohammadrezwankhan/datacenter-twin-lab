@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
 import { SceneDiagram } from './primitives';
@@ -26,7 +27,7 @@ export default function CommissioningScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="commissioning"
       title="Commissioning evidence wall"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >
@@ -61,7 +62,7 @@ export default function CommissioningScene({ result, step }: SceneProps) {
             {value}
           </text>
           {index < 3 && (
-            <path d={`M245 ${133}H${274 + index * 224}`} stroke="#69d8d3" strokeWidth="3" />
+            <path d={`M245 133H${String(274 + index * 224)}`} stroke="#69d8d3" strokeWidth="3" />
           )}
         </g>
       ))}
@@ -109,7 +110,7 @@ export default function CommissioningScene({ result, step }: SceneProps) {
               fill="#c0cfda"
               fontSize="11"
             >
-              {typeof duration === 'number' ? `${duration} s` : 'Not run'}
+              {typeof duration === 'number' ? `${String(duration)} s` : 'Not run'}
             </text>
           </g>
         );
@@ -151,7 +152,8 @@ export default function CommissioningScene({ result, step }: SceneProps) {
         Discrepancy → correct → retest
       </text>
       <text x="777" y="397" fill="#a0b1c3" fontSize="13">
-        Thermal {rows[1].value} · electrical {rows[2].value}
+        Thermal {requiredValue(rows[1], 'rows[1]').value} · electrical{' '}
+        {requiredValue(rows[2], 'rows[2]').value}
       </text>
     </SceneDiagram>
   );

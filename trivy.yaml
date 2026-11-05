@@ -1,0 +1,19 @@
+# HIGH/CRITICAL findings, database errors, and scanner errors fail the gate.
+# Unfixed vulnerabilities remain visible and fail at this severity threshold.
+exit-code: 1
+format: json
+severity:
+  - HIGH
+  - CRITICAL
+timeout: 15m
+scan:
+  scanners:
+    - vuln
+    - misconfig
+  skip-dirs:
+    - .git
+    - .venv
+    - node_modules
+    - hardening-artifacts
+vulnerability:
+  ignore-unfixed: false

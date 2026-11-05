@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { SiteScenario } from './types';
 import { n } from './client';
@@ -78,10 +79,13 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
   useEffect(() => {
     if (!plotElement.current) return;
     const observer = new ResizeObserver(([entry]) => {
-      if (entry.contentRect.width > 0) setPlotWidth(Math.max(240, entry.contentRect.width));
+      if (entry && entry.contentRect.width > 0)
+        setPlotWidth(Math.max(240, entry.contentRect.width));
     });
     observer.observe(plotElement.current);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [hasPreview]);
   const otherEvents = current.events.filter((event) => event.action !== 'set_demand');
   const selectedIndex = draft.steps.findIndex((step) => step.id === selected);
@@ -109,7 +113,7 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
   const path = preview?.segments
     .map(
       (segment, index) =>
-        `${index ? 'L' : 'M'}${x(segment.start)},${y(segment.kw)} H${x(segment.end)}`,
+        `${index ? 'L' : 'M'}${String(x(segment.start))},${String(y(segment.kw))} H${String(x(segment.end))}`,
     )
     .join(' ');
   const changed = JSON.stringify(draft) !== JSON.stringify(demandDraft(current));
@@ -134,7 +138,7 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
     else setDraft({ ...draft, initialKw: value });
   }
   function addStep() {
-    const id = `new-${nextId.current++}`;
+    const id = `new-${String(nextId.current++)}`;
     setDraft({
       ...draft,
       steps: [
@@ -176,7 +180,7 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
       {preview && scenario && (
         <div className="demand-plot" ref={plotElement}>
           <svg
-            viewBox={`0 0 ${width} ${height}`}
+            viewBox={`0 0 ${String(width)} ${String(height)}`}
             role="img"
             aria-label="Preview of requested IT demand in kilowatts over elapsed seconds"
           >
@@ -224,14 +228,20 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
                 y2={bottom}
               />
             ))}
-            <path className="demand-area" d={`${path} L${right},${bottom} L${left},${bottom} Z`} />
+            <path
+              className="demand-area"
+              d={`${String(path)} L${String(right)},${String(bottom)} L${String(left)},${String(bottom)} Z`}
+            />
             <path className="demand-line" d={path} />
           </svg>
           {[
             { id: 'initial', atS: '0', demandKw: scenario.it_demand_kw },
             ...draft.steps.map((step, index) => ({
               ...step,
-              demandKw: validatedSteps[index].value_kw!,
+              demandKw: requiredPresent(
+                requiredValue(validatedSteps[index], 'validatedSteps[index]').value_kw,
+                'requiredValue(validatedSteps[index], "validatedSteps[index]").value_kw',
+              ),
             })),
           ].map((step, index) => (
             <button
@@ -239,13 +249,15 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
               type="button"
               disabled={busy}
               className="demand-point"
-              aria-label={index === 0 ? 'Select initial demand' : `Select step ${index}`}
+              aria-label={index === 0 ? 'Select initial demand' : `Select step ${String(index)}`}
               aria-pressed={selected === step.id}
               style={{
-                left: `${(x(Number(step.atS)) / width) * 100}%`,
-                top: `${(y(step.demandKw) / height) * 100}%`,
+                left: `${String((x(Number(step.atS)) / width) * 100)}%`,
+                top: `${String((y(step.demandKw) / height) * 100)}%`,
               }}
-              onClick={() => setSelected(step.id)}
+              onClick={() => {
+                setSelected(step.id);
+              }}
             >
               {index === 0 ? 'I' : index}
             </button>
@@ -270,7 +282,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
             <select
               aria-label="Timeline point"
               value={selected}
-              onChange={(event) => setSelected(event.target.value)}
+              onChange={(event) => {
+                setSelected(event.target.value);
+              }}
             >
               <option value="initial">Initial demand</option>
               {draft.steps.map((step, index) => (
@@ -288,7 +302,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
               inputMode="decimal"
               maxLength={128}
               value={selectedKw}
-              onChange={(event) => updatePower(event.target.value, true)}
+              onChange={(event) => {
+                updatePower(event.target.value, true);
+              }}
               aria-describedby={hintId}
             />
           </label>
@@ -301,7 +317,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
                 inputMode="numeric"
                 maxLength={20}
                 value={selectedStep.atS}
-                onChange={(event) => updateStep(selected, { atS: event.target.value })}
+                onChange={(event) => {
+                  updateStep(selected, { atS: event.target.value });
+                }}
               />
             </label>
           )}
@@ -315,7 +333,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
               step={1}
               disabled={!preview}
               value={sliderKw}
-              onChange={(event) => updatePower(event.target.value)}
+              onChange={(event) => {
+                updatePower(event.target.value);
+              }}
             />
           </label>
           {selectedStep && (
@@ -329,7 +349,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
                 step={1}
                 disabled={!preview}
                 value={Number(selectedStep.atS) || 0}
-                onChange={(event) => updateStep(selected, { atS: event.target.value })}
+                onChange={(event) => {
+                  updateStep(selected, { atS: event.target.value });
+                }}
               />
             </label>
           )}
@@ -339,7 +361,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
             type="button"
             disabled={busy}
             aria-pressed={selected === 'initial'}
-            onClick={() => setSelected('initial')}
+            onClick={() => {
+              setSelected('initial');
+            }}
           >
             Initial · {draft.initialKw} kW
           </button>
@@ -349,7 +373,9 @@ function TimelineEditor({ current, busy, onRun }: DemandTimelineProps) {
               type="button"
               disabled={busy}
               aria-pressed={selected === step.id}
-              onClick={() => setSelected(step.id)}
+              onClick={() => {
+                setSelected(step.id);
+              }}
             >
               Step {index + 1} · {step.atS} s · {step.demandKw} kW
             </button>

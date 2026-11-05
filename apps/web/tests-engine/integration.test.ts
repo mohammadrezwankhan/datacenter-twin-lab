@@ -4,13 +4,13 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import { dispatchParsed } from '../src/javascript-worker';
-import type { DemoData } from '../src/js-engine/index';
+import { catalogFixture, demoFixture } from './json-fixtures';
 
 const root = resolve(process.cwd(), '../..');
-const demoData = JSON.parse(
+const demoData = demoFixture(
   readFileSync(resolve(root, '.local/browser-demo-assets/demo-data.json'), 'utf8'),
-) as DemoData;
-const catalog = JSON.parse(
+);
+const catalog = catalogFixture(
   readFileSync(resolve(root, '.local/browser-demo-assets/catalog.json'), 'utf8'),
 );
 const assets = { demoData, catalog };
@@ -32,7 +32,7 @@ function pythonExecutable(): string {
   );
 }
 
-function native(op: string, payload: unknown): any {
+function native(op: string, payload: unknown): unknown {
   const source = [
     'import json,sys',
     'sys.path.insert(0, sys.argv[1])',
@@ -64,11 +64,11 @@ function native(op: string, payload: unknown): any {
     maxBuffer: 64 * 1024 * 1024,
   });
   if (result.status !== 0)
-    throw new Error(result.stderr || `Native Python failed (${result.status})`);
+    throw new Error(result.stderr || `Native Python failed (${String(result.status)})`);
   return JSON.parse(result.stdout);
 }
 
-test('dispatcher covers fixed demo, catalog, simulation, sweep, report, planning, and quote routes', () => {
+void test('dispatcher covers fixed demo, catalog, simulation, sweep, report, planning, and quote routes', () => {
   assert.deepEqual(dispatchParsed('presets', null, assets), demoData.presets);
   assert.deepEqual(
     dispatchParsed('demo?preset=ai_cluster_generator_failure', null, assets),
@@ -95,7 +95,7 @@ test('dispatcher covers fixed demo, catalog, simulation, sweep, report, planning
     dispatchParsed('reports', htmlReportBody, assets),
     native('report', htmlReportBody),
   );
-  const planning = JSON.parse(
+  const planning: unknown = JSON.parse(
     readFileSync(resolve(root, 'data/scenarios/baseline-1mw.json'), 'utf8'),
   );
   assert.deepEqual(dispatchParsed('planning', planning, assets), native('planning', planning));

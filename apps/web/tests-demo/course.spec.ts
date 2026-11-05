@@ -1,5 +1,6 @@
+import { requiredPresent } from '../src/required-value';
+import { objectValue, objectList } from './json-contracts';
 import { test, expect } from '@playwright/test';
-import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import { lessons } from '../src/course-lessons';
 
@@ -41,23 +42,28 @@ test('all twelve lessons run both exercises and export complete native-equal res
           `Result for ${lesson.challenge}`,
         );
       }
-      const run = await exported(page, lesson.id === 'pue');
+      const run = objectValue(await exported(page, lesson.id === 'pue'));
       expect(run).toEqual(nativeRun(run));
       await expectSceneLabelsVisible(page);
       const actual =
         lesson.id === 'pue'
           ? run.facility_energy_kwh
           : lesson.resultKey === 'generator_ready'
-            ? run.intervals.find(
-                (row: { asset_states: Record<string, string> }) =>
-                  row.asset_states.generator === 'running',
+            ? objectList(run.intervals).find(
+                (row) => objectValue(row.asset_states).generator === 'running',
               )?.start_s
             : lesson.resultKey === 'depletion'
-              ? run.events.find((event: { action: string }) => event.action === 'battery_depleted')
-                  ?.at_s
-              : run.summary[lesson.resultKey];
-      expect(Number(actual)).toBeCloseTo(expected[lesson.id][exercise], 7);
-      if (lesson.id !== 'pue') expect(run.summary.energy_balance_residual_kwh).toBe('0');
+              ? objectList(run.events).find((event) => event.action === 'battery_depleted')?.at_s
+              : objectValue(run.summary)[lesson.resultKey];
+      expect(Number(actual)).toBeCloseTo(
+        requiredPresent(
+          requiredPresent(expected[lesson.id], 'expected lesson results')[exercise],
+          'expected exercise result',
+        ),
+        7,
+      );
+      if (lesson.id !== 'pue')
+        expect(objectValue(run.summary).energy_balance_residual_kwh).toBe('0');
     }
     await page.getByRole('button', { name: 'Show worked answer' }).click();
     await expect(page.locator('.worked-answer')).toBeVisible();

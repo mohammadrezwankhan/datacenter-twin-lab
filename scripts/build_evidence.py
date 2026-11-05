@@ -9,31 +9,31 @@ metadata; runtime details live in a separate environment metadata file.
 from __future__ import annotations
 
 import argparse
-from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
-from fractions import Fraction
 import hashlib
 import json
+import logging
 import os
-from pathlib import Path, PurePosixPath, PureWindowsPath
 import platform
 import re
 import sys
 import tempfile
+from decimal import ROUND_HALF_EVEN, Context, Decimal, localcontext
+from fractions import Fraction
+from pathlib import Path, PurePosixPath, PureWindowsPath
 from typing import Any
 from urllib.parse import urlsplit
-
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Direct-script execution imports this checkout after adding ROOT to sys.path.
 from datacenter_twin import __version__  # noqa: E402
-from datacenter_twin.contracts import InputError, decimal_text  # noqa: E402
 from datacenter_twin.continuity import simulate_continuity  # noqa: E402
+from datacenter_twin.contracts import InputError, decimal_text  # noqa: E402
 from datacenter_twin.demo import demo_scenario  # noqa: E402
 from datacenter_twin.reporting import render_html, render_markdown  # noqa: E402
 from datacenter_twin.topology import SiteScenario  # noqa: E402
-
 
 ARITHMETIC = Context(prec=100, rounding=ROUND_HALF_EVEN)
 LEDGER_TOLERANCE_KWH = Fraction(1, 10**90)
@@ -91,7 +91,9 @@ def _course_ride_through(initial_kwh: str) -> SiteScenario:
 
 
 def _event_time(scenario: SiteScenario, *, action: str, target: str) -> Fraction:
-    found = [event.at_s for event in scenario.events if event.action == action and event.target == target]
+    found = [
+        event.at_s for event in scenario.events if event.action == action and event.target == target
+    ]
     if len(found) != 1:
         raise InputError(f"Independent calculation expected one {action} event for {target}")
     return Fraction(found[0])
@@ -119,12 +121,16 @@ def _ride_through_expectations(scenario: SiteScenario) -> dict[str, Fraction]:
 
 def _path_maintenance_expectations(scenario: SiteScenario) -> dict[str, Fraction]:
     failed_path = next(
-        event.target for event in scenario.events
+        event.target
+        for event in scenario.events
         if event.action == "asset_down" and event.target.startswith("path-")
     )
     surviving_gross_kw = sum(
-        (Fraction(asset.capacity_kw) for asset in scenario.assets
-         if asset.kind == "distribution" and asset.id != failed_path),
+        (
+            Fraction(asset.capacity_kw)
+            for asset in scenario.assets
+            if asset.kind == "distribution" and asset.id != failed_path
+        ),
         Fraction(0),
     )
     outage_start = _event_time(scenario, action="asset_down", target=failed_path)
@@ -162,14 +168,20 @@ def _check_row(
     }
 
 
-def _independent_ledger(run: dict) -> dict[str, Any]:
+def _independent_ledger(run: dict[str, Any]) -> dict[str, Any]:
     """Rebuild whole-run energy identities from exported interval terms only."""
     totals = {
         key: Fraction(0)
         for key in (
-            "requested_it_kwh", "served_it_kwh", "unserved_it_kwh", "grid_kwh",
-            "generator_kwh", "battery_stored_change_kwh", "distribution_loss_kwh",
-            "battery_charge_loss_kwh", "battery_discharge_loss_kwh",
+            "requested_it_kwh",
+            "served_it_kwh",
+            "unserved_it_kwh",
+            "grid_kwh",
+            "generator_kwh",
+            "battery_stored_change_kwh",
+            "distribution_loss_kwh",
+            "battery_charge_loss_kwh",
+            "battery_discharge_loss_kwh",
         )
     }
     max_interval_source_difference = Fraction(0)
@@ -181,10 +193,16 @@ def _independent_ledger(run: dict) -> dict[str, Any]:
             totals[key] += value
         source = energy["grid_kwh"] + energy["generator_kwh"]
         accounted = sum(
-            (energy[key] for key in (
-                "served_it_kwh", "battery_stored_change_kwh", "distribution_loss_kwh",
-                "battery_charge_loss_kwh", "battery_discharge_loss_kwh",
-            )),
+            (
+                energy[key]
+                for key in (
+                    "served_it_kwh",
+                    "battery_stored_change_kwh",
+                    "distribution_loss_kwh",
+                    "battery_charge_loss_kwh",
+                    "battery_discharge_loss_kwh",
+                )
+            ),
             Fraction(0),
         )
         request_partition = (
@@ -205,12 +223,22 @@ def _independent_ledger(run: dict) -> dict[str, Any]:
             max_interval_storage_difference, abs(storage_difference)
         )
 
-    source_difference = totals["grid_kwh"] + totals["generator_kwh"] - sum(
-        (totals[key] for key in (
-            "served_it_kwh", "battery_stored_change_kwh", "distribution_loss_kwh",
-            "battery_charge_loss_kwh", "battery_discharge_loss_kwh",
-        )),
-        Fraction(0),
+    source_difference = (
+        totals["grid_kwh"]
+        + totals["generator_kwh"]
+        - sum(
+            (
+                totals[key]
+                for key in (
+                    "served_it_kwh",
+                    "battery_stored_change_kwh",
+                    "distribution_loss_kwh",
+                    "battery_charge_loss_kwh",
+                    "battery_discharge_loss_kwh",
+                )
+            ),
+            Fraction(0),
+        )
     )
     request_difference = (
         totals["requested_it_kwh"] - totals["served_it_kwh"] - totals["unserved_it_kwh"]
@@ -239,9 +267,7 @@ def _independent_ledger(run: dict) -> dict[str, Any]:
             "energy_balance_residual_kwh fields are ignored."
         ),
         "tolerance_kwh": _format_fraction(LEDGER_TOLERANCE_KWH),
-        "checks": {
-            key: _format_fraction(value) for key, value in discrepancies.items()
-        },
+        "checks": {key: _format_fraction(value) for key, value in discrepancies.items()},
         "status": "pass",
     }
 
@@ -266,34 +292,45 @@ def _build_case(case_id: str, scenario: SiteScenario, kind: str) -> dict[str, An
         initial = _format_fraction(Fraction(scenario.battery_initial_kwh))
         outage_start_s = _format_fraction(outage_start)
         recovery_s = _format_fraction(_event_time(scenario, action="asset_up", target="utility"))
-        deliverable = Fraction(scenario.battery_initial_kwh) * Fraction(
-            scenario.battery_discharge_efficiency
-        ) * Fraction(scenario.distribution_efficiency)
+        deliverable = (
+            Fraction(scenario.battery_initial_kwh)
+            * Fraction(scenario.battery_discharge_efficiency)
+            * Fraction(scenario.distribution_efficiency)
+        )
         equations = {
             "requested_it_kwh": (
-                f"{scenario.it_demand_kw} kW × {scenario.duration_s} s ÷ 3,600"
+                f"{scenario.it_demand_kw} kW \u00d7 {scenario.duration_s} s ÷ 3,600"
             ),
             "ride_through_s": (
-                f"({initial} kWh × {scenario.battery_discharge_efficiency} × "
-                f"{scenario.distribution_efficiency}) ÷ {scenario.it_demand_kw} kW × 3,600"
+                f"({initial} kWh \u00d7 {scenario.battery_discharge_efficiency} \u00d7 "
+                f"{scenario.distribution_efficiency}) ÷ {scenario.it_demand_kw} kW \u00d7 3,600"
             ),
             "depletion_elapsed_s": f"{outage_start_s} s outage start + ride-through",
-            "unserved_duration_s": f"{recovery_s} s recovery − depletion elapsed",
-            "unserved_it_kwh": f"{scenario.it_demand_kw} kW × unserved seconds ÷ 3,600",
+            "unserved_duration_s": f"{recovery_s} s recovery \u2212 depletion elapsed",
+            "unserved_it_kwh": f"{scenario.it_demand_kw} kW \u00d7 unserved seconds ÷ 3,600",
         }
         units = {
-            "requested_it_kwh": "kWh", "ride_through_s": "s", "depletion_elapsed_s": "s",
-            "unserved_duration_s": "s", "unserved_it_kwh": "kWh",
+            "requested_it_kwh": "kWh",
+            "ride_through_s": "s",
+            "depletion_elapsed_s": "s",
+            "unserved_duration_s": "s",
+            "unserved_it_kwh": "kWh",
         }
         checks = [
             _check_row(
-                case_id=case_id, metric=metric, equation=equations[metric],
-                expected=expected[metric], observed=observed[metric], unit=units[metric],
+                case_id=case_id,
+                metric=metric,
+                equation=equations[metric],
+                expected=expected[metric],
+                observed=observed[metric],
+                unit=units[metric],
             )
             for metric in expected
         ]
         if deliverable <= 0:
-            raise InputError("Independent ride-through calculation expected positive deliverable energy")
+            raise InputError(
+                "Independent ride-through calculation expected positive deliverable energy"
+            )
     elif kind == "path-maintenance":
         expected = _path_maintenance_expectations(scenario)
         outage_start = _event_time(
@@ -302,7 +339,8 @@ def _build_case(case_id: str, scenario: SiteScenario, kind: str) -> dict[str, An
             target=next(event.target for event in scenario.events if event.action == "asset_down"),
         )
         row = next(
-            interval for interval in run["intervals"]
+            interval
+            for interval in run["intervals"]
             if _fraction(interval["start_s"]) == outage_start
         )
         observed = {
@@ -316,34 +354,45 @@ def _build_case(case_id: str, scenario: SiteScenario, kind: str) -> dict[str, An
             event.target for event in scenario.events if event.action == "asset_down"
         )
         gross_kw = sum(
-            (Fraction(asset.capacity_kw) for asset in scenario.assets
-             if asset.kind == "distribution" and asset.id != failed_path),
+            (
+                Fraction(asset.capacity_kw)
+                for asset in scenario.assets
+                if asset.kind == "distribution" and asset.id != failed_path
+            ),
             Fraction(0),
         )
         recovery_s = _format_fraction(_event_time(scenario, action="asset_up", target=failed_path))
         equations = {
             "requested_it_kwh": (
-                f"{scenario.it_demand_kw} kW × {scenario.duration_s} s ÷ 3,600"
+                f"{scenario.it_demand_kw} kW \u00d7 {scenario.duration_s} s ÷ 3,600"
             ),
             "served_kw_during_maintenance": (
-                f"{_format_fraction(gross_kw)} gross kW × "
+                f"{_format_fraction(gross_kw)} gross kW \u00d7 "
                 f"{scenario.distribution_efficiency} distribution efficiency"
             ),
             "unserved_kw_during_maintenance": (
-                f"{scenario.it_demand_kw} kW requested − served kW"
+                f"{scenario.it_demand_kw} kW requested \u2212 served kW"
             ),
-            "unserved_duration_s": f"{recovery_s} s recovery − { _format_fraction(outage_start) } s outage start",
-            "unserved_it_kwh": "unserved kW × unserved seconds ÷ 3,600",
+            "unserved_duration_s": (
+                f"{recovery_s} s recovery \u2212 {_format_fraction(outage_start)} s outage start"
+            ),
+            "unserved_it_kwh": "unserved kW \u00d7 unserved seconds ÷ 3,600",
         }
         units = {
-            "requested_it_kwh": "kWh", "served_kw_during_maintenance": "kW",
-            "unserved_kw_during_maintenance": "kW", "unserved_duration_s": "s",
+            "requested_it_kwh": "kWh",
+            "served_kw_during_maintenance": "kW",
+            "unserved_kw_during_maintenance": "kW",
+            "unserved_duration_s": "s",
             "unserved_it_kwh": "kWh",
         }
         checks = [
             _check_row(
-                case_id=case_id, metric=metric, equation=equations[metric],
-                expected=expected[metric], observed=observed[metric], unit=units[metric],
+                case_id=case_id,
+                metric=metric,
+                equation=equations[metric],
+                expected=expected[metric],
+                observed=observed[metric],
+                unit=units[metric],
             )
             for metric in expected
         ]
@@ -403,50 +452,67 @@ def _render_receipt(cases: list[dict[str, Any]], context: dict[str, str]) -> str
         "",
         f"Engine version: `{__version__}`.",
         "",
-        "This is maintainer-generated synthetic evidence. Independent external review: **not obtained**.",
-        "No facility, equipment, cooling, workload, certification, or physical-control behavior is validated.",
+        (
+            "This is maintainer-generated synthetic evidence. Independent"
+            " external review: **not obtained**."
+        ),
+        (
+            "No facility, equipment, cooling, workload, certification, or"
+            " physical-control behavior is validated."
+        ),
         "",
     ]
     if context:
         lines.append("Public context supplied by the packet operator:")
         lines.extend(f"- {key}: `{value}`" for key, value in sorted(context.items()))
         lines.append("")
-    lines.extend([
-        "| Case | Input SHA-256 | Run ID |",
-        "| --- | --- | --- |",
-    ])
-    for case in cases:
-        lines.append(
-            f"| `{case['case_id']}` | `{case['input_sha256']}` | `{case['run_id']}` |"
-        )
+    lines.extend(
+        [
+            "| Case | Input SHA-256 | Run ID |",
+            "| --- | --- | --- |",
+        ]
+    )
+    lines.extend(
+        f"| `{case['case_id']}` | `{case['input_sha256']}` | `{case['run_id']}` |" for case in cases
+    )
     for case in cases:
         lines.extend(["", f"## {case['case_id']}", ""])
-        lines.extend([
-            "| Measure | Independent equation | Expected | Observed |",
-            "| --- | --- | --- | --- |",
-        ])
-        for check in case["checks"]:
-            lines.append(
-                f"| {check['metric']} ({check['unit']}) | {check['equation']} | "
-                f"{_receipt_value(check['expected'])} | {_receipt_value(check['observed'])} |"
-            )
+        lines.extend(
+            [
+                "| Measure | Independent equation | Expected | Observed |",
+                "| --- | --- | --- | --- |",
+            ]
+        )
+        lines.extend(
+            f"| {check['metric']} ({check['unit']}) | {check['equation']} | "
+            f"{_receipt_value(check['expected'])} | {_receipt_value(check['observed'])} |"
+            for check in case["checks"]
+        )
         lines.append(
             "Independent interval-ledger reconstruction: **pass**; maximum tolerated "
             f"rounding difference `{case['ledger']['tolerance_kwh']} kWh`. "
             "It sums the exported interval terms and ignores the engine residual fields."
         )
-    lines.extend([
-        "",
-        "Receipt values show at most 14 significant digits; an ellipsis marks additional digits. "
-        "The scenario/run JSON retain full numeric strings from the engine's 100-significant-digit, "
-        "round-half-even context. "
-        "Independent rational values are compared with a maximum absolute tolerance of "
-        f"`{_format_fraction(LEDGER_TOLERANCE_KWH)} kWh` (also used numerically for time and power checks).",
-        "Runtime details are in `environment.json`; scenario, run, reports, and this receipt "
-        "are deterministic numerical artifacts for the same inputs and engine version.",
-        "See `manifest.json` for per-file SHA-256 values; its own digest is printed by the builder.",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "Receipt values show at most 14 significant digits; "
+            "an ellipsis marks additional digits. "
+            "The scenario/run JSON retain full numeric strings "
+            "from the engine's 100-significant-digit, "
+            "round-half-even context. "
+            "Independent rational values are compared with a maximum absolute tolerance of "
+            f"`{_format_fraction(LEDGER_TOLERANCE_KWH)} kWh` "
+            "(also used numerically for time and power checks).",
+            "Runtime details are in `environment.json`; scenario, run, reports, and this receipt "
+            "are deterministic numerical artifacts for the same inputs and engine version.",
+            (
+                "See `manifest.json` for per-file SHA-256 values; its own"
+                " digest is printed by the builder."
+            ),
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -473,7 +539,9 @@ def _safe_public_context(revision: str | None, repository: str | None) -> dict[s
             or len(value) > 300
             or any(ord(char) < 32 for char in value)
         ):
-            raise InputError(f"--{key} must be a nonempty public context value of at most 300 characters")
+            raise InputError(
+                f"--{key} must be a nonempty public context value of at most 300 characters"
+            )
         if key == "revision":
             if (
                 "\\" in value
@@ -502,7 +570,9 @@ def _safe_public_context(revision: str | None, repository: str | None) -> dict[s
                     or parsed.fragment
                     or len([part for part in parsed.path.split("/") if part]) < 2
                 ):
-                    raise InputError("--repository must be a public repository identifier or HTTPS URL")
+                    raise InputError(
+                        "--repository must be a public repository identifier or HTTPS URL"
+                    )
             elif (
                 ":" in value
                 or value.startswith(("/", "~", "."))
@@ -524,11 +594,13 @@ def _packet_artifacts(
     manifest_cases = []
     for case in cases:
         artifacts.update(case.pop("files"))
-        manifest_cases.append({key: value for key, value in case.items()})
+        manifest_cases.append(dict(case))
     artifacts["receipt.md"] = _render_receipt(manifest_cases, context)
     artifacts["environment.json"] = _json_text(_environment_metadata())
     classifications = {
-        name: "environment_metadata" if name == "environment.json" else "deterministic_numerical_artifact"
+        name: "environment_metadata"
+        if name == "environment.json"
+        else "deterministic_numerical_artifact"
         for name in artifacts
     }
     manifest = {
@@ -607,6 +679,7 @@ def build_packet(
     try:
         for name, content in artifacts.items():
             from datacenter_twin.output import write_result
+
             write_result(stage / name, content)
             created.append(stage / name)
         if destination.is_symlink() or destination.exists():
@@ -614,7 +687,9 @@ def build_packet(
         try:
             destination.mkdir()
         except FileExistsError as exc:
-            raise InputError("Evidence destination appeared while building; no files were replaced") from exc
+            raise InputError(
+                "Evidence destination appeared while building; no files were replaced"
+            ) from exc
         destination_created = True
         for name in artifacts:
             source = stage / name
@@ -627,16 +702,16 @@ def build_packet(
         if destination_created:
             try:
                 destination.rmdir()
-            except OSError:
-                pass
+            except OSError as exc:
+                logging.getLogger(__name__).debug("Destination cleanup failed: %s", exc)
         raise
     finally:
         for path in created:
             path.unlink(missing_ok=True)
         try:
             stage.rmdir()
-        except OSError:
-            pass
+        except OSError as exc:
+            logging.getLogger(__name__).debug("Staging cleanup failed: %s", exc)
     manifest_sha256 = _sha256_text(artifacts[MANIFEST_NAME])
     return {
         "destination": destination,
@@ -693,7 +768,9 @@ def verify_packet(directory: Path) -> dict[str, Any]:
     if actual_names != expected_names:
         missing = sorted(expected_names - actual_names)
         extra = sorted(actual_names - expected_names)
-        raise InputError(f"Evidence packet file set differs from manifest (missing={missing}, extra={extra})")
+        raise InputError(
+            f"Evidence packet file set differs from manifest (missing={missing}, extra={extra})"
+        )
     for name, entry in artifacts.items():
         if (
             not isinstance(entry, dict)
@@ -710,12 +787,14 @@ def verify_packet(directory: Path) -> dict[str, Any]:
     expected_context_keys = {"revision", "repository"}
     public_context = manifest.get("public_context")
     if not isinstance(public_context, dict) or set(public_context) - expected_context_keys:
-        raise InputError("Evidence manifest public_context must contain only revision/repository strings")
-    context = _safe_public_context(
-        public_context.get("revision"), public_context.get("repository")
-    )
+        raise InputError(
+            "Evidence manifest public_context must contain only revision/repository strings"
+        )
+    context = _safe_public_context(public_context.get("revision"), public_context.get("repository"))
     if context != public_context:
-        raise InputError("Evidence manifest public_context must contain only explicit, nonempty values")
+        raise InputError(
+            "Evidence manifest public_context must contain only explicit, nonempty values"
+        )
     if type(manifest.get("schema_version")) is not int or manifest["schema_version"] != 1:
         raise InputError("Unsupported evidence packet schema_version")
     if manifest.get("packet_type") != "datacenter-twin-lab-independent-reproduction":
@@ -736,8 +815,12 @@ def verify_packet(directory: Path) -> dict[str, Any]:
     except (OSError, json.JSONDecodeError) as exc:
         raise InputError(f"Cannot read environment metadata: {exc}") from exc
     expected_environment_keys = {
-        "engine_version", "python_implementation", "python_version", "operating_system",
-        "operating_system_release", "machine_architecture",
+        "engine_version",
+        "python_implementation",
+        "python_version",
+        "operating_system",
+        "operating_system_release",
+        "machine_architecture",
     }
     if (
         not isinstance(environment, dict)
@@ -779,10 +862,15 @@ def verify_packet(directory: Path) -> dict[str, Any]:
                 raise InputError("Environment metadata has an invalid artifact classification")
             continue
         if actual_entry != expected_entry:
-            raise InputError(f"Evidence manifest hash for {name} does not match current reproduction")
+            raise InputError(
+                f"Evidence manifest hash for {name} does not match current reproduction"
+            )
         expected_content = expected_files[name].encode("utf-8")
         artifact_path = directory / name
-        if artifact_path.stat().st_size != len(expected_content) or artifact_path.read_bytes() != expected_content:
+        if (
+            artifact_path.stat().st_size != len(expected_content)
+            or artifact_path.read_bytes() != expected_content
+        ):
             raise InputError(f"Numerical artifact {name} differs from current-engine reproduction")
 
     return {
@@ -827,21 +915,25 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "build":
             result = build_packet(
-                args.output, revision=getattr(args, "revision", None),
+                args.output,
+                revision=getattr(args, "revision", None),
                 repository=getattr(args, "repository", None),
             )
-            print(f"Evidence packet: {result['destination']}")
-            print(f"Artifacts checked by manifest: {result['artifact_count']}")
-            print(f"Manifest SHA-256: {result['manifest_sha256']}")
+            sys.stdout.write((f"Evidence packet: {result['destination']}") + "\n")
+            sys.stdout.write((f"Artifacts checked by manifest: {result['artifact_count']}") + "\n")
+            sys.stdout.write((f"Manifest SHA-256: {result['manifest_sha256']}") + "\n")
         else:
             result = verify_packet(args.packet)
-            print(
-                "Verified file hashes and current-engine numerical reproduction "
-                f"for {result['artifact_count']} artifacts ({result['engine_version']})"
+            sys.stdout.write(
+                (
+                    "Verified file hashes and current-engine numerical reproduction "
+                    f"for {result['artifact_count']} artifacts ({result['engine_version']})"
+                )
+                + "\n"
             )
-            print(f"Manifest SHA-256: {result['manifest_sha256']}")
+            sys.stdout.write((f"Manifest SHA-256: {result['manifest_sha256']}") + "\n")
     except (InputError, OSError, ValueError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+        sys.stderr.write((f"Error: {exc}") + "\n")
         return 2
     return 0
 

@@ -1,3 +1,13 @@
+import {
+  objectValue,
+  arrayValue,
+  numberValue,
+  screenValue,
+  screenExport,
+  type ScreenFixture,
+  type ScreenExportFixture,
+} from './json-contracts';
+import { requiredPresent } from '../src/required-value';
 import { expect, test, type Download, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { createHash } from 'node:crypto';
@@ -69,7 +79,7 @@ function assertScreenOutputsMatchAcrossRuntimes(actual: ScreenOutputs, expected:
       );
       expect(
         Math.abs(actualNumber - expectedValue),
-        `${key} should match across runtimes within rel=${SCREEN_REL_TOL} / abs=${SCREEN_ABS_TOL}`,
+        `${key} should match across runtimes within rel=${String(SCREEN_REL_TOL)} / abs=${String(SCREEN_ABS_TOL)}`,
       ).toBeLessThanOrEqual(tolerance);
       continue;
     }
@@ -83,17 +93,18 @@ async function exportCompleted(page: Page) {
   const download: Download = await pending;
   const path = await download.path();
   if (!path) throw new Error('Completed screen export did not create a downloadable file');
-  return JSON.parse(await readFile(path, 'utf8')) as Record<string, any>;
+  const value: unknown = JSON.parse(await readFile(path, 'utf8'));
+  return screenExport(value);
 }
 
 function assertResult(
-  payload: Record<string, any>,
+  payload: ScreenExportFixture,
   id: string,
   inputs: ScreenInputs,
   prediction: string,
 ) {
   const lesson = lessonById(id);
-  const result = payload.result as Record<string, any>;
+  const result = payload.result;
   const outputs = calculateScreen(lesson.experiment.model, inputs);
   expect(payload).toMatchObject({
     exportSchema: 'infrastructure-lesson-export-1',
@@ -112,7 +123,7 @@ function assertResult(
 }
 
 function assertRawResult(
-  result: Record<string, any>,
+  result: ScreenFixture,
   lesson: (typeof infrastructureLessons)[number],
   inputs: ScreenInputs,
   model: ModelName,
@@ -128,11 +139,11 @@ function assertRawResult(
   expect(result.inputUnits).toEqual(
     Object.fromEntries(Object.keys(inputs).map((key) => [key, screenUnits(model).inputs[key]])),
   );
-  expect(Object.keys(result.outputUnits).sort()).toEqual(Object.keys(outputs).sort());
-  for (const [key, unit] of Object.entries(result.outputUnits))
+  expect(Object.keys(objectValue(result.outputUnits)).sort()).toEqual(Object.keys(outputs).sort());
+  for (const [key, unit] of Object.entries(objectValue(result.outputUnits)))
     expect(unit).toBe(screenUnits(model).outputs[key]);
-  expect(result.assumptions.length).toBeGreaterThan(0);
-  expect(result.limitations.length).toBeGreaterThan(0);
+  expect(arrayValue(result.assumptions).length).toBeGreaterThan(0);
+  expect(arrayValue(result.limitations).length).toBeGreaterThan(0);
   expect(result.sourceLocators).toEqual([
     {
       id: lesson.source.id,
@@ -164,7 +175,7 @@ async function runAndCheck(page: Page, id: string, inputs: ScreenInputs, predict
   await page.getByRole('button', { name: 'Run screen' }).click();
   await expect(page.getByTestId('infrastructure-run-state')).toContainText('Completed case');
   const result = calculateScreen(lesson.experiment.model, inputs);
-  for (const [key, value] of Object.entries(result))
+  for (const key of Object.keys(result))
     await expect(
       page.locator('[aria-label="Infrastructure experiment"]').locator(`[data-output="${key}"]`),
     ).toBeVisible();
@@ -178,13 +189,13 @@ async function runAndCheck(page: Page, id: string, inputs: ScreenInputs, predict
     );
     expect(payload.fuel).toEqual(expectedFuel);
     assertRawResult(
-      payload.fuel,
+      requiredPresent(payload.fuel, 'fuel screen result'),
       lesson,
       fuelInputs,
       'fuelScreen',
       calculateScreen('fuelScreen', fuelInputs),
     );
-    expect(payload.fuel.outputs.usableLitres).toBe(324000);
+    expect(requiredPresent(payload.fuel, 'fuel screen result').outputs.usableLitres).toBe(324000);
   } else {
     expect(payload.fuel).toBeNull();
   }
@@ -245,7 +256,7 @@ test('all twelve lessons run exact defaults and challenges, export canonical raw
       expect(defaultPayload.result.outputs.availableMW).toBeCloseTo(21.6, 10);
       expect(defaultPayload.result.outputs.marginMW).toBeCloseTo(-5.4, 10);
       expect(defaultPayload.result.outputs.availableMW).toBeLessThan(
-        defaultPayload.result.inputs.requiredMW,
+        numberValue(defaultPayload.result.inputs.requiredMW),
       );
     }
     if (lesson.id === 'ups-battery-station-dc') {
@@ -296,9 +307,12 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
   baseURL,
 }) => {
   test.setTimeout(300000);
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: requiredPresent(baseURL, 'baseURL'),
+  });
   const page = await context.newPage();
-  const requestContext = await page.context().request;
+  const requestContext = page.context().request;
   try {
     for (const lesson of infrastructureLessons) {
       const response = await page.goto(`./${lesson.readingRoute}`);
@@ -306,7 +320,7 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
       await expect(page.getByRole('heading', { level: 1 })).toContainText(lesson.title);
       await expect(page.getByText('Engineering HOLD', { exact: false }).first()).toBeVisible();
       await expect(
-        page.getByText(new RegExp(`chapter ${lesson.source.chapter}`, 'i')).first(),
+        page.getByText(new RegExp(`chapter ${String(lesson.source.chapter)}`, 'i')).first(),
       ).toBeVisible();
       await expect(page.getByText('Worked default — unrounded educational outputs')).toBeVisible();
       await expect(page.getByText('Worked challenge')).toBeVisible();
@@ -343,17 +357,17 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
         new URL('results.json', page.url()).toString(),
       );
       expect(resultsResponse.status()).toBe(200);
-      const results = await resultsResponse.json();
+      const results = objectValue(await resultsResponse.json());
       expect(results.engineeringDecision).toBe('HOLD');
       assertRawResult(
-        results.starting,
+        screenValue(results.starting),
         lesson,
         lesson.experiment.defaultInputs,
         lesson.experiment.model,
         calculateScreen(lesson.experiment.model, lesson.experiment.defaultInputs),
       );
       assertRawResult(
-        results.challenge,
+        screenValue(results.challenge),
         lesson,
         appliedInputs(lesson.id, true),
         lesson.experiment.model,
@@ -362,13 +376,13 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
       expect(results.fuel).toEqual(lesson.id === 'generator-bank-fuel' ? expect.any(Object) : null);
       if (lesson.id === 'generator-bank-fuel') {
         assertRawResult(
-          results.fuel,
+          screenValue(results.fuel),
           lesson,
           fuelInputs,
           'fuelScreen',
           calculateScreen('fuelScreen', fuelInputs),
         );
-        expect(results.fuel.outputs.usableLitres).toBe(324000);
+        expect(screenValue(results.fuel).outputs.usableLitres).toBe(324000);
       }
 
       const linkTargets = await page
@@ -379,7 +393,7 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
             .filter((href) => new URL(href).origin === location.origin),
         );
       expect(linkTargets.length).toBeGreaterThanOrEqual(3);
-      const mountPath = new URL(baseURL!).pathname;
+      const mountPath = new URL(requiredPresent(baseURL, 'baseURL')).pathname;
       for (const href of linkTargets) {
         const target = new URL(href);
         expect(target.pathname.startsWith(mountPath), `${lesson.id} relative link ${href}`).toBe(
@@ -525,7 +539,9 @@ test('scene keyboard controls, reduced-motion and visibility pauses, route histo
     'false',
   );
 
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
   await page.goto('./?lesson=evidence-load-ledger');
   const offscreenScene = page.locator('.infra-scene');
   await offscreenScene.getByRole('button', { name: 'Play' }).click();
@@ -533,12 +549,16 @@ test('scene keyboard controls, reduced-motion and visibility pauses, route histo
     'aria-pressed',
     'true',
   );
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
   await expect(offscreenScene.getByRole('button', { name: 'Play' })).toHaveAttribute(
     'aria-pressed',
     'false',
   );
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
   const nextLesson = page.getByRole('button', { name: /Next lesson/ });
   await nextLesson.click();
   await expect(page.locator('.infrastructure-course')).toHaveAttribute(
@@ -584,13 +604,13 @@ test('responsive capstone keeps page bounds and provides screenshots at target w
     await page.setViewportSize({ width, height: 1000 });
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), {
-        message: `no horizontal document overflow at ${width} CSS pixels`,
+        message: `no horizontal document overflow at ${String(width)} CSS pixels`,
       })
       .toBe(true);
     const name =
       width === 720
         ? 'infrastructure-capstone-200-percent-css-equivalent.png'
-        : `infrastructure-capstone-${width}.png`;
+        : `infrastructure-capstone-${String(width)}.png`;
     await page.screenshot({ path: testInfo.outputPath(name), fullPage: false });
   }
 });

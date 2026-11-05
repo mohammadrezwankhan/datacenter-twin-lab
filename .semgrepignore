@@ -1,0 +1,12 @@
+# Replace Semgrep's implicit test/vendor exclusions with generated tooling only.
+# Source, tests, documentation and the security helpers remain eligible for scans.
+.git/
+node_modules/
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.security-tools/
+hardening-artifacts/

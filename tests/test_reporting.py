@@ -1,5 +1,5 @@
-from dataclasses import replace
 import unittest
+from dataclasses import replace
 
 from datacenter_twin.continuity import simulate_continuity
 from datacenter_twin.demo import demo_scenario
@@ -8,8 +8,10 @@ from datacenter_twin.sensitivity import sweep_continuity
 
 
 class ReportingTests(unittest.TestCase):
-    def test_single_run_reports_are_deterministic_and_complete(self):
-        scenario = replace(demo_scenario("generator_failure"), name="<script>alert('x')</script> | outage")
+    def test_single_run_reports_are_deterministic_and_complete(self) -> None:
+        scenario = replace(
+            demo_scenario("generator_failure"), name="<script>alert('x')</script> | outage"
+        )
         result = simulate_continuity(scenario).to_dict()
         markdown = render_markdown(result)
         html = render_html(result)
@@ -26,15 +28,17 @@ class ReportingTests(unittest.TestCase):
         self.assertNotIn("generated_at", markdown)
         self.assertNotIn("<img", html)
 
-    def test_unknown_generator_cost_is_visible_in_single_report(self):
+    def test_unknown_generator_cost_is_visible_in_single_report(self) -> None:
         result = simulate_continuity(demo_scenario("utility_loss")).to_dict()
         markdown = render_markdown(result)
         html = render_html(result)
         self.assertIn("generator\\_energy\\_charge", markdown)
         self.assertIn("total_incremental_energy_charge", html)
 
-    def test_sweep_report_has_ordered_values_warnings_and_caveats(self):
-        result = sweep_continuity(demo_scenario("generator_failure"), "battery_initial_kwh", ["0", "100"])
+    def test_sweep_report_has_ordered_values_warnings_and_caveats(self) -> None:
+        result = sweep_continuity(
+            demo_scenario("generator_failure"), "battery_initial_kwh", ["0", "100"]
+        )
         markdown = render_markdown(result)
         html = render_html(result)
         self.assertLess(markdown.index("0 kWh"), markdown.index("100 kWh"))

@@ -1,3 +1,4 @@
+import type { RuntimeProgress } from './runtime-progress';
 export const n = (value: unknown, digits = 1) =>
   value === null || value === undefined
     ? 'Unknown'
@@ -11,14 +12,14 @@ export async function request<T>(
   path: string,
   signal?: AbortSignal,
   body?: unknown,
-  onProgress?: (progress: import('./runtime-progress').RuntimeProgress) => void,
+  onProgress?: (progress: RuntimeProgress) => void,
 ): Promise<T> {
   if (import.meta.env.MODE === 'demo') {
     const { browserRequest } = await import('./browser-client');
     return browserRequest<T>(path, signal, body, onProgress);
   }
   const response = await fetch(`/api/v1/${path}`, {
-    signal,
+    ...(signal === undefined ? {} : { signal }),
     ...(body === undefined
       ? {}
       : {
@@ -27,8 +28,16 @@ export async function request<T>(
           body: JSON.stringify(body),
         }),
   });
-  const data = await response.json();
-  if (!response.ok)
-    throw new Error(data.error || data.detail || `Request failed (${response.status})`);
-  return data;
+  const data: unknown = await response.json();
+  if (!response.ok) {
+    let message = `Request failed (${String(response.status)})`;
+    if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
+      const problem = data as Record<string, unknown>;
+      if (typeof problem.error === 'string' && problem.error) message = problem.error;
+      else if (typeof problem.detail === 'string' && problem.detail) message = problem.detail;
+    }
+    throw new Error(message);
+  }
+  // Callers declare the response contract for the selected API route.
+  return data as T;
 }

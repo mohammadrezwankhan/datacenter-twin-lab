@@ -1,33 +1,43 @@
 """Install a built wheel into a fresh environment and exercise it outside the checkout."""
 
 import argparse
-from hashlib import sha256
 import json
 import os
-from pathlib import Path
 import subprocess
 import sys
 import tomllib
-from tempfile import TemporaryDirectory
 import venv
+from hashlib import sha256
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 
 
 def verify_web_inventory(archive: ZipFile, web_root: Path, *, require_web: bool = False) -> None:
     """Compare every bundled dashboard file with the current native build."""
     prefix = "datacenter_twin/web/"
-    entries = [entry for entry in archive.infolist() if entry.filename.startswith(prefix) and not entry.is_dir()]
+    entries = [
+        entry
+        for entry in archive.infolist()
+        if entry.filename.startswith(prefix) and not entry.is_dir()
+    ]
     if not entries:
         if require_web:
             raise RuntimeError("Build apps/web before building a dashboard distribution")
         return
 
-    names = [entry.filename[len(prefix):] for entry in entries]
+    names = [entry.filename[len(prefix) :] for entry in entries]
     if len(names) != len(set(names)):
         raise RuntimeError("Duplicate bundled dashboard file names")
-    current_files = {path.relative_to(web_root).as_posix(): path for path in web_root.rglob("*") if path.is_file()}
+    current_files = {
+        path.relative_to(web_root).as_posix(): path
+        for path in web_root.rglob("*")
+        if path.is_file()
+    }
     if not current_files:
-        raise RuntimeError("Bundled dashboard verification requires the current native build; build apps/web first")
+        raise RuntimeError(
+            "Bundled dashboard verification requires the current native build; build apps/web first"
+        )
     missing = sorted(current_files.keys() - set(names))
     extra = sorted(set(names) - current_files.keys())
     if missing or extra:
@@ -36,14 +46,19 @@ def verify_web_inventory(archive: ZipFile, web_root: Path, *, require_web: bool 
             "Rebuild the wheel from a fresh packaging source/build tree"
         )
     for name in sorted(names):
-        if sha256(archive.read(prefix + name)).digest() != sha256(current_files[name].read_bytes()).digest():
+        if (
+            sha256(archive.read(prefix + name)).digest()
+            != sha256(current_files[name].read_bytes()).digest()
+        ):
             raise RuntimeError(f"Bundled dashboard hash mismatch: {name}")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("wheel_directory", type=Path)
-    parser.add_argument("--require-web", action="store_true", help="Also require the built dashboard in the wheel")
+    parser.add_argument(
+        "--require-web", action="store_true", help="Also require the built dashboard in the wheel"
+    )
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     project = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))["project"]
@@ -53,15 +68,29 @@ def main() -> int:
         parser.error("Expected exactly one Datacenter Twin Lab wheel in the supplied directory")
     wheel = wheels[0]
     with ZipFile(wheel) as archive:
-        if any(name.endswith(".docx") or any(part in {"docs", "planning", "campaign"} for part in Path(name).parts) for name in archive.namelist()):
+        if any(
+            name.endswith(".docx")
+            or any(part in {"docs", "planning", "campaign"} for part in Path(name).parts)
+            for name in archive.namelist()
+        ):
             raise RuntimeError("Private source material must not be included in the wheel")
-        verify_web_inventory(archive, root / "datacenter_twin" / "web", require_web=args.require_web)
-        web_files = [entry.filename for entry in archive.infolist()
-                     if entry.filename.startswith("datacenter_twin/web/") and not entry.is_dir()]
+        verify_web_inventory(
+            archive, root / "datacenter_twin" / "web", require_web=args.require_web
+        )
+        web_files = [
+            entry.filename
+            for entry in archive.infolist()
+            if entry.filename.startswith("datacenter_twin/web/") and not entry.is_dir()
+        ]
         if web_files and "datacenter_twin/web/THIRD-PARTY-NOTICES.txt" not in web_files:
-            raise RuntimeError("Bundled dashboard must retain its React/React DOM/Scheduler notices")
-        if args.require_web and ("datacenter_twin/web/index.html" not in web_files or
-                not any(name.endswith(".js") for name in web_files) or not any(name.endswith(".css") for name in web_files)):
+            raise RuntimeError(
+                "Bundled dashboard must retain its React/React DOM/Scheduler notices"
+            )
+        if args.require_web and (
+            "datacenter_twin/web/index.html" not in web_files
+            or not any(name.endswith(".js") for name in web_files)
+            or not any(name.endswith(".css") for name in web_files)
+        ):
             raise RuntimeError("Build apps/web before building a dashboard distribution")
         if args.require_web:
             index = json.loads(archive.read("datacenter_twin/web/evidence-index.json"))
@@ -84,15 +113,33 @@ def main() -> int:
         console = binary / ("datacenter-twin.exe" if os.name == "nt" else "datacenter-twin")
         clean_env = {key: value for key, value in os.environ.items() if key.upper() != "PYTHONPATH"}
 
-        def execute(*arguments):
-            return subprocess.run(arguments, cwd=workspace, env=clean_env, check=True,
-                                  capture_output=True, text=True, encoding="utf-8", timeout=120).stdout
+        def execute(*arguments: str) -> str:
+            if not arguments or arguments[0] not in {str(python), str(console)}:
+                raise ValueError("Distribution verification may run only its isolated environment")
+            # Only this fresh venv may run, with shell=False, clean PYTHONPATH,
+            # bounded execution, and fixed owned-wheel verification arguments.
+            return subprocess.run(  # noqa: S603
+                arguments,
+                cwd=workspace,
+                env=clean_env,
+                check=True,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=120,
+            ).stdout
 
         execute(str(python), "-I", "-m", "pip", "install", "--no-index", "--no-deps", str(wheel))
-        identity = json.loads(execute(str(python), "-I", "-c",
-            "import json,datacenter_twin; from importlib.metadata import version; "
-            "print(json.dumps({'file':datacenter_twin.__file__,'runtime':datacenter_twin.__version__,"
-            f"'distribution':version({distribution!r})}}))"))
+        identity = json.loads(
+            execute(
+                str(python),
+                "-I",
+                "-c",
+                "import json,datacenter_twin; from importlib.metadata import version; "
+                "print(json.dumps({'file':datacenter_twin.__file__,'runtime':datacenter_twin.__version__,"
+                f"'distribution':version({distribution!r})}}))",
+            )
+        )
         if not Path(identity["file"]).resolve().is_relative_to(environment.resolve()):
             raise RuntimeError("Smoke test imported source checkout instead of the installed wheel")
         if identity["runtime"] != identity["distribution"]:
@@ -101,26 +148,56 @@ def main() -> int:
         alternative = workspace / "alternative.json"
         baseline.write_bytes((root / "data/scenarios/baseline-1mw.json").read_bytes())
         alternative.write_bytes((root / "data/scenarios/alternative-pue-115.json").read_bytes())
-        result = json.loads(execute(str(python), "-I", "-m", "datacenter_twin", "run", str(baseline)))
+        result = json.loads(
+            execute(str(python), "-I", "-m", "datacenter_twin", "run", str(baseline))
+        )
         if result["result"]["energy_only_cost"] != "1095000.00":
             raise RuntimeError("Installed module returned an incorrect baseline result")
         result = json.loads(execute(str(console), "compare", str(baseline), str(alternative)))
         if result["result"]["energy_only_cost_saving"] != "87600.00":
             raise RuntimeError("Installed console command returned an incorrect comparison")
-        result = json.loads(execute(str(console), "simulate", "--preset", "generator_failure"))["result"]
-        if result["summary"]["service_status"] != "unserved_load" or result["summary"]["energy_balance_residual_kwh"] != "0":
+        result = json.loads(execute(str(console), "simulate", "--preset", "generator_failure"))[
+            "result"
+        ]
+        if (
+            result["summary"]["service_status"] != "unserved_load"
+            or result["summary"]["energy_balance_residual_kwh"] != "0"
+        ):
             raise RuntimeError("Installed continuity engine failed its outage fixture")
         if not any(event["action"] == "battery_depleted" for event in result["events"]):
             raise RuntimeError("Installed preset failed to replay battery depletion")
-        report = execute(str(console), "simulate", "--preset", "generator_failure", "--format", "html")
+        report = execute(
+            str(console), "simulate", "--preset", "generator_failure", "--format", "html"
+        )
         if result["input_sha256"] not in report or "607.8" not in report:
             raise RuntimeError("Installed report omitted result provenance or depletion evidence")
-        sweep = json.loads(execute(str(console), "sweep", "--preset", "generator_failure",
-                                  "--parameter", "battery_initial_kwh", "--values", "0", "50", "100"))["result"]
+        sweep = json.loads(
+            execute(
+                str(console),
+                "sweep",
+                "--preset",
+                "generator_failure",
+                "--parameter",
+                "battery_initial_kwh",
+                "--values",
+                "0",
+                "50",
+                "100",
+            )
+        )["result"]
         if len(sweep["runs"]) != 3 or sweep["runs"][2]["input_sha256"] != result["input_sha256"]:
             raise RuntimeError("Installed sensitivity sweep diverged from the base preset")
-        catalog = json.loads(execute(str(python), "-I", "-c",
-            "import json; from datacenter_twin.catalog import load_catalog; print(json.dumps(load_catalog()))"))
+        catalog = json.loads(
+            execute(
+                str(python),
+                "-I",
+                "-c",
+                (
+                    "import json; from datacenter_twin.catalog import"
+                    " load_catalog; print(json.dumps(load_catalog()))"
+                ),
+            )
+        )
         if {offer["provider"] for offer in catalog["cloud_offers"]} != {"AWS", "Azure", "OCI"}:
             raise RuntimeError("Installed catalogue is incomplete")
         for preset in ("ai_cluster_utility_loss", "ai_cluster_generator_failure"):
@@ -141,25 +218,44 @@ def main() -> int:
         # source records as well as the original outage fixtures.
         source_ids = {source["id"] for source in catalog["sources"]}
         for profile, demand_kw in (
-            ("ai_cluster_50mw", "50000"), ("hyperscale_200mw", "200000"),
-            ("crypto_30mw", "30000"), ("traditional_5mw", "5000"),
+            ("ai_cluster_50mw", "50000"),
+            ("hyperscale_200mw", "200000"),
+            ("crypto_30mw", "30000"),
+            ("traditional_5mw", "5000"),
         ):
             for mode in ("ramp", "reserve"):
-                run = json.loads(execute(str(console), "simulate", "--preset", f"{profile}_{mode}"))["result"]
+                run = json.loads(
+                    execute(str(console), "simulate", "--preset", f"{profile}_{mode}")
+                )["result"]
                 if run["scenario"]["it_demand_kw"] != demand_kw:
                     raise RuntimeError("Installed facility profile changed demand units")
                 if run["summary"]["energy_balance_residual_kwh"] != "0":
                     raise RuntimeError("Installed facility profile failed energy accounting")
                 if run["summary"]["unserved_it_kwh"] != "0":
-                    raise RuntimeError("Installed default load-step or reserve case has a shortfall")
+                    raise RuntimeError(
+                        "Installed default load-step or reserve case has a shortfall"
+                    )
                 if not set(run["scenario"]["source_ids"]).issubset(source_ids):
                     raise RuntimeError("Installed facility profile has an unregistered source")
-        print(json.dumps({"wheel": wheel.name, "version": identity["runtime"],
-                          "python": sys.version.split()[0], "installed_outside_checkout": True,
-                          "network_free_install": True, "module_and_console": "passed",
-                          "continuity_and_catalogue": "passed", "ai_presets": "passed",
-                          "facility_presets": "passed",
-                          "dashboard_bundled": bool(web_files)}))
+        sys.stdout.write(
+            (
+                json.dumps(
+                    {
+                        "wheel": wheel.name,
+                        "version": identity["runtime"],
+                        "python": sys.version.split()[0],
+                        "installed_outside_checkout": True,
+                        "network_free_install": True,
+                        "module_and_console": "passed",
+                        "continuity_and_catalogue": "passed",
+                        "ai_presets": "passed",
+                        "facility_presets": "passed",
+                        "dashboard_bundled": bool(web_files),
+                    }
+                )
+            )
+            + "\n"
+        )
     return 0
 
 

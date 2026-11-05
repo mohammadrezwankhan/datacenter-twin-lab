@@ -6,17 +6,18 @@ phases below make the event, dispatch, boundary, and accounting decisions
 visible without changing the model's deterministic ordering.
 """
 
+import hashlib
+import json
 from collections import deque
 from dataclasses import dataclass
 from decimal import Decimal, localcontext
 from fractions import Fraction
-import hashlib
-import json
+from typing import Any, cast
 
 from . import __version__
 from .contracts import InputError, decimal_text
 from .engine import ARITHMETIC
-from .topology import SiteScenario, topological_order
+from .topology import Asset, Event, SiteScenario, topological_order
 
 
 def format_quantity(value: Fraction) -> str:
@@ -47,19 +48,19 @@ def money(value: Fraction | None) -> str | None:
 class FlowNetwork:
     """Small deterministic residual network used for source dispatch."""
 
-    def __init__(self):
-        self.residual = {}
-        self.capacity = {}
+    def __init__(self) -> None:
+        self.residual: dict[str, dict[str, Fraction]] = {}
+        self.capacity: dict[tuple[str, str], Fraction] = {}
 
-    def add(self, source, target, capacity):
+    def add(self, source: str, target: str, capacity: Fraction) -> None:
         self.residual.setdefault(source, {})[target] = capacity
         self.residual.setdefault(target, {})[source] = Fraction(0)
         self.capacity[(source, target)] = capacity
 
-    def flow(self, source, target):
+    def flow(self, source: str, target: str) -> Fraction:
         return self.capacity[(source, target)] - self.residual[source][target]
 
-    def augment(self):
+    def augment(self) -> None:
         """Apply sorted breadth-first augmentations until no path remains."""
         while True:
             parents = self._find_augmenting_path()
@@ -68,8 +69,8 @@ class FlowNetwork:
             amount = self._capacity_from_parents(parents)
             self._apply_augmentation(parents, amount)
 
-    def _find_augmenting_path(self):
-        parents = {"SOURCE": None}
+    def _find_augmenting_path(self) -> dict[str, str | None] | None:
+        parents: dict[str, str | None] = {"SOURCE": None}
         queue = deque(["SOURCE"])
         while queue and "SINK" not in parents:
             current = queue.popleft()
@@ -79,20 +80,22 @@ class FlowNetwork:
                     queue.append(target)
         return parents if "SINK" in parents else None
 
-    def _capacity_from_parents(self, parents):
+    def _capacity_from_parents(self, parents: dict[str, str | None]) -> Fraction:
         current = "SINK"
         amount = None
         while parents[current] is not None:
-            previous = parents[current]
+            previous = cast(str, parents[current])
             edge_capacity = self.residual[previous][current]
             amount = edge_capacity if amount is None else min(amount, edge_capacity)
             current = previous
-        return amount
+        # A path returned by _find_augmenting_path reaches a distinct SINK,
+        # so it contains at least one edge and establishes a Fraction capacity.
+        return cast(Fraction, amount)
 
-    def _apply_augmentation(self, parents, amount):
+    def _apply_augmentation(self, parents: dict[str, str | None], amount: Fraction) -> None:
         current = "SINK"
         while parents[current] is not None:
-            previous = parents[current]
+            previous = cast(str, parents[current])
             self.residual[previous][current] -= amount
             self.residual[current][previous] += amount
             current = previous
@@ -103,11 +106,11 @@ class SimulationRun:
     run_id: str
     input_sha256: str
     scenario: SiteScenario
-    intervals: tuple[dict, ...]
-    events: tuple[dict, ...]
-    summary: dict
+    intervals: tuple[dict[str, Any], ...]
+    events: tuple[dict[str, Any], ...]
+    summary: dict[str, Any]
 
-    def to_dict(self):
+    def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": 2,
             "model": "single_load_electrical_continuity_v1",
@@ -125,11 +128,20 @@ class SimulationRun:
                 "cooling excluded"
             ),
             "limitations": [
-                "No switching transient, protection study, cooling, workload queue or certification model.",
+                (
+                    "No switching transient, protection study, cooling, workload"
+                    " queue or certification model."
+                ),
                 "Generator starts on utility-asset unavailability only; downstream path faults "
                 "do not request a start.",
-                "Generator fuel is assumed sufficient for this horizon; its unit energy cost may be unknown.",
-                "Initial stored battery energy is an opening balance; prior charging cost is excluded.",
+                (
+                    "Generator fuel is assumed sufficient for this horizon; its"
+                    " unit energy cost may be unknown."
+                ),
+                (
+                    "Initial stored battery energy is an opening balance; prior"
+                    " charging cost is excluded."
+                ),
                 "Prices are illustrative inputs; costs exclude CAPEX and non-energy charges.",
             ],
         }
@@ -137,14 +149,14 @@ class SimulationRun:
 
 @dataclass(frozen=True)
 class _SimulationSetup:
-    assets: dict
+    assets: dict[str, Asset]
     utility_id: str
     generator_id: str
     battery_id: str
     load_id: str
     requires_order: list[str]
     incoming_requires: dict[str, list[str]]
-    schedule: list[tuple[int, object]]
+    schedule: list[tuple[int, Event]]
 
 
 @dataclass
@@ -156,8 +168,8 @@ class _SimulationState:
     direct_down: set[str]
     domains_down: set[str]
     generator_ready_at: Fraction | None
-    rows: list[dict]
-    event_log: list[dict]
+    rows: list[dict[str, Any]]
+    event_log: list[dict[str, Any]]
     totals: dict[str, Fraction]
     peak_unserved_kw: Fraction
 
@@ -183,12 +195,10 @@ class _IntervalAccounting:
     values: dict[str, Fraction]
 
 
-def _prepare_simulation(scenario: SiteScenario):
+def _prepare_simulation(scenario: SiteScenario) -> tuple[_SimulationSetup, str, str]:
     canonical = json.dumps(scenario.to_dict(), sort_keys=True, separators=(",", ":"))
     input_sha256 = hashlib.sha256(canonical.encode()).hexdigest()
-    run_id = hashlib.sha256(
-        f"continuity-v1:{__version__}:{input_sha256}".encode()
-    ).hexdigest()[:20]
+    run_id = hashlib.sha256(f"continuity-v1:{__version__}:{input_sha256}".encode()).hexdigest()[:20]
 
     assets = {asset.id: asset for asset in scenario.assets}
     asset_by_kind = {
@@ -204,9 +214,7 @@ def _prepare_simulation(scenario: SiteScenario):
         ]
         for asset_id in assets
     }
-    schedule = sorted(
-        enumerate(scenario.events), key=lambda pair: (pair[1].at_s, pair[0])
-    )
+    schedule = sorted(enumerate(scenario.events), key=lambda pair: (pair[1].at_s, pair[0]))
     setup = _SimulationSetup(
         assets=assets,
         utility_id=asset_by_kind["utility"],
@@ -267,7 +275,8 @@ def _apply_events_at_current_time(
         elif event.action == "domain_up":
             state.domains_down.discard(event.target)
         else:
-            state.demand_kw = Fraction(event.value_kw)
+            # Event.__post_init__ validates set_demand values through number().
+            state.demand_kw = Fraction(cast(Decimal, event.value_kw))
         state.event_log.append(
             {
                 **event.to_dict(),
@@ -284,7 +293,7 @@ def _calculate_availability(
     setup: _SimulationSetup,
 ) -> dict[str, bool]:
     """Propagate direct and failure-domain outages through requires edges."""
-    available = {}
+    available: dict[str, bool] = {}
     for asset_id in setup.requires_order:
         asset = setup.assets[asset_id]
         direct_failure = asset_id in state.direct_down
@@ -350,12 +359,8 @@ def _build_dispatch_network(
         ),
     ):
         if edge.relation == "feeds":
-            network.add(
-                f"out:{edge.source}", f"in:{edge.target}", total_capacity_kw
-            )
-    network.add(
-        f"out:{setup.load_id}", "SINK", demand_kw / distribution_efficiency
-    )
+            network.add(f"out:{edge.source}", f"in:{edge.target}", total_capacity_kw)
+    network.add(f"out:{setup.load_id}", "SINK", demand_kw / distribution_efficiency)
     return network
 
 
@@ -406,9 +411,7 @@ def _dispatch_charging(
     for source_id in (setup.generator_id, setup.battery_id):
         network.residual["SOURCE"][f"in:{source_id}"] = Fraction(0)
         network.capacity[("SOURCE", f"in:{source_id}")] = Fraction(0)
-    charging_edge = next(
-        edge for edge in scenario.dependencies if edge.relation == "charges"
-    )
+    charging_edge = next(edge for edge in scenario.dependencies if edge.relation == "charges")
     network.add(
         f"out:{charging_edge.source}",
         "CHARGER",
@@ -493,9 +496,7 @@ def _next_interval_boundary(
     if charging_kw:
         battery_full_at = (
             state.now
-            + (capacity_kwh - state.stored_energy_kwh)
-            / (charging_kw * charge_efficiency)
-            * 3600
+            + (capacity_kwh - state.stored_energy_kwh) / (charging_kw * charge_efficiency) * 3600
         )
         boundary = min(boundary, battery_full_at)
     return boundary
@@ -595,8 +596,7 @@ def _asset_states(
     accounting: _IntervalAccounting,
 ) -> dict[str, str]:
     asset_states = {
-        asset_id: "available" if available[asset_id] else "unavailable"
-        for asset_id in setup.assets
+        asset_id: "available" if available[asset_id] else "unavailable" for asset_id in setup.assets
     }
     if available[setup.generator_id]:
         asset_states[setup.generator_id] = (
@@ -635,11 +635,9 @@ def _build_interval_row(
     dispatch: _DispatchResult,
     accounting: _IntervalAccounting,
     generator_running: bool,
-) -> dict:
+) -> dict[str, Any]:
     _accumulate_accounting(state, accounting)
-    asset_states = _asset_states(
-        state, setup, available, generator_running, dispatch, accounting
-    )
+    asset_states = _asset_states(state, setup, available, generator_running, dispatch, accounting)
     warnings = _interval_warnings(state, scenario, setup, available, accounting)
     values = accounting.values
     previous_energy_kwh = state.stored_energy_kwh
@@ -647,9 +645,7 @@ def _build_interval_row(
         {
             "source": edge.source,
             "target": edge.target,
-            "kw": format_quantity(
-                dispatch.network.flow(f"out:{edge.source}", f"in:{edge.target}")
-            ),
+            "kw": format_quantity(dispatch.network.flow(f"out:{edge.source}", f"in:{edge.target}")),
         }
         for edge in scenario.dependencies
         if edge.relation == "feeds"
@@ -689,7 +685,7 @@ def _build_interval_row(
 def _build_summary(
     scenario: SiteScenario,
     state: _SimulationState,
-) -> dict:
+) -> dict[str, Any]:
     grid_cost = (
         None
         if scenario.tariff_per_kwh is None
@@ -700,9 +696,7 @@ def _build_summary(
     elif scenario.generator_cost_per_kwh is None:
         generator_cost = None
     else:
-        generator_cost = state.totals["generator_kwh"] * Fraction(
-            scenario.generator_cost_per_kwh
-        )
+        generator_cost = state.totals["generator_kwh"] * Fraction(scenario.generator_cost_per_kwh)
     return {
         **{key: format_quantity(value) for key, value in state.totals.items()},
         "battery_final_kwh": format_quantity(state.stored_energy_kwh),
@@ -711,19 +705,13 @@ def _build_summary(
         "grid_energy_charge": format_currency(grid_cost),
         "generator_energy_charge": format_currency(generator_cost),
         "total_incremental_energy_charge": format_currency(
-            None
-            if grid_cost is None or generator_cost is None
-            else grid_cost + generator_cost
+            None if grid_cost is None or generator_cost is None else grid_cost + generator_cost
         ),
         "cost_status": (
-            "unknown_component"
-            if grid_cost is None or generator_cost is None
-            else "illustrative"
+            "unknown_component" if grid_cost is None or generator_cost is None else "illustrative"
         ),
         "service_status": (
-            "unserved_load"
-            if state.totals["unserved_it_kwh"]
-            else "served_throughout"
+            "unserved_load" if state.totals["unserved_it_kwh"] else "served_throughout"
         ),
         "interval_count": len(state.rows),
     }
@@ -745,9 +733,7 @@ def simulate_continuity(scenario: SiteScenario) -> SimulationRun:
             raise InputError("Simulation exceeded its interval budget")
         _apply_events_at_current_time(state, setup)
         available = _calculate_availability(state, setup)
-        generator_running = _update_generator_readiness(
-            state, scenario, setup, available
-        )
+        generator_running = _update_generator_readiness(state, scenario, setup, available)
         dispatch = _dispatch_interval(
             scenario,
             setup,

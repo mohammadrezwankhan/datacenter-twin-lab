@@ -9,28 +9,43 @@ from __future__ import annotations
 
 import argparse
 import csv
-from fractions import Fraction
 import hashlib
 import json
-from pathlib import Path
 import sys
+from fractions import Fraction
+from pathlib import Path
+from typing import Any, Literal, TypeAliasType, TypedDict
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Direct-script execution imports this checkout after adding ROOT to sys.path.
 from datacenter_twin.continuity import simulate_continuity  # noqa: E402
 from datacenter_twin.reporting import render_html, render_markdown  # noqa: E402
 from datacenter_twin.topology import SiteScenario  # noqa: E402
-
 
 INPUTS = ROOT / "docs/examples/demand-timing"
 CASES = ("early-peak", "late-peak", "shifted-peak")
 TOLERANCE = Fraction(1, 10**90)
 
+
 # All schedules contain 900 seconds at 1,000 kW and 900 seconds at 500 kW.
 # The battery can deliver 100 * 0.90 * 0.95 = 85.5 kWh at the IT boundary.
-EXPECTED = {
+class TimingExpectation(TypedDict):
+    outage_requested_kwh: Fraction
+    unserved_it_kwh: Fraction
+    unserved_duration_s: Fraction
+    battery_final_kwh: Fraction
+    depletion_s: list[str]
+
+
+# OpenGrep 1.33 cannot parse PEP 695 statements; retain the same Literal alias object.
+ExpectedQuantity = TypeAliasType(  # noqa: UP040
+    "ExpectedQuantity", Literal["unserved_it_kwh", "unserved_duration_s", "battery_final_kwh"]
+)
+
+EXPECTED: dict[str, TimingExpectation] = {
     "early-peak": {
         "outage_requested_kwh": Fraction(1000 * 600, 3600),
         "unserved_it_kwh": Fraction(487, 6),
@@ -65,18 +80,25 @@ def load_case(name: str) -> SiteScenario:
     return SiteScenario.from_dict(json.loads((INPUTS / f"{name}.json").read_text()))
 
 
-def verify_case(name: str, result: dict) -> None:
+def verify_case(name: str, result: dict[str, Any]) -> None:
     expected = EXPECTED[name]
     summary = result["summary"]
     close(summary["requested_it_kwh"], Fraction(375), f"{name}: total demand")
-    for field in ("unserved_it_kwh", "unserved_duration_s", "battery_final_kwh"):
+    quantities: tuple[ExpectedQuantity, ...] = (
+        "unserved_it_kwh",
+        "unserved_duration_s",
+        "battery_final_kwh",
+    )
+    for field in quantities:
         close(summary[field], expected[field], f"{name}: {field}")
     close(
         summary["served_it_kwh"],
         Fraction(375) - expected["unserved_it_kwh"],
         f"{name}: served energy",
     )
-    depletion = [event["at_s"] for event in result["events"] if event["action"] == "battery_depleted"]
+    depletion = [
+        event["at_s"] for event in result["events"] if event["action"] == "battery_depleted"
+    ]
     if depletion != expected["depletion_s"]:
         raise ValueError(f"{name}: unexpected depletion events {depletion}")
 
@@ -102,11 +124,11 @@ def verify_case(name: str, result: dict) -> None:
         raise ValueError(f"{name}: an unspecified tariff must remain unknown")
 
 
-def write_results(target: Path) -> dict:
+def write_results(target: Path) -> dict[str, Any]:
     # Refuse an existing directory: reruns must not replace a reader's records.
     target.mkdir(parents=True, exist_ok=False)
     cases = []
-    rows = []
+    rows: list[dict[str, str]] = []
     for name in CASES:
         result = simulate_continuity(load_case(name)).to_dict()
         verify_case(name, result)
@@ -117,34 +139,54 @@ def write_results(target: Path) -> dict:
         }
         for filename, text in outputs.items():
             (target / filename).write_text(text, encoding="utf-8", newline="\n")
-        for row in result["intervals"]:
-            rows.append({"case": name, **{field: row[field] for field in (
-                "start_s", "end_s", "requested_it_kw", "served_it_kw", "unserved_it_kw"
-            )}})
-        cases.append({
-            "case": name,
-            "input_file": f"docs/examples/demand-timing/{name}.json",
-            "input_file_sha256": hashlib.sha256((INPUTS / f"{name}.json").read_bytes()).hexdigest(),
-            "input_sha256": result["input_sha256"],
-            "run_id": result["run_id"],
-            "engine_version": result["engine_version"],
-            "summary": result["summary"],
-            "hand_expectations": {
-                field: str(value) if isinstance(value, Fraction) else value
-                for field, value in EXPECTED[name].items()
-            },
-        })
+        rows.extend(
+            {
+                "case": name,
+                **{
+                    field: row[field]
+                    for field in (
+                        "start_s",
+                        "end_s",
+                        "requested_it_kw",
+                        "served_it_kw",
+                        "unserved_it_kw",
+                    )
+                },
+            }
+            for row in result["intervals"]
+        )
+        cases.append(
+            {
+                "case": name,
+                "input_file": f"docs/examples/demand-timing/{name}.json",
+                "input_file_sha256": hashlib.sha256(
+                    (INPUTS / f"{name}.json").read_bytes()
+                ).hexdigest(),
+                "input_sha256": result["input_sha256"],
+                "run_id": result["run_id"],
+                "engine_version": result["engine_version"],
+                "summary": result["summary"],
+                "hand_expectations": {
+                    field: str(value) if isinstance(value, Fraction) else value
+                    for field, value in EXPECTED[name].items()
+                },
+            }
+        )
     with (target / "chart-rows.csv").open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     manifest = {
         "schema_version": 1,
-        "scope": "Original synthetic equal-energy timing lesson; software reproduction, not external review.",
+        "scope": (
+            "Original synthetic equal-energy timing lesson; software"
+            " reproduction, not external review."
+        ),
         "cases": cases,
         "files": [
             {"path": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
-            for path in sorted(target.iterdir()) if path.is_file()
+            for path in sorted(target.iterdir())
+            if path.is_file()
         ],
     }
     (target / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
@@ -153,13 +195,20 @@ def write_results(target: Path) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, required=True, help="New directory for reproducible outputs")
+    parser.add_argument(
+        "--output", type=Path, required=True, help="New directory for reproducible outputs"
+    )
     args = parser.parse_args()
     manifest = write_results(args.output)
     for case in manifest["cases"]:
         summary = case["summary"]
-        print(f"{case['case']}: requested {summary['requested_it_kwh']} kWh; "
-              f"unserved {summary['unserved_it_kwh']} kWh; input {case['input_sha256']}")
+        sys.stdout.write(
+            (
+                f"{case['case']}: requested {summary['requested_it_kwh']} kWh; "
+                f"unserved {summary['unserved_it_kwh']} kWh; input {case['input_sha256']}"
+            )
+            + "\n"
+        )
 
 
 if __name__ == "__main__":

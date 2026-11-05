@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import { useContext, useEffect, useId, useRef, useState } from 'react';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
@@ -41,7 +42,9 @@ export default function ThermalScene({ result, step }: SceneProps) {
         setPlaying(false);
       } else setCursorSeconds(cursorRef.current + 0.5);
     }, 100);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [motion, playing, result]);
   useEffect(() => {
     if (!motion) setPlaying(false);
@@ -56,7 +59,7 @@ export default function ThermalScene({ result, step }: SceneProps) {
       element && typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver(
             ([entry]) => {
-              if (!entry.isIntersecting) setPlaying(false);
+              if (entry && !entry.isIntersecting) setPlaying(false);
             },
             { threshold: 0.08 },
           )
@@ -108,7 +111,9 @@ export default function ThermalScene({ result, step }: SceneProps) {
           max="60"
           step="0.5"
           value={restoreSeconds}
-          onChange={(event) => setRestoreSeconds(Number(event.currentTarget.value))}
+          onChange={(event) => {
+            setRestoreSeconds(Number(event.currentTarget.value));
+          }}
         />
         <p className="infra-scene-local-note">
           This is a separate teaching assumption. At the selected second, the preview restores full
@@ -160,7 +165,7 @@ export default function ThermalScene({ result, step }: SceneProps) {
       <SceneDiagram
         id="thermal"
         title="Two heat paths, two continuity clocks"
-        description={`${story} Physical seconds use a labelled cursor. Restoration is an explicit preview assumption; model outputs remain from the completed result.`}
+        description={`${String(story)} Physical seconds use a labelled cursor. Restoration is an explicit preview assumption; model outputs remain from the completed result.`}
         rows={rows}
         flat={false}
       >
@@ -207,10 +212,10 @@ export default function ThermalScene({ result, step }: SceneProps) {
           strokeDasharray="9 7"
         />
         <text x="323" y="225" textAnchor="middle" fill="#8df0cd" fontSize="15">
-          Liquid heat · {rows[0].value}
+          Liquid heat · {requiredValue(rows[0], 'rows[0]').value}
         </text>
         <text x="365" y="380" textAnchor="middle" fill="#acd1ff" fontSize="15">
-          Residual air heat · {rows[1].value}
+          Residual air heat · {requiredValue(rows[1], 'rows[1]').value}
         </text>
         <path d="M210 309 307 309" stroke="#c0a5ff" strokeWidth="3" strokeDasharray="3 7" />
         <text x="505" y="34" textAnchor="middle" fill="#edf4fa" fontSize="16" fontWeight="700">
@@ -223,7 +228,7 @@ export default function ThermalScene({ result, step }: SceneProps) {
         {thermalLimit !== null && thermalLimit <= 600 && (
           <g>
             <path
-              d={`M${timeX(thermalLimit)} 67V97`}
+              d={`M${String(timeX(thermalLimit))} 67V97`}
               stroke="#ff9e8b"
               strokeWidth="3"
               strokeDasharray="5 4"
@@ -244,15 +249,17 @@ export default function ThermalScene({ result, step }: SceneProps) {
         </text>
         <path d="M110 155H900" stroke="#83bcff" strokeWidth="8" />
         <path
-          d={`M${timeX(restoreSeconds)} 67V97`}
+          d={`M${String(timeX(restoreSeconds))} 67V97`}
           stroke="#ffd17e"
           strokeWidth="3"
           strokeDasharray="6 4"
         />
-        {result && <path d={`M${timeX(cursorSeconds)} 61V103`} stroke="#edf4fa" strokeWidth="2" />}
+        {result && (
+          <path d={`M${String(timeX(cursorSeconds))} 61V103`} stroke="#edf4fa" strokeWidth="2" />
+        )}
         {[0, 100, 200, 300, 400, 500, 600].map((time) => (
           <g key={time}>
-            <path d={`M${timeX(time)} 78v8`} stroke="#a0b1c3" />
+            <path d={`M${String(timeX(time))} 78v8`} stroke="#a0b1c3" />
             <text x={timeX(time)} y="102" textAnchor="middle" fill="#a0b1c3" fontSize="11">
               {time}
             </text>

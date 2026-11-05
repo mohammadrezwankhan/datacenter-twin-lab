@@ -1,3 +1,4 @@
+import { requiredPresent } from '../required-value';
 /** Exact non-negative input decimals and signed rational arithmetic.
  *
  * The Python continuity engine keeps all simulation quantities as Fraction
@@ -116,7 +117,7 @@ function normalizeDecimalText(input: string): string {
   return Array.from(input.trim())
     .filter((character) => character !== '_')
     .map((character) => {
-      const codePoint = character.codePointAt(0)!;
+      const codePoint = requiredPresent(character.codePointAt(0), 'character.codePointAt(0)');
       for (const [start, end] of UNICODE_DIGIT_RANGES)
         if (codePoint >= start && codePoint <= end) return String(codePoint - start);
       return character;
@@ -296,7 +297,7 @@ export function decimalText(value: Rational): string {
   const scaledNumerator = scale >= 0 ? numerator * pow10(BigInt(scale)) : numerator;
   const scaledDenominator = scale >= 0 ? denominator : denominator * pow10(BigInt(-scale));
   const coefficient = roundHalfEven(scaledNumerator, scaledDenominator);
-  let digits = coefficient.toString();
+  const digits = coefficient.toString();
   let output: string;
   if (scale >= 0) {
     const point = digits.length - scale;

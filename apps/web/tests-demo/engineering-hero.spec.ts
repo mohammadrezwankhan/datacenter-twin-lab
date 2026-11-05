@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -129,8 +130,12 @@ test('late adapter registration is safe across start-page unmount and remount', 
     const hero = await page.getByTestId('engineering-hero').boundingBox();
     expect(host).not.toBeNull();
     expect(hero).not.toBeNull();
-    expect(host!.x).toBeGreaterThanOrEqual(hero!.x);
-    expect(host!.x + host!.width).toBeLessThanOrEqual(hero!.x + hero!.width + 1);
+    expect(requiredPresent(host, 'host').x).toBeGreaterThanOrEqual(requiredPresent(hero, 'hero').x);
+    expect(
+      requiredPresent(host, 'host').x + requiredPresent(host, 'host').width,
+    ).toBeLessThanOrEqual(
+      requiredPresent(hero, 'hero').x + requiredPresent(hero, 'hero').width + 1,
+    );
     await expect(
       page.getByTestId('engineering-hero').locator('.engineering-hero-summary'),
     ).toBeVisible();
@@ -208,6 +213,8 @@ test('the verified adapter fits mobile, tablet, and desktop without clipping cop
       };
       const hostBounds = element.getBoundingClientRect();
       const hostStyle = getComputedStyle(element);
+      const wrapper = element.parentElement;
+      if (!wrapper) throw new Error('Expected engineering hero wrapper');
       return {
         viewportWidth: window.innerWidth,
         host: rect(element),
@@ -217,20 +224,32 @@ test('the verified adapter fits mobile, tablet, and desktop without clipping cop
         hostHeight: hostBounds.height,
         hostScrollHeight: element.scrollHeight,
         hostOverflow: hostStyle.overflow,
-        wrapperOverflow: getComputedStyle(element.parentElement!).overflow,
+        wrapperOverflow: getComputedStyle(wrapper).overflow,
       };
     });
     expect(layout.host).not.toBeNull();
     expect(layout.frame).not.toBeNull();
     expect(layout.controls).not.toBeNull();
     expect(layout.copy).not.toBeNull();
-    expect(layout.host!.left).toBeGreaterThanOrEqual(-1);
-    expect(layout.host!.right).toBeLessThanOrEqual(viewport.width + 1);
-    expect(layout.frame!.left).toBeGreaterThanOrEqual(layout.host!.left - 1);
-    expect(layout.frame!.right).toBeLessThanOrEqual(layout.host!.right + 1);
-    expect(layout.controls!.bottom).toBeLessThanOrEqual(layout.frame!.bottom + 1);
-    expect(layout.copy!.top).toBeGreaterThanOrEqual(layout.frame!.bottom - 1);
-    expect(layout.copy!.bottom).toBeLessThanOrEqual(layout.host!.bottom + 1);
+    expect(requiredPresent(layout.host, 'layout.host').left).toBeGreaterThanOrEqual(-1);
+    expect(requiredPresent(layout.host, 'layout.host').right).toBeLessThanOrEqual(
+      viewport.width + 1,
+    );
+    expect(requiredPresent(layout.frame, 'layout.frame').left).toBeGreaterThanOrEqual(
+      requiredPresent(layout.host, 'layout.host').left - 1,
+    );
+    expect(requiredPresent(layout.frame, 'layout.frame').right).toBeLessThanOrEqual(
+      requiredPresent(layout.host, 'layout.host').right + 1,
+    );
+    expect(requiredPresent(layout.controls, 'layout.controls').bottom).toBeLessThanOrEqual(
+      requiredPresent(layout.frame, 'layout.frame').bottom + 1,
+    );
+    expect(requiredPresent(layout.copy, 'layout.copy').top).toBeGreaterThanOrEqual(
+      requiredPresent(layout.frame, 'layout.frame').bottom - 1,
+    );
+    expect(requiredPresent(layout.copy, 'layout.copy').bottom).toBeLessThanOrEqual(
+      requiredPresent(layout.host, 'layout.host').bottom + 1,
+    );
     expect(layout.hostScrollHeight).toBeLessThanOrEqual(layout.hostHeight + 1);
     expect(layout.hostOverflow).not.toMatch(/hidden|clip/);
     expect(layout.wrapperOverflow).not.toMatch(/hidden|clip/);
@@ -239,7 +258,7 @@ test('the verified adapter fits mobile, tablet, and desktop without clipping cop
       await page.screenshot({
         path: resolve(
           screenshotDirectory,
-          `engineering-hero-${viewport.width}x${viewport.height}.png`,
+          `engineering-hero-${String(viewport.width)}x${String(viewport.height)}.png`,
         ),
         fullPage: true,
         animations: 'disabled',

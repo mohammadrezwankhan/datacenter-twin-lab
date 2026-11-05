@@ -2,12 +2,23 @@ import { compareUnicode } from './canonical';
 import { InputError } from './decimal';
 
 function pyString(value: unknown): string {
-  if (value === null || value === undefined) return 'None';
-  if (value === true) return 'True';
-  if (value === false) return 'False';
-  if (Array.isArray(value)) return `[${value.map(pyString).join(', ')}]`;
-  if (typeof value === 'object') return '[object Object]';
-  return String(value);
+  switch (typeof value) {
+    case 'undefined':
+      return 'None';
+    case 'boolean':
+      return value ? 'True' : 'False';
+    case 'string':
+      return value;
+    case 'number':
+    case 'bigint':
+    case 'symbol':
+      return String(value);
+    case 'function':
+      return Function.prototype.toString.call(value);
+    case 'object':
+      if (value === null) return 'None';
+      return Array.isArray(value) ? `[${value.map(pyString).join(', ')}]` : '[object Object]';
+  }
 }
 
 function md(value: unknown): string {
@@ -44,16 +55,32 @@ function html(value: unknown): string {
     .replaceAll("'", '&#x27;');
 }
 
-function object(value: unknown, name: string): Record<string, any> {
+function object(value: unknown, name: string): Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value))
     throw new InputError(`${name}: expected an object`);
-  return value as Record<string, any>;
+  return value as Record<string, unknown>;
 }
 
-function requireResult(result: unknown): Record<string, any> {
+function list(value: unknown, name: string): unknown[] {
+  if (!value) return [];
+  if (!Array.isArray(value)) throw new InputError(`${name}: expected an array`);
+  return value as unknown[];
+}
+
+function records(value: unknown, name: string): Record<string, unknown>[] {
+  return list(value, name).map((entry) => object(entry, name));
+}
+
+function strings(value: unknown, name: string): string[] {
+  return list(value, name).map((entry) => {
+    if (typeof entry !== 'string') throw new InputError(`${name}: expected text entries`);
+    return entry;
+  });
+}
+
+function requireResult(result: unknown): Record<string, unknown> {
   const value = object(result, 'Report result');
-  if (!object(value.scenario ?? value.base_scenario, 'Report result'))
-    throw new InputError('Report result must include a scenario');
+  object(value.scenario ?? value.base_scenario, 'Report result');
   if (
     !Object.prototype.hasOwnProperty.call(value, 'summary') &&
     !(
@@ -65,11 +92,11 @@ function requireResult(result: unknown): Record<string, any> {
   return value;
 }
 
-function scenario(result: Record<string, any>): Record<string, any> {
-  return result.scenario || result.base_scenario || {};
+function scenario(result: Record<string, unknown>): Record<string, unknown> {
+  return object(result.scenario || result.base_scenario || {}, 'Report scenario');
 }
 
-function scenarioRows(input: Record<string, any>): [string, string, string][] {
+function scenarioRows(input: Record<string, unknown>): [string, string, string][] {
   const units: Record<string, string> = {
     duration_s: 's',
     step_s: 's',
@@ -110,29 +137,30 @@ function scenarioRows(input: Record<string, any>): [string, string, string][] {
   ]);
 }
 
-function warnings(run: Record<string, any>): Map<string, number> {
+function warnings(run: Record<string, unknown>): Map<string, number> {
   const counts = new Map<string, number>();
-  for (const interval of run.intervals || [])
-    for (const warning of interval.warnings || [])
-      counts.set(String(warning), (counts.get(String(warning)) || 0) + 1);
+  for (const interval of records(run.intervals, 'Report intervals'))
+    for (const warning of strings(interval.warnings, 'Interval warnings'))
+      counts.set(warning, (counts.get(warning) || 0) + 1);
   return counts;
 }
 
-function singleSummary(result: Record<string, any>): Record<string, any> {
-  const summary = { ...(result.summary || {}) };
+function singleSummary(result: Record<string, unknown>): Record<string, unknown> {
+  const summary = { ...object(result.summary || {}, 'Report summary') };
   summary.requested_kwh ??= summary.requested_it_kwh ?? 'unknown';
   summary.served_kwh ??= summary.served_it_kwh ?? 'unknown';
   summary.unserved_kwh ??= summary.unserved_it_kwh ?? 'unknown';
   summary.unserved_seconds ??= summary.unserved_duration_s ?? 'unknown';
   summary.first_battery_depletion_s ??=
-    (result.events || []).find((event: any) => event.action === 'battery_depleted')?.at_s ?? null;
+    records(result.events, 'Report events').find((event) => event.action === 'battery_depleted')
+      ?.at_s ?? null;
   summary.cost_unknowns ??= ['generator_energy_charge', 'total_incremental_energy_charge'].filter(
     (key) => summary[key] === null,
   );
   return summary;
 }
 
-function summaryRows(summary: Record<string, any>): [string, unknown, string][] {
+function summaryRows(summary: Record<string, unknown>): [string, unknown, string][] {
   const depletion = summary.first_battery_depletion_s;
   return [
     ['Requested IT energy', summary.requested_kwh ?? 'unknown', 'kWh'],
@@ -148,7 +176,7 @@ function summaryRows(summary: Record<string, any>): [string, unknown, string][] 
     ['Peak unserved demand', summary.peak_unserved_kw ?? 'unknown', 'kW'],
     ['Service status', summary.service_status ?? 'unknown', ''],
     ['Cost status', summary.cost_status ?? 'unknown', ''],
-    ['Cost unknowns', (summary.cost_unknowns || []).join(', ') || 'none', ''],
+    ['Cost unknowns', strings(summary.cost_unknowns, 'Unknown costs').join(', ') || 'none', ''],
     ['Energy balance residual', summary.energy_balance_residual_kwh ?? 'unknown', 'kWh'],
   ];
 }
@@ -159,8 +187,8 @@ function markdownTable(headers: string[], rows: unknown[][]): string[] {
   return lines;
 }
 
-function eventRows(result: Record<string, any>): unknown[][] {
-  return (result.events || []).map((event: any) => [
+function eventRows(result: Record<string, unknown>): unknown[][] {
+  return records(result.events, 'Report events').map((event) => [
     event.at_s ?? 'unknown',
     event.action ?? 'unknown',
     event.target ?? 'unknown',
@@ -169,11 +197,11 @@ function eventRows(result: Record<string, any>): unknown[][] {
   ]);
 }
 
-function sweepRows(result: Record<string, any>): { rows: unknown[][]; warningLines: string[] } {
+function sweepRows(result: Record<string, unknown>): { rows: unknown[][]; warningLines: string[] } {
   const rows: unknown[][] = [];
   const counts = new Map<string, number>();
-  for (const entry of result.runs || []) {
-    const summary = entry.summary || {};
+  for (const entry of records(result.runs, 'Sweep runs')) {
+    const summary = object(entry.summary || {}, 'Sweep summary');
     rows.push([
       entry.value_label ?? entry.value ?? 'unknown',
       summary.requested_kwh ?? summary.requested_it_kwh ?? 'unknown',
@@ -184,22 +212,24 @@ function sweepRows(result: Record<string, any>): { rows: unknown[][]; warningLin
         ? 'none'
         : summary.first_battery_depletion_s,
       summary.service_status ?? 'unknown',
-      (summary.cost_unknowns || []).join(', ') || 'none',
+      strings(summary.cost_unknowns, 'Unknown costs').join(', ') || 'none',
       entry.run_id ?? 'unknown',
       entry.input_sha256 ?? 'unknown',
     ]);
     if (entry.result)
-      for (const [name, count] of warnings(entry.result))
+      for (const [name, count] of warnings(object(entry.result, 'Sweep result')))
         counts.set(name, (counts.get(name) || 0) + count);
     else
-      for (const [name, count] of Object.entries(summary.warning_counts || {}))
-        counts.set(String(name), (counts.get(String(name)) || 0) + Number(count));
+      for (const [name, count] of Object.entries(
+        object(summary.warning_counts || {}, 'Warning counts'),
+      ))
+        counts.set(name, (counts.get(name) || 0) + Number(count));
   }
   return {
     rows,
     warningLines: Array.from(counts)
       .sort(([left], [right]) => compareUnicode(left, right))
-      .map(([name, count]) => `${name}: ${count} interval(s)`),
+      .map(([name, count]) => `${name}: ${String(count)} interval(s)`),
   };
 }
 
@@ -261,7 +291,7 @@ export function renderMarkdown(input: unknown): string {
     );
     warningLines = Array.from(warnings(result))
       .sort(([left], [right]) => compareUnicode(left, right))
-      .map(([name, count]) => `${name}: ${count} interval(s)`);
+      .map(([name, count]) => `${name}: ${String(count)} interval(s)`);
   }
   lines.push(
     '',
@@ -284,11 +314,11 @@ export function renderMarkdown(input: unknown): string {
     '',
     '## Assumptions',
     '',
-    ...(result.assumptions || []).map((item: unknown) => `- ${md(item)}`),
+    ...list(result.assumptions, 'Report assumptions').map((item) => `- ${md(item)}`),
     '',
     '## Limitations',
     '',
-    ...(result.limitations || []).map((item: unknown) => `- ${md(item)}`),
+    ...list(result.limitations, 'Report limitations').map((item) => `- ${md(item)}`),
   );
   return `${lines.join('\n')}\n`;
 }
@@ -355,7 +385,7 @@ export function renderHtml(input: unknown): string {
     );
     warningLines = Array.from(warnings(result))
       .sort(([left], [right]) => compareUnicode(left, right))
-      .map(([name, count]) => `${name}: ${count} interval(s)`);
+      .map(([name, count]) => `${name}: ${String(count)} interval(s)`);
   }
   parts.push(
     '<h2>Scenario assumptions</h2>',
@@ -378,7 +408,9 @@ export function renderHtml(input: unknown): string {
   ] as const)
     parts.push(
       `<h2>${heading}</h2>`,
-      `<ul>${(result[key] || []).map((item: unknown) => `<li>${html(item)}</li>`).join('')}</ul>`,
+      `<ul>${list(result[key], key)
+        .map((item) => `<li>${html(item)}</li>`)
+        .join('')}</ul>`,
     );
   parts.push('</body>', '</html>');
   return `${parts.join('\n')}\n`;

@@ -1,3 +1,4 @@
+import { requiredPresent } from '../../required-value';
 import { useState } from 'react';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
@@ -28,7 +29,10 @@ export default function ProtectionScene({ result, step }: SceneProps) {
     { id: 'cable', title: 'Cable zone', x: 555 },
     { id: 'load', title: 'Load side', x: 730 },
   ];
-  const selectedFault = faultLocations.find((location) => location.id === faultId)!;
+  const selectedFault = requiredPresent(
+    faultLocations.find((location) => location.id === faultId),
+    'faultLocations.find((location) => location.id === faultId)',
+  );
   return (
     <div className="infra-scene-composition">
       <div
@@ -41,7 +45,9 @@ export default function ProtectionScene({ result, step }: SceneProps) {
             type="button"
             key={location.id}
             aria-pressed={faultId === location.id}
-            onClick={() => setFaultId(location.id)}
+            onClick={() => {
+              setFaultId(location.id);
+            }}
           >
             {location.title}
           </button>
@@ -54,7 +60,7 @@ export default function ProtectionScene({ result, step }: SceneProps) {
       <SceneDiagram
         id="protection"
         title="CT-defined protection zones"
-        description={`${story} Selected fault location: ${selectedFault.title}; the model trip-time result is unchanged.`}
+        description={`${String(story)} Selected fault location: ${selectedFault.title}; the model trip-time result is unchanged.`}
         rows={rows}
         flat={false}
       >
@@ -126,7 +132,7 @@ export default function ProtectionScene({ result, step }: SceneProps) {
           Zone 3 · CT3–CB2
         </text>
         <path
-          d={`M${selectedFault.x - 20} 205 ${selectedFault.x} 181 ${selectedFault.x + 20} 205 ${selectedFault.x} 229Z`}
+          d={`M${String(selectedFault.x - 20)} 205 ${String(selectedFault.x)} 181 ${String(selectedFault.x + 20)} 205 ${String(selectedFault.x)} 229Z`}
           fill="#302427"
           stroke="#ff9e8b"
           strokeWidth="3"
@@ -134,7 +140,7 @@ export default function ProtectionScene({ result, step }: SceneProps) {
         <text x={selectedFault.x} y="134" textAnchor="middle" fill="#ffb4a7" fontSize="14">
           {selectedFault.title}
         </text>
-        <path d={`M${selectedFault.x} 157V177`} stroke="#ff9e8b" strokeDasharray="5 4" />
+        <path d={`M${String(selectedFault.x)} 157V177`} stroke="#ff9e8b" strokeDasharray="5 4" />
         <rect x="325" y="343" width="352" height="54" rx="8" fill="#142736" stroke="#496273" />
         <text x="501" y="366" textAnchor="middle" fill="#edf4fa" fontSize="14">
           Detection → trip logic → coil → breaker action

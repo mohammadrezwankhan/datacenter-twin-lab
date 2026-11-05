@@ -1,19 +1,17 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const accessibilityTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
-async function openEmt(page: import('@playwright/test').Page) {
+async function openEmt(page: Page) {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./?mode=emt');
   await expect(page.getByRole('heading', { name: 'Inside a voltage sag' })).toBeVisible();
 }
 
-async function openResearch(
-  page: import('@playwright/test').Page,
-  study: 'load-step' | 'modal' = 'load-step',
-) {
+async function openResearch(page: Page, study: 'load-step' | 'modal' = 'load-step') {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`./?study=${study}`);
@@ -42,8 +40,8 @@ test('responsive-20261028 EMT SVG controls name each visible label and reading',
   const devices = page.locator('.emt-device');
   const visibleContent = await devices.evaluateAll((elements) =>
     elements.map((element) => ({
-      label: element.querySelector('.emt-label')?.textContent?.trim() ?? '',
-      value: element.querySelector('.emt-value')?.textContent?.trim() ?? '',
+      label: element.querySelector('.emt-label')?.textContent.trim() ?? '',
+      value: element.querySelector('.emt-value')?.textContent.trim() ?? '',
     })),
   );
   expect(visibleContent).toHaveLength(5);
@@ -234,7 +232,7 @@ test('responsive-20261028 EMT and dynamics studies reflow at phone and tablet wi
       }));
       expect(
         layout.documentWidth - layout.viewportWidth,
-        `${route.path} at ${viewport.width}px`,
+        `${route.path} at ${String(viewport.width)}px`,
       ).toBeLessThanOrEqual(1);
 
       if (route.path.includes('study=')) {

@@ -16,10 +16,9 @@ from math import isfinite
 from numbers import Real
 from typing import Any
 
-from .sdcib import run_sdcib_study
-from .model_comparison import run_model_comparison
 from .grid_network import run_grid_network
-
+from .model_comparison import run_model_comparison
+from .sdcib import run_sdcib_study
 
 STUDY_DEFAULTS: dict[str, dict[str, float]] = {
     "load-step": {
@@ -84,7 +83,8 @@ def _normalize_config(study_id: str, config: dict[str, Any]) -> dict[str, float]
     unknown = set(config) - set(defaults)
     if unknown:
         raise ValueError(
-            f"Unsupported {study_id} configuration field(s): {', '.join(sorted(map(str, unknown)))}."
+            f"Unsupported {study_id} configuration field(s): "
+            f"{', '.join(sorted(map(str, unknown)))}."
         )
     normalized: dict[str, float] = {}
     for field, (low, high) in STUDY_LIMITS[study_id].items():

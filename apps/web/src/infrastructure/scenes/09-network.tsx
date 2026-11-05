@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput, textOutput } from './types';
 import { Cable, Device, SceneDiagram } from './primitives';
@@ -7,7 +8,7 @@ export default function NetworkScene({ result, step }: SceneProps) {
     const value = result?.inputs[key];
     if (!result) return 'Not run';
     if (typeof value !== 'number' || !Number.isFinite(value)) return 'Not supplied';
-    return `${value} ${unit}`;
+    return `${String(value)} ${unit}`;
   };
   const rows = [
     { label: 'Physical span length', value: input('lengthM', 'm') },
@@ -43,7 +44,7 @@ export default function NetworkScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="network"
       title="Physical route beneath the logical fabric"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >
@@ -114,7 +115,7 @@ export default function NetworkScene({ result, step }: SceneProps) {
         physical common route
       </text>
       <text x="774" y="380" fill="#a0b1c3" fontSize="13">
-        Optical margin · {rows[6].value}
+        Optical margin · {requiredValue(rows[6], 'rows[6]').value}
       </text>
     </SceneDiagram>
   );

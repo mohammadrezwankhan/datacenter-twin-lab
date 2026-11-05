@@ -1,7 +1,7 @@
 import os
+import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
 from unittest.mock import patch
 
 from datacenter_twin.contracts import InputError
@@ -9,7 +9,7 @@ from datacenter_twin.output import write_result
 
 
 class OutputTests(unittest.TestCase):
-    def test_force_replaces_complete_result(self):
+    def test_force_replaces_complete_result(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"
             path.write_text("previous", encoding="utf-8")
@@ -17,7 +17,7 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), b'{"complete":true}\n')
             self.assertEqual(list(Path(directory).iterdir()), [path])
 
-    def test_force_still_protects_hard_linked_input(self):
+    def test_force_still_protects_hard_linked_input(self) -> None:
         with TemporaryDirectory() as directory:
             source, alias = Path(directory) / "source.json", Path(directory) / "alias.json"
             source.write_text("input", encoding="utf-8")
@@ -26,7 +26,7 @@ class OutputTests(unittest.TestCase):
                 write_result(alias, "replacement", protected_paths=[source], force=True)
             self.assertEqual(source.read_text(), "input")
 
-    def test_force_replacement_does_not_truncate_other_hard_links(self):
+    def test_force_replacement_does_not_truncate_other_hard_links(self) -> None:
         with TemporaryDirectory() as directory:
             output, other = Path(directory) / "output.json", Path(directory) / "other.json"
             other.write_text("previous", encoding="utf-8")
@@ -35,50 +35,60 @@ class OutputTests(unittest.TestCase):
             self.assertEqual(other.read_text(), "previous")
             self.assertEqual(output.read_text(), "new")
 
-    def test_failed_flush_preserves_previous_result_and_cleans_temporary(self):
+    def test_failed_flush_preserves_previous_result_and_cleans_temporary(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"
             path.write_text("previous", encoding="utf-8")
-            with patch("datacenter_twin.output.os.fsync", side_effect=OSError("Disk failure")):
-                with self.assertRaisesRegex(OSError, "Disk failure"):
-                    write_result(path, "new", force=True)
+            with (
+                patch("datacenter_twin.output.os.fsync", side_effect=OSError("Disk failure")),
+                self.assertRaisesRegex(OSError, "Disk failure"),
+            ):
+                write_result(path, "new", force=True)
             self.assertEqual(path.read_text(), "previous")
             self.assertEqual(list(Path(directory).iterdir()), [path])
 
-    def test_failed_replace_preserves_previous_result(self):
+    def test_failed_replace_preserves_previous_result(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"
             path.write_text("previous", encoding="utf-8")
-            with patch("datacenter_twin.output.os.replace", side_effect=PermissionError("Locked")):
-                with self.assertRaises(PermissionError):
-                    write_result(path, "new", force=True)
+            with (
+                patch("datacenter_twin.output.Path.replace", side_effect=PermissionError("Locked")),
+                self.assertRaises(PermissionError),
+            ):
+                write_result(path, "new", force=True)
             self.assertEqual(path.read_text(), "previous")
             self.assertEqual(list(Path(directory).iterdir()), [path])
 
-    def test_competing_writer_cannot_be_overwritten_without_force(self):
+    def test_competing_writer_cannot_be_overwritten_without_force(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"
             link = os.link
 
-            def competing_write(source, destination):
+            def competing_write(source: str | Path, destination: str | Path) -> None:
                 Path(destination).write_text("competing result", encoding="utf-8")
                 link(source, destination)
 
-            with patch("datacenter_twin.output.os.link", side_effect=competing_write):
-                with self.assertRaisesRegex(InputError, "already exists"):
-                    write_result(path, "our result")
+            with (
+                patch("datacenter_twin.output.os.link", side_effect=competing_write),
+                self.assertRaisesRegex(InputError, "already exists"),
+            ):
+                write_result(path, "our result")
             self.assertEqual(path.read_text(), "competing result")
             self.assertEqual(list(Path(directory).iterdir()), [path])
 
-    def test_unsupported_atomic_creation_leaves_no_partial_result(self):
+    def test_unsupported_atomic_creation_leaves_no_partial_result(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "result.json"
-            with patch("datacenter_twin.output.os.link", side_effect=OSError("Unsupported filesystem")):
-                with self.assertRaises(OSError):
-                    write_result(path, "new")
+            with (
+                patch(
+                    "datacenter_twin.output.os.link", side_effect=OSError("Unsupported filesystem")
+                ),
+                self.assertRaises(OSError),
+            ):
+                write_result(path, "new")
             self.assertEqual(list(Path(directory).iterdir()), [])
 
-    def test_symbolic_link_output_is_rejected(self):
+    def test_symbolic_link_output_is_rejected(self) -> None:
         with TemporaryDirectory() as directory:
             target, alias = Path(directory) / "target.json", Path(directory) / "alias.json"
             target.write_text("previous", encoding="utf-8")

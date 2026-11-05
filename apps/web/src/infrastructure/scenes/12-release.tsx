@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput, textOutput } from './types';
 import { SceneDiagram } from './primitives';
@@ -40,7 +41,7 @@ export default function ReleaseScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="release"
       title="Evidence-controlled release gate"
-      description={`${story} The release state is held when any gate fails or remains unresolved.`}
+      description={`${String(story)} The release state is held when any gate fails or remains unresolved.`}
       rows={rows}
       flat={false}
     >
@@ -56,7 +57,8 @@ export default function ReleaseScene({ result, step }: SceneProps) {
         Separate campus remedy
       </text>
       <text x="758" y="149" textAnchor="middle" fill="#a0b1c3" fontSize="13">
-        capacity margin · {rows[1].value} · current {textOutput(result, 'currentStatus')}
+        capacity margin · {requiredValue(rows[1], 'rows[1]').value} · current{' '}
+        {textOutput(result, 'currentStatus')}
       </text>
       <path d="M242 164V203H758V164" fill="none" stroke="#83bcff" strokeWidth="3" />
       <text x="500" y="195" textAnchor="middle" fill="#acd1ff" fontSize="13">
@@ -120,7 +122,8 @@ export default function ReleaseScene({ result, step }: SceneProps) {
       })}
       {step >= 1 && (
         <text x="500" y="407" textAnchor="middle" fill="#a0b1c3" fontSize="13">
-          Transformer correction still leaves the independent current issue · {rows[3].value}
+          Transformer correction still leaves the independent current issue ·{' '}
+          {requiredValue(rows[3], 'rows[3]').value}
         </text>
       )}
     </SceneDiagram>

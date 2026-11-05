@@ -1,3 +1,4 @@
+import { requiredPresent } from './src/required-value';
 import { readFileSync, readdirSync } from 'node:fs';
 import { buildScreenResult, screenUnits, type ScreenOutputs } from './src/infrastructure/screens';
 import type { InfrastructureLesson } from './src/infrastructure/content';
@@ -89,27 +90,30 @@ export async function infrastructureReadingPages(
     emit(
       `${path}index.html`,
       document(
-        `${lesson.number}. ${lesson.title} | Datacenter Twin Lab`,
+        `${String(lesson.number)}. ${lesson.title} | Datacenter Twin Lab`,
         lesson.lead,
         path,
-        `<p class="eyebrow">Infrastructure Engineering · Lesson ${lesson.number} of ${courseTotal} · ${lesson.estimatedMinutes} minutes</p><h1>${escape(lesson.title)}</h1><p class="lead">${escape(lesson.lead)}</p><a class="button" rel="nofollow" href="${root}?lesson=${encodeURIComponent(lesson.id)}">Run this lesson interactively</a>
+        `<p class="eyebrow">Infrastructure Engineering · Lesson ${String(lesson.number)} of ${String(courseTotal)} · ${String(lesson.estimatedMinutes)} minutes</p><h1>${escape(lesson.title)}</h1><p class="lead">${escape(lesson.lead)}</p><a class="button" rel="nofollow" href="${root}?lesson=${encodeURIComponent(lesson.id)}">Run this lesson interactively</a>
 <aside class="panel"><h2>Engineering HOLD</h2><p>These are bounded educational screens, not an approved design or certification. Educational publication was approved by the owner on 12 October 2026; that decision does not clear engineering evidence.</p></aside>
 <h2>Learning objectives</h2><ul>${lesson.objectives.map((item) => `<li>${escape(item)}</li>`).join('')}</ul>
-${lesson.sections.map((section) => `<section><p class="eyebrow">${labels[section.evidenceLabel]}</p><h2>${escape(section.title)}</h2><p>${escape(section.body)}</p></section>`).join('')}
+${lesson.sections.map((section) => `<section><p class="eyebrow">${String(labels[section.evidenceLabel])}</p><h2>${escape(section.title)}</h2><p>${escape(section.body)}</p></section>`).join('')}
 <h2>Predict → run → explain</h2><ol>${lesson.experiment.instructions.map((item) => `<li>${escape(item)}</li>`).join('')}</ol><p class="equation">${escape(equations[lesson.experiment.model] || 'See the explicit model inputs and outputs.')}</p><h3>Declared starting inputs</h3><pre>${escape(JSON.stringify(starting.inputs, null, 2))}</pre>${table(starting.outputs, screenUnits(lesson.experiment.model).outputs, 'Worked default — unrounded educational outputs')}
 <h2>Challenge</h2><p>${escape(lesson.experiment.challenge.question)}</p><pre>${escape(JSON.stringify(lesson.experiment.challenge.changes, null, 2))}</pre><p>${escape(lesson.experiment.challenge.answer)}</p>${table(challenge.outputs, challenge.outputUnits, 'Worked challenge')}
 ${fuel ? `<h2>Separate usable-fuel ledger</h2><p>Source statement: constant load and the stated source coefficient. Usable L = load kW × hours × L/kWh. Gross storage, reserve and transfer capability remain unresolved.</p><pre>${escape(JSON.stringify(fuel.inputs, null, 2))}</pre>${table(fuel.outputs, fuel.outputUnits, 'Source usable-fuel screen')}` : ''}
 <h2>${escape(lesson.scene.title)} — static equivalent</h2><ol>${lesson.scene.storyboard.map((item) => `<li>${escape(item)}</li>`).join('')}</ol><p>${escape(lesson.scene.staticAlternative)}</p><p>${escape(lesson.scene.interaction)}</p><p>Narrative steps are not physical seconds. Essential states and quantities remain available without animation.</p>
 <h2>Assessment and answer criteria</h2>${lesson.assessments.map((item) => `<section><h3>${escape(item.id)} · ${escape(item.question)}</h3><details><summary>Read answer and marking criterion</summary><p>${escape(item.answer)}</p><p><strong>Criterion:</strong> ${escape(item.rubric)}</p><p><strong>Source:</strong> ${escape(item.source)}</p></details></section>`).join('')}
-<section class="panel"><h2>Source and model boundaries</h2><p><cite>Data Centre Infrastructure Engineering</cite>, reference manuscript revision 1 (DCIE-R1), 11 October 2026, chapter ${lesson.source.chapter}, PDF pp.${lesson.source.pdfPages.join('–')}. PDF page 1 includes the cover. ${escape(lesson.source.evidenceStatus)}.</p><ul>${lesson.limits.map((item) => `<li>${escape(item)}</li>`).join('')}</ul><p>Original educational adaptation. The private PDF and missing archive are not public downloads. Source statement, Editorial derivation, Illustrative assumption and Unresolved remain distinct.</p><p>Result schema: ${starting.resultSchema}; content ${starting.contentVersion}; model ${starting.modelVersion}. <a href="results.json">Raw inputs, outputs, units, assumptions, source locators and canonical hashes</a>. No supported in-browser Python verification protocol exists for this result family.</p></section>
+<section class="panel"><h2>Source and model boundaries</h2><p><cite>Data Centre Infrastructure Engineering</cite>, reference manuscript revision 1 (DCIE-R1), 11 October 2026, chapter ${String(lesson.source.chapter)}, PDF pp.${lesson.source.pdfPages.join('–')}. PDF page 1 includes the cover. ${escape(lesson.source.evidenceStatus)}.</p><ul>${lesson.limits.map((item) => `<li>${escape(item)}</li>`).join('')}</ul><p>Original educational adaptation. The private PDF and missing archive are not public downloads. Source statement, Editorial derivation, Illustrative assumption and Unresolved remain distinct.</p><p>Result schema: ${starting.resultSchema}; content ${starting.contentVersion}; model ${starting.modelVersion}. <a href="results.json">Raw inputs, outputs, units, assumptions, source locators and canonical hashes</a>. No supported in-browser Python verification protocol exists for this result family.</p></section>
 <nav class="jump-links" aria-label="Prerequisites">${lesson.prerequisites
           .map((id) => {
-            const item = courseCatalog.find((record) => record.id === id)!;
+            const item = requiredPresent(
+              courseCatalog.find((record) => record.id === id),
+              'courseCatalog.find((record) => record.id === id)',
+            );
             return `<a href="${root}${item.readingRoute}">${escape(item.title)}</a>`;
           })
           .join(
             '',
-          )}</nav><nav class="pager" aria-label="Lesson navigation">${prev ? `<a href="${root}${prev.readingRoute}">Previous · ${prev.number}. ${escape(prev.title)}</a>` : ''}${next ? `<a href="${root}${next.readingRoute}">Next · ${next.number}. ${escape(next.title)}</a>` : `<a href="${root}studies/emt/">Continue to EMT and dynamics</a>`}</nav>`,
+          )}</nav><nav class="pager" aria-label="Lesson navigation">${prev ? `<a href="${root}${prev.readingRoute}">Previous · ${String(prev.number)}. ${escape(prev.title)}</a>` : ''}${next ? `<a href="${root}${next.readingRoute}">Next · ${String(next.number)}. ${escape(next.title)}</a>` : `<a href="${root}studies/emt/">Continue to EMT and dynamics</a>`}</nav>`,
         {
           '@type': ['LearningResource', 'TechArticle'],
           name: lesson.title,
@@ -119,7 +123,7 @@ ${fuel ? `<h2>Separate usable-fuel ledger</h2><p>Source statement: constant load
           isAccessibleForFree: true,
           inLanguage: 'en',
           version: lesson.contentVersion,
-          citation: `DCIE-R1 chapter ${lesson.source.chapter}, PDF pp.${lesson.source.pdfPages.join('–')}`,
+          citation: `DCIE-R1 chapter ${String(lesson.source.chapter)}, PDF pp.${lesson.source.pdfPages.join('–')}`,
         },
       ),
     );

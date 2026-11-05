@@ -42,9 +42,14 @@ test('capture observable paint, shift, long-task and input timing for guide/cour
       /* metric unsupported */
     }
     try {
+      const eventOptions: PerformanceObserverInit & { durationThreshold: number } = {
+        type: 'event',
+        buffered: true,
+        durationThreshold: 16,
+      };
       new PerformanceObserver((list) => {
         result.eventDurations.push(...list.getEntries().map((entry) => entry.duration));
-      }).observe({ type: 'event', buffered: true, durationThreshold: 16 });
+      }).observe(eventOptions);
     } catch {
       /* metric unsupported */
     }

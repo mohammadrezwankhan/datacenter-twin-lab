@@ -1,3 +1,4 @@
+import { requiredValue } from '../required-value';
 import { useMemo, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { ResearchMode, ResearchResult } from './types';
@@ -27,7 +28,10 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
       </section>
     );
 
-  const selected = validModes[Math.min(selectedIndex, validModes.length - 1)];
+  const selected = requiredValue(
+    validModes[Math.min(selectedIndex, validModes.length - 1)],
+    'validModes[Math.min(selectedIndex, validModes.length - 1)]',
+  );
   const width = 720;
   const height = 365;
   const left = 78;
@@ -78,7 +82,7 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
       </p>
       <svg
         className="research-mode-plot"
-        viewBox={'0 0 ' + width + ' ' + height}
+        viewBox={'0 0 ' + String(width) + ' ' + String(height)}
         role="group"
         aria-label="Scatter plot of eigenvalue real and imaginary parts, with zero axes."
       >
@@ -100,9 +104,9 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
           opacity=".035"
         />
         {xticks.map((value, index) => (
-          <g key={'x' + index}>
+          <g key={'x' + String(index)}>
             <path
-              d={'M' + x(value) + ' ' + top + 'V' + (top + plotHeight)}
+              d={'M' + String(x(value)) + ' ' + String(top) + 'V' + String(top + plotHeight)}
               className="research-gridline"
             />
             <text x={x(value)} y={height - 31} textAnchor="middle">
@@ -111,9 +115,9 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
           </g>
         ))}
         {yticks.map((value, index) => (
-          <g key={'y' + index}>
+          <g key={'y' + String(index)}>
             <path
-              d={'M' + left + ' ' + y(value) + 'H' + (left + plotWidth)}
+              d={'M' + String(left) + ' ' + String(y(value)) + 'H' + String(left + plotWidth)}
               className="research-gridline"
             />
             <text x={left - 10} y={y(value) + 4} textAnchor="end">
@@ -122,11 +126,11 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
           </g>
         ))}
         <path
-          d={'M' + xZero + ' ' + top + 'V' + (top + plotHeight)}
+          d={'M' + String(xZero) + ' ' + String(top) + 'V' + String(top + plotHeight)}
           className="research-zero-axis"
         />
         <path
-          d={'M' + left + ' ' + yZero + 'H' + (left + plotWidth)}
+          d={'M' + String(left) + ' ' + String(yZero) + 'H' + String(left + plotWidth)}
           className="research-zero-axis"
         />
         {validModes.map((mode, index) => (
@@ -137,7 +141,7 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
             tabIndex={0}
             aria-label={
               'Mode ' +
-              (index + 1) +
+              String(index + 1) +
               ', real part ' +
               fmt(mode.real) +
               ' per second, imaginary part ' +
@@ -147,8 +151,12 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
               ' hertz.'
             }
             aria-pressed={index === selectedIndex}
-            onClick={() => setSelectedIndex(index)}
-            onKeyDown={(event) => selectFromKey(event, index)}
+            onClick={() => {
+              setSelectedIndex(index);
+            }}
+            onKeyDown={(event) => {
+              selectFromKey(event, index);
+            }}
           >
             <title>
               {mode.dominant_state} · Re {fmt(mode.real)} · Im {fmt(mode.imag)} s⁻¹
@@ -165,7 +173,7 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
           </g>
         ))}
         <text
-          transform={'rotate(-90 18 ' + (top + plotHeight / 2) + ')'}
+          transform={'rotate(-90 18 ' + String(top + plotHeight / 2) + ')'}
           x="18"
           y={top + plotHeight / 2}
           textAnchor="middle"
@@ -229,7 +237,9 @@ export function ModePlot({ result, accent }: { result: ResearchResult; accent: s
                       type="button"
                       className="research-mode-row"
                       aria-pressed={index === selectedIndex}
-                      onClick={() => setSelectedIndex(index)}
+                      onClick={() => {
+                        setSelectedIndex(index);
+                      }}
                     >
                       {index + 1}
                     </button>

@@ -1,9 +1,11 @@
+import { requiredPresent } from '../src/required-value';
+import { arrayValue, jsonObject, objectValue, stringValue } from './json-contracts';
+import { emtResultValue } from './emt-contract';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Locator, type Page } from '@playwright/test';
-import type { EmtResult } from '../src/emt/engine';
-import type { ResearchResult } from '../src/research/types';
+import { researchResultValue } from './research-contract';
 
 async function downloaded(page: Page, button: Locator): Promise<string> {
   const pending = page.waitForEvent('download');
@@ -14,7 +16,7 @@ async function downloaded(page: Page, button: Locator): Promise<string> {
 }
 
 function csvRows(text: string): string[][] {
-  return JSON.parse(
+  const parsed: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -24,6 +26,7 @@ function csvRows(text: string): string[][] {
       { input: text, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 },
     ),
   );
+  return arrayValue(parsed).map((row) => arrayValue(row).map(stringValue));
 }
 
 test('prediction shortcut is visible and focuses the input at desktop and phone widths', async ({
@@ -33,7 +36,7 @@ test('prediction shortcut is visible and focuses the input at desktop and phone 
     [1905, 889],
     [375, 844],
     [320, 780],
-  ]) {
+  ] as const) {
     await page.setViewportSize({ width, height });
     await page.goto('./');
     const link = page.getByRole('link', { name: /Make a prediction/ });
@@ -45,7 +48,7 @@ test('prediction shortcut is visible and focuses the input at desktop and phone 
         timeout: 5000,
       })
       .toBeLessThanOrEqual(0);
-    await page.screenshot({ path: info.outputPath('prediction-' + width + '.png') });
+    await page.screenshot({ path: info.outputPath(`prediction-${String(width)}.png`) });
     await link.focus();
     await page.keyboard.press('Enter');
     await expect(input).toBeFocused();
@@ -72,10 +75,12 @@ test('visible reset label and commissioning PUE constraint are exposed to the br
   await pue.fill('1');
   await page.getByRole('button', { name: 'Run screen', exact: true }).click();
   await expect(page.getByTestId('infrastructure-run-state')).toContainText('Completed case');
-  const payload = JSON.parse(
+  const payload = jsonObject(
     await downloaded(page, page.getByRole('button', { name: 'Export completed screen' })),
   );
-  expect(payload.result.outputs.annualFacilityMWh).toBe(payload.result.outputs.annualItMWh);
+  expect(objectValue(objectValue(payload.result).outputs).annualFacilityMWh).toBe(
+    objectValue(objectValue(payload.result).outputs).annualItMWh,
+  );
 });
 
 test('capacity equality and a genuine shortfall remain distinct through the rendered form', async ({
@@ -89,7 +94,7 @@ test('capacity equality and a genuine shortfall remain distinct through the rend
     ['Loading', '1'],
     ['Installed', '4'],
     ['Unavailable', '1'],
-  ]) {
+  ] as const) {
     await page.getByRole('spinbutton', { name: new RegExp('^' + label + '( |$)') }).fill(value);
   }
   for (const [demand, status, count] of [
@@ -99,11 +104,11 @@ test('capacity equality and a genuine shortfall remain distinct through the rend
     await page.getByRole('spinbutton', { name: /^Required MW/ }).fill(demand);
     await page.getByRole('button', { name: 'Run screen', exact: true }).click();
     await expect(page.getByTestId('infrastructure-run-state')).toContainText('Completed case');
-    const payload = JSON.parse(
+    const payload = jsonObject(
       await downloaded(page, page.getByRole('button', { name: 'Export completed screen' })),
     );
-    expect(payload.result.outputs.status).toBe(status);
-    expect(payload.result.outputs.minimumNPlusOne).toBe(count);
+    expect(objectValue(objectValue(payload.result).outputs).status).toBe(status);
+    expect(objectValue(objectValue(payload.result).outputs).minimumNPlusOne).toBe(count);
   }
 });
 
@@ -115,14 +120,14 @@ test('actual EMT CSV downloads preserve every sample and applied inputs after dr
   await page.getByTestId('emt-capacitance_mf').fill('24');
   for (const expected of [12, 24]) {
     if (expected === 24) await page.getByTestId('emt-run').click();
-    const json = JSON.parse(await downloaded(page, page.getByTestId('emt-export-json')));
-    const result: EmtResult = json.result ?? json;
+    const json = jsonObject(await downloaded(page, page.getByTestId('emt-export-json')));
+    const result = emtResultValue(json.result ?? json);
     const rows = csvRows(await downloaded(page, page.getByTestId('emt-export-csv')));
     assert.equal(result.config.capacitance_mf, expected);
     assert.equal(rows.length, result.rows.length + 1);
-    assert.equal(rows[0][8], 'applied_config_json');
+    assert.equal(requiredPresent(rows[0], 'EMT CSV header')[8], 'applied_config_json');
     for (const [index, sample] of result.rows.entries()) {
-      const row = rows[index + 1];
+      const row = requiredPresent(rows[index + 1], 'EMT CSV data row');
       assert.deepEqual(row.slice(0, 7).map(Number), [
         sample.time_ms,
         sample.source_v,
@@ -133,9 +138,9 @@ test('actual EMT CSV downloads preserve every sample and applied inputs after dr
         sample.balance_error_j,
       ]);
       assert.equal(row[7], result.model);
-      assert.deepEqual(JSON.parse(row[8]), result.config);
-      assert.deepEqual(JSON.parse(row[9]), result.assumptions);
-      assert.match(row[10], /Educational/);
+      assert.deepEqual(JSON.parse(requiredPresent(row[8], 'CSV column 8')), result.config);
+      assert.deepEqual(JSON.parse(requiredPresent(row[9], 'CSV column 9')), result.assumptions);
+      assert.match(requiredPresent(row[10], 'CSV column 10'), /Educational/);
     }
   }
 });
@@ -163,17 +168,17 @@ test('actual dynamics CSV, completion status and chart labels describe the compl
   await sliders.first().focus();
   await page.keyboard.press('ArrowRight');
   await expect(sliders.first()).toBeFocused();
-  const result = JSON.parse(
-    await downloaded(page, page.getByTestId('research-export-json')),
-  ) as ResearchResult;
+  const result = researchResultValue(
+    jsonObject(await downloaded(page, page.getByTestId('research-export-json'))),
+  );
   await page.getByTestId('research-input-forcing_amplitude_pu').fill('0.07');
   const rows = csvRows(await downloaded(page, page.getByTestId('research-export-csv')));
-  assert.equal(rows[0][9], 'applied_config_json');
+  assert.equal(requiredPresent(rows[0], 'research CSV header')[9], 'applied_config_json');
   let index = 1;
   for (const chart of result.charts) {
     for (let sample = 0; sample < chart.x.length; sample++) {
       for (const line of chart.lines) {
-        const row = rows[index++];
+        const row = requiredPresent(rows[index++], 'research CSV data row');
         assert.deepEqual(row.slice(0, 7), [
           chart.id,
           chart.title,
@@ -185,10 +190,10 @@ test('actual dynamics CSV, completion status and chart labels describe the compl
         ]);
         assert.equal(row[7], result.study_id);
         assert.equal(row[8], result.model);
-        assert.deepEqual(JSON.parse(row[9]), result.config);
-        assert.deepEqual(JSON.parse(row[10]), result.solver);
-        assert.deepEqual(JSON.parse(row[11]), result.assumptions);
-        assert.match(row[12], /Educational/);
+        assert.deepEqual(JSON.parse(requiredPresent(row[9], 'CSV column 9')), result.config);
+        assert.deepEqual(JSON.parse(requiredPresent(row[10], 'CSV column 10')), result.solver);
+        assert.deepEqual(JSON.parse(requiredPresent(row[11], 'CSV column 11')), result.assumptions);
+        assert.match(requiredPresent(row[12], 'CSV column 12'), /Educational/);
       }
     }
   }
@@ -268,14 +273,37 @@ test('changing workspace subview preserves an in-progress preset restoration', a
       holdSimulation?: boolean;
       releaseSimulation?: () => void;
     };
-    const postMessage = Worker.prototype.postMessage;
-    Worker.prototype.postMessage = function (...args: Parameters<Worker['postMessage']>) {
-      const deliver = () => postMessage.apply(this, args);
-      if (state.holdSimulation && args[0]?.path === 'simulations') {
+    const postMessage: unknown = Object.getOwnPropertyDescriptor(
+      Worker.prototype,
+      'postMessage',
+    )?.value;
+    if (typeof postMessage !== 'function') throw new Error('Native Worker.postMessage is missing');
+    const nativePostMessage = postMessage;
+    function intercepted(this: Worker, message: unknown, transfer: Transferable[]): void;
+    function intercepted(
+      this: Worker,
+      message: unknown,
+      options?: StructuredSerializeOptions,
+    ): void;
+    function intercepted(
+      this: Worker,
+      message: unknown,
+      options?: Transferable[] | StructuredSerializeOptions,
+    ): void {
+      const deliver = () => {
+        Reflect.apply(nativePostMessage, this, [message, options]);
+      };
+      const isSimulation =
+        message !== null &&
+        typeof message === 'object' &&
+        'path' in message &&
+        message.path === 'simulations';
+      if (state.holdSimulation && isSimulation) {
         state.holdSimulation = false;
         state.releaseSimulation = deliver;
       } else deliver();
-    };
+    }
+    Worker.prototype.postMessage = intercepted;
   });
   await page.goto('./?mode=advanced&preset=normal');
   const scenario = page.getByRole('combobox', { name: 'Scenario', exact: true });

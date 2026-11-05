@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import type { Lesson } from './course-lessons';
 import { lessonValue } from './lesson-results';
 import type { PlanningRun, Run } from './types';
@@ -25,11 +26,11 @@ function escapeHtml(value: unknown): string {
       '"': '&quot;',
       "'": '&#39;',
     };
-    return entities[character];
+    return requiredValue(entities[character], character);
   });
 }
 
-function quantity(value: unknown, unit = ''): string {
+function quantity(value: string | number | boolean | null | undefined, unit = ''): string {
   if (value === null || value === undefined) return 'Unknown';
   const number = Number(value);
   const label = Number.isFinite(number) ? numberFormat.format(number) : String(value);
@@ -46,12 +47,15 @@ function table(caption: string, rows: [string, unknown][]): string {
 }
 
 function header(page: number, label: string): string {
-  return `<header><b>DATACENTER TWIN LAB</b><span>${page} / 3 · ${label}</span></header>`;
+  return `<header><b>DATACENTER TWIN LAB</b><span>${String(page)} / 3 · ${label}</span></header>`;
 }
 
 function assumptions(calculation: Run | PlanningRun): [string, unknown][] {
   if (calculation.schema_version === 1) {
-    const segment = calculation.assumptions.segments[0];
+    const segment = requiredValue(
+      calculation.assumptions.segments[0],
+      'calculation.assumptions.segments[0]',
+    );
     return [
       ['Constant IT load', quantity(segment.it_load_kw, 'kW')],
       ['Duration', quantity(segment.hours, 'h')],
@@ -65,8 +69,11 @@ function assumptions(calculation: Run | PlanningRun): [string, unknown][] {
   }
   const scenario = calculation.scenario;
   return [
-    ['IT demand / duration', `${quantity(scenario.it_demand_kw, 'kW')} / ${scenario.duration_s} s`],
-    ['Nominal interval', `${scenario.step_s} s; events can split intervals`],
+    [
+      'IT demand / duration',
+      `${quantity(scenario.it_demand_kw, 'kW')} / ${String(scenario.duration_s)} s`,
+    ],
+    ['Nominal interval', `${String(scenario.step_s)} s; events can split intervals`],
     [
       'Opening battery / capacity',
       `${quantity(scenario.battery_initial_kwh, 'kWh')} / ${quantity(scenario.battery_capacity_kwh, 'kWh')}`,
@@ -77,7 +84,7 @@ function assumptions(calculation: Run | PlanningRun): [string, unknown][] {
       `${scenario.battery_charge_efficiency} / ${scenario.battery_discharge_efficiency} (ratios)`,
     ],
     ['Distribution efficiency', `${scenario.distribution_efficiency} (ratio)`],
-    ['Generator startup delay', `${scenario.generator_start_delay_s} s`],
+    ['Generator startup delay', `${String(scenario.generator_start_delay_s)} s`],
     [
       'Grid / generator tariff',
       `${quantity(scenario.tariff_per_kwh)} / ${quantity(scenario.generator_cost_per_kwh)} ${scenario.currency}/kWh`,
@@ -90,7 +97,7 @@ function scheduledEvents(run: Run): string {
   return `<ul class="small">${run.scenario.events
     .map(
       (event) =>
-        `<li>${event.at_s} s: ${escapeHtml(event.action.replaceAll('_', ' '))} · ` +
+        `<li>${String(event.at_s)} s: ${escapeHtml(event.action.replaceAll('_', ' '))} · ` +
         `${escapeHtml(event.target)}${event.value_kw === null ? '' : ` · ${escapeHtml(event.value_kw)} kW`}</li>`,
     )
     .join('')}</ul>`;
@@ -100,11 +107,11 @@ function plot(run: Run | PlanningRun): string {
   if (run.schema_version === 1) {
     const values = [Number(run.it_energy_kwh), Number(run.non_it_energy_kwh)];
     const total = Number(run.facility_energy_kwh);
-    const width = total > 0 ? (590 * values[0]) / total : 0;
+    const width = total > 0 ? (590 * requiredValue(values[0], 'values[0]')) / total : 0;
     return `<figure><svg viewBox="0 0 640 106" role="img" aria-label="Annual energy split">
       <title>Annual IT and non-IT energy in kilowatt-hours</title>
-      <rect x="25" y="16" width="${width}" height="28" fill="#176b69"/>
-      <rect x="${25 + width}" y="16" width="${590 - width}" height="28" fill="#8db8d1"/>
+      <rect x="25" y="16" width="${String(width)}" height="28" fill="#176b69"/>
+      <rect x="${String(25 + width)}" y="16" width="${String(590 - width)}" height="28" fill="#8db8d1"/>
       <text x="25" y="70" font-size="13">IT: ${quantity(values[0], 'kWh')}</text>
       <text x="25" y="93" font-size="13">Non-IT: ${quantity(values[1], 'kWh')}</text>
       </svg><figcaption>Annual energy allocation under the declared PUE assumption.</figcaption></figure>`;
@@ -117,8 +124,8 @@ function plot(run: Run | PlanningRun): string {
     run.intervals
       .map(
         (interval, index) =>
-          `${index ? 'L' : 'M'}${x(interval.start_s)},${y(interval[key])} ` +
-          `L${x(interval.end_s)},${y(interval[key])}`,
+          `${index ? 'L' : 'M'}${String(x(interval.start_s))},${String(y(interval[key]))} ` +
+          `L${String(x(interval.end_s))},${String(y(interval[key]))}`,
       )
       .join(' ');
   return `<figure><svg viewBox="0 0 640 170" role="img" aria-label="Requested and served IT power">
@@ -131,8 +138,8 @@ function plot(run: Run | PlanningRun): string {
     <path d="${path('served_it_kw')}" fill="none" stroke="#176b69" stroke-width="2"
       stroke-dasharray="6 3"/>
     <text x="58" y="135" font-size="10">0</text>
-    <text x="335" y="135" text-anchor="middle" font-size="10">${duration / 2}</text>
-    <text x="612" y="135" text-anchor="end" font-size="10">${duration}</text>
+    <text x="335" y="135" text-anchor="middle" font-size="10">${String(duration / 2)}</text>
+    <text x="612" y="135" text-anchor="end" font-size="10">${String(duration)}</text>
     <text x="335" y="158" text-anchor="middle" font-size="11">Elapsed time (s)</text>
     </svg><figcaption>Solid: requested power. Dashed: served power. A step plot of completed
     intervals; animation and electrical transients are not represented.</figcaption></figure>`;
@@ -140,7 +147,7 @@ function plot(run: Run | PlanningRun): string {
 
 function working(lesson: Lesson, run: Run | PlanningRun): string[] {
   if (run.schema_version === 1) {
-    const segment = run.assumptions.segments[0];
+    const segment = requiredValue(run.assumptions.segments[0], 'run.assumptions.segments[0]');
     return [
       `${quantity(segment.it_load_kw)} kW × ${segment.hours} h = ${quantity(run.it_energy_kwh)} kWh IT energy.`,
       `${quantity(run.it_energy_kwh)} × ${segment.assumed_pue} = ${quantity(run.facility_energy_kwh)} kWh facility energy.`,
@@ -155,13 +162,13 @@ function working(lesson: Lesson, run: Run | PlanningRun): string[] {
   const reserve =
     outage && run.intervals.find((interval) => Number(interval.start_s) === outage.at_s);
   const depleted = run.events.find((event) => event.action === 'battery_depleted');
-  if (lesson.resultKey === 'depletion' && reserve && outage) {
+  if (lesson.resultKey === 'depletion' && reserve) {
     const delivered =
       Number(reserve.battery_start_kwh) *
       Number(scenario.battery_discharge_efficiency) *
       Number(scenario.distribution_efficiency);
     return [
-      `At the ${outage.at_s} s outage, the stored reserve is ${quantity(reserve.battery_start_kwh)} kWh.
+      `At the ${String(outage.at_s)} s outage, the stored reserve is ${quantity(reserve.battery_start_kwh)} kWh.
        The opening reserve was ${quantity(scenario.battery_initial_kwh)} kWh; charging before the outage can change it.`,
       `${quantity(reserve.battery_start_kwh)} × ${scenario.battery_discharge_efficiency} ×
        ${scenario.distribution_efficiency} = ${quantity(delivered)} kWh deliverable to the IT load in this case.`,
@@ -175,11 +182,11 @@ function working(lesson: Lesson, run: Run | PlanningRun): string[] {
   }
   if (lesson.resultKey === 'generator_ready')
     return [
-      `The outage at ${outage?.at_s ?? 'unknown'} s plus ${scenario.generator_start_delay_s} s startup delay
-     gives a scheduled ready time of ${outage ? outage.at_s + scenario.generator_start_delay_s : 'unknown'} s.`,
+      `The outage at ${String(outage?.at_s ?? 'unknown')} s plus ${String(scenario.generator_start_delay_s)} s startup delay
+     gives a scheduled ready time of ${String(outage ? outage.at_s + scenario.generator_start_delay_s : 'unknown')} s.`,
       result === undefined
         ? 'No generator-running interval occurred. Utility recovery can precede generator service.'
-        : `The first generator-running interval starts at ${result} s elapsed.`,
+        : `The first generator-running interval starts at ${String(result)} s elapsed.`,
       `Unserved time over the completed run: ${quantity(run.summary.unserved_duration_s)} s.`,
     ];
   if (lesson.id === 'distribution-loss')
@@ -316,7 +323,7 @@ export function buildLessonWorksheet(data: LessonWorksheet): string {
         also contains the complete result under “Embedded calculation” below.</p>
       ${topology(calculation)}
       <p class="small"><b>Source identifiers:</b>
-        ${escapeHtml((run?.scenario.source_ids ?? planning!.assumptions.source_ids).join(', '))}.</p>
+        ${escapeHtml((run?.scenario.source_ids ?? requiredPresent(planning, 'planning').assumptions.source_ids).join(', '))}.</p>
       <h3>Model limits</h3><ul class="small">${calculation.limitations
         .map((limit) => `<li>${escapeHtml(limit)}</li>`)
         .join('')}</ul>
@@ -340,5 +347,7 @@ export function downloadLessonWorksheet(data: LessonWorksheet): void {
   link.href = url;
   link.download = `lesson-${data.lesson.id}-${data.calculation.run_id}-worksheet.html`;
   link.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }

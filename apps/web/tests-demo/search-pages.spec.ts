@@ -1,3 +1,5 @@
+import { jsonObject, jsonObjects, objectValue, objectList, stringValue } from './json-contracts';
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { ENGINE_VERSION } from '../src/js-engine/version';
@@ -7,7 +9,7 @@ import { infrastructureLessons } from '../seo-infrastructure';
 import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
-import site from '../site.config.json' with { type: 'json' };
+const { default: site } = await import('../site.config.json', { with: { type: 'json' } });
 import { nativeRun } from './course-test-helpers';
 
 const demoSite = resolve(process.env.TWIN_DEMO_OUT_DIR ?? '../../.local/browser-demo-site');
@@ -49,7 +51,10 @@ test('search pages expose all twelve worked lessons with JavaScript disabled', a
   baseURL,
   request,
 }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: requiredPresent(baseURL, 'baseURL'),
+  });
   const page = await context.newPage();
   try {
     await page.goto('./');
@@ -76,12 +81,23 @@ test('search pages expose all twelve worked lessons with JavaScript disabled', a
       // Inspect shipped bytes: local endpoint protection can inject its own browser scripts.
       const shipped = await readFile(join(demoSite, 'learn', lesson.id, 'index.html'), 'utf8');
       expect(shipped).not.toMatch(/<script\b[^>]*\bsrc=/i);
-      const graph = JSON.parse(
-        (await page.locator('script[type="application/ld+json"]').textContent())!,
-      )['@graph'];
-      expect(graph[0].description).toBe(lesson.question);
-      expect(graph[0].author.name).toBe('Mohammad Rezwan Khan');
-      expect(graph[0].learningResourceType).toBe('Lesson');
+      const graph = objectList(
+        jsonObject(
+          requiredPresent(
+            await page.locator('script[type="application/ld+json"]').textContent(),
+            '(await page.locator(\'script[type="application/ld+json"]\').textContent())',
+          ),
+        )['@graph'],
+      );
+      expect(requiredPresent(graph[0], 'first linked-data record').description).toBe(
+        lesson.question,
+      );
+      expect(objectValue(requiredPresent(graph[0], 'first linked-data record').author).name).toBe(
+        'Mohammad Rezwan Khan',
+      );
+      expect(requiredPresent(graph[0], 'first linked-data record').learningResourceType).toBe(
+        'Lesson',
+      );
     }
     await page.goto('./about/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
@@ -93,7 +109,7 @@ test('search pages expose all twelve worked lessons with JavaScript disabled', a
     );
     const manifest = await request.get(`./data/evidence/v${ENGINE_VERSION}/manifest.json`);
     expect(manifest.status()).toBe(200);
-    expect((await manifest.json()).engine_version).toBe(ENGINE_VERSION);
+    expect(objectValue(await manifest.json()).engine_version).toBe(ENGINE_VERSION);
   } finally {
     await context.close();
   }
@@ -106,8 +122,8 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   const publicBase = process.env.VITE_PUBLIC_SITE_URL || site.url;
   const sitemap = await request.get('./sitemap.xml');
   expect(sitemap.status()).toBe(200);
-  const urls = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map(
-    (match) => match[1],
+  const urls = [...(await sitemap.text()).matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) =>
+    stringValue(match[1]),
   );
   expect(new Set(urls).size).toBe(30);
   expect(urls.every((url) => url.startsWith(publicBase))).toBe(true);
@@ -143,7 +159,7 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
   expect(fullTextBody).toContain('The ideal source can absorb reverse current');
   for (const lesson of infrastructureLessons) {
     const entry = fullTextBody
-      .split(`## ${lesson.number}. ${lesson.title} | Datacenter Twin Lab\n`)[1]
+      .split(`## ${String(lesson.number)}. ${lesson.title} | Datacenter Twin Lab\n`)[1]
       ?.split('\n## ')[0];
     expect(entry).toContain(`URL: ${publicBase}${lesson.readingRoute}`);
     expect(entry).toContain(lesson.lead);
@@ -173,8 +189,11 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
       'summary_large_image',
     );
     titles.add(await page.title());
-    const linkedData = JSON.parse(
-      (await page.locator('script[type="application/ld+json"]').textContent())!,
+    const linkedData = jsonObject(
+      requiredPresent(
+        await page.locator('script[type="application/ld+json"]').textContent(),
+        '(await page.locator(\'script[type="application/ld+json"]\').textContent())',
+      ),
     );
     expect(linkedData['@context']).toBe('https://schema.org');
     expect(JSON.stringify(linkedData)).not.toMatch(/aggregateRating|award|reviewRating/);
@@ -191,13 +210,14 @@ test('search pages sitemap, canonical URLs and social metadata agree', async ({
     expect(linkedDataText).toContain('"url":"https://mrkhan.co.technology/"');
     expect(linkedDataText).not.toContain(`${publicBase}about/#author`);
     if (relative === 'learn/') {
-      const course = linkedData['@graph'].find(
-        (item: { '@type': string }) => item['@type'] === 'Course',
+      const course = requiredPresent(
+        objectList(linkedData['@graph']).find((item) => item['@type'] === 'Course'),
+        'Course linked-data record',
       );
       expect(course.hasPart).toHaveLength(courseTotal);
-      expect(
-        course.hasPart.every((item: { '@type': string }) => item['@type'] === 'LearningResource'),
-      ).toBe(true);
+      expect(objectList(course.hasPart).every((item) => item['@type'] === 'LearningResource')).toBe(
+        true,
+      );
       expect(course).not.toHaveProperty('hasCourseInstance');
     }
   }
@@ -240,7 +260,7 @@ test('search pages result records reproduce all 24 native lesson calculations', 
   baseURL,
   request,
 }) => {
-  const expectations = JSON.parse(
+  const expectations = jsonObjects(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -250,24 +270,30 @@ test('search pages result records reproduce all 24 native lesson calculations', 
       { cwd: '../..', encoding: 'utf8' },
     ),
   );
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: requiredPresent(baseURL, 'baseURL'),
+  });
   const page = await context.newPage();
-  const identity = await (await request.get('./build-identity.json')).json();
+  const identity = objectValue(await (await request.get('./build-identity.json')).json());
   expect(identity.version).toBe(ENGINE_VERSION);
   if (identity.sourceRevision !== null) expect(identity.sourceRevision).toMatch(/^[a-f0-9]{40}$/);
   try {
     for (const lesson of lessons) {
       const response = await request.get(`./learn/${lesson.id}/results.json`);
       expect(response.status()).toBe(200);
-      const record = await response.json();
+      const record = objectValue(await response.json());
       expect(record.lesson_id).toBe(lesson.id);
       expect(record.result_unit).toBe(lesson.resultUnit);
       expect(record.records).toHaveLength(2);
       expect(record.source_revision).toBe(identity.sourceRevision || `v${ENGINE_VERSION}`);
-      const expected = expectations.find((item: { id: string }) => item.id === lesson.id);
+      const expected = requiredPresent(
+        expectations.find((item) => item.id === lesson.id),
+        'native lesson expectation',
+      );
       await page.goto(`./learn/${lesson.id}/#worked-answer`);
       const cells = page.locator('#calculated-results [data-result]');
-      for (const [index, row] of record.records.entries()) {
+      for (const [index, row] of objectList(record.records).entries()) {
         expect(row.input).toBe(index ? lesson.challenge : lesson.initial);
         expect(row.calculation).toEqual(nativeRun(row.calculation));
         expect(Number(row.result)).toBeCloseTo(
@@ -280,11 +306,18 @@ test('search pages result records reproduce all 24 native lesson calculations', 
         );
       }
       await expect(page.locator('#cite')).toContainText(`${site.url}learn/${lesson.id}/`);
-      const graph = JSON.parse(
-        (await page.locator('script[type="application/ld+json"]').textContent())!,
-      )['@graph'];
-      for (const citation of graph[0].citation) {
-        await expect(page.locator(`a[href="${citation.url}"]`).first()).toBeVisible();
+      const graph = objectList(
+        jsonObject(
+          requiredPresent(
+            await page.locator('script[type="application/ld+json"]').textContent(),
+            '(await page.locator(\'script[type="application/ld+json"]\').textContent())',
+          ),
+        )['@graph'],
+      );
+      for (const citation of objectList(
+        requiredPresent(graph[0], 'first linked-data record').citation,
+      )) {
+        await expect(page.locator(`a[href="${String(citation.url)}"]`).first()).toBeVisible();
       }
     }
   } finally {
@@ -297,39 +330,52 @@ test('search pages evidence claims link to complete versioned records without Ja
   baseURL,
   request,
 }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: requiredPresent(baseURL, 'baseURL'),
+  });
   const page = await context.newPage();
   try {
     await page.goto('./');
     await page
       .getByRole('link', { name: 'Reference results and source records', exact: true })
       .click();
-    await expect(page).toHaveURL(new URL('evidence/', baseURL!).href);
+    await expect(page).toHaveURL(new URL('evidence/', baseURL).href);
     await expect(page.locator('#quick-answer')).toContainText('307.8 seconds');
     await expect(page.locator('#quick-answer')).toContainText('153.9 seconds');
     await expect(page.locator('#quick-answer')).toContainText('607.8 s or 453.9 s elapsed');
-    const index = await (await request.get('./evidence-index.json')).json();
+    const index = objectValue(await (await request.get('./evidence-index.json')).json());
     const table = page.getByRole('table');
-    for (const item of index.cases) {
-      const run = await (await request.get('./' + item.run_path)).json();
+    for (const item of objectList(index.cases)) {
+      const run = objectValue(await (await request.get('./' + stringValue(item.run_path))).json());
       expect(run).toEqual(nativeRun(run));
-      await expect(page.locator('#' + item.id)).toContainText(item.outcome);
-      const row = table.getByRole('row').filter({ hasText: item.title });
+      await expect(page.locator('#' + stringValue(item.id))).toContainText(
+        stringValue(item.outcome),
+      );
+      const row = table.getByRole('row').filter({ hasText: stringValue(item.title) });
       for (const field of ['requested_it_kwh', 'served_it_kwh', 'unserved_it_kwh']) {
         await expect(row).toContainText(
           new Intl.NumberFormat('en-US', { maximumFractionDigits: 6 }).format(
-            Number(run.summary[field]),
+            Number(objectValue(run.summary)[field]),
           ),
         );
       }
     }
-    const graph = JSON.parse(
-      (await page.locator('script[type="application/ld+json"]').textContent())!,
-    )['@graph'];
-    const dataset = graph.find((item: { '@type': string }) => item['@type'] === 'Dataset');
+    const graph = objectList(
+      jsonObject(
+        requiredPresent(
+          await page.locator('script[type="application/ld+json"]').textContent(),
+          '(await page.locator(\'script[type="application/ld+json"]\').textContent())',
+        ),
+      )['@graph'],
+    );
+    const dataset = requiredPresent(
+      graph.find((item) => item['@type'] === 'Dataset'),
+      'Dataset linked-data record',
+    );
     expect(dataset.distribution).toHaveLength(6);
-    for (const item of dataset.distribution) {
-      const relative = item.contentUrl.slice(site.url.length);
+    for (const item of objectList(dataset.distribution)) {
+      const relative = stringValue(item.contentUrl).slice(site.url.length);
       expect((await request.get('./' + relative)).status()).toBe(200);
       await expect(page.locator(`a[href="../${relative}"]`)).toBeVisible();
     }

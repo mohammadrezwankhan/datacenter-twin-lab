@@ -1,3 +1,5 @@
+import { evidenceIndex } from '../src/evidence-index';
+import { objectValue } from './json-contracts';
 import { expect, test } from '@playwright/test';
 import { nativeRun } from './course-test-helpers';
 import { ENGINE_VERSION } from '../src/js-engine/version';
@@ -34,7 +36,7 @@ test('evidence hub exposes three complete native-equal cases, reports and captio
 }) => {
   const indexResponse = await request.get('./evidence-index.json');
   expect(indexResponse.ok()).toBe(true);
-  const index = await indexResponse.json();
+  const index = evidenceIndex(await indexResponse.json(), ENGINE_VERSION);
   expect(index.version).toBe(ENGINE_VERSION);
   expect(index.cases).toHaveLength(3);
   await page.goto('./?mode=evidence');
@@ -42,7 +44,7 @@ test('evidence hub exposes three complete native-equal cases, reports and captio
   for (const item of index.cases) {
     const response = await request.get(`./${item.run_path}`);
     expect(response.ok()).toBe(true);
-    const run = await response.json();
+    const run = objectValue(await response.json());
     expect(run.input_sha256).toBe(item.input_sha256);
     expect(run.run_id).toBe(item.run_id);
     expect(run).toEqual(nativeRun(run));

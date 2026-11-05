@@ -1,3 +1,4 @@
+import { requiredValue } from '../required-value';
 export const MODEL_VERSION = '1.0.0';
 
 export type ModelName =
@@ -76,7 +77,9 @@ type Runner = (p: InputRecord) => OutputRecord;
 
 const num = (x: unknown, name: string, lo = 0, hi = Infinity): number => {
   if (typeof x !== 'number' || !Number.isFinite(x) || x < lo || x > hi)
-    throw new RangeError(name + ' must be a finite number in [' + lo + ', ' + hi + ']');
+    throw new RangeError(
+      name + ' must be a finite number in [' + String(lo) + ', ' + String(hi) + ']',
+    );
   return x;
 };
 const pos = (x: unknown, name: string): number => {
@@ -329,7 +332,7 @@ const runners: Record<ModelName, Runner> = {
     if (!Array.isArray(p.stageSeconds) || p.stageSeconds.length === 0)
       throw new RangeError('stageSeconds is empty');
     const stageSeconds = p.stageSeconds.map((value: unknown, i: number) =>
-      num(value, 'stage ' + i),
+      num(value, 'stage ' + String(i)),
     );
     const electricalSeconds = num(p.electricalSeconds, 'electricalSeconds');
     const thermalSeconds = num(p.thermalSeconds, 'thermalSeconds');
@@ -374,7 +377,7 @@ const runners: Record<ModelName, Runner> = {
     };
   },
   releaseGate(p) {
-    return runReleaseGate(p as ReleaseGateInputs);
+    return runReleaseGate(p);
   },
 };
 
@@ -387,7 +390,7 @@ const requiredGateStates: readonly (keyof ReleaseGateInputs)[] = [
   'evidence',
 ];
 
-function runReleaseGate(states: ReleaseGateInputs): OutputRecord {
+function runReleaseGate(states: InputRecord): OutputRecord {
   const blocking: string[] = [];
   for (const key of requiredGateStates) {
     const state = states[key];
@@ -670,7 +673,7 @@ function cloneInputRecord(input: unknown, model: ModelName): InputRecord {
     else if (Array.isArray(value) && key === 'stageSeconds') {
       cloned[key] = Array.from({ length: value.length }, (_, index) => {
         if (!Object.hasOwn(value, index)) throw new TypeError('stageSeconds must not be sparse');
-        return num(value[index], key + '[' + index + ']');
+        return num(value[index], key + '[' + String(index) + ']');
       });
     } else {
       throw new TypeError(key + ' must be a number, number array, or null');
@@ -695,10 +698,7 @@ function assertFiniteTree(value: unknown): void {
 
 export function calculateScreen(model: ModelName, inputs: ScreenInputs): ScreenOutputs;
 export function calculateScreen(model: 'releaseGate', inputs: ReleaseGateInputs): ScreenOutputs;
-export function calculateScreen(
-  model: ModelName,
-  inputs: ScreenInputs | ReleaseGateInputs,
-): ScreenOutputs {
+export function calculateScreen(model: ModelName, inputs: unknown): ScreenOutputs {
   if (!Object.hasOwn(runners, model)) throw new RangeError('Unknown model: ' + model);
   if (model === 'releaseGate') {
     if (!inputs || typeof inputs !== 'object' || Array.isArray(inputs))
@@ -752,7 +752,7 @@ export function canonicalJson(value: unknown): string {
     }
     return '[' + parts.join(',') + ']';
   }
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === 'object') {
     if (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
       throw new TypeError('Canonical JSON requires plain objects');
     if (Reflect.ownKeys(value).some((key) => typeof key !== 'string'))
@@ -789,7 +789,10 @@ function sourceLocator(lesson: LessonEvidence): SourceLocator {
   return {
     id: lesson.source.id,
     chapter: lesson.source.chapter,
-    pdfPages: [pages[0], pages[pages.length - 1]],
+    pdfPages: [
+      requiredValue(pages[0], 'pages[0]'),
+      requiredValue(pages[pages.length - 1], 'pages[pages.length - 1]'),
+    ],
     evidenceStatus: lesson.source.evidenceStatus,
   };
 }

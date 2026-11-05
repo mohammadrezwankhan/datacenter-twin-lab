@@ -1,12 +1,16 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { nativeRun } from './course-test-helpers';
+import { requiredPresent } from '../src/required-value';
+import { continuityResultValue } from './continuity-contract';
+import { jsonObject } from './json-contracts';
 
-async function exportResult(page: import('@playwright/test').Page) {
+async function exportResult(page: Page) {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export guided run (JSON)' }).click();
   const download = await pending;
-  return JSON.parse(await readFile((await download.path())!, 'utf8'));
+  return continuityResultValue(jsonObject(await readFile(await download.path(), 'utf8')));
 }
 
 test('the five-minute guide requires a prediction and matches native results for both reserves', async ({
@@ -57,8 +61,12 @@ test('the five-minute guide requires a prediction and matches native results for
     await expect(page.getByTestId('guide-result')).toHaveCount(0);
     await page.getByTestId('guide-run').click();
     await expect(page.getByTestId('guide-result')).toBeVisible();
-    await expect(page.getByTestId('guide-result')).toContainText(`${item.rideThrough} seconds`);
-    await expect(page.getByTestId('guide-result')).toContainText(`${item.elapsed} s elapsed`);
+    await expect(page.getByTestId('guide-result')).toContainText(
+      `${String(item.rideThrough)} seconds`,
+    );
+    await expect(page.getByTestId('guide-result')).toContainText(
+      `${String(item.elapsed)} s elapsed`,
+    );
     await expect(page.getByTestId('guide-result')).toContainText('300 s elapsed');
 
     const result = await exportResult(page);
@@ -77,8 +85,9 @@ test('the five-minute guide requires a prediction and matches native results for
     expect(result.scenario.events).toContainEqual(
       expect.objectContaining({ at_s: 900, action: 'asset_up', target: 'utility' }),
     );
-    const depleted = result.events.find(
-      (event: { action: string }) => event.action === 'battery_depleted',
+    const depleted = requiredPresent(
+      result.events.find((event) => event.action === 'battery_depleted'),
+      'battery depletion event',
     );
     expect(Number(depleted.at_s) - 300).toBeCloseTo(item.rideThrough, 7);
     expect(Number(depleted.at_s)).toBeCloseTo(item.elapsed, 7);

@@ -28,7 +28,7 @@ async function generatePages() {
       let nextReferenceId = 0;
       const context: HookContext = {
         emitFile(file) {
-          const referenceId = `reference-${++nextReferenceId}`;
+          const referenceId = `reference-${String(++nextReferenceId)}`;
           if (file.type === 'asset')
             files.set(
               file.fileName,
@@ -52,14 +52,14 @@ function description(html: string): string {
   return html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] ?? '';
 }
 
-test('homepage and course catalog expose distinct search descriptions', async () => {
+void test('homepage and course catalog expose distinct search descriptions', async () => {
   const generated = await generatePages();
   const catalog = generated.files.get('learn/index.html');
   assert.ok(catalog, 'the static course catalog should be generated');
   assert.notEqual(description(generated.home), description(catalog));
 });
 
-test('generated not-found page has a responsive, accessible recovery path', async () => {
+void test('generated not-found page has a responsive, accessible recovery path', async () => {
   const generated = await generatePages();
   const notFound = generated.files.get('404.html');
   assert.ok(notFound, 'the static not-found page should be generated');

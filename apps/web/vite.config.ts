@@ -1,14 +1,8 @@
+import { readRegularFile } from './read-regular-file';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { createHash } from 'node:crypto';
-import {
-  copyFileSync,
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ENGINE_VERSION } from './src/js-engine/version.ts';
@@ -37,15 +31,14 @@ function engineeringHeroAssets(root: string): import('vite').Plugin {
       if (
         !existsSync(sourceRoot) ||
         lstatSync(sourceRoot).isSymbolicLink() ||
-        !lstatSync(sourceRoot).isDirectory() ||
-        !existsSync(manifestPath) ||
-        !lstatSync(manifestPath).isFile()
+        !lstatSync(sourceRoot).isDirectory()
       )
         throw new Error(
           'Run VITE_ENGINEERING_HERO=1 python scripts/prepare_browser_demo.py to verify and stage the film',
         );
 
-      const release = JSON.parse(readFileSync(manifestPath, 'utf8')) as {
+      const manifestBytes = readRegularFile(manifestPath);
+      const release = JSON.parse(manifestBytes.toString('utf8')) as {
         status?: unknown;
         frames?: unknown;
         width?: unknown;
@@ -87,7 +80,7 @@ function engineeringHeroAssets(root: string): import('vite').Plugin {
           throw new Error(`Unsafe or malformed engineering hero release entry: ${String(path)}`);
         copied.add(path);
         const source = resolve(sourceRoot, path);
-        if (!source.startsWith(`${sourceRoot}${sep}`) || !existsSync(source))
+        if (!source.startsWith(`${sourceRoot}${sep}`))
           throw new Error(`Engineering hero release file is missing or unsafe: ${path}`);
         const sourceParts = path.split('/');
         let sourceParent = sourceRoot;
@@ -96,9 +89,7 @@ function engineeringHeroAssets(root: string): import('vite').Plugin {
           if (lstatSync(sourceParent).isSymbolicLink())
             throw new Error(`Engineering hero release path contains a symbolic link: ${path}`);
         }
-        if (!lstatSync(source).isFile() || lstatSync(source).isSymbolicLink())
-          throw new Error(`Engineering hero release file is missing or unsafe: ${path}`);
-        const bytesOnDisk = readFileSync(source);
+        const bytesOnDisk = readRegularFile(source);
         if (
           bytesOnDisk.byteLength !== bytes ||
           createHash('sha256').update(bytesOnDisk).digest('hex') !== sha256
@@ -114,7 +105,7 @@ function engineeringHeroAssets(root: string): import('vite').Plugin {
           `Engineering hero release is missing required files: ${missing.join(', ')}`,
         );
       mkdirSync(outputRoot, { recursive: true });
-      copyFileSync(manifestPath, resolve(outputRoot, 'release-media.json'));
+      writeFileSync(resolve(outputRoot, 'release-media.json'), manifestBytes);
     },
   };
 }
@@ -137,7 +128,9 @@ export default defineConfig(({ mode }) => {
     ],
     // One static artifact can live at a custom-domain root or a repository subpath.
     base: mode === 'demo' ? './' : '/',
-    cacheDir: process.env.TWIN_VITE_CACHE_DIR,
+    ...(process.env.TWIN_VITE_CACHE_DIR === undefined
+      ? {}
+      : { cacheDir: process.env.TWIN_VITE_CACHE_DIR }),
     publicDir:
       mode === 'demo'
         ? '../../.local/browser-demo-assets'

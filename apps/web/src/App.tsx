@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import type { Asset, Catalog, Interval, Run, SiteScenario } from './types';
@@ -80,13 +81,18 @@ function PowerChart({
     left + (Number(seconds) / run.scenario.duration_s) * (width - left - 16);
   const y = (kw: string | number) => bottom - (Number(kw) / ymax) * 116;
   const path = (key: 'served_it_kw' | 'requested_it_kw') =>
-    rows.map((r, i) => `${i ? 'L' : 'M'}${x(r.start_s)},${y(r[key])} H${x(r.end_s)}`).join(' ');
+    rows
+      .map(
+        (r, i) =>
+          `${i ? 'L' : 'M'}${String(x(r.start_s))},${String(y(r[key]))} H${String(x(r.end_s))}`,
+      )
+      .join(' ');
   const selectFromPointer = (event: PointerEvent<SVGRectElement>) => {
     const svg = event.currentTarget.ownerSVGElement;
     if (!svg || !rows.length) return;
     const viewX = svgViewBoxPoint(svg, event.clientX, event.clientY).x;
     const fraction = Math.max(0, Math.min(1, (viewX - left) / (width - left - 16)));
-    const seconds = fraction * Number(run.scenario.duration_s);
+    const seconds = fraction * run.scenario.duration_s;
     onSelect(
       Math.max(
         0,
@@ -110,7 +116,7 @@ function PowerChart({
   return (
     <div className="power-chart-wrap">
       <svg
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${String(width)} ${String(height)}`}
         role="img"
         aria-label="IT power over the complete run, requested and served, in kilowatts"
         className="power-chart"
@@ -130,7 +136,7 @@ function PowerChart({
           </g>
         ))}
         <path
-          d={`${path('served_it_kw')} L${x(run.scenario.duration_s)},${bottom} L${left},${bottom} Z`}
+          d={`${path('served_it_kw')} L${String(x(run.scenario.duration_s))},${String(bottom)} L${String(left)},${String(bottom)} Z`}
           className="chart-fill"
         />
         <path d={path('served_it_kw')} className="chart-served" />
@@ -141,8 +147,8 @@ function PowerChart({
             <line key={i} x1={x(e.at_s)} x2={x(e.at_s)} y1={17} y2={bottom} className="eventline" />
           ))}
         <line
-          x1={x(rows[cursor].start_s)}
-          x2={x(rows[cursor].start_s)}
+          x1={x(requiredValue(rows[cursor], 'rows[cursor]').start_s)}
+          x2={x(requiredValue(rows[cursor], 'rows[cursor]').start_s)}
           y1={12}
           y2={bottom}
           className="cursorline"
@@ -206,7 +212,13 @@ function Topology({
   const ranks = new Map(assets.map((a) => [a.id, 0]));
   for (let i = 0; i < assets.length; i++)
     for (const d of edges)
-      ranks.set(d.target, Math.max(ranks.get(d.target)!, ranks.get(d.source)! + 1));
+      ranks.set(
+        d.target,
+        Math.max(
+          requiredPresent(ranks.get(d.target), 'ranks.get(d.target)'),
+          requiredPresent(ranks.get(d.source), 'ranks.get(d.source)') + 1,
+        ),
+      );
   const maxRank = Math.max(...ranks.values(), 1);
   const groups = Array.from({ length: maxRank + 1 }, (_, r) =>
     assets.filter((a) => ranks.get(a.id) === r),
@@ -215,8 +227,8 @@ function Topology({
   const width = Math.max(1030, (maxRank + 1) * 176);
   const positions = new Map(
     assets.map((a) => {
-      const r = ranks.get(a.id)!,
-        group = groups[r];
+      const r = requiredPresent(ranks.get(a.id), 'ranks.get(a.id)'),
+        group = requiredValue(groups[r], 'groups[r]');
       return [
         a.id,
         {
@@ -229,7 +241,7 @@ function Topology({
   return (
     <div className="topology-scroll">
       <svg
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${String(width)} ${String(height)}`}
         style={{ minWidth: Math.min(width, 850) }}
         className="topology"
         role="group"
@@ -249,8 +261,8 @@ function Topology({
           </marker>
         </defs>
         {edges.map((d) => {
-          const s = positions.get(d.source)!,
-            t = positions.get(d.target)!,
+          const s = requiredPresent(positions.get(d.source), 'positions.get(d.source)'),
+            t = requiredPresent(positions.get(d.target), 'positions.get(d.target)'),
             flow =
               row.feed_flows_kw.find((f) => f.source === d.source && f.target === d.target)?.kw ||
               '0';
@@ -261,7 +273,7 @@ function Topology({
               className={Number(flow) > 0 ? 'edge active' : 'edge'}
             >
               <path
-                d={`M${s.x + 150},${s.y + 31} H${mid} V${t.y + 31} H${t.x - 4}`}
+                d={`M${String(s.x + 150)},${String(s.y + 31)} H${String(mid)} V${String(t.y + 31)} H${String(t.x - 4)}`}
                 markerEnd="url(#arrow)"
               />
               <text x={mid + 4} y={(s.y + t.y) / 2 + 22}>
@@ -271,15 +283,17 @@ function Topology({
           );
         })}
         {assets.map((a) => {
-          const p = positions.get(a.id)!,
-            state = row.asset_states[a.id];
+          const p = requiredPresent(positions.get(a.id), 'positions.get(a.id)'),
+            state = requiredValue(row.asset_states[a.id], `asset state ${a.id}`);
           return (
             <g
               key={a.id}
-              transform={`translate(${p.x}, ${p.y})`}
+              transform={`translate(${String(p.x)}, ${String(p.y)})`}
               role="button"
               tabIndex={0}
-              onClick={() => onSelect(a.id)}
+              onClick={() => {
+                onSelect(a.id);
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
@@ -328,7 +342,9 @@ function AssetDetail({
       </div>
       <div>
         <span className="detail-label">State</span>
-        <strong>{words(row.asset_states[asset.id])}</strong>
+        <strong>
+          {words(requiredValue(row.asset_states[asset.id], 'row.asset_states[asset.id]'))}
+        </strong>
       </div>
       <div className="domains">
         <span className="detail-label">Failure domains</span>
@@ -389,11 +405,13 @@ function Compare({ baseline, run }: { baseline: Run; run: Run }) {
               <tr key={key}>
                 <td>{label}</td>
                 <td>
-                  {n(baseline.summary[key], 2)}{' '}
-                  {key.includes('charge') ? baseline.scenario.currency : unit}
+                  {n(baseline.summary[requiredValue(key, 'key')], 2)}{' '}
+                  {requiredValue(key, 'summary key').includes('charge')
+                    ? baseline.scenario.currency
+                    : unit}
                 </td>
                 <td>
-                  {n(run.summary[key], 2)} {unit}
+                  {n(run.summary[requiredValue(key, 'key')], 2)} {unit}
                 </td>
               </tr>
             ))}
@@ -435,7 +453,9 @@ export function App() {
       restorePreset.current();
     };
     window.addEventListener('popstate', update);
-    return () => window.removeEventListener('popstate', update);
+    return () => {
+      window.removeEventListener('popstate', update);
+    };
   }, []);
   function navigate(next: typeof page) {
     if (next === page) return;
@@ -451,7 +471,7 @@ export function App() {
     const controller = new AbortController();
     active.current = controller;
     setBusy(true);
-    (async () => {
+    void (async () => {
       try {
         const [p, d] = await Promise.all([
           request<typeof presets>('presets', controller.signal),
@@ -474,32 +494,37 @@ export function App() {
         }
       }
     })();
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [needsWorkspace, routeSearch]);
   useEffect(() => {
     if (page !== 'evidence' || catalog) return;
     const controller = new AbortController();
     request<Catalog>('catalog', controller.signal)
       .then(setCatalog)
-      .catch((cause) => {
-        if (!controller.signal.aborted) setError((cause as Error).message);
+      .catch((cause: unknown) => {
+        if (!controller.signal.aborted)
+          setError(cause instanceof Error ? cause.message : 'The catalogue could not be loaded.');
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [page, catalog]);
   useEffect(() => {
     if (!playing || !run) return;
-    const timer = window.setInterval(
-      () =>
-        setCursor((i) => {
-          if (i >= run.intervals.length - 1) {
-            setPlaying(false);
-            return i;
-          }
-          return i + 1;
-        }),
-      120,
-    );
-    return () => window.clearInterval(timer);
+    const timer = window.setInterval(() => {
+      setCursor((i) => {
+        if (i >= run.intervals.length - 1) {
+          setPlaying(false);
+          return i;
+        }
+        return i + 1;
+      });
+    }, 120);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [playing, run]);
   async function calculate(
     nextPreset?: string,
@@ -526,13 +551,18 @@ export function App() {
               `demo?preset=${encodeURIComponent(nextPreset)}`,
               controller.signal,
             )
-          : draft!);
+          : requiredPresent(draft, 'draft'));
       const result = await request<Run>('simulations', controller.signal, scenario);
       if (controller.signal.aborted || !canApply()) return;
       setRun(result);
       setDraft(result.scenario);
       setCursor(0);
-      setSelected(result.scenario.assets.find((item) => item.kind === 'load')!.id);
+      setSelected(
+        requiredPresent(
+          result.scenario.assets.find((item) => item.kind === 'load'),
+          "result.scenario.assets.find((item) => item.kind === 'load')",
+        ).id,
+      );
       if (nextPreset) {
         setPreset(nextPreset);
         if (updateUrl) {
@@ -573,7 +603,9 @@ export function App() {
     a.href = url;
     a.download = `twin-run-${run.run_id.slice(0, 12)}.json`;
     a.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    window.setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
     setNotice('Run exported with inputs, timeline, source IDs, and energy ledger.');
   }
   const row = run?.intervals[cursor];
@@ -604,7 +636,9 @@ export function App() {
           {(
             [
               ...(browserDemo ? [['start', '◉', 'Start here'] as const] : []),
-              ...(browserDemo ? [['learn', '▹', `${courseTotal} browser lessons`] as const] : []),
+              ...(browserDemo
+                ? [['learn', '▹', `${String(courseTotal)} browser lessons`] as const]
+                : []),
               ['emt', '∿', 'EMT study'],
               ...(browserDemo ? [['studies', '◌', 'Power dynamics studies'] as const] : []),
               ['overview', '◫', browserDemo ? 'Advanced workspace' : 'Overview'],
@@ -622,7 +656,9 @@ export function App() {
               key={id}
               className={page === id ? 'nav-item current' : 'nav-item'}
               aria-current={page === id ? 'page' : undefined}
-              onClick={() => navigate(id)}
+              onClick={() => {
+                navigate(id);
+              }}
             >
               <span aria-hidden="true">{icon}</span>
               {label}
@@ -638,7 +674,11 @@ export function App() {
           </strong>
           <p>{courseTotal} interactive lessons, from kW to infrastructure evidence.</p>
           {browserDemo ? (
-            <button onClick={() => navigate('learn')}>
+            <button
+              onClick={() => {
+                navigate('learn');
+              }}
+            >
               Open the course <span aria-hidden="true">↗</span>
             </button>
           ) : (
@@ -709,7 +749,7 @@ export function App() {
                     : page === 'assurance'
                       ? 'Equations, inputs and outputs, together in one research assurance packet.'
                       : page === 'learn'
-                        ? `${courseTotal} interactive lessons for datacenter engineers. Predict, experiment and explain.`
+                        ? `${String(courseTotal)} interactive lessons for datacenter engineers. Predict, experiment and explain.`
                         : page === 'evidence'
                           ? 'Trace the inputs and options behind each calculation.'
                           : page === 'energy'
@@ -733,7 +773,9 @@ export function App() {
                       disabled={!run || busy}
                       aria-expanded={timelineOpen}
                       aria-controls="demand-timeline"
-                      onClick={() => setTimelineOpen(!timelineOpen)}
+                      onClick={() => {
+                        setTimelineOpen(!timelineOpen);
+                      }}
                     >
                       Edit demand timeline
                     </button>
@@ -742,7 +784,9 @@ export function App() {
                     disabled={!run || busy}
                     aria-expanded={filesOpen}
                     aria-controls="scenario-files"
-                    onClick={() => setFilesOpen(!filesOpen)}
+                    onClick={() => {
+                      setFilesOpen(!filesOpen);
+                    }}
                   >
                     Import scenario
                   </button>
@@ -765,7 +809,15 @@ export function App() {
           {error && (
             <div role="alert" className="error-banner">
               {error}
-              {!run && <button onClick={() => window.location.reload()}>Retry</button>}
+              {!run && (
+                <button
+                  onClick={() => {
+                    window.location.reload();
+                  }}
+                >
+                  Retry
+                </button>
+              )}
             </div>
           )}
           {notice && (
@@ -786,9 +838,15 @@ export function App() {
             <>
               {engineeringHeroEnabled && <EngineeringHero />}
               <GuidedStart
-                onExplore={() => navigate('overview')}
-                onLearn={() => navigate('learn')}
-                onEvidence={() => navigate('assurance')}
+                onExplore={() => {
+                  navigate('overview');
+                }}
+                onLearn={() => {
+                  navigate('learn');
+                }}
+                onEvidence={() => {
+                  navigate('assurance');
+                }}
               />
             </>
           )}
@@ -830,10 +888,12 @@ export function App() {
               {page === 'energy' ? (
                 <EnergyGuide
                   onScenario={(mode) => {
-                    const profile =
+                    const profile = requiredValue(
                       facilityProfiles.find((item) =>
                         Object.values(item.presets).includes(preset),
-                      ) ?? facilityProfiles[0];
+                      ) ?? facilityProfiles[0],
+                      'facilityProfiles.find((item) =>\n                        Object.values(item.presets).includes(preset),\n                      ) ?? facilityProfiles[0]',
+                    );
                     navigate('overview');
                     void calculate(profile.presets[mode]);
                   }}
@@ -926,7 +986,9 @@ export function App() {
                         step="any"
                         required
                         value={draft.it_demand_kw}
-                        onChange={(e) => setDraft({ ...draft, it_demand_kw: e.target.value })}
+                        onChange={(e) => {
+                          setDraft({ ...draft, it_demand_kw: e.target.value });
+                        }}
                         disabled={busy}
                       />
                     </label>
@@ -939,9 +1001,9 @@ export function App() {
                         step="any"
                         value={draft.tariff_per_kwh ?? ''}
                         placeholder="Unknown"
-                        onChange={(e) =>
-                          setDraft({ ...draft, tariff_per_kwh: e.target.value || null })
-                        }
+                        onChange={(e) => {
+                          setDraft({ ...draft, tariff_per_kwh: e.target.value || null });
+                        }}
                         disabled={busy}
                       />
                     </label>
@@ -955,9 +1017,9 @@ export function App() {
                         step="any"
                         required
                         value={draft.battery_initial_kwh}
-                        onChange={(e) =>
-                          setDraft({ ...draft, battery_initial_kwh: e.target.value })
-                        }
+                        onChange={(e) => {
+                          setDraft({ ...draft, battery_initial_kwh: e.target.value });
+                        }}
                         disabled={busy}
                       />
                     </label>
@@ -970,9 +1032,9 @@ export function App() {
                         max="86400"
                         required
                         value={draft.generator_start_delay_s}
-                        onChange={(e) =>
-                          setDraft({ ...draft, generator_start_delay_s: Number(e.target.value) })
-                        }
+                        onChange={(e) => {
+                          setDraft({ ...draft, generator_start_delay_s: Number(e.target.value) });
+                        }}
                         disabled={busy}
                       />
                     </label>
@@ -994,7 +1056,7 @@ export function App() {
                     <span>
                       {dirty
                         ? 'Unapplied edits · results below belong to the last completed run'
-                        : `${run.scenario.name} · ${n(run.scenario.it_demand_kw, 0)} kW demand · ${run.scenario.duration_s / 60} min`}
+                        : `${run.scenario.name} · ${n(run.scenario.it_demand_kw, 0)} kW demand · ${String(run.scenario.duration_s / 60)} min`}
                     </span>
                     <span className="mono" data-testid="run-id">
                       RUN {run.run_id.slice(0, 12)}
@@ -1070,7 +1132,9 @@ export function App() {
                       <AssetDetail
                         asset={asset}
                         row={row}
-                        onEvidence={() => navigate('evidence')}
+                        onEvidence={() => {
+                          navigate('evidence');
+                        }}
                       />
                     )}
                     {page === 'topology' && (
@@ -1157,7 +1221,7 @@ export function App() {
                     </section>
                     <section className="panel event-panel">
                       <div className="section-title">
-                        <h2>Events & warnings</h2>
+                        <h2>Events &amp; warnings</h2>
                         <span className="pill">{run.events.length} events</span>
                       </div>
                       <div className="warnings" data-testid="warnings">
@@ -1243,7 +1307,11 @@ export function App() {
                           answer.
                         </p>
                       </div>
-                      <button onClick={() => navigate('energy')}>
+                      <button
+                        onClick={() => {
+                          navigate('energy');
+                        }}
+                      >
                         Explore energy systems <span aria-hidden="true">↗</span>
                       </button>
                     </div>
@@ -1253,7 +1321,7 @@ export function App() {
                   {browserDemo && <PythonVerification run={run} />}
                   <details className="panel assumptions">
                     <summary>
-                      Model boundary & run evidence <span>Synthetic · uncalibrated</span>
+                      Model boundary &amp; run evidence <span>Synthetic · uncalibrated</span>
                     </summary>
                     <p>{run.boundary}</p>
                     <p>
@@ -1273,7 +1341,9 @@ export function App() {
                     <button
                       type="button"
                       aria-label="Open evidence register"
-                      onClick={() => navigate('evidence')}
+                      onClick={() => {
+                        navigate('evidence');
+                      }}
                     >
                       Open evidence register <span aria-hidden="true">↗</span>
                     </button>
@@ -1287,7 +1357,7 @@ export function App() {
             <span>Synthetic planning · uncalibrated · electrical boundary only</span>
             {browserDemo && (
               <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/engineering/browser-demo.md">
-                Privacy, runtime & source
+                Privacy, runtime &amp; source
               </a>
             )}
           </footer>

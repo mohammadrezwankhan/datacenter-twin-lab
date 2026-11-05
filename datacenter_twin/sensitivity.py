@@ -1,16 +1,15 @@
 """Deterministic one-parameter sensitivity sweeps for schema-v2 continuity."""
 
-from dataclasses import replace
-from decimal import Decimal
 import hashlib
 import json
+from dataclasses import replace
+from decimal import Decimal
 from typing import Any
 
 from . import __version__
 from .continuity import SimulationRun, simulate_continuity
 from .contracts import InputError, decimal_text, number
 from .topology import SiteScenario
-
 
 SWEEP_PARAMETERS = {
     "battery_initial_kwh": "kWh",
@@ -45,20 +44,25 @@ def _summary(run: SimulationRun) -> dict[str, Any]:
     for interval in run.intervals:
         for warning in interval.get("warnings", []):
             warning_counts[warning] = warning_counts.get(warning, 0) + 1
-    unknowns = [key for key in ("generator_energy_charge", "total_incremental_energy_charge")
-                if summary.get(key) is None]
-    summary.update({
-        "requested_kwh": summary["requested_it_kwh"],
-        "served_kwh": summary["served_it_kwh"],
-        "unserved_kwh": summary["unserved_it_kwh"],
-        "unserved_seconds": summary["unserved_duration_s"],
-        "first_battery_depletion_s": next(
-            (event["at_s"] for event in run.events if event["action"] == "battery_depleted"),
-            None,
-        ),
-        "cost_unknowns": unknowns,
-        "warning_counts": warning_counts,
-    })
+    unknowns = [
+        key
+        for key in ("generator_energy_charge", "total_incremental_energy_charge")
+        if summary.get(key) is None
+    ]
+    summary.update(
+        {
+            "requested_kwh": summary["requested_it_kwh"],
+            "served_kwh": summary["served_it_kwh"],
+            "unserved_kwh": summary["unserved_it_kwh"],
+            "unserved_seconds": summary["unserved_duration_s"],
+            "first_battery_depletion_s": next(
+                (event["at_s"] for event in run.events if event["action"] == "battery_depleted"),
+                None,
+            ),
+            "cost_unknowns": unknowns,
+            "warning_counts": warning_counts,
+        }
+    )
     return summary
 
 
@@ -67,7 +71,20 @@ def _canonical_digest(scenario: SiteScenario) -> str:
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def sweep_continuity(scenario: SiteScenario, parameter: str, values: list[str | int]) -> dict:
+def _with_parameter(scenario: SiteScenario, parameter: str, value: Decimal) -> SiteScenario:
+    """Keep each validated sweep field paired with its concrete constructor type."""
+    if parameter == "generator_start_delay_s":
+        return replace(scenario, generator_start_delay_s=int(value))
+    if parameter == "battery_initial_kwh":
+        return replace(scenario, battery_initial_kwh=value)
+    if parameter == "it_demand_kw":
+        return replace(scenario, it_demand_kw=value)
+    if parameter == "distribution_efficiency":
+        return replace(scenario, distribution_efficiency=value)
+    raise InputError("Unsupported sweep parameter")
+
+
+def sweep_continuity(scenario: object, parameter: object, values: object) -> dict[str, Any]:
     """Run independent simulations while varying one validated scenario field.
 
     Values are normalised to the scenario's decimal representation, retained in
@@ -95,18 +112,17 @@ def sweep_continuity(scenario: SiteScenario, parameter: str, values: list[str | 
 
     base_run = simulate_continuity(scenario)
     runs: list[dict[str, Any]] = []
-    full_results: list[dict] = []
+    full_results: list[dict[str, Any]] = []
     full_size = 0
     include_full = True
     for parsed, label in parsed_values:
-        candidate_value = (
-            int(parsed) if parameter == "generator_start_delay_s" else parsed
-        )
-        candidate = replace(scenario, **{parameter: candidate_value})
+        candidate = _with_parameter(scenario, parameter, parsed)
         run = simulate_continuity(candidate)
         run_result = run.to_dict()
         if include_full:
-            full_size += len(json.dumps(run_result, sort_keys=True, separators=(",", ":"), ensure_ascii=True))
+            full_size += len(
+                json.dumps(run_result, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+            )
             if full_size <= _MAX_FULL_RESULT_BYTES:
                 full_results.append(run_result)
             else:
@@ -114,17 +130,19 @@ def sweep_continuity(scenario: SiteScenario, parameter: str, values: list[str | 
                 # is crossed; summaries continue to be collected below.
                 include_full = False
                 full_results.clear()
-        runs.append({
-            "value": label,
-            "value_label": f"{label} {SWEEP_PARAMETERS[parameter]}",
-            "value_unit": SWEEP_PARAMETERS[parameter],
-            "run_id": run.run_id,
-            "input_sha256": run.input_sha256,
-            "summary": _summary(run),
-        })
+        runs.append(
+            {
+                "value": label,
+                "value_label": f"{label} {SWEEP_PARAMETERS[parameter]}",
+                "value_unit": SWEEP_PARAMETERS[parameter],
+                "run_id": run.run_id,
+                "input_sha256": run.input_sha256,
+                "summary": _summary(run),
+            }
+        )
 
     if include_full:
-        for entry, run_result in zip(runs, full_results):
+        for entry, run_result in zip(runs, full_results, strict=True):
             entry["result"] = run_result
 
     return {
@@ -142,7 +160,10 @@ def sweep_continuity(scenario: SiteScenario, parameter: str, values: list[str | 
         "full_results_limit_bytes": _MAX_FULL_RESULT_BYTES,
         "assumptions": [
             "Each value is evaluated from the same starting schema-v2 scenario.",
-            "Values change one scenario field; battery capacity and all other topology inputs remain fixed.",
+            (
+                "Values change one scenario field; battery capacity and all"
+                " other topology inputs remain fixed."
+            ),
             "Energy accounting is exact within the synthetic single-IT-load continuity model.",
         ],
         "limitations": [

@@ -1,0 +1,21 @@
+title = "Rezwan default secret detection"
+# Keep the complete upstream rule set. Reviewed exceptions require an exact
+# non-secret value, field, path and rule; no whole file or commit is skipped.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Verified historical CSS SHA-256; see .github/security/reviews/demo-checksum.json"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''(^|/)docs/images/demo-walkthrough\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"apps/web/src/tokens\.css"\s*:\s*"50193e895bf17bb104523f3780c981aa82619a60dcebefe49d3ac4629315373e",?\s*$''']
+
+[[allowlists]]
+description = "Exact public Ubuntu Archive 2018 signing fingerprint in the native source lock"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^(?:/tmp/rezwan-secret-source-[^/]+/)?\.github/security/native-scanner\.json$''']
+regexTarget = "match"
+regexes = ['''^distribution_signature_key": "F6ECB3762474EDA9D21B7022871920D1991BC93C"$''']

@@ -1,9 +1,12 @@
+import { requiredPresent } from './src/required-value';
 import type { LearningRecord } from './learn-manifest';
 
 const escape = (value: string) =>
-  value.replace(
-    /[&<>"']/g,
-    (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+  value.replace(/[&<>"']/g, (c) =>
+    requiredPresent(
+      { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c],
+      "({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' })[c]",
+    ),
   );
 
 const paths = [
@@ -35,22 +38,22 @@ const paths = [
 
 export function learningDirectory(items: LearningRecord[]): string {
   const count = (kind: string) => items.filter((item) => item.kind === kind).length;
-  return `<nav class="learning-paths" aria-label="Learning pathways">${paths.map((path, index) => `<a href="#${path.id}" data-path="${path.id}" class="path-${path.id}"><span class="path-number">0${index + 1} / ${count(path.id)} ${path.unit}</span><strong>${path.label} <span aria-hidden="true">↗</span></strong><span>${path.detail}</span></a>`).join('')}</nav>
+  return `<nav class="learning-paths" aria-label="Learning pathways">${paths.map((path, index) => `<a href="#${path.id}" data-path="${path.id}" class="path-${path.id}"><span class="path-number">0${String(index + 1)} / ${String(count(path.id))} ${path.unit}</span><strong>${path.label} <span aria-hidden="true">↗</span></strong><span>${path.detail}</span></a>`).join('')}</nav>
 <section id="learning-library" aria-labelledby="library-title">
-<div class="section-heading"><div><p class="eyebrow">Find your next question</p><h2 id="library-title">The learning library</h2></div><p>${count('continuity')} continuity lessons · ${count('infrastructure')} infrastructure lessons · ${count('emt')} EMT study · ${count('dynamics')} advanced studies.<br>Scenario presets are a separate collection.</p></div>
+<div class="section-heading"><div><p class="eyebrow">Find your next question</p><h2 id="library-title">The learning library</h2></div><p>${String(count('continuity'))} continuity lessons · ${String(count('infrastructure'))} infrastructure lessons · ${String(count('emt'))} EMT study · ${String(count('dynamics'))} advanced studies.<br>Scenario presets are a separate collection.</p></div>
 <form class="learn-search" role="search" aria-label="Search learning content" hidden>
 <label for="learning-search">Search a topic or question<input id="learning-search" name="q" type="search" maxlength="200" placeholder="Try battery, voltage or shared controls" autocomplete="off"></label>
 <fieldset><legend>Learning path</legend><div class="path-filters"><button type="button" data-filter="all" aria-pressed="true">All paths</button>${paths.map((path) => `<button type="button" data-filter="${path.id}" aria-pressed="false">${path.label}</button>`).join('')}</div></fieldset>
-<div class="search-footer"><p role="status" aria-live="polite" aria-atomic="true" id="learning-count">${items.length} learning items shown</p><button type="reset">Clear filters</button></div></form>
+<div class="search-footer"><p role="status" aria-live="polite" aria-atomic="true" id="learning-count">${String(items.length)} learning items shown</p><button type="reset">Clear filters</button></div></form>
 <p class="learn-empty" hidden>No matching lessons or studies. Try a broader term, or clear the filters to see every path.</p>
 ${paths
   .map(
     (path) =>
-      `<section id="${path.id}" class="learning-group path-${path.id}" aria-labelledby="${path.id}-title"><div class="group-heading"><h3 id="${path.id}-title">${path.label}</h3><span>${count(path.id)} ${path.unit}</span></div><div class="learning-cards">${items
+      `<section id="${path.id}" class="learning-group path-${path.id}" aria-labelledby="${path.id}-title"><div class="group-heading"><h3 id="${path.id}-title">${path.label}</h3><span>${String(count(path.id))} ${path.unit}</span></div><div class="learning-cards">${items
         .filter((item) => item.kind === path.id)
         .map(
           (item) =>
-            `<article class="learning-card" data-learning-id="${item.id}" data-kind="${item.kind}" data-search="${escape([item.title, item.question, item.description, ...item.tags].join(' ').toLowerCase())}"><span class="eyebrow">${item.kind === 'continuity' || item.kind === 'infrastructure' ? `Lesson ${String(item.sequence).padStart(2, '0')} / ${count('continuity') + count('infrastructure')}` : item.kind === 'emt' ? 'EMT fundamentals' : `Study ${item.sequence} / ${count('dynamics')}`}</span><h4><a href="..${item.overviewPath}">${escape(item.title)}</a></h4>${item.question ? `<p>${escape(item.question)}</p>` : ''}<p class="card-description">${escape(item.description)}</p><div class="card-links"><a href="..${item.overviewPath}">${item.kind === 'continuity' || item.kind === 'infrastructure' ? 'Read lesson' : 'Read study guide'}<span class="sr-only">: ${escape(item.title)}</span></a><a href="..${item.runtimePath}">Run experiment<span class="sr-only">: ${escape(item.title)}</span><span aria-hidden="true"> ↗</span></a></div></article>`,
+            `<article class="learning-card" data-learning-id="${item.id}" data-kind="${item.kind}" data-search="${escape([item.title, item.question, item.description, ...item.tags].join(' ').toLowerCase())}"><span class="eyebrow">${item.kind === 'continuity' || item.kind === 'infrastructure' ? `Lesson ${String(item.sequence).padStart(2, '0')} / ${String(count('continuity') + count('infrastructure'))}` : item.kind === 'emt' ? 'EMT fundamentals' : `Study ${String(item.sequence)} / ${String(count('dynamics'))}`}</span><h4><a href="..${item.overviewPath}">${escape(item.title)}</a></h4>${item.question ? `<p>${escape(item.question)}</p>` : ''}<p class="card-description">${escape(item.description)}</p><div class="card-links"><a href="..${item.overviewPath}">${item.kind === 'continuity' || item.kind === 'infrastructure' ? 'Read lesson' : 'Read study guide'}<span class="sr-only">: ${escape(item.title)}</span></a><a href="..${item.runtimePath}">Run experiment<span class="sr-only">: ${escape(item.title)}</span><span aria-hidden="true"> ↗</span></a></div></article>`,
         )
         .join('')}</div></section>`,
   )
@@ -143,7 +146,7 @@ function modelDiagram(model: (typeof models)[number]): string {
       : model.id === 'emt'
         ? 'M75 155V65H470V275H75V155 M325 65V275'
         : 'M75 75H455 M270 75V155H175V235 M270 155H385V235';
-  return `<svg viewBox="0 0 540 320" role="img" aria-labelledby="diagram-${model.id}-title diagram-${model.id}-desc"><title id="diagram-${model.id}-title">${model.name}: illustrative system relationships</title><desc id="diagram-${model.id}-desc">${model.summary}</desc><path class="diagram-wire" d="${path}"/><path class="diagram-flow" d="${path}"/>${positions.map(([x, y], i) => `<g transform="translate(${x},${y})"><path class="node-depth" d="M-61,-26 L-50,-37 L72,-37 L72,15 L61,26 L-61,26Z"/><rect class="node-face" x="-61" y="-26" width="122" height="52" rx="7"/><text y="5" text-anchor="middle">${model.nodes[i]}</text></g>`).join('')}</svg>`;
+  return `<svg viewBox="0 0 540 320" role="img" aria-labelledby="diagram-${model.id}-title diagram-${model.id}-desc"><title id="diagram-${model.id}-title">${model.name}: illustrative system relationships</title><desc id="diagram-${model.id}-desc">${model.summary}</desc><path class="diagram-wire" d="${path}"/><path class="diagram-flow" d="${path}"/>${positions.map(([x, y], i) => `<g transform="translate(${String(x)},${String(y)})"><path class="node-depth" d="M-61,-26 L-50,-37 L72,-37 L72,15 L61,26 L-61,26Z"/><rect class="node-face" x="-61" y="-26" width="122" height="52" rx="7"/><text y="5" text-anchor="middle">${String(model.nodes[i])}</text></g>`).join('')}</svg>`;
 }
 
 export function learningExplorer(): string {
@@ -160,7 +163,7 @@ ${models
       ]
         .map(
           ([label, text], i) =>
-            `<details ${i === 0 ? 'open' : ''}><summary><span class="lens-number">0${i + 1}</span> ${label}</summary><p>${text}</p>${label === 'Verification' ? `<a href="${model.evidence}">Read the guide, evidence and sources →</a>` : ''}</details>`,
+            `<details ${i === 0 ? 'open' : ''}><summary><span class="lens-number">0${String(i + 1)}</span> ${String(label)}</summary><p>${String(text)}</p>${label === 'Verification' ? `<a href="${model.evidence}">Read the guide, evidence and sources →</a>` : ''}</details>`,
         )
         .join(
           '',

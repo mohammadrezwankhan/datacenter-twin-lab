@@ -19,14 +19,14 @@ for (const [key, value, label] of [
   ['waterCp', 1e308, 'Water'],
   ['airCp', 1e308, 'Air'],
 ] as const) {
-  test(`thermal rejects an overflowing ${label.toLowerCase()} denominator`, () => {
+  void test(`thermal rejects an overflowing ${label.toLowerCase()} denominator`, () => {
     assert.throws(
       () => calculateScreen('thermalScreen', { ...thermal, [key]: value }),
       new RegExp(label + '.*overflow', 'i'),
     );
   });
 }
-test('thermal rejects an underflowed positive heat-capacity product', () => {
+void test('thermal rejects an underflowed positive heat-capacity product', () => {
   assert.throws(
     () =>
       calculateScreen('thermalScreen', {
@@ -37,16 +37,16 @@ test('thermal rejects an underflowed positive heat-capacity product', () => {
     /Water.*underflow/i,
   );
 });
-test('ordinary thermal flow and lumped time remain correct', () => {
+void test('ordinary thermal flow and lumped time remain correct', () => {
   const output = calculateScreen('thermalScreen', thermal);
   assert.equal(output.waterKgS, 80000 / 41860);
   assert.equal(output.residualAirM3S, 20000 / (1.2 * 1005 * 12));
   assert.equal(output.thermalLimitS, 100);
 });
-test('zero captured heat still yields zero water flow with a valid denominator', () => {
+void test('zero captured heat still yields zero water flow with a valid denominator', () => {
   assert.equal(calculateScreen('thermalScreen', { ...thermal, captureFraction: 0 }).waterKgS, 0);
 });
-test('equal extreme MTBF and MTTR retain half availability', () => {
+void test('equal extreme MTBF and MTTR retain half availability', () => {
   const output = calculateScreen('availability', {
     mtbfH: 1e308,
     mttrH: 1e308,
@@ -57,7 +57,7 @@ test('equal extreme MTBF and MTTR retain half availability', () => {
   assert.equal(output.combinedQ, 0.25);
   assert.equal(output.unavailableMinutesPer8760H, 131400);
 });
-test('availability remains correct for ordinary and zero repair time', () => {
+void test('availability remains correct for ordinary and zero repair time', () => {
   const ordinary = calculateScreen('availability', {
     mtbfH: 1000,
     mttrH: 10,
@@ -73,7 +73,7 @@ test('availability remains correct for ordinary and zero repair time', () => {
     1,
   );
 });
-test('availability handles repair time greater than MTBF without an overflowing sum', () => {
+void test('availability handles repair time greater than MTBF without an overflowing sum', () => {
   const output = calculateScreen('availability', {
     mtbfH: 1e308,
     mttrH: 1.5e308,

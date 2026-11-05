@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import {
   trackLessons,
@@ -52,14 +53,15 @@ const trackOrder: CurriculumTrackId[] = [
 
 for (const track of ['foundations', 'facility', 'infrastructure'] as const) {
   const members = trackLessons(track);
-  trackDetails[track].summary = `Lessons ${members[0].number}–${members.at(-1)!.number}`;
+  trackDetails[track].summary =
+    `Lessons ${String(requiredValue(members[0], 'members[0]').number)}–${String(requiredPresent(members.at(-1), 'members.at(-1)').number)}`;
 }
-trackDetails['power-dynamics'].summary = `EMT + ${RESEARCH_STUDIES.length} studies`;
+trackDetails['power-dynamics'].summary = `EMT + ${String(RESEARCH_STUDIES.length)} studies`;
 
 function lessonRouteChoices(trackId: LessonTrackId) {
   return trackLessons(trackId).map((lesson) => ({
     href: `?lesson=${encodeURIComponent(lesson.id)}`,
-    label: `Lesson ${lesson.number} · ${lesson.title}`,
+    label: `Lesson ${String(lesson.number)} · ${lesson.title}`,
   }));
 }
 
@@ -78,7 +80,9 @@ export function CurriculumTracks({ activeTrack = 'foundations' }: CurriculumTrac
   const [selectedTrack, setSelectedTrack] = useState(activeTrack);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
-  useEffect(() => setSelectedTrack(activeTrack), [activeTrack]);
+  useEffect(() => {
+    setSelectedTrack(activeTrack);
+  }, [activeTrack]);
 
   function selectTrack(trackId: CurriculumTrackId, focus = false) {
     setSelectedTrack(trackId);
@@ -98,7 +102,7 @@ export function CurriculumTracks({ activeTrack = 'foundations' }: CurriculumTrac
     if (event.key === 'End') nextIndex = trackOrder.length - 1;
     if (nextIndex === undefined) return;
     event.preventDefault();
-    selectTrack(trackOrder[nextIndex], true);
+    selectTrack(requiredValue(trackOrder[nextIndex], 'trackOrder[nextIndex]'), true);
   }
 
   const currentDetails = trackDetails[selectedTrack];
@@ -133,7 +137,9 @@ export function CurriculumTracks({ activeTrack = 'foundations' }: CurriculumTrac
               aria-selected={isSelected}
               aria-controls="curriculum-track-panel"
               tabIndex={isSelected ? 0 : -1}
-              onClick={() => selectTrack(trackId)}
+              onClick={() => {
+                selectTrack(trackId);
+              }}
               onKeyDown={onTabKeyDown}
             >
               <span className="curriculum-track-tab-title">{details.title}</span>

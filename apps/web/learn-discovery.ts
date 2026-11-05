@@ -1,3 +1,4 @@
+import { requiredPresent } from './src/required-value';
 // This page reveals reviewed HTML only; numerical engines are separate, explicit links.
 const form = document.querySelector<HTMLFormElement>('.learn-search');
 const search = document.querySelector<HTMLInputElement>('#learning-search');
@@ -23,7 +24,8 @@ function render(): void {
     group.hidden = !group.querySelector('[data-learning-id]:not([hidden])');
   for (const button of filters)
     button.setAttribute('aria-pressed', String(button.dataset.filter === path));
-  if (count) count.textContent = `${visible} of ${cards.length} learning items shown`;
+  if (count)
+    count.textContent = `${String(visible)} of ${String(cards.length)} learning items shown`;
   if (empty) empty.hidden = visible !== 0;
 }
 
@@ -49,7 +51,9 @@ function restore(): void {
 if (form && search) {
   form.hidden = false;
   restore();
-  search.addEventListener('input', () => save());
+  search.addEventListener('input', () => {
+    save();
+  });
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     save(true);
@@ -87,33 +91,61 @@ const motionAllowed = () => !reducedMotion.matches && !connection?.saveData;
 
 function stop(diagram: HTMLElement): void {
   diagram.classList.remove('flow-playing', 'flow-paused');
-  const pause = diagram.querySelector<HTMLButtonElement>('[data-flow="pause"]')!;
+  const pause = requiredPresent(
+    diagram.querySelector<HTMLButtonElement>('[data-flow="pause"]'),
+    'diagram.querySelector<HTMLButtonElement>(\'[data-flow="pause"]\')',
+  );
   pause.disabled = true;
   pause.textContent = 'Pause flow';
-  diagram.querySelector<HTMLElement>('.flow-status')!.textContent = motionAllowed()
+  requiredPresent(
+    diagram.querySelector<HTMLElement>('.flow-status'),
+    "diagram.querySelector<HTMLElement>('.flow-status')",
+  ).textContent = motionAllowed()
     ? 'Static diagram. No simulation is running.'
     : 'Static view: reduced motion or data saving is enabled.';
 }
 
 for (const diagram of diagrams) {
-  const controls = diagram.querySelector<HTMLElement>('.diagram-controls')!;
-  const stage = diagram.querySelector<HTMLElement>('.diagram-stage')!;
-  const replay = diagram.querySelector<HTMLButtonElement>('[data-flow="replay"]')!;
-  const pause = diagram.querySelector<HTMLButtonElement>('[data-flow="pause"]')!;
-  const status = diagram.querySelector<HTMLElement>('.flow-status')!;
+  const controls = requiredPresent(
+    diagram.querySelector<HTMLElement>('.diagram-controls'),
+    "diagram.querySelector<HTMLElement>('.diagram-controls')",
+  );
+  const stage = requiredPresent(
+    diagram.querySelector<HTMLElement>('.diagram-stage'),
+    "diagram.querySelector<HTMLElement>('.diagram-stage')",
+  );
+  const replay = requiredPresent(
+    diagram.querySelector<HTMLButtonElement>('[data-flow="replay"]'),
+    'diagram.querySelector<HTMLButtonElement>(\'[data-flow="replay"]\')',
+  );
+  const pause = requiredPresent(
+    diagram.querySelector<HTMLButtonElement>('[data-flow="pause"]'),
+    'diagram.querySelector<HTMLButtonElement>(\'[data-flow="pause"]\')',
+  );
+  const status = requiredPresent(
+    diagram.querySelector<HTMLElement>('.flow-status'),
+    "diagram.querySelector<HTMLElement>('.flow-status')",
+  );
   controls.hidden = false;
   const reduce = () => {
     stop(diagram);
     replay.disabled = !motionAllowed();
     stage.classList.toggle('static-view', !motionAllowed());
-    diagram.querySelector<HTMLButtonElement>('[data-view="rotate"]')!.disabled = !motionAllowed();
+    requiredPresent(
+      diagram.querySelector<HTMLButtonElement>('[data-view="rotate"]'),
+      'diagram.querySelector<HTMLButtonElement>(\'[data-view="rotate"]\')',
+    ).disabled = !motionAllowed();
   };
   reduce();
   reducedMotion.addEventListener('change', reduce);
-  diagram
-    .querySelector('[data-view="rotate"]')!
-    .addEventListener('click', () => stage.classList.toggle('is-rotated'));
-  diagram.querySelector('[data-view="reset"]')!.addEventListener('click', () => {
+  requiredPresent(
+    diagram.querySelector('[data-view="rotate"]'),
+    'diagram\n    .querySelector(\'[data-view="rotate"]\')',
+  ).addEventListener('click', () => stage.classList.toggle('is-rotated'));
+  requiredPresent(
+    diagram.querySelector('[data-view="reset"]'),
+    'diagram.querySelector(\'[data-view="reset"]\')',
+  ).addEventListener('click', () => {
     stage.classList.remove('is-rotated');
     stop(diagram);
   });
@@ -133,14 +165,16 @@ for (const diagram of diagrams) {
       ? 'Illustration paused. No simulation is running.'
       : 'Illustrative flow resumed.';
   });
-  stage.addEventListener('animationend', () => stop(diagram));
+  stage.addEventListener('animationend', () => {
+    stop(diagram);
+  });
   new IntersectionObserver(([entry]) => {
-    if (!entry.isIntersecting) stop(diagram);
+    if (entry && !entry.isIntersecting) stop(diagram);
   }).observe(diagram);
 }
 
 if (picker) {
-  picker.parentElement!.hidden = false;
+  requiredPresent(picker.parentElement, 'picker.parentElement').hidden = false;
   const choose = () => {
     for (const diagram of diagrams) {
       stop(diagram);

@@ -1,3 +1,11 @@
+import {
+  continuityValue,
+  scenarioValue,
+  jsonObject,
+  type ContinuityFixture,
+} from './json-contracts';
+import { demoFixture } from '../tests-engine/json-fixtures';
+import { requiredPresent } from '../src/required-value';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
@@ -5,10 +13,16 @@ import { execFileSync } from 'node:child_process';
 import { nativeRun } from './course-test-helpers';
 import type { SiteScenario } from '../src/types';
 
-async function download(page: Page, name: string) {
+async function download(page: Page, name: 'Export run'): Promise<ContinuityFixture>;
+async function download(page: Page, name: 'Download current scenario'): Promise<SiteScenario>;
+async function download(
+  page: Page,
+  name: 'Export run' | 'Download current scenario',
+): Promise<ContinuityFixture | SiteScenario> {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name, exact: true }).click();
-  return JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  const value: unknown = JSON.parse(await readFile(await (await pending).path(), 'utf8'));
+  return name === 'Export run' ? continuityValue(value) : scenarioValue(value);
 }
 
 async function choose(page: Page, data: unknown, name = 'scenario.json') {
@@ -43,7 +57,7 @@ test('all eighteen saved scenarios preview without execution and reproduce nativ
     if (request.method() !== 'GET') requests.push(request.url());
   });
   await openFiles(page);
-  const data = JSON.parse(
+  const data = demoFixture(
     await readFile('../../.local/browser-demo-assets/demo-data.json', 'utf8'),
   );
   expect(Object.keys(data.scenarios)).toHaveLength(18);
@@ -51,10 +65,10 @@ test('all eighteen saved scenarios preview without execution and reproduce nativ
     const previous = await page.getByTestId('run-id').textContent();
     await choose(page, scenario, `${id}.json`);
     await expect(page.getByTestId('scenario-file-preview')).toContainText('Ready to run');
-    await expect(page.getByTestId('run-id')).toHaveText(previous!);
+    await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
     const run = await runImported(page);
     expect(run).toEqual(nativeRun(run));
-    expect(run.scenario.id).toBe((scenario as { id: string }).id);
+    expect(run.scenario.id).toBe(scenario.id);
     expect(await download(page, 'Download current scenario')).toEqual(run.scenario);
     expect(new URL(page.url()).searchParams.has('preset')).toBe(false);
   }
@@ -105,7 +119,10 @@ test('run imports ignore supplied results, preserve custom topology and verify w
   expect(run).toEqual(nativeRun(run));
   expect(run.scenario).toEqual(scenario);
   expect(
-    run.events.find((event: { action: string }) => event.action === 'battery_depleted').at_s,
+    requiredPresent(
+      run.events.find((event) => event.action === 'battery_depleted'),
+      'battery-depleted event',
+    ).at_s,
   ).toBe('453.9');
   expect(run.summary.grid_energy_charge).toBeNull();
   await page.getByLabel('Verify against Python').check();
@@ -120,7 +137,7 @@ test('a native CLI export reopens with its complete result and hashes preserved'
   page,
 }) => {
   await openFiles(page);
-  const envelope = JSON.parse(
+  const envelope = jsonObject(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       ['-m', 'datacenter_twin', 'simulate', '--preset', 'path_maintenance'],
@@ -166,7 +183,7 @@ const invalidFiles: {
   {
     name: 'missing event target',
     make: (s) => {
-      s.events[0].target = 'missing-asset';
+      requiredPresent(s.events[0], 'first scenario event').target = 'missing-asset';
       return s;
     },
     error: 'unknown asset',
@@ -247,12 +264,12 @@ test('preview is keyboard accessible, shows assumptions and discards without los
 
 test('a late file read cannot resurrect an import after the draft changes', async ({ page }) => {
   await page.addInitScript(() => {
-    const read = File.prototype.text;
+    const read = (file: File) => Blob.prototype.text.call(file);
     File.prototype.text = function () {
-      if (this.name !== 'delayed.json') return read.call(this);
+      if (this.name !== 'delayed.json') return read(this);
       return new Promise<string>((resolve) => {
         (window as unknown as { finishRead: () => void }).finishRead = () => {
-          void read.call(this).then(resolve);
+          void read(this).then(resolve);
         };
       });
     };
@@ -262,7 +279,9 @@ test('a late file read cannot resurrect an import after the draft changes', asyn
   await choose(page, original.scenario, 'delayed.json');
   await expect(panel.getByRole('status')).toContainText('Reading and validating');
   await page.getByLabel('Initial battery (kWh)').fill('70');
-  await page.evaluate(() => (window as unknown as { finishRead: () => void }).finishRead());
+  await page.evaluate(() => {
+    (window as unknown as { finishRead: () => void }).finishRead();
+  });
   await expect(panel.getByRole('status')).toHaveCount(0);
   await expect(page.getByTestId('scenario-file-preview')).toHaveCount(0);
   await choose(page, { ...original.scenario, battery_initial_kwh: '30' });

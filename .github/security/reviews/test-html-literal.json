@@ -1,0 +1,11 @@
+{
+  "reviewed_at": "2026-11-05",
+  "reviewer": "independent battery_matlab agent; root reviewed scope",
+  "rule": "javascript.lang.security.audit.unknown-value-with-script-tag.unknown-value-with-script-tag",
+  "classification": "verified-test-literal-not-an-html-sink",
+  "finding_path": "apps/web/tests-engine/build-security.test.ts",
+  "finding_line": 39,
+  "expression": "assert.equal(result, expected literal HTML)",
+  "verification": "The actual result and fixed expected HTML literal are arguments to node:assert/strict equal. No DOM assignment, script execution, response rendering or other executable HTML sink occurs. The source fixture is a hardcoded local literal; parse5 parses without executing scripts.",
+  "scope": "One inline rule-specific annotation on the existing expected-HTML assertion only. No production code, file, or other rule is excluded."
+}

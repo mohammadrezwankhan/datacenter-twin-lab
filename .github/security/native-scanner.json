@@ -1,0 +1,864 @@
+{
+  "schema": 1,
+  "scanner": {
+    "name": "OpenGrep",
+    "version": "1.33.1",
+    "commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
+    "source_date_epoch": 1793265646
+  },
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64",
+    "distribution": "ubuntu",
+    "version": "24.04"
+  },
+  "native_switch_sha256": "e533b4d2d0e0b30e4bb3922190c121d38bfae9729c4171b2aac4004acd086c59",
+  "installed_packages": {
+    "ANSITerminal": "0.8.5",
+    "alcotest": "1.9.1",
+    "alcotest-js": "1.9.1",
+    "alcotest-lwt": "1.9.1",
+    "ambient-context": "0.2",
+    "ambient-context-lwt": "0.2",
+    "angstrom": "0.16.1",
+    "asn1-combinators": "0.3.3",
+    "astring": "0.8.5",
+    "atd": "2.16.0",
+    "atdgen": "2.16.0",
+    "atdgen-runtime": "2.16.0",
+    "backoff": "0.1.1",
+    "base": "v0.17.3",
+    "base-bigarray": "base",
+    "base-bytes": "base",
+    "base-domains": "base",
+    "base-effects": "base",
+    "base-nnp": "base",
+    "base-threads": "base",
+    "base-unix": "base",
+    "base64": "3.5.2",
+    "bigstringaf": "0.10.0",
+    "biniou": "1.2.2",
+    "bos": "0.3.0",
+    "ca-certs": "1.0.3",
+    "calendar": "3.0.0",
+    "camlp-streams": "5.0.1",
+    "carton": "0.7.2",
+    "carton-git": "0.7.2",
+    "carton-lwt": "0.7.2",
+    "checkseum": "0.5.4",
+    "cmdliner": "2.1.1",
+    "cohttp": "6.3.0",
+    "cohttp-lwt": "6.3.0",
+    "cohttp-lwt-unix": "6.3.0",
+    "compiler-cloning": "enabled",
+    "conduit": "8.0.0",
+    "conduit-lwt": "8.0.0",
+    "conduit-lwt-unix": "8.0.0",
+    "conf-gmp": "5",
+    "conf-gmp-powm-sec": "4",
+    "conf-libev": "4-13",
+    "conf-pkg-config": "5",
+    "cppo": "1.8.0",
+    "csexp": "1.5.2",
+    "cstruct": "6.3.0",
+    "ctypes": "0.24.0",
+    "decompress": "1.6.1",
+    "digestif": "1.4.1",
+    "domain-local-await": "1.0.1",
+    "domain-name": "0.5.0",
+    "domainslib": "0.5.2",
+    "duff": "0.5",
+    "dune": "3.24.2",
+    "dune-build-info": "3.24.2",
+    "dune-configurator": "3.24.2",
+    "duration": "0.3.1",
+    "easy-format": "1.3.4",
+    "either": "1.0.0",
+    "emile": "1.1",
+    "encore": "0.8.1",
+    "eqaf": "0.10",
+    "fileutils": "0.6.6",
+    "fix": "20250919",
+    "fmt": "0.11.0",
+    "fpath": "0.7.3",
+    "gen": "1.1",
+    "git": "3.18.0",
+    "gmap": "0.3.0",
+    "hmap": "0.8.1",
+    "http": "6.3.0",
+    "hxd": "0.5.0",
+    "integers": "0.8.0",
+    "integers_stubs_js": "1.0",
+    "ipaddr": "5.6.2",
+    "ipaddr-sexp": "5.6.2",
+    "jane-street-headers": "v0.17.0",
+    "js_of_ocaml": "6.5.0",
+    "js_of_ocaml-compiler": "6.5.0",
+    "jsonrpc": "1.22.0",
+    "jst-config": "v0.17.0",
+    "kdf": "1.1.2",
+    "ke": "0.6",
+    "logs": "0.10.0",
+    "lsp": "1.22.0",
+    "lwt": "6.1.2",
+    "lwt_ppx": "6.1.0",
+    "macaddr": "5.6.2",
+    "magic-mime": "1.3.1",
+    "memprof-limits": "dev",
+    "menhir": "20230608",
+    "menhirLib": "20230608",
+    "menhirSdk": "20230608",
+    "mimic": "0.0.10",
+    "mirage-crypto": "2.4.1",
+    "mirage-crypto-ec": "2.4.1",
+    "mirage-crypto-pk": "2.4.1",
+    "mirage-crypto-rng": "2.4.1",
+    "mirage-flow": "5.0.0",
+    "mirage-kv": "6.1.1",
+    "mirage-ptime": "5.2.0",
+    "multicore-magic": "2.3.2",
+    "num": "1.6",
+    "ocaml": "5.5.2",
+    "ocaml-compiler": "5.5.2",
+    "ocaml-compiler-libs": "v0.17.0",
+    "ocaml-option-no-compression": "1",
+    "ocaml-syntax-shims": "1.0.0",
+    "ocaml-variants": "5.5.2+options",
+    "ocaml-version": "4.1.5",
+    "ocaml_intrinsics_kernel": "v0.17.3",
+    "ocamlbuild": "0.16.1",
+    "ocamlfind": "1.9.9~preview",
+    "ocamlformat": "0.29.0",
+    "ocamlformat-lib": "0.29.0",
+    "ocamlgraph": "2.2.0",
+    "ocolor": "1.3.1",
+    "ocp-indent": "1.10.0",
+    "ocplib-endian": "1.2",
+    "ohex": "0.2.0",
+    "optint": "0.3.0",
+    "parsexp": "v0.17.0",
+    "pecu": "0.7",
+    "ppx_assert": "v0.17.0",
+    "ppx_base": "v0.17.0",
+    "ppx_cold": "v0.17.0",
+    "ppx_compare": "v0.17.0",
+    "ppx_derivers": "1.2.1",
+    "ppx_deriving": "6.2.0",
+    "ppx_deriving_yojson": "3.10.0",
+    "ppx_enumerate": "v0.17.0",
+    "ppx_expect": "v0.17.3",
+    "ppx_globalize": "v0.17.2",
+    "ppx_hash": "v0.17.0",
+    "ppx_here": "v0.17.0",
+    "ppx_inline_test": "v0.17.1",
+    "ppx_optcomp": "v0.17.1",
+    "ppx_sexp_conv": "v0.17.1",
+    "ppx_yojson_conv_lib": "v0.17.0",
+    "ppxlib": "0.38.0",
+    "ppxlib_jane": "v0.17.4",
+    "psq": "0.2.1",
+    "ptime": "1.2.0",
+    "re": "1.14.0",
+    "result": "1.5",
+    "rresult": "0.7.0",
+    "sarif": "0.3.1",
+    "saturn": "1.0.0",
+    "sedlex": "3.8.1",
+    "semver": "0.2.1",
+    "seq": "base",
+    "sexplib": "v0.17.0",
+    "sexplib0": "v0.17.0",
+    "stdio": "v0.17.0",
+    "stdlib-shims": "0.3.0",
+    "stringext": "1.6.0",
+    "terminal_size": "0.2.0",
+    "thread-local-storage": "0.2",
+    "thread-table": "1.0.0",
+    "time_now": "v0.17.0",
+    "timedesc": "3.1.2",
+    "timedesc-tzdb": "3.1.2",
+    "timedesc-tzlocal": "3.1.2",
+    "tls": "2.1.4",
+    "tls-lwt": "2.1.4",
+    "tls-mirage": "2.1.4",
+    "topkg": "1.1.1",
+    "tsort": "2.2.0",
+    "uri": "4.4.0",
+    "uri-sexp": "4.4.0",
+    "uucp": "18.0.0",
+    "uuidm": "0.9.10",
+    "uuseg": "18.0.0",
+    "uutf": "1.0.4",
+    "visitors": "dev",
+    "x509": "1.2.0",
+    "xmlm": "1.4.0",
+    "yaml": "3.2.0",
+    "yojson": "2.2.2",
+    "zarith": "1.14",
+    "zarith_stubs_js": "v0.17.0"
+  },
+  "assets": [
+    {
+      "name": "opengrep-source",
+      "kind": "archive",
+      "destination": "source",
+      "url": "https://github.com/opengrep/opengrep/archive/092c80faa0817840228349f93eff12a50fb9cf6b.tar.gz",
+      "sha256": "09b61a7800f612f9774df589d4b297d52b5e39d72ab1639fed9f28f182a7c08a",
+      "audit": {
+        "commit": "092c80faa0817840228349f93eff12a50fb9cf6b"
+      }
+    },
+    {
+      "name": "submodule-1392efc21e60d5acde72d0d1c6586f5692fedace",
+      "kind": "archive",
+      "destination": "source/libs/ocaml-tree-sitter-core",
+      "url": "https://github.com/opengrep/ocaml-tree-sitter-core/archive/1392efc21e60d5acde72d0d1c6586f5692fedace.tar.gz",
+      "sha256": "e7d6a605945331e145cb353a28c50a948547bcc52954481b96e59e8be4bda39f",
+      "audit": {
+        "commit": "1392efc21e60d5acde72d0d1c6586f5692fedace"
+      }
+    },
+    {
+      "name": "submodule-4e0a44486bb518b7a24ca11286c4b03a8d51e17e",
+      "kind": "archive",
+      "destination": "source/libs/pcre2",
+      "url": "https://github.com/semgrep/pcre2-ocaml/archive/4e0a44486bb518b7a24ca11286c4b03a8d51e17e.tar.gz",
+      "sha256": "eae7b493875118103166e77731f671dc1ea388ff3b3da8e845660150de9eef44",
+      "audit": {
+        "commit": "4e0a44486bb518b7a24ca11286c4b03a8d51e17e"
+      }
+    },
+    {
+      "name": "submodule-99a0d4f08d9cbabc87d10da94a534ce8a1220cd9",
+      "kind": "archive",
+      "destination": "source/libs/testo",
+      "url": "https://github.com/semgrep/testo/archive/99a0d4f08d9cbabc87d10da94a534ce8a1220cd9.tar.gz",
+      "sha256": "2516b56663afa212cbb0ffdd11cd0cdd9e9512e884a495c18a7d13be2dba8b2c",
+      "audit": {
+        "commit": "99a0d4f08d9cbabc87d10da94a534ce8a1220cd9"
+      }
+    },
+    {
+      "name": "submodule-f0a382de1184139c5a356eb64ccd9bdfcc8ce526",
+      "kind": "archive",
+      "destination": "source/tests/semgrep-rules",
+      "url": "https://github.com/semgrep/semgrep-rules/archive/f0a382de1184139c5a356eb64ccd9bdfcc8ce526.tar.gz",
+      "sha256": "52da2efaef91929792e395f67b90c6dfc2acbc752c1e88b5c857850fee847eb2",
+      "audit": {
+        "commit": "f0a382de1184139c5a356eb64ccd9bdfcc8ce526"
+      }
+    },
+    {
+      "name": "submodule-5e705660dc7381d4c4c247fa83c4c5860e61d555",
+      "kind": "archive",
+      "destination": "source/cli/src/semgrep/semgrep_interfaces",
+      "url": "https://github.com/opengrep/semgrep-interfaces/archive/5e705660dc7381d4c4c247fa83c4c5860e61d555.tar.gz",
+      "sha256": "60a283e9a840f1be891ff0ab4794ba7555b443b8415be12bdcf4f92433329e66",
+      "audit": {
+        "commit": "5e705660dc7381d4c4c247fa83c4c5860e61d555"
+      }
+    },
+    {
+      "name": "submodule-f2a235f997379033a8c64f0962d5ef1252629a0a",
+      "kind": "archive",
+      "destination": "source/languages/apex/tree-sitter/semgrep-apex",
+      "url": "https://github.com/opengrep/semgrep-apex/archive/f2a235f997379033a8c64f0962d5ef1252629a0a.tar.gz",
+      "sha256": "93fcafc1fcf0a4648befffdac5d300fb312329e16913ba1f73a8cd31af90e90b",
+      "audit": {
+        "commit": "f2a235f997379033a8c64f0962d5ef1252629a0a"
+      }
+    },
+    {
+      "name": "submodule-e6f3944f59b684b212a37bdec6b113621a1ad9ea",
+      "kind": "archive",
+      "destination": "source/languages/bash/tree-sitter/semgrep-bash",
+      "url": "https://github.com/opengrep/semgrep-bash/archive/e6f3944f59b684b212a37bdec6b113621a1ad9ea.tar.gz",
+      "sha256": "b48d2337e20cdf7fd30b315d294ae09f25a23ff53ef5964842ee9ca122ea6ef6",
+      "audit": {
+        "commit": "e6f3944f59b684b212a37bdec6b113621a1ad9ea"
+      }
+    },
+    {
+      "name": "submodule-3e4d0ded8fc62dbb03232193721bf6bb376bfc62",
+      "kind": "archive",
+      "destination": "source/languages/cairo/tree-sitter/semgrep-cairo",
+      "url": "https://github.com/opengrep/semgrep-cairo/archive/3e4d0ded8fc62dbb03232193721bf6bb376bfc62.tar.gz",
+      "sha256": "54cf37ada41e30352b63b45a2a044dd2c755f6b25a6604d6c031943fabd0312a",
+      "audit": {
+        "commit": "3e4d0ded8fc62dbb03232193721bf6bb376bfc62"
+      }
+    },
+    {
+      "name": "submodule-66a0ff265c38a31240162d0011190b5bdd85efd5",
+      "kind": "archive",
+      "destination": "source/languages/circom/tree-sitter/semgrep-circom",
+      "url": "https://github.com/opengrep/semgrep-circom/archive/66a0ff265c38a31240162d0011190b5bdd85efd5.tar.gz",
+      "sha256": "d8d00a4ad0e368ea854549741974719b78fd075ce2ac3d177dc9f6f757f6c1d0",
+      "audit": {
+        "commit": "66a0ff265c38a31240162d0011190b5bdd85efd5"
+      }
+    },
+    {
+      "name": "submodule-8625a5341aebb93c62eb953f6a66fc1083dffe84",
+      "kind": "archive",
+      "destination": "source/languages/cpp/tree-sitter/semgrep-cpp",
+      "url": "https://github.com/opengrep/semgrep-cpp/archive/8625a5341aebb93c62eb953f6a66fc1083dffe84.tar.gz",
+      "sha256": "a6acad0e1d95487fc69c97c77896c0a252b04f0e401d798ba4659f298df1af1c",
+      "audit": {
+        "commit": "8625a5341aebb93c62eb953f6a66fc1083dffe84"
+      }
+    },
+    {
+      "name": "submodule-f279484792c259278c4e135e8f1048bbcea7c358",
+      "kind": "archive",
+      "destination": "source/languages/crystal/tree-sitter/opengrep-crystal",
+      "url": "https://github.com/opengrep/opengrep-crystal/archive/f279484792c259278c4e135e8f1048bbcea7c358.tar.gz",
+      "sha256": "10522b30596a5d7893fa659ab4a2a028bd9f8e510424304228e7a557a2d1c479",
+      "audit": {
+        "commit": "f279484792c259278c4e135e8f1048bbcea7c358"
+      }
+    },
+    {
+      "name": "submodule-32e780f56df16c12bf726996564c9d80bf54d02c",
+      "kind": "archive",
+      "destination": "source/languages/csharp/tree-sitter/semgrep-c-sharp",
+      "url": "https://github.com/opengrep/semgrep-c-sharp/archive/32e780f56df16c12bf726996564c9d80bf54d02c.tar.gz",
+      "sha256": "9dd7ee48107f41ccc03ca39777151dbdad31a3d544c0661e8459b16dbe806b61",
+      "audit": {
+        "commit": "32e780f56df16c12bf726996564c9d80bf54d02c"
+      }
+    },
+    {
+      "name": "submodule-cb3c48321fdab5485d2c1f92c99c78425543e59d",
+      "kind": "archive",
+      "destination": "source/languages/dart/tree-sitter/semgrep-dart",
+      "url": "https://github.com/opengrep/semgrep-dart/archive/cb3c48321fdab5485d2c1f92c99c78425543e59d.tar.gz",
+      "sha256": "5b2dd4aee608ecbfa57ff837a829e7c546fbf809c55af61e370d2af7d7a43067",
+      "audit": {
+        "commit": "cb3c48321fdab5485d2c1f92c99c78425543e59d"
+      }
+    },
+    {
+      "name": "submodule-e3a773f20c7fee9558529e6442e164c2cced9fb9",
+      "kind": "archive",
+      "destination": "source/languages/dockerfile/tree-sitter/semgrep-dockerfile",
+      "url": "https://github.com/opengrep/semgrep-dockerfile/archive/e3a773f20c7fee9558529e6442e164c2cced9fb9.tar.gz",
+      "sha256": "9ccebcb7da26a37a0c14331aeeacb9e6a62b153d1043cabbfa4aaaa73fe4cd49",
+      "audit": {
+        "commit": "e3a773f20c7fee9558529e6442e164c2cced9fb9"
+      }
+    },
+    {
+      "name": "submodule-681f90052720f4bc1c2fd2c2547771f6029917f0",
+      "kind": "archive",
+      "destination": "source/languages/elixir/tree-sitter/semgrep-elixir",
+      "url": "https://github.com/opengrep/semgrep-elixir/archive/681f90052720f4bc1c2fd2c2547771f6029917f0.tar.gz",
+      "sha256": "822df03fa3504bb78a08d39b620747c4ed8884880ae6c1d98e261b024aaba381",
+      "audit": {
+        "commit": "681f90052720f4bc1c2fd2c2547771f6029917f0"
+      }
+    },
+    {
+      "name": "submodule-b36632089866c9223ce5bd31a0353627a48f50f9",
+      "kind": "archive",
+      "destination": "source/languages/go/tree-sitter/semgrep-go",
+      "url": "https://github.com/opengrep/semgrep-go/archive/b36632089866c9223ce5bd31a0353627a48f50f9.tar.gz",
+      "sha256": "1e6a70e79125d549f3ee6e26d0831f656383be49092606c83d900395b0ce09f7",
+      "audit": {
+        "commit": "b36632089866c9223ce5bd31a0353627a48f50f9"
+      }
+    },
+    {
+      "name": "submodule-f1adb0ae2b0e77a5181de5a98f55055435b0aa57",
+      "kind": "archive",
+      "destination": "source/languages/hack/tree-sitter/semgrep-hack",
+      "url": "https://github.com/opengrep/semgrep-hack/archive/f1adb0ae2b0e77a5181de5a98f55055435b0aa57.tar.gz",
+      "sha256": "ca76745b615188585e52b796e320d92033c4c44859010d13124420db90038a6b",
+      "audit": {
+        "commit": "f1adb0ae2b0e77a5181de5a98f55055435b0aa57"
+      }
+    },
+    {
+      "name": "submodule-827d34d593016cd34324f3a3b46248022cf613b6",
+      "kind": "archive",
+      "destination": "source/languages/html/tree-sitter/semgrep-html",
+      "url": "https://github.com/opengrep/semgrep-html/archive/827d34d593016cd34324f3a3b46248022cf613b6.tar.gz",
+      "sha256": "743f55b5ae21846b60d73cccfbb4df04dd530ddb07c2705c9f72b33bf1467c55",
+      "audit": {
+        "commit": "827d34d593016cd34324f3a3b46248022cf613b6"
+      }
+    },
+    {
+      "name": "submodule-7b6cb9d41b74a6f21133cc9a9cc0a2e60ff2af6f",
+      "kind": "archive",
+      "destination": "source/languages/java/tree-sitter/semgrep-java",
+      "url": "https://github.com/opengrep/semgrep-java/archive/7b6cb9d41b74a6f21133cc9a9cc0a2e60ff2af6f.tar.gz",
+      "sha256": "bc1b18dc45655f579f39d510f2247ee6d4831088ab81bf13f6382269f706b17a",
+      "audit": {
+        "commit": "7b6cb9d41b74a6f21133cc9a9cc0a2e60ff2af6f"
+      }
+    },
+    {
+      "name": "submodule-a9e8d4c35acfa457e6649f4f54c467f5575e6777",
+      "kind": "archive",
+      "destination": "source/languages/jsonnet/tree-sitter/semgrep-jsonnet",
+      "url": "https://github.com/opengrep/semgrep-jsonnet/archive/a9e8d4c35acfa457e6649f4f54c467f5575e6777.tar.gz",
+      "sha256": "b10d7a5df72e14f18b47553ea780ab3fde8cea2f26b932a70342b224e3bc249e",
+      "audit": {
+        "commit": "a9e8d4c35acfa457e6649f4f54c467f5575e6777"
+      }
+    },
+    {
+      "name": "submodule-31bcd2dcaa9beb1580f60c81a133037f7fad0a40",
+      "kind": "archive",
+      "destination": "source/languages/julia/tree-sitter/semgrep-julia",
+      "url": "https://github.com/opengrep/semgrep-julia/archive/31bcd2dcaa9beb1580f60c81a133037f7fad0a40.tar.gz",
+      "sha256": "0c0ad32377bc72f3ede2b331a544f7c200a8ed41e14a2f66576404e099f73d6a",
+      "audit": {
+        "commit": "31bcd2dcaa9beb1580f60c81a133037f7fad0a40"
+      }
+    },
+    {
+      "name": "submodule-97203482e0aa1a88f25bfe4880fc05230524eb5a",
+      "kind": "archive",
+      "destination": "source/languages/kotlin/tree-sitter/semgrep-kotlin",
+      "url": "https://github.com/opengrep/semgrep-kotlin/archive/97203482e0aa1a88f25bfe4880fc05230524eb5a.tar.gz",
+      "sha256": "18a9e511d9510494b91835b337266a0284517f2a7f86ab56aa4e0b2da85c252b",
+      "audit": {
+        "commit": "97203482e0aa1a88f25bfe4880fc05230524eb5a"
+      }
+    },
+    {
+      "name": "submodule-0c4985d4f26c019ca15ff5ea7b8b525f4128e0df",
+      "kind": "archive",
+      "destination": "source/languages/lisp/tree-sitter/semgrep-clojure",
+      "url": "https://github.com/opengrep/semgrep-clojure/archive/0c4985d4f26c019ca15ff5ea7b8b525f4128e0df.tar.gz",
+      "sha256": "b24f6f316d91b0493d65098b716c5c04799768fb1a86770d10bea9d8df5818e7",
+      "audit": {
+        "commit": "0c4985d4f26c019ca15ff5ea7b8b525f4128e0df"
+      }
+    },
+    {
+      "name": "submodule-073f283a0fa4144f941199e869fd787d8e3ce338",
+      "kind": "archive",
+      "destination": "source/languages/lua/tree-sitter/semgrep-lua",
+      "url": "https://github.com/opengrep/semgrep-lua/archive/073f283a0fa4144f941199e869fd787d8e3ce338.tar.gz",
+      "sha256": "be3287ccf09b24b3658d2b88b24c0afe05b8bbdc51a0c2aed6ba19f2f4d4ac36",
+      "audit": {
+        "commit": "073f283a0fa4144f941199e869fd787d8e3ce338"
+      }
+    },
+    {
+      "name": "submodule-74276d40735ccb584d341144308f84c31b0384f9",
+      "kind": "archive",
+      "destination": "source/languages/move_on_aptos/tree-sitter/semgrep-move-on-aptos",
+      "url": "https://github.com/opengrep/semgrep-move-on-aptos/archive/74276d40735ccb584d341144308f84c31b0384f9.tar.gz",
+      "sha256": "aff20c85cb8a8b1e63f08797dff9c06f8b22486efad013fd19e24f992cafb3e3",
+      "audit": {
+        "commit": "74276d40735ccb584d341144308f84c31b0384f9"
+      }
+    },
+    {
+      "name": "submodule-f1fc8f468c21e26d0c3dfafdea7e9888bdfb97e8",
+      "kind": "archive",
+      "destination": "source/languages/move_on_sui/tree-sitter/semgrep-move-on-sui",
+      "url": "https://github.com/opengrep/semgrep-move-on-sui/archive/f1fc8f468c21e26d0c3dfafdea7e9888bdfb97e8.tar.gz",
+      "sha256": "0e3ba41e98c0e21c14b78fdb2302b83d01d8afbc5653343059e914594cb50d8d",
+      "audit": {
+        "commit": "f1fc8f468c21e26d0c3dfafdea7e9888bdfb97e8"
+      }
+    },
+    {
+      "name": "submodule-ee015c07fc8b99250875d796da5aec0888eaa8fe",
+      "kind": "archive",
+      "destination": "source/languages/ocaml/tree-sitter/semgrep-ocaml",
+      "url": "https://github.com/opengrep/semgrep-ocaml/archive/ee015c07fc8b99250875d796da5aec0888eaa8fe.tar.gz",
+      "sha256": "1b11b9510fb263ef13c54c7cba8b433edfa7018463a1bca91f0a63f9790770d7",
+      "audit": {
+        "commit": "ee015c07fc8b99250875d796da5aec0888eaa8fe"
+      }
+    },
+    {
+      "name": "submodule-0b9dd47725c12481017485d9882e375fda26e142",
+      "kind": "archive",
+      "destination": "source/languages/php/tree-sitter/semgrep-php",
+      "url": "https://github.com/opengrep/semgrep-php/archive/0b9dd47725c12481017485d9882e375fda26e142.tar.gz",
+      "sha256": "2ff026d37d4280ecea12a2a89051e4c639db40be32eed15a875dc9e05cdbfd55",
+      "audit": {
+        "commit": "0b9dd47725c12481017485d9882e375fda26e142"
+      }
+    },
+    {
+      "name": "submodule-a6ac8bf5a35e2078b50098cbb5f64bf259c31875",
+      "kind": "archive",
+      "destination": "source/languages/promql/tree-sitter/semgrep-promql",
+      "url": "https://github.com/opengrep/semgrep-promql/archive/a6ac8bf5a35e2078b50098cbb5f64bf259c31875.tar.gz",
+      "sha256": "e26752a60165765d45b72a1706d4adaa0fbe0263526fd8391dc427c7585ab1e0",
+      "audit": {
+        "commit": "a6ac8bf5a35e2078b50098cbb5f64bf259c31875"
+      }
+    },
+    {
+      "name": "submodule-25bae8f9d0b9f56f4914fd3d2adcee754fd241d8",
+      "kind": "archive",
+      "destination": "source/languages/protobuf/tree-sitter/semgrep-proto",
+      "url": "https://github.com/opengrep/semgrep-proto/archive/25bae8f9d0b9f56f4914fd3d2adcee754fd241d8.tar.gz",
+      "sha256": "ad30f15e3e905fdbb06cd71b6443fbea9a7717b67fae8cf63b84dc51e7365a79",
+      "audit": {
+        "commit": "25bae8f9d0b9f56f4914fd3d2adcee754fd241d8"
+      }
+    },
+    {
+      "name": "submodule-444327263390b07b66bb13c0a91848c7767d9af2",
+      "kind": "archive",
+      "destination": "source/languages/python/tree-sitter/semgrep-python",
+      "url": "https://github.com/opengrep/semgrep-python/archive/444327263390b07b66bb13c0a91848c7767d9af2.tar.gz",
+      "sha256": "2de3e3975edd887f67b5f436c1ae650563c9a98b6e4216030950caef5c1c429b",
+      "audit": {
+        "commit": "444327263390b07b66bb13c0a91848c7767d9af2"
+      }
+    },
+    {
+      "name": "submodule-853a990a50b71f0ca24e3732dccff5c8c54e874d",
+      "kind": "archive",
+      "destination": "source/languages/ql/tree-sitter/semgrep-ql",
+      "url": "https://github.com/opengrep/semgrep-ql/archive/853a990a50b71f0ca24e3732dccff5c8c54e874d.tar.gz",
+      "sha256": "1826157041e56f5acc0198e81870c6481c15a0680edae1eacbcc2391fb36089f",
+      "audit": {
+        "commit": "853a990a50b71f0ca24e3732dccff5c8c54e874d"
+      }
+    },
+    {
+      "name": "submodule-2c556b67422a627e0325589f71fc1394b5750c98",
+      "kind": "archive",
+      "destination": "source/languages/r/tree-sitter/semgrep-r",
+      "url": "https://github.com/opengrep/semgrep-r/archive/2c556b67422a627e0325589f71fc1394b5750c98.tar.gz",
+      "sha256": "579065d0c33dcede54f0839a39767e669d8955886a3c9452d5832f61564fd170",
+      "audit": {
+        "commit": "2c556b67422a627e0325589f71fc1394b5750c98"
+      }
+    },
+    {
+      "name": "submodule-bf09252137a27dc29a8d9da82d4d5a4527bda46b",
+      "kind": "archive",
+      "destination": "source/languages/ruby/tree-sitter/semgrep-ruby",
+      "url": "https://github.com/opengrep/semgrep-ruby/archive/bf09252137a27dc29a8d9da82d4d5a4527bda46b.tar.gz",
+      "sha256": "96a0b79ea6ec04e1525ad65d7db94beacc15198a3ea23da953f41bc42a88f398",
+      "audit": {
+        "commit": "bf09252137a27dc29a8d9da82d4d5a4527bda46b"
+      }
+    },
+    {
+      "name": "submodule-fb6c73fbe4f34592fbbd0ce0f825e224533d47e7",
+      "kind": "archive",
+      "destination": "source/languages/rust/tree-sitter/semgrep-rust",
+      "url": "https://github.com/opengrep/semgrep-rust/archive/fb6c73fbe4f34592fbbd0ce0f825e224533d47e7.tar.gz",
+      "sha256": "460d3dc01073a8879f021fae4d38a747e970cd09933db1ed8aadb169f1767561",
+      "audit": {
+        "commit": "fb6c73fbe4f34592fbbd0ce0f825e224533d47e7"
+      }
+    },
+    {
+      "name": "submodule-e101c0c6c8c86bd5ff02f1d3a737cb3e3bebe498",
+      "kind": "archive",
+      "destination": "source/languages/solidity/tree-sitter/semgrep-solidity",
+      "url": "https://github.com/opengrep/semgrep-solidity/archive/e101c0c6c8c86bd5ff02f1d3a737cb3e3bebe498.tar.gz",
+      "sha256": "88b333c8fbdbf656d2883206463c20824e12d6724d0b83e0c934518ec43b54d6",
+      "audit": {
+        "commit": "e101c0c6c8c86bd5ff02f1d3a737cb3e3bebe498"
+      }
+    },
+    {
+      "name": "submodule-61d1550d1b4aee70f7e00457d3121e4f1d3c0d47",
+      "kind": "archive",
+      "destination": "source/languages/swift/tree-sitter/semgrep-swift",
+      "url": "https://github.com/opengrep/semgrep-swift/archive/61d1550d1b4aee70f7e00457d3121e4f1d3c0d47.tar.gz",
+      "sha256": "32036d15e101073b91dee6ae92962f21719ef8994844af2a0c8f499fe6bb8fd3",
+      "audit": {
+        "commit": "61d1550d1b4aee70f7e00457d3121e4f1d3c0d47"
+      }
+    },
+    {
+      "name": "submodule-e42e9d924de848c784e4ab46c571bff5145d245e",
+      "kind": "archive",
+      "destination": "source/languages/terraform/tree-sitter/semgrep-hcl",
+      "url": "https://github.com/opengrep/semgrep-hcl/archive/e42e9d924de848c784e4ab46c571bff5145d245e.tar.gz",
+      "sha256": "4a7c1c6c2077a059df673455d5b37476448c3fed6b61b6dd190d002fcc55ef81",
+      "audit": {
+        "commit": "e42e9d924de848c784e4ab46c571bff5145d245e"
+      }
+    },
+    {
+      "name": "submodule-a5799ce5d762168fe17c94b86ad5f77ee13d2138",
+      "kind": "archive",
+      "destination": "source/languages/typescript/tree-sitter/semgrep-tsx",
+      "url": "https://github.com/opengrep/semgrep-tsx/archive/a5799ce5d762168fe17c94b86ad5f77ee13d2138.tar.gz",
+      "sha256": "70e47ce48ea93e45e2d7f04f4aa7aee2e64ce824eecbe326ca47211e595b7a09",
+      "audit": {
+        "commit": "a5799ce5d762168fe17c94b86ad5f77ee13d2138"
+      }
+    },
+    {
+      "name": "submodule-6c288cd9c2fecf05556be02d540814aa5456ad2b",
+      "kind": "archive",
+      "destination": "source/languages/typescript/tree-sitter/semgrep-typescript",
+      "url": "https://github.com/opengrep/semgrep-typescript/archive/6c288cd9c2fecf05556be02d540814aa5456ad2b.tar.gz",
+      "sha256": "ceb6c932ef7eec0a749fc82113f90c4f73f7bf35cff0471b326e6bc954ec1b6a",
+      "audit": {
+        "commit": "6c288cd9c2fecf05556be02d540814aa5456ad2b"
+      }
+    },
+    {
+      "name": "pcre2-source",
+      "kind": "archive",
+      "destination": "pcre2-source",
+      "url": "https://github.com/PCRE2Project/pcre2/archive/ee7b43963d9a6a95c1745fa8ff1b56625d7b1dc3.tar.gz",
+      "sha256": "a011a8ef7bf19fa6668be2c347a97662df1ec43b149dd627cdde32fbe570a0f1",
+      "audit": {
+        "commit": "ee7b43963d9a6a95c1745fa8ff1b56625d7b1dc3"
+      }
+    },
+    {
+      "name": "sljit-source",
+      "kind": "archive",
+      "destination": "pcre2-source/deps/sljit",
+      "url": "https://github.com/zherczeg/sljit/archive/39c508d1b8fbae332d60c7450db20236913089da.tar.gz",
+      "sha256": "f5fd7b9d548d049dad9ec664ec520b4bbaebf5bcb1bdcb53f3f2821c190e4452",
+      "audit": {
+        "commit": "39c508d1b8fbae332d60c7450db20236913089da"
+      }
+    },
+    {
+      "name": "tree-sitter-source",
+      "kind": "archive",
+      "destination": "source/libs/ocaml-tree-sitter-core/downloads/tree-sitter-0.22.6",
+      "url": "https://github.com/tree-sitter/tree-sitter/archive/refs/tags/v0.22.6.tar.gz",
+      "sha256": "e2b687f74358ab6404730b7fb1a1ced7ddb3780202d37595ecd7b20a8f41861f",
+      "audit": {
+        "commit": "b40f342067a89cd6331bf4c27407588320f3c263"
+      }
+    },
+    {
+      "name": "opam",
+      "kind": "executable",
+      "destination": "tools/opam",
+      "url": "https://github.com/ocaml/opam/releases/download/2.5.2/opam-2.5.2-x86_64-linux",
+      "sha256": "edfca2630c373b44b7ee1c2f81cd8dcf67468d0db57d6c02158de553ac63dbd4",
+      "audit": {
+        "commit": "ad0564f20c6306bc83085fe663cab903fe887208"
+      }
+    },
+    {
+      "name": "libgmp-dev",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/gmp/libgmp-dev_6.3.0+dfsg-2ubuntu6_amd64.deb",
+      "sha256": "ffadf91b116cc2647ef213742ac1cbe80f450af14413c146df6e200f8c3c9a1a",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "gmp"
+        },
+        "version": "2:6.3.0+dfsg-2ubuntu6"
+      }
+    },
+    {
+      "name": "libgmp10",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/gmp/libgmp10_6.3.0+dfsg-2ubuntu6_amd64.deb",
+      "sha256": "649a5ee5f74f0aa1e1b9c4f169eabbae56a79aa5aac51ef733eb9e18700bd8fc",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "gmp"
+        },
+        "version": "2:6.3.0+dfsg-2ubuntu6"
+      }
+    },
+    {
+      "name": "libgmpxx4ldbl",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/g/gmp/libgmpxx4ldbl_6.3.0+dfsg-2ubuntu6_amd64.deb",
+      "sha256": "a50e3c79d72857077ec7602fb2b59dd3fa12ce15ae46c7a9409301311ae212b0",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "gmp"
+        },
+        "version": "2:6.3.0+dfsg-2ubuntu6"
+      }
+    },
+    {
+      "name": "libpkgconf3",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/p/pkgconf/libpkgconf3_1.8.1-2build1_amd64.deb",
+      "sha256": "fc3a57e8f931ec06cb7c51acc56878f1fec247ff02a7adcab26905c2faeb2792",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "pkgconf"
+        },
+        "version": "1.8.1-2build1"
+      }
+    },
+    {
+      "name": "pkg-config",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/p/pkgconf/pkg-config_1.8.1-2build1_amd64.deb",
+      "sha256": "16bda455d9216da31ad55d72df5a7380cb9d5ac32a2393941cab262a4e5b526f",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "pkgconf"
+        },
+        "version": "1.8.1-2build1"
+      }
+    },
+    {
+      "name": "pkgconf",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/p/pkgconf/pkgconf_1.8.1-2build1_amd64.deb",
+      "sha256": "834a58031069d97d7cfb8b2f5bfd5effc69cecf7f30cc362071875f1f8dc1828",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "pkgconf"
+        },
+        "version": "1.8.1-2build1"
+      }
+    },
+    {
+      "name": "pkgconf-bin",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/p/pkgconf/pkgconf-bin_1.8.1-2build1_amd64.deb",
+      "sha256": "7a812f05ee1610154b433e2ad54f6e4163fcbb306b9fb31afe959afb2e5e1545",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "pkgconf"
+        },
+        "version": "1.8.1-2build1"
+      }
+    },
+    {
+      "name": "libev-dev",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/libe/libev/libev-dev_4.33-2.1build1_amd64.deb",
+      "sha256": "9c5c8da05f611efeeaa566a5d5ec3885b48a9aa339d042bbd4b5e38e6677ef41",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "libev"
+        },
+        "version": "1:4.33-2.1build1"
+      }
+    },
+    {
+      "name": "libev4t64",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/universe/libe/libev/libev4t64_4.33-2.1build1_amd64.deb",
+      "sha256": "efc04482efadbc5b95a9386131190015c206fdae324caffdd129e602196b0757",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "libev"
+        },
+        "version": "1:4.33-2.1build1"
+      }
+    },
+    {
+      "name": "bubblewrap",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.12.0-1_amd64.deb",
+      "sha256": "db4d572a7927bfd34cc9b8e24b56983efa8e0483d03da6c810f6caae081dcc36",
+      "executable_sha256": "5d1f77a455d3a5cc1a45bdbf2e23b89cbd7b33e640dd9ae3b5ce2573d133889e",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:26.10",
+          "name": "bubblewrap"
+        },
+        "version": "0.12.0-1"
+      },
+      "runtime_requirements": {
+        "libc6": ">=2.38",
+        "libcap2": ">=1:2.10",
+        "libselinux1": ">=3.1~"
+      },
+      "published_sha512": "f4e2c7e8944e22ea0d49ad88fdba695a78dd5793524fdbf8cccdf8f0984c0b3e13c27812e92664d2f0a71cd09c4121e470468c962da1c644e9566e2082aaae6a",
+      "distribution_signature_key": "F6ECB3762474EDA9D21B7022871920D1991BC93C"
+    },
+    {
+      "name": "apparmor-profiles",
+      "kind": "deb",
+      "destination": "sysroot",
+      "url": "https://archive.ubuntu.com/ubuntu/pool/main/a/apparmor/apparmor-profiles_4.0.1really4.0.1-0ubuntu0.24.04.9_all.deb",
+      "sha256": "90b02aa006eea7702cd4e851343e469e41365dda42145a3cb035de1d6c773b8c",
+      "profile_sha256": "11d39094f044f0cda0febb3ad517b830301da6b2ce929664af09ee9e4dd264f9",
+      "audit": {
+        "package": {
+          "ecosystem": "Ubuntu:24.04:LTS",
+          "name": "apparmor"
+        },
+        "version": "4.0.1really4.0.1-0ubuntu0.24.04.9"
+      }
+    }
+  ],
+  "components": {
+    "ocaml": "5.5.2",
+    "opam": "2.5.2",
+    "pcre2": "ee7b43963d9a6a95c1745fa8ff1b56625d7b1dc3 (10.50~DEV upstream source)",
+    "tree_sitter": "0.22.6",
+    "bundled_libyaml": "2c891fc7a770e8ba2fec34fc6b545c672beb37e6 (ocaml-yaml 3.2.0 vendor source)",
+    "memprof_limits": "c2cced325a93d2271379f0712db85867b29dbee1",
+    "visitors": "e18a7a67150a54a3aef51661e0317cacc313d764"
+  },
+  "additional_audited_components": [
+    {
+      "name": "memprof-limits.dev",
+      "query": {
+        "commit": "c2cced325a93d2271379f0712db85867b29dbee1"
+      }
+    },
+    {
+      "name": "visitors.dev",
+      "query": {
+        "commit": "e18a7a67150a54a3aef51661e0317cacc313d764"
+      }
+    },
+    {
+      "name": "ocaml-yaml bundled libyaml",
+      "query": {
+        "commit": "2c891fc7a770e8ba2fec34fc6b545c672beb37e6"
+      }
+    },
+    {
+      "name": "opam tool",
+      "query": {
+        "package": {
+          "ecosystem": "opam",
+          "name": "opam"
+        },
+        "version": "2.5.2"
+      }
+    },
+    {
+      "name": "bubblewrap 0.12.0 upstream source",
+      "query": {
+        "commit": "2a76602a8c71f36c1527cf9fc3417d9149822e0c"
+      }
+    }
+  ],
+  "compiler_configuration": {
+    "version": "5.5.2",
+    "compression_c_libraries": ""
+  }
+}

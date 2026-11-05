@@ -1,7 +1,8 @@
+import { requiredValue, requiredPresent } from '../required-value';
 import { canonicalJson, compareUnicode, sha256Hex } from './canonical';
 import { decimalText, InputError, moneyText, Rational } from './decimal';
 import { parseQuantity, topologicalOrder, validateScenario } from './contract';
-import type { Asset, Interval, Run, SiteScenario } from './types';
+import type { Interval, Run, SiteScenario } from './types';
 import { ENGINE_VERSION } from './version';
 
 const MODEL = 'single_load_electrical_continuity_v1' as const;
@@ -22,26 +23,38 @@ export class FlowNetwork {
   add(source: string, target: string, capacity: Rational): void {
     if (!this.residual.has(source)) this.residual.set(source, new Map());
     if (!this.residual.has(target)) this.residual.set(target, new Map());
-    this.residual.get(source)!.set(target, capacity);
-    this.residual.get(target)!.set(source, zero());
+    requiredPresent(this.residual.get(source), 'this.residual.get(source)').set(target, capacity);
+    requiredPresent(this.residual.get(target), 'this.residual.get(target)').set(source, zero());
     this.capacity.set(this.key(source, target), capacity);
   }
 
   flow(source: string, target: string): Rational {
-    return this.capacity
-      .get(this.key(source, target))!
-      .sub(this.residual.get(source)!.get(target)!);
+    return requiredPresent(
+      this.capacity.get(this.key(source, target)),
+      'this.capacity\n      .get(this.key(source, target))',
+    ).sub(
+      requiredPresent(
+        requiredPresent(this.residual.get(source), 'this.residual.get(source)').get(target),
+        'this.residual.get(source)!.get(target)',
+      ),
+    );
   }
 
   augment(): void {
-    while (true) {
+    for (;;) {
       const parents = new Map<string, string | null>([['SOURCE', null]]);
       const queue = ['SOURCE'];
       while (queue.length && !parents.has('SINK')) {
-        const current = queue.shift()!;
+        const current = requiredPresent(queue.shift(), 'queue.shift()');
         const edges = Array.from(this.residual.get(current)?.keys() ?? []).sort(compareUnicode);
         for (const target of edges) {
-          if (!parents.has(target) && this.residual.get(current)!.get(target)!.isPositive()) {
+          if (
+            !parents.has(target) &&
+            requiredPresent(
+              requiredPresent(this.residual.get(current), 'this.residual.get(current)').get(target),
+              'this.residual.get(current)!.get(target)',
+            ).isPositive()
+          ) {
             parents.set(target, current);
             queue.push(target);
           }
@@ -51,18 +64,33 @@ export class FlowNetwork {
       let current = 'SINK';
       let amount: Rational | null = null;
       while (parents.get(current) !== null) {
-        const previous = parents.get(current)!;
-        const value = this.residual.get(previous)!.get(current)!;
+        const previous = requiredPresent(parents.get(current), 'parents.get(current)');
+        const value = requiredPresent(
+          requiredPresent(this.residual.get(previous), 'this.residual.get(previous)').get(current),
+          'this.residual.get(previous)!.get(current)',
+        );
         amount = amount === null ? value : min(amount, value);
         current = previous;
       }
       current = 'SINK';
       while (parents.get(current) !== null) {
-        const previous = parents.get(current)!;
-        const forward = this.residual.get(previous)!.get(current)!;
-        const backward = this.residual.get(current)!.get(previous)!;
-        this.residual.get(previous)!.set(current, forward.sub(amount!));
-        this.residual.get(current)!.set(previous, backward.add(amount!));
+        const previous = requiredPresent(parents.get(current), 'parents.get(current)');
+        const forward = requiredPresent(
+          requiredPresent(this.residual.get(previous), 'this.residual.get(previous)').get(current),
+          'this.residual.get(previous)!.get(current)',
+        );
+        const backward = requiredPresent(
+          requiredPresent(this.residual.get(current), 'this.residual.get(current)').get(previous),
+          'this.residual.get(current)!.get(previous)',
+        );
+        requiredPresent(this.residual.get(previous), 'this.residual.get(previous)').set(
+          current,
+          forward.sub(requiredPresent(amount, 'amount')),
+        );
+        requiredPresent(this.residual.get(current), 'this.residual.get(current)').set(
+          previous,
+          backward.add(requiredPresent(amount, 'amount')),
+        );
         current = previous;
       }
     }
@@ -91,16 +119,31 @@ export function simulateValidated(scenario: SiteScenario): Run {
   const digest = sha256Hex(canonical);
   const runId = sha256Hex(`continuity-v1:${ENGINE_VERSION}:${digest}`).slice(0, 20);
   const assets = new Map(scenario.assets.map((asset) => [asset.id, asset]));
-  const utility = scenario.assets.find((asset) => asset.kind === 'utility')!.id;
-  const generator = scenario.assets.find((asset) => asset.kind === 'generator')!.id;
-  const battery = scenario.assets.find((asset) => asset.kind === 'battery')!.id;
-  const load = scenario.assets.find((asset) => asset.kind === 'load')!.id;
+  const utility = requiredPresent(
+    scenario.assets.find((asset) => asset.kind === 'utility'),
+    "scenario.assets.find((asset) => asset.kind === 'utility')",
+  ).id;
+  const generator = requiredPresent(
+    scenario.assets.find((asset) => asset.kind === 'generator'),
+    "scenario.assets.find((asset) => asset.kind === 'generator')",
+  ).id;
+  const battery = requiredPresent(
+    scenario.assets.find((asset) => asset.kind === 'battery'),
+    "scenario.assets.find((asset) => asset.kind === 'battery')",
+  ).id;
+  const load = requiredPresent(
+    scenario.assets.find((asset) => asset.kind === 'load'),
+    "scenario.assets.find((asset) => asset.kind === 'load')",
+  ).id;
   const requiresOrder = topologicalOrder(scenario, 'requires');
   const incomingRequires = new Map<string, string[]>(
     scenario.assets.map((asset) => [asset.id, []]),
   );
   for (const edge of scenario.dependencies)
-    if (edge.relation === 'requires') incomingRequires.get(edge.target)!.push(edge.source);
+    if (edge.relation === 'requires')
+      requiredPresent(incomingRequires.get(edge.target), 'incomingRequires.get(edge.target)').push(
+        edge.source,
+      );
   const schedule = scenario.events
     .map((event, index) => ({ event, index }))
     .sort((left, right) => left.event.at_s - right.event.at_s || left.index - right.index);
@@ -135,15 +178,19 @@ export function simulateValidated(scenario: SiteScenario): Run {
     if (rows.length > 5000) throw new InputError('Simulation exceeded its interval budget');
     while (
       eventIndex < schedule.length &&
-      now.compare(Rational.fromInteger(schedule[eventIndex].event.at_s)) === 0
+      now.compare(
+        Rational.fromInteger(
+          requiredValue(schedule[eventIndex], 'schedule[eventIndex]').event.at_s,
+        ),
+      ) === 0
     ) {
-      const scheduled = schedule[eventIndex];
+      const scheduled = requiredValue(schedule[eventIndex], 'schedule[eventIndex]');
       const current = scheduled.event;
       if (current.action === 'asset_down') directDown.add(current.target);
       else if (current.action === 'asset_up') directDown.delete(current.target);
       else if (current.action === 'domain_down') domainsDown.add(current.target);
       else if (current.action === 'domain_up') domainsDown.delete(current.target);
-      else demand = quantity(current.value_kw!);
+      else demand = quantity(requiredPresent(current.value_kw, 'current.value_kw'));
       log.push({
         ...eventValue(current),
         at_s: text(Rational.fromInteger(current.at_s)),
@@ -154,11 +201,13 @@ export function simulateValidated(scenario: SiteScenario): Run {
     }
     const available = new Map<string, boolean>();
     for (const id of requiresOrder) {
-      const asset = assets.get(id)!;
+      const asset = requiredPresent(assets.get(id), 'assets.get(id)');
       const okay =
         !directDown.has(id) &&
         !asset.failure_domains.some((domain) => domainsDown.has(domain)) &&
-        incomingRequires.get(id)!.every((source) => available.get(source));
+        requiredPresent(incomingRequires.get(id), 'incomingRequires.get(id)').every((source) =>
+          available.get(source),
+        );
       available.set(id, okay);
     }
     if (available.get(utility) || !available.get(generator)) {
@@ -179,7 +228,12 @@ export function simulateValidated(scenario: SiteScenario): Run {
       Rational.fromInteger(scenario.duration_s),
     );
     if (eventIndex < schedule.length)
-      boundary = min(boundary, Rational.fromInteger(schedule[eventIndex].event.at_s));
+      boundary = min(
+        boundary,
+        Rational.fromInteger(
+          requiredValue(schedule[eventIndex], 'schedule[eventIndex]').event.at_s,
+        ),
+      );
     if (readyAt !== null && readyAt.compare(now) > 0) boundary = min(boundary, readyAt);
 
     const network = new FlowNetwork();
@@ -191,7 +245,9 @@ export function simulateValidated(scenario: SiteScenario): Run {
       network.add(
         `in:${id}`,
         `out:${id}`,
-        available.get(id) ? quantity(assets.get(id)!.capacity_kw) : zero(),
+        available.get(id)
+          ? quantity(requiredPresent(assets.get(id), 'assets.get(id)').capacity_kw)
+          : zero(),
       );
     for (const edge of scenario.dependencies
       .slice()
@@ -212,7 +268,9 @@ export function simulateValidated(scenario: SiteScenario): Run {
       network.add(
         'SOURCE',
         `in:${source}`,
-        enabled ? quantity(assets.get(source)!.capacity_kw) : zero(),
+        enabled
+          ? quantity(requiredPresent(assets.get(source), 'assets.get(source)').capacity_kw)
+          : zero(),
       );
       network.augment();
     }
@@ -228,10 +286,16 @@ export function simulateValidated(scenario: SiteScenario): Run {
       energy.compare(capacity) < 0
     ) {
       for (const source of [generator, battery]) {
-        network.residual.get('SOURCE')!.set(`in:${source}`, zero());
+        requiredPresent(network.residual.get('SOURCE'), "network.residual.get('SOURCE')").set(
+          `in:${source}`,
+          zero(),
+        );
         network.capacity.set(`SOURCE\u0000in:${source}`, zero());
       }
-      const chargingEdge = scenario.dependencies.find((edge) => edge.relation === 'charges')!;
+      const chargingEdge = requiredPresent(
+        scenario.dependencies.find((edge) => edge.relation === 'charges'),
+        "scenario.dependencies.find((edge) => edge.relation === 'charges')",
+      );
       network.add(`out:${chargingEdge.source}`, 'CHARGER', quantity(scenario.battery_charge_kw));
       network.add('CHARGER', 'SINK', quantity(scenario.battery_charge_kw));
       network.augment();
@@ -271,14 +335,30 @@ export function simulateValidated(scenario: SiteScenario): Run {
       ['battery_stored_change_kwh', energy.sub(previousEnergy)],
       ['unserved_duration_s', unserved.isPositive() ? seconds : zero()],
     ]);
-    const residual = values
-      .get('grid_kwh')!
-      .add(values.get('generator_kwh')!)
-      .sub(values.get('battery_stored_change_kwh')!)
-      .sub(values.get('served_it_kwh')!)
-      .sub(values.get('distribution_loss_kwh')!)
-      .sub(values.get('battery_charge_loss_kwh')!)
-      .sub(values.get('battery_discharge_loss_kwh')!);
+    const residual = requiredPresent(values.get('grid_kwh'), "values\n      .get('grid_kwh')")
+      .add(requiredPresent(values.get('generator_kwh'), "values.get('generator_kwh')"))
+      .sub(
+        requiredPresent(
+          values.get('battery_stored_change_kwh'),
+          "values.get('battery_stored_change_kwh')",
+        ),
+      )
+      .sub(requiredPresent(values.get('served_it_kwh'), "values.get('served_it_kwh')"))
+      .sub(
+        requiredPresent(values.get('distribution_loss_kwh'), "values.get('distribution_loss_kwh')"),
+      )
+      .sub(
+        requiredPresent(
+          values.get('battery_charge_loss_kwh'),
+          "values.get('battery_charge_loss_kwh')",
+        ),
+      )
+      .sub(
+        requiredPresent(
+          values.get('battery_discharge_loss_kwh'),
+          "values.get('battery_discharge_loss_kwh')",
+        ),
+      );
     if (
       !residual.isZero() ||
       energy.compare(zero()) < 0 ||
@@ -286,7 +366,8 @@ export function simulateValidated(scenario: SiteScenario): Run {
       unserved.compare(zero()) < 0
     )
       throw new Error('Electrical energy invariant violated');
-    for (const [key, value] of values) totals.set(key, totals.get(key)!.add(value));
+    for (const [key, value] of values)
+      totals.set(key, requiredPresent(totals.get(key), 'totals.get(key)').add(value));
     peakUnserved = max(peakUnserved, unserved);
     const warnings: string[] = [];
     if (unserved.isPositive()) warnings.push('UNSERVED_IT_LOAD');
@@ -334,7 +415,11 @@ export function simulateValidated(scenario: SiteScenario): Run {
       battery_end_kwh: text(energy),
       it_capacity_margin_kw: text(quantity(scenario.it_capacity_kw).sub(demand)),
       grid_energy_charge_to_date:
-        tariff === null ? null : moneyText(totals.get('grid_kwh')!.mul(tariff)),
+        tariff === null
+          ? null
+          : moneyText(
+              requiredPresent(totals.get('grid_kwh'), "totals.get('grid_kwh')").mul(tariff),
+            ),
       energy: energyObject,
       energy_balance_residual_kwh: '0',
       asset_states: assetStates,
@@ -359,14 +444,22 @@ export function simulateValidated(scenario: SiteScenario): Run {
   const gridCost =
     scenario.tariff_per_kwh === null
       ? null
-      : totals.get('grid_kwh')!.mul(quantity(scenario.tariff_per_kwh));
-  const generatorCost = totals.get('generator_kwh')!.isZero()
+      : requiredPresent(totals.get('grid_kwh'), "totals.get('grid_kwh')").mul(
+          quantity(scenario.tariff_per_kwh),
+        );
+  const generatorCost = requiredPresent(
+    totals.get('generator_kwh'),
+    "totals.get('generator_kwh')",
+  ).isZero()
     ? zero()
     : scenario.generator_cost_per_kwh === null
       ? null
-      : totals.get('generator_kwh')!.mul(quantity(scenario.generator_cost_per_kwh));
+      : requiredPresent(totals.get('generator_kwh'), "totals.get('generator_kwh')").mul(
+          quantity(scenario.generator_cost_per_kwh),
+        );
   const summary: Record<string, unknown> = {};
-  for (const key of totalKeys) summary[key] = text(totals.get(key)!);
+  for (const key of totalKeys)
+    summary[key] = text(requiredPresent(totals.get(key), 'totals.get(key)'));
   summary.battery_final_kwh = text(energy);
   summary.peak_unserved_kw = text(peakUnserved);
   summary.energy_balance_residual_kwh = '0';
@@ -376,7 +469,10 @@ export function simulateValidated(scenario: SiteScenario): Run {
     gridCost === null || generatorCost === null ? null : moneyText(gridCost.add(generatorCost));
   summary.cost_status =
     gridCost === null || generatorCost === null ? 'unknown_component' : 'illustrative';
-  summary.service_status = totals.get('unserved_it_kwh')!.isPositive()
+  summary.service_status = requiredPresent(
+    totals.get('unserved_it_kwh'),
+    "totals.get('unserved_it_kwh')",
+  ).isPositive()
     ? 'unserved_load'
     : 'served_throughout';
   summary.interval_count = rows.length;
@@ -398,8 +494,10 @@ export function simulateValidated(scenario: SiteScenario): Run {
   };
 }
 
-export async function simulateContinuity(input: unknown): Promise<Run> {
-  return simulateValidated(validateScenario(input));
+export function simulateContinuity(input: unknown): Promise<Run> {
+  return new Promise<Run>((resolve) => {
+    resolve(simulateValidated(validateScenario(input)));
+  });
 }
 
 export function simulateContinuitySync(input: unknown): Run {

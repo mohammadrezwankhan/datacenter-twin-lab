@@ -1,4 +1,4 @@
-import catalog from './course-catalog.json' with { type: 'json' };
+const { default: catalog } = await import('./course-catalog.json', { with: { type: 'json' } });
 
 export type LessonTrackId = 'foundations' | 'facility' | 'infrastructure';
 export type CurriculumTrackId = LessonTrackId | 'power-dynamics';

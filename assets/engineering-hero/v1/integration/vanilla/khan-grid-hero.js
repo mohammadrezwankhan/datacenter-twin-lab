@@ -1,4 +1,31 @@
 import { getSite } from '../../src/config.js';
+
+/** Build the fixed embed shell without invoking the HTML parser. */
+function createHeroShell(doc) {
+  const node = (tag, attributes = {}, ...children) => {
+    const element = doc.createElement(tag);
+    for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
+    element.append(...children);
+    return element;
+  };
+  const fragment = doc.createDocumentFragment();
+  fragment.append(
+    node('link', {rel: 'stylesheet'}),
+    node('section', {class: 'frame', part: 'frame', 'aria-label': 'Conceptual engineering film'},
+      node('div', {class: 'placeholder'},
+        node('p', {class: 'eyebrow'}, 'Research / Models / Evidence'),
+        node('h2', {}, 'From First Principles', node('br'), 'to Grid-Scale Reality'),
+        node('p', {}, 'Dr. Mohammad Rezwan Khan')),
+      node('img', {class: 'poster', alt: '', hidden: ''}),
+      node('div', {class: 'controls'},
+        node('button', {type: 'button', class: 'toggle', 'aria-pressed': 'false'}, 'Play animation'),
+        node('button', {type: 'button', class: 'replay', hidden: ''}, 'Replay'))),
+    node('div', {class: 'copy'},
+      node('p', {}, 'Physics → executable models → evidence → energy systems. Illustrative telemetry; not live data, certified acceptance, plant control, or investment advice.'),
+      node('a')),
+    node('p', {class: 'sr-only', 'aria-live': 'polite'}));
+  return fragment;
+}
 /** Same-origin, lifecycle-owned embed. Video is the default; WebGL requires explicit opt-in.
  * Copy this module with its relative directory structure, or let the host bundler resolve it.
  */
@@ -17,13 +44,7 @@ class KhanGridHero extends HTMLElement {
     this._mounted=true;this._disposed=false;this._visible=false;this._playing=false;this._resume=false;this._frameReady=false;this._hasStarted=false;this._posterFailed=false;this._playRequest=0;this._generation=(this._generation||0)+1;
     this._reduced=matchMedia('(prefers-reduced-motion: reduce)');this._saveData=!!navigator.connection?.saveData;
     this._mode=this.getAttribute('mode')==='interactive'?'interactive':'video';this._site=getSite(this.getAttribute('site')||'mrkhan');
-    // Static markup only. User-provided values are assigned via DOM properties below.
-    this.shadowRoot.innerHTML=`<link rel="stylesheet"><section class="frame" part="frame" aria-label="Conceptual engineering film">
-      <div class="placeholder"><p class="eyebrow">Research / Models / Evidence</p><h2>From First Principles<br>to Grid-Scale Reality</h2><p>Dr. Mohammad Rezwan Khan</p></div>
-      <img class="poster" alt="" hidden>
-      <div class="controls"><button type="button" class="toggle" aria-pressed="false">Play animation</button><button type="button" class="replay" hidden>Replay</button></div>
-      </section><div class="copy"><p>Physics → executable models → evidence → energy systems. Illustrative telemetry; not live data, certified acceptance, plant control, or investment advice.</p><a></a></div>
-      <p class="sr-only" aria-live="polite"></p>`;
+    this.shadowRoot.replaceChildren(createHeroShell(this.ownerDocument));
     this.shadowRoot.querySelector('link').href=new URL('./embed.css',import.meta.url).href;
     this._frame=this.shadowRoot.querySelector('.frame');this._placeholder=this.shadowRoot.querySelector('.placeholder');
     this._poster=this.shadowRoot.querySelector('.poster');this._toggle=this.shadowRoot.querySelector('.toggle');this._replay=this.shadowRoot.querySelector('.replay');this._status=this.shadowRoot.querySelector('[aria-live]');

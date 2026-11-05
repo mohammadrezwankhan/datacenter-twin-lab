@@ -4,19 +4,20 @@ No networking, filesystem writes, dynamic Python execution, or shared service.
 """
 
 import json
+from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
 from .catalog import load_catalog, normalize_quote
-from .contracts import InputError, MAX_SCENARIO_BYTES, Scenario, parse_json_document
-from .engine import simulate as simulate_planning
 from .continuity import simulate_continuity
+from .contracts import MAX_SCENARIO_BYTES, InputError, Scenario, parse_json_document
 from .demo import PRESETS, demo_scenario
-from .topology import SiteScenario
+from .engine import simulate as simulate_planning
 from .reporting import render_html, render_markdown
 from .sensitivity import sweep_continuity
+from .topology import SiteScenario
 
 
-def scenario_report(payload: dict) -> dict:
+def scenario_report(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict) or set(payload) != {"scenario", "format"}:
         raise InputError("Report requires scenario and format")
     if payload["format"] not in ("markdown", "html"):
@@ -26,11 +27,12 @@ def scenario_report(payload: dict) -> dict:
     return {"format": payload["format"], "text": renderer(run), "run_id": run["run_id"]}
 
 
-def scenario_sweep(payload: dict) -> dict:
+def scenario_sweep(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict) or set(payload) != {"scenario", "parameter", "values"}:
         raise InputError("Sweep requires scenario, parameter, and values")
-    return sweep_continuity(SiteScenario.from_dict(payload["scenario"]),
-                            payload["parameter"], payload["values"])
+    return sweep_continuity(
+        SiteScenario.from_dict(payload["scenario"]), payload["parameter"], payload["values"]
+    )
 
 
 def dispatch_json(path: str, body: str = "null") -> str:
@@ -38,6 +40,7 @@ def dispatch_json(path: str, body: str = "null") -> str:
     if len(body.encode("utf-8")) > MAX_SCENARIO_BYTES:
         raise InputError("Request exceeds the 4 MiB input limit")
     route = urlsplit(path)
+    result: object
     if route.path == "presets":
         result = [{"id": key, "name": name} for key, name in PRESETS.items()]
     elif route.path == "demo":
@@ -49,6 +52,7 @@ def dispatch_json(path: str, body: str = "null") -> str:
         payload = parse_json_document(body.encode("utf-8"))
         if route.path == "emt":
             from .emt import simulate_emt
+
             result = simulate_emt(payload)
         elif route.path == "simulations":
             result = simulate_continuity(SiteScenario.from_dict(payload)).to_dict()

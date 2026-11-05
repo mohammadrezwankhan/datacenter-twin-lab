@@ -1,0 +1,121 @@
+minimum_pre_commit_version: 3.2.0
+repos:
+- repo: local
+  hooks:
+  - id: rezwan-workflow
+    name: Rezwan workflow security gate
+    entry: python3.12 .github/security/run.py workflow
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: rezwan-secrets
+    name: Rezwan secrets security gate
+    entry: python3.12 .github/security/run.py secrets
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: rezwan-sast
+    name: Rezwan sast security gate
+    entry: python3.12 .github/security/run.py sast
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - manual
+  - id: rezwan-dependencies
+    name: Rezwan dependencies security gate
+    entry: python3.12 .github/security/run.py dependencies
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - manual
+  - id: rezwan-trivy
+    name: Rezwan trivy security gate
+    entry: python3.12 .github/security/run.py trivy
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - manual
+  - id: python-ruff
+    name: Repository-wide Ruff policy
+    entry: python3.12 .github/security/quality.py python-lint
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: python-mypy
+    name: Strict Python types including security tooling
+    entry: python3.12 .github/security/quality.py python-types
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: python-coverage
+    name: Python tests with mandatory numerical core coverage
+    entry: python3.12 .github/security/quality.py python-tests
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-push
+    - manual
+  - id: browser-eslint
+    name: ESLint with zero warning allowance
+    entry: python3.12 .github/security/quality.py browser-lint
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: browser-typescript
+    name: Strict TypeScript project check
+    entry: python3.12 .github/security/quality.py browser-types
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: browser-format
+    name: Browser tooling formatting
+    entry: python3.12 .github/security/quality.py browser-format
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-commit
+    - manual
+  - id: browser-tests
+    name: Browser security contract tests
+    entry: python3.12 .github/security/quality.py browser-tests
+    language: system
+    pass_filenames: false
+    always_run: true
+    require_serial: true
+    stages:
+    - pre-push
+    - manual

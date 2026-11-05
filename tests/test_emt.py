@@ -7,7 +7,12 @@ from datacenter_twin.contracts import InputError
 from datacenter_twin.emt import DEFAULT_EMT, EMT_PRESETS, simulate_emt
 
 
-def analytic_segment(config, state, supply, seconds):
+def analytic_segment(
+    config: dict[str, int | float],
+    state: tuple[float, float],
+    supply: float,
+    seconds: float,
+) -> tuple[float, float]:
     """Closed-form exp(A*t) for an underdamped constant-input segment.
 
     This has no RK stepping or energy quadrature shared with the solver.
@@ -32,7 +37,7 @@ def analytic_segment(config, state, supply, seconds):
 
 
 class EmtCircuitTests(unittest.TestCase):
-    def test_dc_divider_and_no_event_steady_state(self):
+    def test_dc_divider_and_no_event_steady_state(self) -> None:
         result = simulate_emt({**DEFAULT_EMT, "sag_pu": 1})
         current = 800 / (0.08 + 12.8)
         voltage = 12.8 * current
@@ -43,7 +48,7 @@ class EmtCircuitTests(unittest.TestCase):
             result["summary"]["load_energy_j"], voltage**2 / 12.8 * 0.2, places=6
         )
 
-    def test_both_events_against_analytic_segment_solution(self):
+    def test_both_events_against_analytic_segment_solution(self) -> None:
         result = simulate_emt()
         config = result["config"]
         initial = (800 / 12.88, 800 * 12.8 / 12.88)
@@ -57,7 +62,7 @@ class EmtCircuitTests(unittest.TestCase):
             self.assertAlmostEqual(row["source_a"], expected[0], delta=0.00001)
             self.assertAlmostEqual(row["bus_v"], expected[1], delta=0.00001)
 
-    def test_event_is_right_continuous_but_state_cannot_jump(self):
+    def test_event_is_right_continuous_but_state_cannot_jump(self) -> None:
         rows = simulate_emt()["rows"]
         self.assertEqual(rows[399]["source_v"], 800)
         self.assertEqual(rows[400]["source_v"], 400)
@@ -65,7 +70,7 @@ class EmtCircuitTests(unittest.TestCase):
         self.assertAlmostEqual(rows[399]["bus_v"], rows[400]["bus_v"], places=10)
         self.assertAlmostEqual(rows[399]["source_a"], rows[400]["source_a"], places=10)
 
-    def test_fourth_order_refinement_vs_closed_form(self):
+    def test_fourth_order_refinement_vs_closed_form(self) -> None:
         config = dict(DEFAULT_EMT)
         expected = analytic_segment(config, (800 / 12.88, 800 * 12.8 / 12.88), 400, 0.0037)[1]
         errors = []
@@ -75,7 +80,7 @@ class EmtCircuitTests(unittest.TestCase):
         self.assertGreater(errors[0] / errors[1], 12)
         self.assertLess(errors[0] / errors[1], 20)
 
-    def test_energy_ledger_including_reverse_source_flow(self):
+    def test_energy_ledger_including_reverse_source_flow(self) -> None:
         for name, config in EMT_PRESETS.items():
             with self.subTest(name=name):
                 result = simulate_emt(config)
@@ -86,7 +91,7 @@ class EmtCircuitTests(unittest.TestCase):
                 self.assertTrue(any(row["source_a"] < 0 for row in result["rows"]))
                 self.assertEqual(len(result["rows"]), 2001)
 
-    def test_allowed_corner_configurations_remain_finite(self):
+    def test_allowed_corner_configurations_remain_finite(self) -> None:
         for resistance in (0.02, 1):
             for inductance in (0.1, 5):
                 for capacitance in (1, 50):
@@ -103,7 +108,7 @@ class EmtCircuitTests(unittest.TestCase):
                     )
                     self.assertTrue(all(math.isfinite(v) for v in result["summary"].values()))
 
-    def test_reject_invalid_or_ambiguous_inputs(self):
+    def test_reject_invalid_or_ambiguous_inputs(self) -> None:
         for field, value in [
             ("step_us", 15),
             ("step_us", True),

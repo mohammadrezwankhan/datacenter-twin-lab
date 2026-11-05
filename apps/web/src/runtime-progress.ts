@@ -36,8 +36,8 @@ function throttled(report: ProgressReporter, intervalMs = 100): ProgressReporter
     const finished = progress.message.startsWith('Downloaded ');
     if (finished || now - state.last >= intervalMs || progress.loadedBytes === undefined) {
       if (state.timer !== undefined) clearTimeout(state.timer);
-      state.timer = undefined;
-      state.pending = undefined;
+      delete state.timer;
+      delete state.pending;
       state.last = now;
       report(progress);
       return;
@@ -46,11 +46,11 @@ function throttled(report: ProgressReporter, intervalMs = 100): ProgressReporter
     if (state.timer !== undefined) return;
     state.timer = setTimeout(
       () => {
-        state.timer = undefined;
+        delete state.timer;
         if (!state.pending) return;
         state.last = Date.now();
         report(state.pending);
-        state.pending = undefined;
+        delete state.pending;
       },
       intervalMs - (now - state.last),
     );
@@ -67,33 +67,46 @@ export async function readResponseBytes(
   },
   report: ProgressReporter,
 ): Promise<ArrayBuffer> {
-  if (!response.ok) throw new Error(`${options.resource} download failed (${response.status})`);
+  if (!response.ok)
+    throw new Error(`${options.resource} download failed (${String(response.status)})`);
   const emit = throttled(report);
   const { expectedBytes, ...displayOptions } = options;
   const expected = expectedBytes ?? knownLength(response.headers);
   const reader = response.body?.getReader();
   if (!reader) {
-    emit({ ...displayOptions, loadedBytes: 0, totalBytes: expected });
+    emit({
+      ...displayOptions,
+      loadedBytes: 0,
+      ...(expected === undefined ? {} : { totalBytes: expected }),
+    });
     const buffer = await response.arrayBuffer();
     emit({
       ...displayOptions,
       message: `Downloaded ${displayOptions.resource}`,
       loadedBytes: buffer.byteLength,
-      totalBytes: expected,
+      ...(expected === undefined ? {} : { totalBytes: expected }),
     });
     return buffer;
   }
 
   const chunks: Uint8Array[] = [];
   let loadedBytes = 0;
-  emit({ ...displayOptions, loadedBytes, totalBytes: expected });
+  emit({
+    ...displayOptions,
+    loadedBytes,
+    ...(expected === undefined ? {} : { totalBytes: expected }),
+  });
   try {
-    while (true) {
+    for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
       chunks.push(value);
       loadedBytes += value.byteLength;
-      emit({ ...displayOptions, loadedBytes, totalBytes: expected });
+      emit({
+        ...displayOptions,
+        loadedBytes,
+        ...(expected === undefined ? {} : { totalBytes: expected }),
+      });
     }
   } catch (error) {
     await reader.cancel(error).catch(() => undefined);
@@ -111,7 +124,7 @@ export async function readResponseBytes(
     ...displayOptions,
     message: `Downloaded ${displayOptions.resource}`,
     loadedBytes,
-    totalBytes: exactExpected,
+    ...(exactExpected === undefined ? {} : { totalBytes: exactExpected }),
   });
   return output.buffer;
 }
@@ -146,7 +159,7 @@ export async function fetchVerifiedArchive(
     message: `Downloading ${prefix} source archive`,
     resource,
     loadedBytes: 0,
-    totalBytes: expectedBytes,
+    ...(expectedBytes === undefined ? {} : { totalBytes: expectedBytes }),
   });
   const archive = await readResponseBytes(
     await fetch(new URL(resource, base)),
@@ -154,7 +167,7 @@ export async function fetchVerifiedArchive(
       stage: 'download',
       message: `Downloading ${prefix} source archive`,
       resource,
-      expectedBytes,
+      ...(expectedBytes === undefined ? {} : { expectedBytes }),
     },
     report,
   );
@@ -218,7 +231,7 @@ export function observeRuntimeFetches(
               message: `Downloaded ${resource}`,
               resource,
               loadedBytes,
-              totalBytes: exactTotal,
+              ...(exactTotal === undefined ? {} : { totalBytes: exactTotal }),
             });
             return;
           }
@@ -228,7 +241,7 @@ export function observeRuntimeFetches(
             message: `Downloading ${resource}`,
             resource,
             loadedBytes,
-            totalBytes,
+            ...(totalBytes === undefined ? {} : { totalBytes: totalBytes }),
           });
           controller.enqueue(value);
         } catch (error) {

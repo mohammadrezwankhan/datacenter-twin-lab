@@ -12,7 +12,7 @@ test('infrastructure lesson labels wrap at 320px with enlarged text', async ({
   });
   const page = await context.newPage();
   try {
-    await page.goto(`${testInfo.project.use.baseURL}?lesson=evidence-load-ledger`);
+    await page.goto(`${String(testInfo.project.use.baseURL)}?lesson=evidence-load-ledger`);
     await expect(page.locator('.infra-lesson-nav')).toBeVisible();
     // User text sizing and platform font metrics must not force long words outside a button.
     await page.addStyleTag({ content: 'html { font-size: 200%; }' });
@@ -22,7 +22,7 @@ test('infrastructure lesson labels wrap at 320px with enlarged text', async ({
         const range = document.createRange();
         range.selectNodeContents(button);
         const text = range.getBoundingClientRect();
-        return text.left < box.left || text.right > box.right ? [button.textContent?.trim()] : [];
+        return text.left < box.left || text.right > box.right ? [button.textContent.trim()] : [];
       }),
     );
     expect(overflow).toEqual([]);
@@ -42,7 +42,7 @@ test('responsive-20261028 infrastructure track heading stays inside its panel at
   });
   const page = await context.newPage();
   try {
-    await page.goto(`${testInfo.project.use.baseURL}?lesson=evidence-load-ledger`);
+    await page.goto(`${String(testInfo.project.use.baseURL)}?lesson=evidence-load-ledger`);
     const heading = page.locator('.curriculum-track-panel-copy h3');
     await expect(heading).toHaveText('Infrastructure Engineering');
     await page.addStyleTag({ content: 'html { font-size: 200%; }' });
@@ -74,7 +74,7 @@ test('responsive-20261028 infrastructure track heading stays inside its panel at
               {
                 tag: node.tagName,
                 className: node.className,
-                text: node.textContent?.trim().slice(0, 120),
+                text: node.textContent.trim().slice(0, 120),
                 left: rect.left,
                 right: rect.right,
                 contentRight: content.right,
@@ -100,7 +100,7 @@ test('responsive-20261028 infrastructure track heading stays inside its panel at
 });
 
 for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
-  test(`touch navigation keeps labels inside separate buttons at ${width}px`, async ({
+  test(`touch navigation keeps labels inside separate buttons at ${String(width)}px`, async ({
     browser,
   }, testInfo) => {
     const context = await browser.newContext({
@@ -118,7 +118,7 @@ for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
         '?mode=emt',
         '?study=load-step',
       ]) {
-        await page.goto(`${testInfo.project.use.baseURL}${route}`);
+        await page.goto(`${String(testInfo.project.use.baseURL)}${route}`);
         await expect(page.locator('.nav-item').first()).toBeVisible();
         const labels = await page.locator('.nav-item').evaluateAll((buttons) =>
           buttons.map((button) => {
@@ -127,7 +127,7 @@ for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
             range.selectNodeContents(button);
             const text = range.getBoundingClientRect();
             return {
-              name: button.textContent?.trim(),
+              name: button.textContent.trim(),
               contained: text.left >= box.left && text.right <= box.right,
               width: box.width,
               height: box.height,
@@ -150,7 +150,7 @@ for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
 }
 
 for (const width of [320, 390]) {
-  test(`all 24 lessons contain their headings and button labels at ${width}px`, async ({
+  test(`all 24 lessons contain their headings and button labels at ${String(width)}px`, async ({
     browser,
   }, testInfo) => {
     const context = await browser.newContext({
@@ -162,7 +162,7 @@ for (const width of [320, 390]) {
     const page = await context.newPage();
     try {
       for (const lesson of courseCatalog) {
-        await page.goto(`${testInfo.project.use.baseURL}?lesson=${lesson.id}`);
+        await page.goto(`${String(testInfo.project.use.baseURL)}?lesson=${lesson.id}`);
         await expect(page.locator('.course-studio, .infrastructure-course')).toBeVisible();
         const overflow = await page
           .locator('main button, main h1, main h2, main h3')
@@ -175,7 +175,7 @@ for (const width of [320, 390]) {
                 range.selectNodeContents(element);
                 const text = range.getBoundingClientRect();
                 return text.left < box.left - 2 || text.right > box.right + 2
-                  ? [element.textContent?.trim()]
+                  ? [element.textContent.trim()]
                   : [];
               }),
           );

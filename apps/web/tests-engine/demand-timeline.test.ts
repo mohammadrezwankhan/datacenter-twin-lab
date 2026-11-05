@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -11,9 +12,10 @@ import {
 } from '../src/demand-timeline';
 import { simulateContinuitySync } from '../src/js-engine/continuity';
 import type { SiteScenario } from '../src/types';
+import { demoFixture } from './json-fixtures';
 
 const root = resolve(process.cwd(), '../..');
-const data = JSON.parse(
+const data = demoFixture(
   readFileSync(resolve(root, '.local/browser-demo-assets/demo-data.json'), 'utf8'),
 );
 const base = data.scenarios.normal as SiteScenario;
@@ -24,7 +26,7 @@ const step = (atS: string, demandKw: string, id = 'new') => ({
   originalIndex: null,
 });
 function assertNative(scenario: SiteScenario) {
-  const native = JSON.parse(
+  const native: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -40,13 +42,13 @@ function assertNative(scenario: SiteScenario) {
   return result;
 }
 
-test('all eighteen demand schedules round-trip without changing a field or event order', () => {
-  for (const scenario of Object.values(data.scenarios) as SiteScenario[]) {
+void test('all eighteen demand schedules round-trip without changing a field or event order', () => {
+  for (const scenario of Object.values(data.scenarios)) {
     assert.deepEqual(scenarioWithDemand(scenario, demandDraft(scenario)), scenario);
   }
 });
 
-test('demand preview integrates zero-time, equal-time and last-second steps with native parity', () => {
+void test('demand preview integrates zero-time, equal-time and last-second steps with native parity', () => {
   const scenario = scenarioWithDemand(
     { ...base, duration_s: 3600, it_demand_kw: '999', tariff_per_kwh: null },
     {
@@ -71,10 +73,16 @@ test('demand preview integrates zero-time, equal-time and last-second steps with
   ]);
 });
 
-test('edits preserve non-demand events, custom load ids, precision and coincident outage behavior', () => {
+void test('edits preserve non-demand events, custom load ids, precision and coincident outage behavior', () => {
   const source = structuredClone(data.scenarios.generator_failure) as SiteScenario;
-  const oldLoad = source.assets.find((asset) => asset.kind === 'load')!.id;
-  source.assets.find((asset) => asset.kind === 'load')!.id = 'custom-load';
+  const oldLoad = requiredPresent(
+    source.assets.find((asset) => asset.kind === 'load'),
+    "source.assets.find((asset) => asset.kind === 'load')",
+  ).id;
+  requiredPresent(
+    source.assets.find((asset) => asset.kind === 'load'),
+    "source.assets.find((asset) => asset.kind === 'load')",
+  ).id = 'custom-load';
   source.dependencies = source.dependencies.map((edge) => ({
     ...edge,
     target: edge.target === oldLoad ? 'custom-load' : edge.target,
@@ -90,19 +98,20 @@ test('edits preserve non-demand events, custom load ids, precision and coinciden
   );
   assert.deepEqual(edited.source_ids, source.source_ids);
   assert.equal(edited.it_demand_kw, '1000.000000001');
-  assert.equal(edited.events.at(-1)!.target, 'custom-load');
+  assert.equal(requiredPresent(edited.events.at(-1), 'edited.events.at(-1)').target, 'custom-load');
   const result = assertNative(edited);
   // 100 kWh * .90 * .95 = 85.5 kWh available to IT; a 600 s x 500 kW outage needs 83 1/3 kWh.
   assert.equal(result.summary.unserved_it_kwh, '0');
   const draft = demandDraft(edited);
-  draft.steps[0].atS = '900';
-  draft.steps[0].demandKw = '600';
+  const firstStep = requiredPresent(draft.steps[0], 'first edited demand step');
+  firstStep.atS = '900';
+  firstStep.demandKw = '600';
   const sameTime = scenarioWithDemand(edited, draft);
   assert.deepEqual(sameTime.events.slice(0, source.events.length), source.events);
   assertNative(sameTime);
 });
 
-test('invalid inputs and event overflow never mutate the source; boundary values remain valid', () => {
+void test('invalid inputs and event overflow never mutate the source; boundary values remain valid', () => {
   const snapshot = JSON.stringify(base);
   for (const time of ['', '-1', '0.5', String(base.duration_s), 'Infinity', '1e3'])
     assert.throws(() =>
@@ -127,10 +136,13 @@ test('invalid inputs and event overflow never mutate the source; boundary values
   assertNative(zero);
   const unicode = scenarioWithDemand(base, { initialKw: '١٠٠٠', steps: [step('1', '1e-9')] });
   assert.equal(unicode.it_demand_kw, '1000');
-  assert.equal(unicode.events[0].value_kw, '0.000000001');
+  assert.equal(
+    requiredPresent(unicode.events[0], 'first Unicode demand event').value_kw,
+    '0.000000001',
+  );
 });
 
-test('removing steps keeps all availability events and new steps bisect the largest gap', () => {
+void test('removing steps keeps all availability events and new steps bisect the largest gap', () => {
   const source = data.scenarios.ai_cluster_50mw_ramp as SiteScenario;
   assert.equal(scenarioWithDemand(source, { initialKw: '50000', steps: [] }).events.length, 0);
   assert.equal(nextStepTime(demandDraft(source), source.duration_s), 1350);

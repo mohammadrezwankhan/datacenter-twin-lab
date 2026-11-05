@@ -24,8 +24,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 1574,
-      "sha256": "59f088e5fe88d71b3caa4aa77ee3311097923b36931acb805a7a54a83eddcb25"
+      "bytes": 1982,
+      "sha256": "0a900a1dfc193e7424897ee4611e6e4a07a2be587d09ea8377695636ac760441"
     },
     {
       "path": "integration/vanilla/embed.css",
@@ -39,8 +39,8 @@
     },
     {
       "path": "integration/vanilla/example.html",
-      "bytes": 1159,
-      "sha256": "4f448ec4e33f54ef6f29157ec7982d05ef61e9459eed9f0131a8a0f76f7bf6e3"
+      "bytes": 1513,
+      "sha256": "beec134a0e6760e913dbc4f3988e5f33a155dc4361234831fef68b4bf06ee86d"
     },
     {
       "path": "integration/vanilla/host.css",
@@ -49,8 +49,8 @@
     },
     {
       "path": "integration/vanilla/khan-grid-hero.js",
-      "bytes": 8956,
-      "sha256": "8a8f94696c29be49aab46a6136f2e1ebc4b0907bd0666758b3b099d3e70ed2ed"
+      "bytes": 9564,
+      "sha256": "6fa97c79ea656adb9a10ef1fddf21059580ba99b37fadafcc2a3462291b6907e"
     },
     {
       "path": "poster.png",
@@ -79,8 +79,8 @@
     },
     {
       "path": "src/main.js",
-      "bytes": 5179,
-      "sha256": "156c01925d79e2b7c5d6ddd50205fe1bd13043b5e5e7541bed96727920b206d9"
+      "bytes": 5170,
+      "sha256": "25678b6c6dea68c64da0c0ce4d44d05a796afd87418314438d0044dd4589f0f8"
     },
     {
       "path": "src/scene/conduit.js",
@@ -104,8 +104,8 @@
     },
     {
       "path": "src/scene/objects.js",
-      "bytes": 6801,
-      "sha256": "0b444a2fa60442c6857bef0955259dd23cf031c558d05ca9a5447b63bda17443"
+      "bytes": 6780,
+      "sha256": "afdf51620518c789385c970e206b179c91ff912e4e1fc8457c2545ddee3ca012"
     },
     {
       "path": "src/styles/hero.css",
@@ -119,13 +119,13 @@
     },
     {
       "path": "src/ui/panels.js",
-      "bytes": 9178,
-      "sha256": "25ee98a7c1add3201b6838fad446a556c2f99599de84325376efd494622516be"
+      "bytes": 9159,
+      "sha256": "754872b35f01c35e3f2d893a96c58a91755def83354d5bfae82ed2caa3567dab"
     },
     {
       "path": "vendor/manifest.json",
-      "bytes": 1424,
-      "sha256": "7b91fa0a1fd43e444c5e97506c371a1a18b0d6fcf978296e56f771db2794e0df"
+      "bytes": 1731,
+      "sha256": "d0078fbdd033b904814bf3a3e595c619d2220b8870c7d70c836dc9181ba68efc"
     },
     {
       "path": "vendor/three/LICENSE",
@@ -134,8 +134,8 @@
     },
     {
       "path": "vendor/three/build/three.core.js",
-      "bytes": 1403455,
-      "sha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20"
+      "bytes": 1403418,
+      "sha256": "bb96e86e700014d4c87c63bf007167da9773c929dc45daf86ee99973ae74f0a5"
     },
     {
       "path": "vendor/three/build/three.module.js",

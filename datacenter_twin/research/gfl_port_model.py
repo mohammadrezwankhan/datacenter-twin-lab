@@ -1,10 +1,27 @@
-# Adapted from user-supplied python_equivalent archive (SHA-256 c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace were supplied; no MATLAB/measurement validation is claimed.
+# Adapted from user-supplied python_equivalent archive (SHA-256
+# c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps
+# these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace
+# were supplied; no MATLAB/measurement validation is claimed.
 """Python equivalent of gfl_port_model.m."""
+
 from __future__ import annotations
+
+from types import SimpleNamespace
+
 import numpy as np
 
+from .types import Complex, FloatArray, Real
 
-def gfl_port_model(t, x, Vport, gfl, pref_cmd, qref_cmd, omega_sys=None):
+
+def gfl_port_model(
+    _t: float,
+    x: FloatArray,
+    vport: Complex,
+    gfl: SimpleNamespace,
+    pref_cmd: Real,
+    qref_cmd: Real,
+    omega_sys: Real | None = None,
+) -> tuple[FloatArray, Complex, dict[str, Real]]:
     if omega_sys is None:
         omega_sys = gfl.base.ome_sys
     b, f, pll, out, inner, dc = gfl.base, gfl.filt, gfl.pll, gfl.outer, gfl.inner, gfl.dc
@@ -36,17 +53,17 @@ def gfl_port_model(t, x, Vport, gfl, pref_cmd, qref_cmd, omega_sys=None):
 
     p_inst = vr_filt * ir_g + vi_filt * ii_g
     q_inst = vi_filt * ir_g - vr_filt * ii_g
-    Id_pi = out.Kp_p * (pref_cmd - pm) + out.Ki_p * sig_p
-    Iq_pi = -(out.Kp_q * (qref_cmd - qm) + out.Ki_q * sig_q)
-    Vd_pi = inner.kpc * (Id_pi - id_cv) + inner.kic * gam_d
-    Vq_pi = inner.kpc * (Iq_pi - iq_cv) + inner.kic * gam_q
-    Vd_cv_ref = Vd_pi - ome_est * inner.lf * iq_cv + inner.kffv * vd_f
-    Vq_cv_ref = Vq_pi + ome_est * inner.lf * id_cv + inner.kffv * vq_f
+    id_pi = out.Kp_p * (pref_cmd - pm) + out.Ki_p * sig_p
+    iq_pi = -(out.Kp_q * (qref_cmd - qm) + out.Ki_q * sig_q)
+    vd_pi = inner.kpc * (id_pi - id_cv) + inner.kic * gam_d
+    vq_pi = inner.kpc * (iq_pi - iq_cv) + inner.kic * gam_q
+    vd_cv_ref = vd_pi - ome_est * inner.lf * iq_cv + inner.kffv * vd_f
+    vq_cv_ref = vq_pi + ome_est * inner.lf * id_cv + inner.kffv * vq_f
 
-    md, mq = Vd_cv_ref / dc.Vdc, Vq_cv_ref / dc.Vdc
+    md, mq = vd_cv_ref / dc.Vdc, vq_cv_ref / dc.Vdc
     vr_cv = (s * md + c * mq) * dc.Vdc
     vi_cv = (-c * md + s * mq) * dc.Vdc
-    Vr_g, Vi_g = np.real(Vport), np.imag(Vport)
+    vr_g, vi_g = np.real(vport), np.imag(vport)
 
     xdot = np.zeros(15)
     xdot[0:2] = (b.ome_b / f.lf) * np.array(
@@ -63,8 +80,8 @@ def gfl_port_model(t, x, Vport, gfl, pref_cmd, qref_cmd, omega_sys=None):
     )
     xdot[4:6] = (b.ome_b / f.lg) * np.array(
         [
-            vr_filt - Vr_g - f.rg * ir_g + omega_sys * f.lg * ii_g,
-            vi_filt - Vi_g - f.rg * ii_g - omega_sys * f.lg * ir_g,
+            vr_filt - vr_g - f.rg * ir_g + omega_sys * f.lg * ii_g,
+            vi_filt - vi_g - f.rg * ii_g - omega_sys * f.lg * ir_g,
         ]
     )
     xdot[6:9] = [pll.ome_lp * (vq_f - vq_pll), vq_pll, b.ome_b * (ome_est - omega_sys)]
@@ -74,8 +91,8 @@ def gfl_port_model(t, x, Vport, gfl, pref_cmd, qref_cmd, omega_sys=None):
         qref_cmd - qm,
         out.ome_f * (q_inst - qm),
     ]
-    xdot[13:15] = [Id_pi - id_cv, Iq_pi - iq_cv]
+    xdot[13:15] = [id_pi - id_cv, iq_pi - iq_cv]
 
-    Iport = ir_g + 1j * ii_g
-    aux = dict(ome_est=ome_est, p_inst=p_inst, q_inst=q_inst, Id_pi=Id_pi, Iq_pi=Iq_pi)
-    return xdot, Iport, aux
+    iport = ir_g + 1j * ii_g
+    aux = {"ome_est": ome_est, "p_inst": p_inst, "q_inst": q_inst, "Id_pi": id_pi, "Iq_pi": iq_pi}
+    return xdot, iport, aux

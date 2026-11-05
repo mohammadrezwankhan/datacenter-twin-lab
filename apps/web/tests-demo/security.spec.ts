@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
@@ -12,7 +13,9 @@ test('power dynamics security headers protect HTML and the scientific worker', a
   expect(headers['x-frame-options']).toBe('SAMEORIGIN');
   expect(headers['x-content-type-options']).toBe('nosniff');
   expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
-  const permissions = headers['permissions-policy'].split(',').map((value) => value.trim());
+  const permissions = requiredPresent(headers['permissions-policy'], 'Permissions-Policy header')
+    .split(',')
+    .map((value) => value.trim());
   // A local security proxy may add further denials; these required denials
   // must still be present exactly, without depending on header ordering.
   for (const feature of ['camera', 'microphone', 'geolocation'])
@@ -27,7 +30,9 @@ test('power dynamics security headers protect HTML and the scientific worker', a
   expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
   const html = await response.text();
   for (const match of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g))
-    expect(csp).toContain(`'sha256-${createHash('sha256').update(match[1]).digest('base64')}'`);
+    expect(csp).toContain(
+      `'sha256-${createHash('sha256').update(requiredPresent(match[1], 'JSON-LD script body')).digest('base64')}'`,
+    );
   const violations: string[] = [];
   page.on('console', (message) => {
     if (

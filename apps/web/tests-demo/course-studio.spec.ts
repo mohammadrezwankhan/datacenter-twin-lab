@@ -1,3 +1,4 @@
+import { objectValue, objectList } from './json-contracts';
 import { test, expect, type Page } from '@playwright/test';
 import { writeFile } from 'node:fs/promises';
 import { lessons } from '../src/course-lessons';
@@ -81,40 +82,35 @@ test('inclusive boundaries keep event wording, full service and complete Python 
   await expect(page.getByTestId('lesson-result')).toBeVisible();
   await runInput(page, '0');
   await expect(page.getByTestId('lesson-result')).toContainText('Battery starts empty');
-  let run = await exported(page);
+  let run = objectValue(await exported(page));
   expect(run).toEqual(nativeRun(run));
-  expect(Number(run.summary.unserved_it_kwh)).toBeCloseTo((1000 * 600) / 3600, 7);
-  expect(run.events.some((event: { action: string }) => event.action === 'battery_depleted')).toBe(
-    false,
-  );
+  expect(Number(objectValue(run.summary).unserved_it_kwh)).toBeCloseTo((1000 * 600) / 3600, 7);
+  expect(objectList(run.events).some((event) => event.action === 'battery_depleted')).toBe(false);
 
   await selectLesson(page, 'generator-delay');
   await runInput(page, '600');
   await expect(page.getByTestId('lesson-result')).toContainText('No generator-running interval');
   await expect(page.getByTestId('lesson-result')).toContainText('scheduled for 900 s');
-  run = await exported(page);
+  run = objectValue(await exported(page));
   expect(run).toEqual(nativeRun(run));
   expect(
-    run.intervals.some(
-      (row: { asset_states: Record<string, string> }) => row.asset_states.generator === 'running',
-    ),
+    objectList(run.intervals).some((row) => objectValue(row.asset_states).generator === 'running'),
   ).toBe(false);
 
   await selectLesson(page, 'n-plus-one');
   await runInput(page, '1500');
-  run = await exported(page);
+  run = objectValue(await exported(page));
   expect(run).toEqual(nativeRun(run));
-  expect(Number(run.summary.peak_unserved_kw)).toBe(0);
+  expect(Number(objectValue(run.summary).peak_unserved_kw)).toBe(0);
   expect(
-    run.intervals.every(
-      (row: { served_it_kw: string; requested_it_kw: string }) =>
-        Number(row.served_it_kw) === Number(row.requested_it_kw),
+    objectList(run.intervals).every(
+      (row) => Number(row.served_it_kw) === Number(row.requested_it_kw),
     ),
   ).toBe(true);
 
   await selectLesson(page, 'pue');
   await runInput(page, '1');
-  const planning = await exported(page, true);
+  const planning = objectValue(await exported(page, true));
   expect(planning).toEqual(nativeRun(planning));
   expect(Number(planning.it_energy_kwh)).toBe(50000 * 8760);
   expect(Number(planning.non_it_energy_kwh)).toBe(0);
@@ -135,9 +131,9 @@ test('blank, off-step and out-of-range inputs cannot replace the completed lesso
     await expect(page.getByTestId('lesson-result')).toContainText('Result for 1000');
   }
   await runInput(page, '0');
-  const run = await exported(page);
+  const run = objectValue(await exported(page));
   expect(run).toEqual(nativeRun(run));
-  expect(Number(run.summary.requested_it_kwh)).toBe(0);
+  expect(Number(objectValue(run.summary).requested_it_kwh)).toBe(0);
   await expect(page.getByRole('region', { name: 'Lesson visualisation' })).not.toContainText(
     /NaN|Infinity/,
   );
@@ -165,7 +161,7 @@ test('every lesson has a responsive scene at phone, tablet and desktop sizes', a
         (width === 320 && lesson.id === 'ai-outage')
       ) {
         await page.screenshot({
-          path: testInfo.outputPath(`${lesson.id}-${width}.png`),
+          path: testInfo.outputPath(`${lesson.id}-${String(width)}.png`),
           fullPage: true,
         });
       }

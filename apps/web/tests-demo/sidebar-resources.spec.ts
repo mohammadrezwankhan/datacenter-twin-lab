@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 
 test('sidebar reference links have separate readable rows and an independent status badge', async ({
@@ -12,9 +13,12 @@ test('sidebar reference links have separate readable rows and an independent sta
   await expect(evidence).toBeVisible();
   await expect(course).toHaveAttribute('href', './learn/');
   await expect(evidence).toHaveAttribute('href', './evidence/');
-  const first = (await course.boundingBox())!;
-  const second = (await evidence.boundingBox())!;
-  const badge = (await resources.getByText('Local calculations').boundingBox())!;
+  const first = requiredPresent(await course.boundingBox(), '(await course.boundingBox())');
+  const second = requiredPresent(await evidence.boundingBox(), '(await evidence.boundingBox())');
+  const badge = requiredPresent(
+    await resources.getByText('Local calculations').boundingBox(),
+    "(await resources.getByText('Local calculations').boundingBox())",
+  );
   expect(second.y).toBeGreaterThanOrEqual(first.y + first.height + 4);
   expect(badge.y).toBeGreaterThanOrEqual(second.y + second.height + 4);
   expect(first.height).toBeGreaterThanOrEqual(44);
@@ -32,7 +36,7 @@ test('keyboard navigation reaches sidebar references in a short desktop window',
   for (const link of [course, evidence]) {
     await page.keyboard.press('Tab');
     await expect(link).toBeFocused();
-    const box = (await link.boundingBox())!;
+    const box = requiredPresent(await link.boundingBox(), '(await link.boundingBox())');
     expect(box.y).toBeGreaterThanOrEqual(0);
     expect(box.y + box.height).toBeLessThanOrEqual(768);
     expect(

@@ -1,3 +1,4 @@
+import { readRegularFile } from './read-regular-file';
 import { createHash } from 'node:crypto';
 import {
   copyFileSync,
@@ -27,7 +28,10 @@ export function stageLocalEvidenceAssets(root: string, engineVersion: string): s
     '\r\n',
     '\n',
   );
-  const manifest = JSON.parse(manifestText);
+  const manifest = JSON.parse(manifestText) as {
+    engine_version: unknown;
+    artifacts: Record<string, { sha256: unknown }>;
+  };
   if (manifest.engine_version !== engineVersion) throw new Error('Evidence version mismatch');
   const target = resolve(output, `data/evidence/v${engineVersion}`);
   mkdirSync(target, { recursive: true });
@@ -36,9 +40,8 @@ export function stageLocalEvidenceAssets(root: string, engineVersion: string): s
     if (basename(name) !== name || name.includes('\\') || name.includes('/'))
       throw new Error(`Unsafe evidence filename: ${name}`);
     const source = resolve(packet, name);
-    if (!lstatSync(source).isFile()) throw new Error(`Evidence must be a regular file: ${name}`);
-    const bytes = Buffer.from(readFileSync(source, 'utf8').replaceAll('\r\n', '\n'));
-    if (createHash('sha256').update(bytes).digest('hex') !== (entry as { sha256: string }).sha256)
+    const bytes = Buffer.from(readRegularFile(source).toString('utf8').replaceAll('\r\n', '\n'));
+    if (createHash('sha256').update(bytes).digest('hex') !== entry.sha256)
       throw new Error(`Evidence hash mismatch: ${name}`);
     writeFileSync(resolve(target, name), bytes);
   }

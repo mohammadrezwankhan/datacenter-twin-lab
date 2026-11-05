@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from '../required-value';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { CurriculumTracks } from '../CurriculumTracks';
 import { courseCatalog, courseTotal, lessonNavigation, navigateLesson } from '../curriculum';
@@ -51,7 +52,7 @@ function applied(draft: Draft): ScreenInputs {
         key === 'stageSeconds'
           ? values
           : values.length === 1
-            ? values[0]
+            ? requiredValue(values[0], key)
             : (() => {
                 throw new RangeError(`${titleFor(key)} requires one number.`);
               })(),
@@ -128,7 +129,9 @@ function download(value: unknown, name: string, type = 'application/json') {
   link.href = url;
   link.download = name;
   link.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
   const [lesson, setLesson] = useState<InfrastructureLesson | null>(null);
@@ -150,8 +153,9 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
           setDraft(toDraft(value.experiment.defaultInputs));
         }
       })
-      .catch((cause: Error) => {
-        if (active) setError(cause.message);
+      .catch((cause: unknown) => {
+        if (active)
+          setError(cause instanceof Error ? cause.message : 'The lesson could not be loaded.');
       });
     return () => {
       active = false;
@@ -200,7 +204,7 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
       </p>
     );
   const units = screenUnits(lesson.experiment.model);
-  const current = lessonNavigation(lessonId)!;
+  const current = requiredPresent(lessonNavigation(lessonId), 'lessonNavigation(lessonId)');
   const previous = courseCatalog[current.number - 2];
   const next = courseCatalog[current.number];
   const dirty =
@@ -232,7 +236,9 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
           .map((item) => (
             <button
               key={item.id}
-              onClick={() => navigateLesson(item.id)}
+              onClick={() => {
+                navigateLesson(item.id);
+              }}
               aria-current={item.id === lessonId ? 'page' : undefined}
             >
               {item.number}
@@ -309,9 +315,9 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
                       <input
                         type="checkbox"
                         checked={value === 'infinite'}
-                        onChange={(event) =>
-                          setDraft({ ...draft, [key]: event.target.checked ? 'infinite' : '250' })
-                        }
+                        onChange={(event) => {
+                          setDraft({ ...draft, [key]: event.target.checked ? 'infinite' : '250' });
+                        }}
                       />
                       Use infinite source
                     </span>
@@ -325,7 +331,9 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
                     required
                     disabled={value === 'infinite'}
                     value={value === 'infinite' ? '' : value}
-                    onChange={(event) => setDraft({ ...draft, [key]: event.target.value })}
+                    onChange={(event) => {
+                      setDraft({ ...draft, [key]: event.target.value });
+                    }}
                   />
                   {key === 'stageSeconds' && (
                     <small>
@@ -348,15 +356,15 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
                     <label key={key}>
                       {titleFor(key)} ({screenUnits('fuelScreen').inputs[key]})
                       <input
-                        aria-label={`Fuel ${titleFor(key)} (${screenUnits('fuelScreen').inputs[key]})`}
+                        aria-label={`Fuel ${titleFor(key)} (${String(screenUnits('fuelScreen').inputs[key])})`}
                         type="number"
                         inputMode="decimal"
                         step="any"
                         required
                         value={value}
-                        onChange={(event) =>
-                          setFuelDraft({ ...fuelDraft, [key]: event.target.value })
-                        }
+                        onChange={(event) => {
+                          setFuelDraft({ ...fuelDraft, [key]: event.target.value });
+                        }}
                       />
                     </label>
                   ))}
@@ -367,7 +375,9 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
               Your prediction (optional)
               <textarea
                 value={prediction}
-                onChange={(event) => setPrediction(event.target.value)}
+                onChange={(event) => {
+                  setPrediction(event.target.value);
+                }}
                 rows={2}
               />
             </label>
@@ -384,15 +394,15 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
                       {titleFor(key)} state
                       <select
                         value={review[key].state}
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setReview({
                             ...review,
                             [key]: {
                               ...review[key],
                               state: event.target.value as ReviewRow['state'],
                             },
-                          })
-                        }
+                          });
+                        }}
                       >
                         <option value="unresolved">Unresolved</option>
                         <option value="fail">Fail</option>
@@ -404,12 +414,12 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
                       <input
                         required
                         value={review[key].reason}
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setReview({
                             ...review,
                             [key]: { ...review[key], reason: event.target.value },
-                          })
-                        }
+                          });
+                        }}
                       />
                     </label>
                     <label>
@@ -417,12 +427,12 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
                       <input
                         required
                         value={review[key].source}
-                        onChange={(event) =>
+                        onChange={(event) => {
                           setReview({
                             ...review,
                             [key]: { ...review[key], source: event.target.value },
-                          })
-                        }
+                          });
+                        }}
                       />
                     </label>
                   </div>
@@ -444,14 +454,14 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
               </button>
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
                   setDraft(
                     toDraft({
                       ...lesson.experiment.defaultInputs,
                       ...lesson.experiment.challenge.changes,
                     }),
-                  )
-                }
+                  );
+                }}
               >
                 Apply challenge
               </button>
@@ -570,12 +580,12 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
           </a>
           {completed && (
             <button
-              onClick={() =>
+              onClick={() => {
                 download(
                   envelope,
                   `infrastructure-${lessonId}-${completed.result.inputHash.slice(0, 12)}.json`,
-                )
-              }
+                );
+              }}
             >
               Export completed screen
             </button>
@@ -598,31 +608,41 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
       </nav>
       <div className="infra-actions infra-pager">
         {previous && (
-          <button onClick={() => navigateLesson(previous.id)}>
+          <button
+            onClick={() => {
+              navigateLesson(previous.id);
+            }}
+          >
             Previous lesson · {previous.number}
           </button>
         )}
         <button
           aria-pressed={reviewed}
-          onClick={() =>
+          onClick={() => {
             setReviewedIds((ids) =>
               reviewed ? ids.filter((id) => id !== lessonId) : [...ids, lessonId],
-            )
-          }
+            );
+          }}
         >
           {reviewed ? 'Marked as reviewed' : 'Mark as reviewed'}
         </button>
         {next ? (
-          <button onClick={() => navigateLesson(next.id)}>Next lesson · {next.number}</button>
+          <button
+            onClick={() => {
+              navigateLesson(next.id);
+            }}
+          >
+            Next lesson · {next.number}
+          </button>
         ) : (
-          <a href="?mode=emt">Continue to EMT & dynamics</a>
+          <a href="?mode=emt">Continue to EMT &amp; dynamics</a>
         )}
       </div>
       <p className="infra-privacy">
         Review marks are self-reported in this visit only. Nothing is saved or sent.{' '}
         {next
           ? ''
-          : `You have reached the end of ${courseTotal} lessons; engineering evidence remains open.`}
+          : `You have reached the end of ${String(courseTotal)} lessons; engineering evidence remains open.`}
       </p>
     </div>
   );

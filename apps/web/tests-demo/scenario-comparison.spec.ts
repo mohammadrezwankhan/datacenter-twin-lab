@@ -1,21 +1,23 @@
 import { test, expect, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
+import { continuityResultValue } from './continuity-contract';
+import { jsonObject, objectList, stringValue } from './json-contracts';
 
 async function exportedRun(page: Page) {
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
-  return JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  return continuityResultValue(jsonObject(await readFile(await (await download).path(), 'utf8')));
 }
 
 async function downloadedComparison(page: Page) {
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download comparison JSON' }).click();
-  return JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  return jsonObject(await readFile(await (await download).path(), 'utf8'));
 }
 
-function nativeRun(scenario: unknown) {
-  return JSON.parse(
+function nativeRun(scenario: unknown): unknown {
+  const result: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -30,10 +32,11 @@ function nativeRun(scenario: unknown) {
       },
     ),
   );
+  return result;
 }
 
-function nativeSweep(scenario: unknown, parameter: string, values: string[]) {
-  return JSON.parse(
+function nativeSweep(scenario: unknown, parameter: string, values: string[]): unknown {
+  const result: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -48,12 +51,13 @@ function nativeSweep(scenario: unknown, parameter: string, values: string[]) {
       },
     ),
   );
+  return result;
 }
 
 async function selectedValues(page: Page, unit: string) {
   const values: string[] = [];
   for (let index = 1; index <= 3; index++) {
-    const select = page.getByLabel(`Comparison value ${index} (${unit})`);
+    const select = page.getByLabel(`Comparison value ${String(index)} (${unit})`);
     if (await select.count()) values.push(await select.inputValue());
   }
   return values;
@@ -112,19 +116,20 @@ test('surviving distribution path capacity changes only the selected path and ma
   await expect(page.locator('.scenario-comparison__status')).toContainText('Comparison complete');
   const comparison = await downloadedComparison(page);
   expect(comparison.target_asset).toEqual({ id: 'path-b', name: 'Distribution B' });
-  expect(comparison.runs.map((entry: { value: string }) => entry.value)).toEqual(values);
+  const runs = objectList(comparison.runs);
+  expect(runs.map((entry) => entry.value)).toEqual(values);
   const expected = values.map((value) => {
     const scenario = structuredClone(source.scenario);
-    scenario.assets = scenario.assets.map((asset: { id: string; capacity_kw: string }) =>
+    scenario.assets = scenario.assets.map((asset) =>
       asset.id === 'path-b' ? { ...asset, capacity_kw: value } : asset,
     );
     return nativeRun(scenario);
   });
-  expect(comparison.runs.map((entry: { result: unknown }) => entry.result)).toEqual(expected);
-  for (const entry of comparison.runs) {
-    expect(entry.result.scenario.assets).toEqual(
-      source.scenario.assets.map((asset: { id: string; capacity_kw: string }) =>
-        asset.id === 'path-b' ? { ...asset, capacity_kw: entry.value } : asset,
+  expect(runs.map((entry) => entry.result)).toEqual(expected);
+  for (const entry of runs) {
+    expect(continuityResultValue(entry.result).scenario.assets).toEqual(
+      source.scenario.assets.map((asset) =>
+        asset.id === 'path-b' ? { ...asset, capacity_kw: stringValue(entry.value) } : asset,
       ),
     );
   }

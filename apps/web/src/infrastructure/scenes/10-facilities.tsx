@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
 import { Device, SceneDiagram } from './primitives';
@@ -12,7 +13,10 @@ export default function FacilitiesScene({ result, step }: SceneProps) {
     { label: 'Historical datum boundary', value: 'Reported source boundary; not a current survey' },
     {
       label: 'Phase state',
-      value: ['Initial occupancy', 'Expansion works', 'Tie-in', 'Final configuration'][step],
+      value: requiredValue(
+        ['Initial occupancy', 'Expansion works', 'Tie-in', 'Final configuration'][step],
+        'facilities phase',
+      ),
     },
   ];
   const phases = ['Initial occupancy', 'Expansion works', 'Tie-in', 'Final configuration'];
@@ -26,7 +30,7 @@ export default function FacilitiesScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="facilities"
       title="Phase-aware building cutaway"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >
@@ -84,7 +88,7 @@ export default function FacilitiesScene({ result, step }: SceneProps) {
         Cooling nameplate
       </text>
       <text x="719" y="294" fill="#edf4fa" fontSize="15">
-        {rows[1].value}
+        {requiredValue(rows[1], 'rows[1]').value}
       </text>
       <path d="M90 410H910" stroke="#496273" strokeWidth="2" />
       {phases.map((phase, index) => (

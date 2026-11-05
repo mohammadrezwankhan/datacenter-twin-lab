@@ -1,0 +1,12 @@
+{
+  "reviewed_at": "2026-11-05",
+  "rule": "generic-api-key",
+  "classification": "verified-non-secret-content-digest",
+  "finding_path": "docs/images/demo-walkthrough.json",
+  "source_revision": "96fcf002f69ef53b2298330b9ad96ae89807e491",
+  "source_path": "apps/web/src/tokens.css",
+  "normalization": "CRLF to LF",
+  "computed_sha256": "50193e895bf17bb104523f3780c981aa82619a60dcebefe49d3ac4629315373e",
+  "verification": "SHA-256 recomputed from git show at the recorded source revision exactly matches the browser-recording provenance field.",
+  "scope": "One exact JSON field/value line at one path for generic-api-key only. Other values, fields, paths and rules remain active; no commit or historical file is excluded."
+}

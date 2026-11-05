@@ -23,7 +23,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
@@ -60,6 +66,14 @@ jobs:
         run: |
           npm --prefix apps/web run test:engine
           npm --prefix apps/web run build:demo
+      - name: Use Canonical Ubuntu archives for browser dependencies
+        run: |
+          # Azure's mirror repeatedly stalled before the browser tests could start.
+          for sources in /etc/apt/sources.list /etc/apt/apt-mirrors*.txt /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$sources" ]; then
+              sudo sed -i -E 's|https?://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$sources"
+            fi
+          done
       - name: Install Chromium with required native libraries
         run: npm --prefix apps/web exec -- playwright install --with-deps chromium
       - name: Check enlarged-text reflow before the full browser suite
@@ -87,7 +101,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'

@@ -20,21 +20,28 @@ export async function expectSceneLabelsVisible(page: Page) {
   expect(clipped, 'Every scene label must fit inside its visible diagram').toEqual([]);
 }
 
-export async function exported(page: Page, planning = false) {
+export async function exported(page: Page, planning = false): Promise<unknown> {
   const pending = page.waitForEvent('download');
   await page
     .getByRole('button', { name: planning ? 'Export PUE calculation' : 'Export lesson run' })
     .click();
-  return JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  const value: unknown = JSON.parse(await readFile(await (await pending).path(), 'utf8'));
+  return value;
 }
 
-export function nativeRun(run: {
-  schema_version: number;
-  scenario: unknown;
-  assumptions: unknown;
-}) {
+function runObject(value: unknown): Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    throw new TypeError('A native comparison requires a run object');
+  return value as Record<string, unknown>;
+}
+
+export function nativeRun(input: unknown): unknown {
+  const run = runObject(input);
+  if (run.schema_version !== 1 && run.schema_version !== 2)
+    throw new TypeError('A native comparison requires planning schema 1 or continuity schema 2');
   const planning = run.schema_version === 1;
-  return JSON.parse(
+  const modelInput = runObject(planning ? run.assumptions : run.scenario);
+  const result: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -45,10 +52,14 @@ export function nativeRun(run: {
       ],
       {
         cwd: '../..',
-        input: JSON.stringify(planning ? run.assumptions : run.scenario),
+        input: JSON.stringify(modelInput),
         encoding: 'utf8',
         maxBuffer: 16 * 1024 * 1024,
       },
     ),
   );
+  const native = runObject(result);
+  if (native.schema_version !== run.schema_version || typeof native.run_id !== 'string')
+    throw new TypeError('The native process returned an unexpected run shape');
+  return result;
 }

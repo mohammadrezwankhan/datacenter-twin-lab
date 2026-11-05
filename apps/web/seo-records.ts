@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './src/required-value';
 import { lessonPlanningScenario, lessonScenario, type Lesson } from './src/course-lessons';
 import { simulateContinuitySync } from './src/js-engine/continuity';
 import { simulatePlanning } from './src/js-engine/planning';
@@ -19,9 +20,15 @@ export function lessonRecords(lesson: Lesson, scenarios: Record<string, SiteScen
     const run =
       lesson.id === 'pue'
         ? null
-        : (simulateContinuitySync(lessonScenario(lesson, scenarios[lesson.preset], input)) as Run);
+        : (simulateContinuitySync(
+            lessonScenario(
+              lesson,
+              requiredValue(scenarios[lesson.preset], 'scenarios[lesson.preset]'),
+              input,
+            ),
+          ) as Run);
     const planning = lesson.id === 'pue' ? simulatePlanning(lessonPlanningScenario(input)) : null;
-    const calculation = (run ?? planning)!;
+    const calculation = requiredPresent(run ?? planning, '(run ?? planning)');
     return {
       configuration: index ? 'challenge' : 'starting',
       input,
