@@ -80,6 +80,9 @@ jobs:
       - name: Install locked frontend dependencies
         run: npm ci --ignore-scripts
         working-directory: apps/web
+      - name: Native file reader and bridge regressions
+        run: node --experimental-strip-types --loader ./tests-engine/resolve-loader.mjs --test tests-engine/build-security.test.ts tests-engine/read-regular-file.test.ts
+        working-directory: apps/web
       - name: Type check and build the bundled dashboard
         run: |
           npm run format:check
@@ -108,6 +111,25 @@ jobs:
             apps/web/test-results
             apps/web/playwright-report
           retention-days: 14
+
+  native-reader-macos:
+    name: Native file reader / macOS
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+      - name: POSIX acquisition and raw-byte bridge regressions
+        run: |
+          python -m unittest tests.test_read_regular_file -v
+          node --experimental-strip-types --test apps/web/tests-engine/read-regular-file.test.ts
 
   browser-demo:
     name: Browser demo and Python parity

@@ -1,14 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import fs, {
-  mkdtempSync,
-  mkdirSync,
-  renameSync,
-  rmSync,
-  symlinkSync,
-  writeFileSync,
-} from 'node:fs';
-import { syncBuiltinESMExports } from 'node:module';
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -21,6 +13,7 @@ import {
   visiblePageText,
 } from '../build-html.ts';
 import { readRegularFile } from '../read-regular-file.ts';
+import { nativeReaderCase } from './native-reader-fixture.ts';
 import { workerRequest } from '../src/worker-envelope.ts';
 
 void test('HTML text export follows raw-text parsing and decodes entities once', () => {
@@ -103,25 +96,12 @@ void test('regular-file reads reject symlink and directory substitution', (t) =>
   symlinkSync(file, join(root, 'linked'));
   assert.throws(() => readRegularFile(join(root, 'linked')));
   assert.throws(() => readRegularFile(join(root, 'missing')), /ENOENT/);
+  assert.throws(() => readRegularFile(join(root, 'missing')), { code: 'ENOENT' });
 });
 
-void test('regular-file reads reject symlinks without platform-specific open flags', (t) => {
+void test('regular-file reads reject symlinks through the native platform helper', (t) => {
   const root = mkdtempSync(join(tmpdir(), 'twin-portable-file-'));
-  const realOpen = fs.openSync;
-  // Exercise the portable checks with the real OS open, removing flags that
-  // Windows does not provide. No file contents or stat results are mocked.
-  const portableOpen = t.mock.method(fs, 'openSync', (...args: Parameters<typeof fs.openSync>) => {
-    const [path, flags, mode] = args;
-    const portableFlags =
-      typeof flags === 'number'
-        ? flags & ~(fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK)
-        : flags;
-    return realOpen(path, portableFlags, mode);
-  });
-  syncBuiltinESMExports();
   t.after(() => {
-    portableOpen.mock.restore();
-    syncBuiltinESMExports();
     rmSync(root, { recursive: true, force: true });
   });
   const file = join(root, 'source');
@@ -131,32 +111,10 @@ void test('regular-file reads reject symlinks without platform-specific open fla
   assert.throws(() => readRegularFile(join(root, 'linked')), /regular file/);
 });
 
-void test('regular-file reads reject changed file identity and close the descriptor', (t) => {
-  const root = mkdtempSync(join(tmpdir(), 'twin-replaced-file-'));
-  const file = join(root, 'source');
-  writeFileSync(file, 'original content');
-  const realOpen = fs.openSync;
-  let descriptor: number | undefined;
-  // Deterministically replace a real file between pathname validation and open.
-  const replacingOpen = t.mock.method(fs, 'openSync', (...args: Parameters<typeof fs.openSync>) => {
-    if (args[0] === file) {
-      renameSync(file, join(root, 'original'));
-      writeFileSync(file, 'replacement content');
-    }
-    descriptor = realOpen(...args);
-    return descriptor;
-  });
-  syncBuiltinESMExports();
-  t.after(() => {
-    replacingOpen.mock.restore();
-    syncBuiltinESMExports();
-    rmSync(root, { recursive: true, force: true });
-  });
-  assert.throws(() => readRegularFile(file), /changed while opening/);
-  assert.equal(typeof descriptor, 'number');
-  if (descriptor === undefined) throw new Error('The replacement file was not opened');
-  const openedDescriptor = descriptor;
-  assert.throws(() => fs.fstatSync(openedDescriptor), /EBADF/);
+void test('regular-file reads reject changed file identity and close the descriptor', () => {
+  // The native helper owns acquisition now. This real-filesystem regression
+  // retains identity rejection, zero content reads, and EBADF after cleanup.
+  nativeReaderCase('test_replacement_before_open_and_descriptor_closure');
 });
 
 void test('worker request envelopes reject malformed or oversized payloads', () => {

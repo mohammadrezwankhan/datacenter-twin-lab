@@ -1,106 +1,49 @@
 import assert from 'node:assert/strict';
-import fs, { mkdtempSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { syncBuiltinESMExports } from 'node:module';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import test, { type TestContext } from 'node:test';
+import test from 'node:test';
 import { readRegularFile } from '../read-regular-file.ts';
+import { nativeReaderCase } from './native-reader-fixture.ts';
 
-interface OpenMutation {
-  before?: () => void;
-  after?: () => void;
-  portable?: boolean;
-}
+void test('regular-file reads reject a late same-inode symlink at native acquisition', () => {
+  nativeReaderCase('test_late_same_inode_symlink');
+});
 
-function fixture(t: TestContext): { source: string; original: string } {
-  const root = mkdtempSync(join(tmpdir(), 'twin-post-open-file-'));
+void test('regular-file reads reject pathname replacement after opening the original inode', () => {
+  nativeReaderCase('test_replacement_after_metadata_open');
+});
+
+void test('regular-file reads close the descriptor when the pathname disappears during open', () => {
+  nativeReaderCase('test_disappearance_after_metadata_open');
+});
+
+void test('regular-file reads reject a transient same-inode symlink at acquisition', () => {
+  nativeReaderCase('test_transient_same_inode_symlink');
+});
+
+void test('native file bridge preserves binary data beyond execFile default limits', (t) => {
+  const root = mkdtempSync(join(tmpdir(), 'twin-binary-reader-'));
   t.after(() => {
     rmSync(root, { recursive: true, force: true });
   });
-  const source = join(root, 'source');
-  writeFileSync(source, 'original content');
-  return { source, original: join(root, 'original') };
-}
+  const file = join(root, 'spaces & literal $(name).bin');
+  const content = Buffer.alloc(2 * 1024 * 1024 + 1);
+  for (let index = 0; index < content.length; index += 1) content[index] = index % 256;
+  writeFileSync(file, content);
+  assert.deepEqual(readRegularFile(file), content);
+});
 
-function rejectedRead(
-  t: TestContext,
-  source: string,
-  mutation: OpenMutation,
-  expectedError: RegExp,
-): void {
-  const realOpen = fs.openSync;
-  let descriptor: number | undefined;
-  // Mutate real filesystem entries at the open boundary. File bytes and stat
-  // results are never mocked, including when optional POSIX flags are removed.
-  const opening = t.mock.method(fs, 'openSync', (...args: Parameters<typeof fs.openSync>) => {
-    if (args[0] !== source) return realOpen(...args);
-    mutation.before?.();
-    const [path, flags, mode] = args;
-    const openFlags =
-      mutation.portable && typeof flags === 'number'
-        ? flags & ~(fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK)
-        : flags;
-    descriptor = realOpen(path, openFlags, mode);
-    mutation.after?.();
-    return descriptor;
-  });
-  const contentReads = t.mock.method(fs, 'readFileSync');
-  syncBuiltinESMExports();
+void test('native file bridge honors an explicitly configured Python without fallback', (t) => {
+  const previous = process.env.TWIN_PYTHON;
+  const root = mkdtempSync(join(tmpdir(), 'twin-python-selection-'));
   t.after(() => {
-    opening.mock.restore();
-    contentReads.mock.restore();
-    syncBuiltinESMExports();
+    if (previous === undefined) delete process.env.TWIN_PYTHON;
+    else process.env.TWIN_PYTHON = previous;
+    rmSync(root, { recursive: true, force: true });
   });
-
-  assert.throws(() => readRegularFile(source), expectedError);
-  assert.equal(contentReads.mock.calls.length, 0, 'No content read may precede rejection');
-  assert.equal(typeof descriptor, 'number');
-  if (descriptor === undefined) throw new Error('The file was not opened');
-  const openedDescriptor = descriptor;
-  assert.throws(() => fs.fstatSync(openedDescriptor), /EBADF/);
-}
-
-void test('regular-file reads reject a late same-inode symlink without optional open flags', (t) => {
-  const { source, original } = fixture(t);
-  rejectedRead(
-    t,
-    source,
-    {
-      before() {
-        renameSync(source, original);
-        symlinkSync(original, source);
-      },
-      portable: true,
-    },
-    /regular file/,
-  );
-});
-
-void test('regular-file reads reject pathname replacement after opening the original inode', (t) => {
-  const { source, original } = fixture(t);
-  rejectedRead(
-    t,
-    source,
-    {
-      after() {
-        renameSync(source, original);
-        writeFileSync(source, 'replacement content');
-      },
-    },
-    /changed while opening/,
-  );
-});
-
-void test('regular-file reads close the descriptor when the pathname disappears during open', (t) => {
-  const { source, original } = fixture(t);
-  rejectedRead(
-    t,
-    source,
-    {
-      after() {
-        renameSync(source, original);
-      },
-    },
-    /ENOENT/,
-  );
+  const file = join(root, 'source');
+  writeFileSync(file, 'content');
+  process.env.TWIN_PYTHON = join(root, 'missing-python');
+  assert.throws(() => readRegularFile(file), /set TWIN_PYTHON to Python 3.12/);
 });

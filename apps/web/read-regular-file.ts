@@ -1,32 +1,32 @@
-import { closeSync, constants, fstatSync, lstatSync, openSync, readFileSync } from 'node:fs';
+import { constants } from 'node:buffer';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-/** Validate and read the same open file, without reopening a checked pathname. */
+const helper = fileURLToPath(new URL('../../scripts/read_regular_file.py', import.meta.url));
+
+/** Read build assets through a native no-follow handle, including on Windows. */
 export function readRegularFile(path: string): Buffer {
-  const expected = lstatSync(path, { bigint: true });
-  if (!expected.isFile()) throw new Error(`Expected a regular file: ${path}`);
-  // These flags are unavailable on Windows. The pathname/descriptor identity
-  // checks also protect reads on platforms without them.
-  const optionalFlags: Partial<Record<'O_NOFOLLOW' | 'O_NONBLOCK', number>> = constants;
-  const descriptor = openSync(
-    path,
-    constants.O_RDONLY | (optionalFlags.O_NOFOLLOW ?? 0) | (optionalFlags.O_NONBLOCK ?? 0),
-  );
+  const python = process.env.TWIN_PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
   try {
-    const actual = fstatSync(descriptor, { bigint: true });
-    if (!actual.isFile()) throw new Error(`Expected a regular file: ${path}`);
-    if (actual.dev !== expected.dev || actual.ino !== expected.ino) {
-      throw new Error(`File changed while opening: ${path}`);
-    }
-    // Also reject a pathname replaced or removed during open, including a
-    // symlink to the original inode on platforms without O_NOFOLLOW. This
-    // recheck catches observed substitutions; it does not make opening atomic.
-    const current = lstatSync(path, { bigint: true });
-    if (!current.isFile()) throw new Error(`Expected a regular file: ${path}`);
-    if (current.dev !== actual.dev || current.ino !== actual.ino) {
-      throw new Error(`File changed while opening: ${path}`);
-    }
-    return readFileSync(descriptor);
-  } finally {
-    closeSync(descriptor);
+    return execFileSync(python, ['-I', helper, path], {
+      // Preserve the Buffer API's size limit rather than execFile's 1 MiB default.
+      maxBuffer: constants.MAX_LENGTH,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      windowsHide: true,
+    });
+  } catch (error: unknown) {
+    const diagnostic =
+      error instanceof Error && 'stderr' in error && Buffer.isBuffer(error.stderr)
+        ? error.stderr.toString().trim()
+        : '';
+    const failure: NodeJS.ErrnoException = new Error(
+      diagnostic || 'Native file reader could not run; set TWIN_PYTHON to Python 3.12+.',
+      { cause: error },
+    );
+    const nativeCode = /^([A-Z][A-Z0-9_]+): /.exec(diagnostic)?.[1];
+    if (nativeCode) failure.code = nativeCode;
+    else if (error instanceof Error && 'code' in error && typeof error.code === 'string')
+      failure.code = error.code;
+    throw failure;
   }
 }
