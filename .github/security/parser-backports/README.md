@@ -66,3 +66,33 @@ repository scan. The corrected package still requires a fresh hosted build,
 every AST and actual CLI control, and the full source-bound repository gate
 before it can be accepted. The original package-preparation checks alone do not
 claim that qualification.
+
+## CLI parser traversal controls
+
+The next cold run, `42119693778` at commit
+`b9c6a94af8602a53035b132588bbaae98ccb2750`, passed all 27 compiled AST
+controls and all 19 declaration assertions. The actual installed CLI retained
+the five generic-method taint findings and both bound/alias expression findings
+without parser errors. It then failed the `missing_type_bound` control because
+the stable scanner skipped parsing for an irrelevant fixed-literal marker rule
+and therefore returned no required syntax error. No cache was saved and the
+repository scan was not reached.
+
+Every Python CLI fixture now keeps its original configuration as `rules0.json`
+and receives an additional `rules1.json` parser-traversal control. The additional
+rule matches `$X` and excludes the same `$X`: it has no required literal that can
+make the file irrelevant, and it yields no findings after parsing. It does not
+suppress parser errors. The original fixture sources, rule configurations,
+findings, safe lines, error families and exit expectations remain unchanged;
+the actual rule profile must include the additional control. Production scan
+rules, flags and target scope are unchanged.
+
+Independent stock 1.33.1 characterization covers every fixture: the added rule
+preserves all ten required malformed-source rejections and all four ordinary
+valid controls, including six upstream match findings. It exposes the stock
+parser's unsupported modern syntax in the other thirteen valid cases. The
+documented `--optimizations none` option alone did not force parsing and is not
+used as a substitute. The actual patched CLI must pass every unchanged contract
+on the new head. Completed CLI executions retain receipts, and the runner
+aggregates diagnostics for every case; any failed case still makes
+qualification exit nonzero.

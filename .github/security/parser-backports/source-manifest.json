@@ -2,7 +2,7 @@
   "schema_version": 1,
   "upstream_base": "092c80faa0817840228349f93eff12a50fb9cf6b",
   "upstream_url": "https://github.com/opengrep/opengrep/tree/092c80faa0817840228349f93eff12a50fb9cf6b",
-  "status": "hosted-cold-compile-passed-corrected-controls-awaiting-fresh-qualification",
+  "status": "hosted-ast-controls-passed-cli-traversal-corrected-awaiting-fresh-qualification",
   "not_an_unchanged_official_release": true,
   "adaptation": "Official merged PR845 simple-alias production patch plus reviewed authored Menhir PEP695 declaration-parameter backport; retains stable CLI and all unrelated stable semantics",
   "specification_url": "https://peps.python.org/pep-0695/",
@@ -116,8 +116,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "9750e06900aeb1cefaa74d35cc068ffb4410e936a2b182886c2734aed9c5af4b",
-      "bytes": 4309
+      "sha256": "8b296ec54f2973db0f858866454a1f729a6dfdf3a997b4d0c2a757b805b544fa",
+      "bytes": 6116
     },
     {
       "path": "repository-fixture-binding.json",
@@ -179,6 +179,52 @@
       "independent_runtime_support": "Official OpenGrep 1.33.1 show dump-ast, asset SHA256 46e8133cc490f9f50518061590ce2f6be5a08afaeda034471c0ceda4b3899808; CPython AST agrees.",
       "other_expectations_and_fixture_sources": "unchanged",
       "fresh_native_qualification_required": true
+    },
+    "second_hosted_attempt": {
+      "commit": "b9c6a94af8602a53035b132588bbaae98ccb2750",
+      "run_id": 42119693778,
+      "job_id": 127568499593,
+      "artifact_id": 13458297437,
+      "artifact_sha256": "107dcd5aee607470d557cd598b88b2dd2ff9529f03cfc030c5694a9da9af8908",
+      "cold_compile": "passed",
+      "ast_controls": {
+        "status": "passed",
+        "fixtures": 27,
+        "valid": 17,
+        "malformed": 10,
+        "declarations": 19
+      },
+      "cli_cases_completed_before_failure": 9,
+      "exact_generic_taint_findings": 5,
+      "exact_bound_and_alias_findings": 2,
+      "failed_cli_case": "missing_type_bound",
+      "failed_report": "errors=[] despite malformed source; irrelevant fixed-literal rule skipped parsing",
+      "full_repository_scan": "not reached",
+      "cache_saved": false
+    },
+    "cli_parse_traversal_control": {
+      "rule_id": "rezwan-force-parser-control",
+      "configuration": "Separate rules1.json; original rules0.json bytes retained for every Python fixture",
+      "patterns": [
+        {
+          "pattern": "$X"
+        },
+        {
+          "pattern-not": "$X"
+        }
+      ],
+      "purpose": "Force actual parsing without introducing findings; retain all original parser-error and finding expectations",
+      "stock_characterization": {
+        "fixture_count": 27,
+        "malformed_contracts_passed": 10,
+        "ordinary_valid_contracts_passed": 4,
+        "stock_unsupported_modern_valid_cases_rejected": 13,
+        "optimizations_none_forces_parsing": false
+      },
+      "fixture_sources_and_original_configs_and_expectations": "unchanged",
+      "production_rules_flags_targets": "unchanged",
+      "aggregate_diagnostics": "All28 CLI cases required; any failure gives nonzero overall result",
+      "fresh_patched_native_qualification_required": true
     }
   },
   "preserved": {

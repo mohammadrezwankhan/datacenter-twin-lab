@@ -167,6 +167,12 @@ def run_case(scanner: Path, output: Path, case: dict[str, Any]) -> dict[str, Any
             for path in root.iterdir()
             if path.is_file()
         }
+        (case_output / "execution.json").write_text(
+            json.dumps({
+                "id": name, "exit_code": process.returncode, "command": command,
+                "source_sha256": hashes, "after_source_sha256": after,
+            }, indent=2) + "\n"
+        )
         if after != hashes:
             raise RuntimeError("The native scanner modified its source fixtures")
         report = json.loads(report_path.read_text())
@@ -200,6 +206,22 @@ def python_cases(fixtures: dict[str, Any]) -> list[dict[str, Any]]:
             }
         ]
     }
+    # The stable core can skip an irrelevant fixed-literal rule before parsing.
+    # Keep every original configuration and add a separate zero-finding rule
+    # without required literals. Its positive expression pattern forces parsing;
+    # the identical exclusion removes findings, not syntax errors. The exact
+    # malformed-source controls must still fail if parsing is ever skipped.
+    parse_control = {
+        "rules": [
+            {
+                "id": "rezwan-force-parser-control",
+                "languages": ["python"],
+                "message": "Require Python parser traversal",
+                "severity": "WARNING",
+                "patterns": [{"pattern": "$X"}, {"pattern-not": "$X"}],
+            }
+        ]
+    }
     for fixture in fixtures["fixtures"]:
         source = fixture["source"]
         if hashlib.sha256(source.encode()).hexdigest() != fixture["source_sha256"]:
@@ -218,7 +240,7 @@ def python_cases(fixtures: dict[str, Any]) -> list[dict[str, Any]]:
         case = {
             "id": fixture["id"],
             "files": {filename: source},
-            "configs": [rules],
+            "configs": [rules, parse_control],
             "exit_code": 3 if invalid else int(bool(findings)),
             "findings": findings,
             "scanned_paths": [filename],
@@ -247,10 +269,20 @@ def main() -> int:
         names = [case["id"] for case in cases]
         if not names or len(set(names)) != len(names):
             raise ValueError("Native scanner contracts must have unique nonempty scope")
+        receipt["expected_cases"] = names
         for case in cases:
-            receipt["cases"].append(run_case(args.scanner.resolve(), args.output, case))
-        receipt.update(status="passed", expected_cases=names)
-        return 0
+            try:
+                receipt["cases"].append(run_case(args.scanner.resolve(), args.output, case))
+            except (
+                OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError,
+            ) as error:
+                receipt["cases"].append({
+                    "id": case["id"], "status": "failed",
+                    "error": f"{type(error).__name__}: {error}",
+                })
+        failed = any(case["status"] != "passed" for case in receipt["cases"])
+        receipt["status"] = "failed" if failed else "passed"
+        return int(failed)
     except (OSError, ValueError, KeyError, RuntimeError, subprocess.SubprocessError) as error:
         receipt["error"] = f"{type(error).__name__}: {error}"
         return 1

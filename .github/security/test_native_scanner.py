@@ -237,6 +237,45 @@ class NativeCLIContractTests(unittest.TestCase):
         self.assertEqual(command.count("--time"), 1)
         self.assertEqual(command[command.index("--max-target-bytes") + 1], "0")
 
+    def test_cli_failure_keeps_all_diagnostics_and_fails_overall(self) -> None:
+        """An early failed control cannot hide later failures or become a pass."""
+        source = "value = 1\n"
+        fixtures = {
+            "fixtures": [
+                {"id": name, "source": source,
+                 "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+                 "expect_parse": "success"}
+                for name in ("first", "middle")
+            ]
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            python_fixtures = root / "python.json"
+            python_fixtures.write_text(json.dumps(fixtures))
+            cli_fixtures = root / "cli.json"
+            cli_fixtures.write_text(json.dumps({"cases": [{"id": "last"}]}))
+            output = root / "output"
+            arguments = [
+                "controls", "--scanner", str(root / "scanner"), "--output", str(output),
+                "--python-fixtures", str(python_fixtures), "--cli-fixtures", str(cli_fixtures),
+            ]
+            with (
+                patch.object(sys, "argv", arguments),
+                patch.object(scanner_contracts, "run_case", side_effect=[
+                    ValueError("first control failed"),
+                    {"id": "middle", "status": "passed"},
+                    ValueError("last control failed"),
+                ]) as execute,
+            ):
+                self.assertEqual(scanner_contracts.main(), 1)
+            self.assertEqual(execute.call_count, 3)
+            report = json.loads((output / "summary.json").read_text())
+            self.assertEqual(report["status"], "failed")
+            self.assertEqual(report["expected_cases"], ["first", "middle", "last"])
+            self.assertEqual([case["id"] for case in report["cases"]], report["expected_cases"])
+            self.assertEqual([case["status"] for case in report["cases"]],
+                             ["failed", "passed", "failed"])
+
     def test_ast_qualification_rejects_missing_or_wrong_outcomes(self) -> None:
         """Every native fixture must produce its specific parsing/AST outcome."""
         fixtures: list[dict[str, Any]] = [
