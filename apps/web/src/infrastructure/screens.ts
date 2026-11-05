@@ -377,7 +377,7 @@ const runners: Record<ModelName, Runner> = {
     };
   },
   releaseGate(p) {
-    return runReleaseGate(p as ReleaseGateInputs);
+    return runReleaseGate(p);
   },
 };
 
@@ -390,7 +390,7 @@ const requiredGateStates: readonly (keyof ReleaseGateInputs)[] = [
   'evidence',
 ];
 
-function runReleaseGate(states: ReleaseGateInputs): OutputRecord {
+function runReleaseGate(states: InputRecord): OutputRecord {
   const blocking: string[] = [];
   for (const key of requiredGateStates) {
     const state = states[key];
@@ -698,10 +698,7 @@ function assertFiniteTree(value: unknown): void {
 
 export function calculateScreen(model: ModelName, inputs: ScreenInputs): ScreenOutputs;
 export function calculateScreen(model: 'releaseGate', inputs: ReleaseGateInputs): ScreenOutputs;
-export function calculateScreen(
-  model: ModelName,
-  inputs: ScreenInputs | ReleaseGateInputs,
-): ScreenOutputs {
+export function calculateScreen(model: ModelName, inputs: unknown): ScreenOutputs {
   if (!Object.hasOwn(runners, model)) throw new RangeError('Unknown model: ' + model);
   if (model === 'releaseGate') {
     if (!inputs || typeof inputs !== 'object' || Array.isArray(inputs))
@@ -755,7 +752,7 @@ export function canonicalJson(value: unknown): string {
     }
     return '[' + parts.join(',') + ']';
   }
-  if (typeof value === 'object' && value !== null) {
+  if (typeof value === 'object') {
     if (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)
       throw new TypeError('Canonical JSON requires plain objects');
     if (Reflect.ownKeys(value).some((key) => typeof key !== 'string'))

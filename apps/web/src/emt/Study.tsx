@@ -180,9 +180,9 @@ export function EmtStudy() {
       setReducedMotion(query.matches);
     };
     update();
-    query.addEventListener?.('change', update);
+    query.addEventListener('change', update);
     return () => {
-      query.removeEventListener?.('change', update);
+      query.removeEventListener('change', update);
     };
   }, []);
 

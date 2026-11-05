@@ -1,28 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ENGINE_VERSION } from './js-engine/version';
+import { evidenceIndex, type EvidenceIndex } from './evidence-index';
 import './evidence-hub.css';
-
-type EvidenceIndex = {
-  version: string;
-  manifest_path: string;
-  receipt_path: string;
-  cases: {
-    id: string;
-    title: string;
-    input_sha256: string;
-    run_id: string;
-    run_path: string;
-    scenario_path: string;
-    report_path: string;
-    equation: string;
-    outcome: string;
-  }[];
-};
 
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const suppliedRevision = import.meta.env.VITE_PUBLIC_SOURCE_REVISION || '';
 const revision = /^[a-f0-9]{40}$/.test(suppliedRevision) ? suppliedRevision : null;
-const source = (path: string) => `${repository}/blob/${String(revision || 'main')}/${path}`;
+const source = (path: string) => `${repository}/blob/${revision || 'main'}/${path}`;
 const media = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 export function EvidenceHub() {
@@ -36,15 +20,14 @@ export function EvidenceHub() {
           throw new Error(
             'The evidence index could not be loaded. Open the source evidence page below.',
           );
-        const value = (await response.json()) as EvidenceIndex;
-        if (value.version !== ENGINE_VERSION || value.cases?.length !== 3)
-          throw new Error(
-            'Evidence version does not match this build. Use the versioned source packet.',
-          );
-        setIndex(value);
+        const value: unknown = await response.json();
+        setIndex(evidenceIndex(value, ENGINE_VERSION));
       })
-      .catch((cause: Error) => {
-        if (!controller.signal.aborted) setError(cause.message);
+      .catch((cause: unknown) => {
+        if (!controller.signal.aborted)
+          setError(
+            cause instanceof Error ? cause.message : 'The evidence index could not be loaded.',
+          );
       });
     return () => {
       controller.abort();
@@ -80,9 +63,7 @@ export function EvidenceHub() {
           {import.meta.env.MODE === 'demo' && (
             <a href="./evidence/">Readable reference results ↗</a>
           )}
-          <a href={`${repository}/tree/v${ENGINE_VERSION}`}>
-            Versioned source v{ENGINE_VERSION} ↗
-          </a>
+          <a href={`${repository}/tree/v${ENGINE_VERSION}`}>Versioned source v{ENGINE_VERSION} ↗</a>
           <a href={`${repository}/releases`}>Published releases ↗</a>
           <a href={`${repository}/actions/workflows/tests.yml`}>Inspect actual CI runs ↗</a>
         </div>
@@ -127,8 +108,8 @@ export function EvidenceHub() {
             {revision ? (
               <>
                 published source{' '}
-                <a href={`${repository}/commit/${String(revision)}`}>{revision.slice(0, 12)}</a>;
-                result links contain the full immutable commit and input hash.
+                <a href={`${repository}/commit/${revision}`}>{revision.slice(0, 12)}</a>; result
+                links contain the full immutable commit and input hash.
               </>
             ) : (
               'Development build: immutable source links become available in the published build.'

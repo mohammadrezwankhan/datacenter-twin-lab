@@ -14,6 +14,7 @@ import { tmpdir } from 'node:os';
 import { dirname, relative, resolve } from 'node:path';
 import test from 'node:test';
 import { stageLocalEvidenceAssets } from '../local-evidence-assets.ts';
+import { requiredPresent } from '../src/required-value';
 
 const version = '2.0.0';
 const artifact = 'current.json';
@@ -36,7 +37,7 @@ function fixture(t: test.TestContext) {
     writeFileSync(path, bytes);
   };
   const bytes = '{"synthetic":true}\n';
-  const manifest = {
+  const manifest: { engine_version: string; artifacts: Record<string, { sha256: string }> } = {
     engine_version: version,
     artifacts: { [artifact]: { sha256: createHash('sha256').update(bytes).digest('hex') } },
   };
@@ -55,7 +56,7 @@ function snapshot(directory: string): Record<string, string> {
   return Object.fromEntries(
     readdirSync(directory, { recursive: true, withFileTypes: true })
       .filter((entry) => entry.isFile())
-      .map((entry) => {
+      .map((entry): [string, string] => {
         const path = resolve(entry.parentPath, entry.name);
         return [
           relative(directory, path).replaceAll('\\', '/'),
@@ -103,7 +104,10 @@ void test('a mismatched artifact hash fails staging', (t) => {
 
 void test('traversal artifact names fail without altering source files', (t) => {
   const { root, manifest, saveManifest } = fixture(t);
-  manifest.artifacts['../outside.json'] = manifest.artifacts[artifact];
+  manifest.artifacts['../outside.json'] = requiredPresent(
+    manifest.artifacts[artifact],
+    'fixture artifact',
+  );
   saveManifest();
   const before = snapshot(resolve(root, 'data'));
   assert.throws(() => stageLocalEvidenceAssets(root, version), /Unsafe evidence filename/);
@@ -119,7 +123,7 @@ void test('an evidence version mismatch fails staging', (t) => {
 
 void test('missing required media fails staging', (t) => {
   const { root } = fixture(t);
-  rmSync(resolve(root, media[0]));
+  rmSync(resolve(root, requiredPresent(media[0], 'first required media path')));
   assert.throws(() => stageLocalEvidenceAssets(root, version), /ENOENT/);
 });
 

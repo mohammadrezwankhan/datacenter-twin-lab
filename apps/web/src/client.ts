@@ -27,8 +27,16 @@ export async function request<T>(
           body: JSON.stringify(body),
         }),
   });
-  const data = await response.json();
-  if (!response.ok)
-    throw new Error(data.error || data.detail || `Request failed (${String(response.status)})`);
-  return data;
+  const data: unknown = await response.json();
+  if (!response.ok) {
+    let message = `Request failed (${String(response.status)})`;
+    if (data !== null && typeof data === 'object' && !Array.isArray(data)) {
+      const problem = data as Record<string, unknown>;
+      if (typeof problem.error === 'string' && problem.error) message = problem.error;
+      else if (typeof problem.detail === 'string' && problem.detail) message = problem.detail;
+    }
+    throw new Error(message);
+  }
+  // Callers declare the response contract for the selected API route.
+  return data as T;
 }

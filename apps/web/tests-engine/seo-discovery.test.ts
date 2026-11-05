@@ -73,7 +73,7 @@ void test('JSON discovery graph reuses canonical site entities and current engin
   const json = JSON.parse(documents.knowledgeGraphJson) as {
     '@graph': Array<Record<string, unknown>>;
   };
-  const jsonld = JSON.parse(documents.knowledgeGraphJsonLd);
+  const jsonld: unknown = JSON.parse(documents.knowledgeGraphJsonLd);
   assert.deepEqual(jsonld, json);
 
   const person = json['@graph'].find((entity) => entity['@type'] === 'Person');

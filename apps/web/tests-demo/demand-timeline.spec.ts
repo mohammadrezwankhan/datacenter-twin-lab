@@ -3,6 +3,8 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { nativeRun } from './course-test-helpers';
+import { continuityResultValue } from './continuity-contract';
+import { jsonObject } from './json-contracts';
 
 async function download(page: Page, name = 'Export run') {
   const pending = page.waitForEvent('download');
@@ -19,7 +21,7 @@ async function openEditor(page: Page, preset = 'normal') {
 async function runEdited(page: Page) {
   await page.getByRole('button', { name: 'Run edited timeline', exact: true }).click();
   await expect(page.locator('.notice')).toContainText('Edited demand timeline calculated');
-  return JSON.parse(await download(page));
+  return continuityResultValue(jsonObject(await download(page)));
 }
 
 test('visual demand edits preview requested energy, then reproduce native and optional Python reports', async ({
@@ -34,7 +36,7 @@ test('visual demand edits preview requested energy, then reproduce native and op
   await page.getByLabel('Selected demand (kW)').fill('500');
   await expect(page.getByTestId('demand-preview-energy')).toHaveText('375 kWh');
   await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
-  const oldRun = JSON.parse(await download(page));
+  const oldRun = continuityResultValue(jsonObject(await download(page)));
   expect(oldRun.summary.requested_it_kwh).toBe('500');
   const run = await runEdited(page);
   expect(run.summary.requested_it_kwh).toBe('375');
@@ -44,7 +46,10 @@ test('visual demand edits preview requested energy, then reproduce native and op
     {
       at_s: 900,
       action: 'set_demand',
-      target: oldRun.scenario.assets.find((asset: { kind: string }) => asset.kind === 'load').id,
+      target: requiredPresent(
+        oldRun.scenario.assets.find((asset) => asset.kind === 'load'),
+        'load asset',
+      ).id,
       value_kw: '500',
     },
   ]);
@@ -70,7 +75,7 @@ test('all four profile timelines support visual selection, precision, removal an
     await expect(
       page.getByRole('button', { name: 'Run edited timeline', exact: true }),
     ).toBeEnabled();
-    const before = JSON.parse(await download(page));
+    const before = continuityResultValue(jsonObject(await download(page)));
     await expect(
       page.getByRole('group', { name: 'Demand steps in event order' }).getByRole('button'),
     ).toHaveCount(4);

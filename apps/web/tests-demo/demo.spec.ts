@@ -1,16 +1,17 @@
+import { continuityValue, jsonObject } from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 import { test, expect, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 
 async function exported(page: Page) {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
   const file = await pending;
-  return JSON.parse(await readFile(await file.path(), 'utf8'));
+  return continuityValue(jsonObject(await readFile(await file.path(), 'utf8')));
 }
 function nativeRun(scenario: unknown) {
-  return JSON.parse(
+  return jsonObject(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -75,7 +76,10 @@ test('failure journey changes energy, replays recovery, and exports reports and 
   const run = await exported(page);
   expect(run).toEqual(nativeRun(run.scenario));
   expect(
-    run.events.find((event: { action: string }) => event.action === 'battery_depleted').at_s,
+    requiredPresent(
+      run.events.find((event) => event.action === 'battery_depleted'),
+      'battery depletion event',
+    ).at_s,
   ).toBe('478.2675');
   await page.getByRole('button', { name: 'Battery depleted 478.3 s' }).click();
   await expect(page.getByTestId('served-power')).toHaveText('0 kW');

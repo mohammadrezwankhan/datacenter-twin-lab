@@ -1,11 +1,5 @@
 export type RuntimeStage =
-  | 'starting'
-  | 'download'
-  | 'initialize'
-  | 'packages'
-  | 'verify'
-  | 'calculate'
-  | 'complete';
+  'starting' | 'download' | 'initialize' | 'packages' | 'verify' | 'calculate' | 'complete';
 
 export type RuntimeProgress = {
   stage: RuntimeStage;
@@ -90,9 +84,7 @@ export async function readResponseBytes(
       ...displayOptions,
       message: `Downloaded ${displayOptions.resource}`,
       loadedBytes: buffer.byteLength,
-      ...(expected === undefined
-        ? {}
-        : { ...(expected === undefined ? {} : { totalBytes: expected }) }),
+      ...(expected === undefined ? {} : { totalBytes: expected }),
     });
     return buffer;
   }
@@ -105,7 +97,7 @@ export async function readResponseBytes(
     ...(expected === undefined ? {} : { totalBytes: expected }),
   });
   try {
-    while (true) {
+    for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
       chunks.push(value);

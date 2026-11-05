@@ -30,7 +30,7 @@ function escapeHtml(value: unknown): string {
   });
 }
 
-function quantity(value: unknown, unit = ''): string {
+function quantity(value: string | number | boolean | null | undefined, unit = ''): string {
   if (value === null || value === undefined) return 'Unknown';
   const number = Number(value);
   const label = Number.isFinite(number) ? numberFormat.format(number) : String(value);
@@ -162,7 +162,7 @@ function working(lesson: Lesson, run: Run | PlanningRun): string[] {
   const reserve =
     outage && run.intervals.find((interval) => Number(interval.start_s) === outage.at_s);
   const depleted = run.events.find((event) => event.action === 'battery_depleted');
-  if (lesson.resultKey === 'depletion' && reserve && outage) {
+  if (lesson.resultKey === 'depletion' && reserve) {
     const delivered =
       Number(reserve.battery_start_kwh) *
       Number(scenario.battery_discharge_efficiency) *

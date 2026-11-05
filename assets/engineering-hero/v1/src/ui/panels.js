@@ -1,5 +1,5 @@
 import { COLORS as C, FILM, CHAPTERS, SITES, getSite } from '../config.js';
-import { clamp, smooth, telemetry, timeline } from '../kinematics.js';
+import { telemetry, timeline } from '../kinematics.js';
 import { card, round, text, label, pill, line, check, grid, chart } from './draw.js';
 export const PANEL_SIZE = Object.freeze({ width: 1024, height: 608 });
 export function makeCanvas(width, height, dpr = FILM.textureDPR) {
@@ -99,14 +99,14 @@ function gridSystem(s,t) {
 export function drawPanel(s,index,t) {
   clearSurface(s);base(s,index);[physics,models,evidence,gridSystem][index](s,t);return s.audit;
 }
-export function drawHeader(s,index,t) {
+export function drawHeader(s,index) {
   clearSurface(s);const {ctx:c,audit:a}=s,chapter=CHAPTERS[index];
   label(c,a,chapter.eyebrow,0,24,C.orange,{maxWidth:1580});
   text(c,a,chapter.title,0,92,64,C.white,{weight:600,maxWidth:1580});
   text(c,a,chapter.subtitle,3,140,26,C.muted,{maxWidth:1580});
   return a;
 }
-export function drawObjectLabel(s,index,t) {
+export function drawObjectLabel(s,index) {
   clearSurface(s);const {ctx:c,audit:a}=s;
   c.fillStyle=C.ink;c.fillRect(0,0,s.width,s.height);
   text(c,a,CHAPTERS[index].objectLabel,s.width/2,28,22,C.orange,{mono:true,align:'center',maxWidth:s.width});

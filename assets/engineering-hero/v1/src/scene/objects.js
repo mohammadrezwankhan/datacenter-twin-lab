@@ -68,7 +68,7 @@ function gridIsland(group,m){
   // Turbine: stationary tower, analytic rotor rotation about its front-facing hub.
   const tower=new THREE.Mesh(new THREE.CylinderGeometry(.065,.12,2.30,16),m.white);tower.position.set(-1.48,-.36,-.78);island.add(tower);
   const rotor=new THREE.Group();rotor.position.set(-1.48,.86,-.59);island.add(rotor);
-  const hub=electron(rotor,m.orange,.11);
+  electron(rotor,m.orange,.11);
   for(let j=0;j<3;j++){
     const blade=new THREE.Shape();blade.moveTo(-.048,.09);blade.lineTo(.035,.96);blade.lineTo(.15,.40);blade.lineTo(.105,.13);blade.closePath();
     const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(blade,{depth:.035,bevelEnabled:false}),m.white);mesh.rotation.z=j*Math.PI*2/3;rotor.add(mesh);
@@ -79,7 +79,7 @@ function gridIsland(group,m){
   for(let x=0;x<4;x++)for(let y=0;y<3;y++)box(solar,m.solar,.335,.242,.022,-.56+x*.373,-.28+y*.28,.057);
   box(island,m.dark,1.02,1.34,1.06,.62,-.82,-.63,.07);
   for(let i=0;i<4;i++){box(island,m.metal,.18,1.14,.025,.29+i*.22,-.81,-.084,.015);box(island,m.green,.09,.05,.025,.29+i*.22,-.31,-.064);}
-  const load=box(island,m.dark,.78,.99,.78,1.46,-1.0,.94,.06);
+  box(island,m.dark,.78,.99,.78,1.46,-1.0,.94,.06);
   for(let i=0;i<3;i++)for(let j=0;j<2;j++)box(island,m.orange,.10,.13,.025,1.24+i*.21,-.75-j*.29,1.342);
   const nodes=[[-1.48,-1.38,-.78],[-.68,-1.38,.95],[.62,-1.38,-.63],[1.46,-1.38,.94]];
   const routes=[[nodes[0],[-1,-1.38,-.1],[.62,-1.38,-.1],nodes[2]],

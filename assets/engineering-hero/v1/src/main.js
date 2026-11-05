@@ -1,4 +1,4 @@
-import { FILM, getSite } from './config.js';
+import { FILM } from './config.js';
 // The scene is dynamically imported so missing WebGL/dependencies leave a readable fallback.
 const params=new URLSearchParams(location.search),capture=params.get('capture')==='1',embed=params.get('embed')==='1';
 const siteKey=params.get('site')||'mrkhan',stage=document.getElementById('hero-stage');

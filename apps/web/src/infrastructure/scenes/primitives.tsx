@@ -24,15 +24,7 @@ export function Cable({
 }: {
   d: string;
   kind?:
-    | 'power'
-    | 'path-b'
-    | 'liquid'
-    | 'air'
-    | 'network'
-    | 'logical'
-    | 'fuel'
-    | 'shared'
-    | 'ground';
+    'power' | 'path-b' | 'liquid' | 'air' | 'network' | 'logical' | 'fuel' | 'shared' | 'ground';
   label?: string;
   x?: number;
   y?: number;

@@ -1,4 +1,5 @@
-import { createHash } from 'node:crypto';
+import { inlineMetadataHashes } from './build-html';
+import { requiredValue } from './src/required-value';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Plugin } from 'vite';
@@ -24,13 +25,7 @@ export function securityHeaders(engineeringHeroEnabled = false): Plugin {
         )
           continue;
         const html = readFileSync(resolve(outputDir, file), 'utf8');
-        for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-          if (/\bsrc\s*=/.test(match[1]) || !match[2].trim()) continue;
-          // Only generated structured metadata may be inline; executable code stays in assets.
-          if (!/\btype=["']application\/ld\+json["']/.test(match[1]))
-            throw new Error(`Unexpected inline script in ${file}`);
-          hashes.add(`'sha256-${createHash('sha256').update(match[2]).digest('base64')}'`);
-        }
+        for (const hash of inlineMetadataHashes(html, file)) hashes.add(hash);
       }
       const template = readFileSync(templatePath, 'utf8').replaceAll('\r\n', '\n');
       let headers = template.replace(
@@ -68,7 +63,10 @@ export function securityHeaders(engineeringHeroEnabled = false): Plugin {
     },
     configurePreviewServer(server) {
       server.middlewares.use((_request, response, next) => {
-        const global = readFileSync(resolve(output, '_headers'), 'utf8').split('\n\n')[0];
+        const global = requiredValue(
+          readFileSync(resolve(output, '_headers'), 'utf8').split('\n\n')[0],
+          'global response header section',
+        );
         for (const line of global.split('\n').slice(1)) {
           const separator = line.indexOf(':');
           if (separator > 0)

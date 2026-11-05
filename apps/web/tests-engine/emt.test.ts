@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { DEFAULT_EMT, EMT_PRESETS, simulateEmt, refineEmt, compareEmt } from '../src/emt/engine';
 import { getEmtReferenceStatus, sourceStepPath } from '../src/emt/visuals';
+import type { EmtResult } from '../src/emt/engine';
+import { requiredPresent } from '../src/required-value';
 
 void test('source-voltage chart path holds each level until its step event', () => {
   const result = simulateEmt(DEFAULT_EMT);
@@ -72,7 +74,8 @@ void test('EMT full outputs agree with native Python for presets, timestep and e
       { cwd: '../..', input: JSON.stringify(config), encoding: 'utf8', maxBuffer: 8 * 1024 * 1024 },
     );
     assert.equal(result.status, 0, result.stderr);
-    const difference = compareEmt(simulateEmt(config), JSON.parse(result.stdout));
+    // compareEmt checks every field, shape and finite numerical difference at runtime.
+    const difference = compareEmt(simulateEmt(config), JSON.parse(result.stdout) as EmtResult);
     assert.ok(difference <= 1e-7, `complete output max difference ${String(difference)}`);
   }
 });
@@ -87,6 +90,6 @@ void test('EMT no sag remains at the DC divider state and refinement converges',
   assert.throws(() => simulateEmt({ ...DEFAULT_EMT, step_us: 1 }));
   assert.throws(() => simulateEmt({ ...DEFAULT_EMT, sag_start_ms: 40.5 }));
   const corrupt = structuredClone(steady);
-  corrupt.rows[900].bus_v += 0.01;
+  requiredPresent(corrupt.rows[900], 'EMT sample 900').bus_v += 0.01;
   assert.throws(() => compareEmt(steady, corrupt), /mismatch/);
 });

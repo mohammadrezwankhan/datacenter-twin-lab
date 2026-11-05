@@ -1,3 +1,4 @@
+import { jsonObject } from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
@@ -36,7 +37,7 @@ test('measure cold guide entry, first result and precomputed replay without clai
     ).toEqual([]);
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Export guided run (JSON)' }).click();
-    const run = JSON.parse(await readFile(await (await download).path(), 'utf8'));
+    const run = jsonObject(await readFile(await (await download).path(), 'utf8'));
     samples.push({
       sample: index + 1,
       interactive_ms: interactiveMs,

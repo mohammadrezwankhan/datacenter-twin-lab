@@ -153,8 +153,9 @@ export function InfrastructureCourse({ lessonId }: { lessonId: string }) {
           setDraft(toDraft(value.experiment.defaultInputs));
         }
       })
-      .catch((cause: Error) => {
-        if (active) setError(cause.message);
+      .catch((cause: unknown) => {
+        if (active)
+          setError(cause instanceof Error ? cause.message : 'The lesson could not be loaded.');
       });
     return () => {
       active = false;

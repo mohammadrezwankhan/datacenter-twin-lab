@@ -42,8 +42,8 @@ test('responsive-20261028 EMT SVG controls name each visible label and reading',
   const devices = page.locator('.emt-device');
   const visibleContent = await devices.evaluateAll((elements) =>
     elements.map((element) => ({
-      label: element.querySelector('.emt-label')?.textContent?.trim() ?? '',
-      value: element.querySelector('.emt-value')?.textContent?.trim() ?? '',
+      label: element.querySelector('.emt-label')?.textContent.trim() ?? '',
+      value: element.querySelector('.emt-value')?.textContent.trim() ?? '',
     })),
   );
   expect(visibleContent).toHaveLength(5);
@@ -57,9 +57,7 @@ test('responsive-20261028 EMT SVG controls name each visible label and reading',
   }
 });
 
-test('responsive-20261028 EMT sample table passes WCAG 2.2 AA axe', async ({
-  page,
-}, testInfo) => {
+test('responsive-20261028 EMT sample table passes WCAG 2.2 AA axe', async ({ page }, testInfo) => {
   await openEmt(page);
   await page.locator('.emt-samples > summary').click();
   const violations = (

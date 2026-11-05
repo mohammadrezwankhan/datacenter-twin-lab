@@ -1,3 +1,4 @@
+import { jsonObject, objectValue } from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 /** Expand coverage beyond the original 12 native-equal continuity lessons.
  * Infrastructure educational screens are a separate result family and must
@@ -41,7 +42,9 @@ for (const lesson of lessons) {
       .locator('pre')
       .textContent();
     expect(before).not.toBeNull();
-    const baselineHash = JSON.parse(requiredPresent(before, 'before')).result.inputHash;
+    const baselineHash = objectValue(
+      jsonObject(requiredPresent(before, 'before')).result,
+    ).inputHash;
     await studio.getByRole('button', { name: 'Apply challenge' }).click();
     await expect(status).toContainText('Inputs changed');
     await runButton.click();
@@ -50,23 +53,24 @@ for (const lesson of lessons) {
     await expect(exportButton).toBeEnabled();
     const [download] = await Promise.all([page.waitForEvent('download'), exportButton.click()]);
     expect(download.suggestedFilename()).toMatch(/^infrastructure-[\w-]+-[0-9a-f]{12}\.json$/);
-    const blob = JSON.parse(
+    const blob = jsonObject(
       await (await import('node:fs/promises')).readFile(await download.path(), 'utf8'),
     );
     expect(blob.exportSchema).toBe('infrastructure-lesson-export-1');
     expect(blob.engineeringDecision).toBe('HOLD');
     expect(blob.independentEngineeringVerification).toBe(false);
-    expect(blob.result.inputHash).toMatch(/^[0-9a-f]{64}$/);
-    expect(blob.result.inputHash, 'Challenge must change the applied model inputs').not.toBe(
-      baselineHash,
-    );
-    expect(blob.result.outputs).toBeDefined();
+    expect(objectValue(blob.result).inputHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(
+      objectValue(blob.result).inputHash,
+      'Challenge must change the applied model inputs',
+    ).not.toBe(baselineHash);
+    expect(objectValue(blob.result).outputs).toBeDefined();
     await testInfo.attach(`infra-${lesson.id}-metadata`, {
       body: JSON.stringify(
         {
           lessonId: lesson.id,
           exportedFilename: download.suggestedFilename(),
-          inputHash: blob.result.inputHash,
+          inputHash: objectValue(blob.result).inputHash,
           engineeringDecision: blob.engineeringDecision,
           pageErrors,
         },

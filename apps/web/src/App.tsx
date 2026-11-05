@@ -92,7 +92,7 @@ function PowerChart({
     if (!svg || !rows.length) return;
     const viewX = svgViewBoxPoint(svg, event.clientX, event.clientY).x;
     const fraction = Math.max(0, Math.min(1, (viewX - left) / (width - left - 16)));
-    const seconds = fraction * Number(run.scenario.duration_s);
+    const seconds = fraction * run.scenario.duration_s;
     onSelect(
       Math.max(
         0,
@@ -503,8 +503,9 @@ export function App() {
     const controller = new AbortController();
     request<Catalog>('catalog', controller.signal)
       .then(setCatalog)
-      .catch((cause) => {
-        if (!controller.signal.aborted) setError((cause as Error).message);
+      .catch((cause: unknown) => {
+        if (!controller.signal.aborted)
+          setError(cause instanceof Error ? cause.message : 'The catalogue could not be loaded.');
       });
     return () => {
       controller.abort();

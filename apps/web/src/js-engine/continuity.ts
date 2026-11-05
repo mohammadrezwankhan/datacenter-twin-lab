@@ -2,7 +2,7 @@ import { requiredValue, requiredPresent } from '../required-value';
 import { canonicalJson, compareUnicode, sha256Hex } from './canonical';
 import { decimalText, InputError, moneyText, Rational } from './decimal';
 import { parseQuantity, topologicalOrder, validateScenario } from './contract';
-import type { Asset, Interval, Run, SiteScenario } from './types';
+import type { Interval, Run, SiteScenario } from './types';
 import { ENGINE_VERSION } from './version';
 
 const MODEL = 'single_load_electrical_continuity_v1' as const;
@@ -41,7 +41,7 @@ export class FlowNetwork {
   }
 
   augment(): void {
-    while (true) {
+    for (;;) {
       const parents = new Map<string, string | null>([['SOURCE', null]]);
       const queue = ['SOURCE'];
       while (queue.length && !parents.has('SINK')) {
@@ -494,8 +494,10 @@ export function simulateValidated(scenario: SiteScenario): Run {
   };
 }
 
-export async function simulateContinuity(input: unknown): Promise<Run> {
-  return simulateValidated(validateScenario(input));
+export function simulateContinuity(input: unknown): Promise<Run> {
+  return new Promise<Run>((resolve) => {
+    resolve(simulateValidated(validateScenario(input)));
+  });
 }
 
 export function simulateContinuitySync(input: unknown): Run {

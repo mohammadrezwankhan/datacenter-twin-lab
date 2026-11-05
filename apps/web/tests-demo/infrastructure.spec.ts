@@ -1,3 +1,12 @@
+import {
+  objectValue,
+  arrayValue,
+  numberValue,
+  screenValue,
+  screenExport,
+  type ScreenFixture,
+  type ScreenExportFixture,
+} from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 import { expect, test, type Download, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -84,17 +93,18 @@ async function exportCompleted(page: Page) {
   const download: Download = await pending;
   const path = await download.path();
   if (!path) throw new Error('Completed screen export did not create a downloadable file');
-  return JSON.parse(await readFile(path, 'utf8')) as Record<string, any>;
+  const value: unknown = JSON.parse(await readFile(path, 'utf8'));
+  return screenExport(value);
 }
 
 function assertResult(
-  payload: Record<string, any>,
+  payload: ScreenExportFixture,
   id: string,
   inputs: ScreenInputs,
   prediction: string,
 ) {
   const lesson = lessonById(id);
-  const result = payload.result as Record<string, any>;
+  const result = payload.result;
   const outputs = calculateScreen(lesson.experiment.model, inputs);
   expect(payload).toMatchObject({
     exportSchema: 'infrastructure-lesson-export-1',
@@ -113,7 +123,7 @@ function assertResult(
 }
 
 function assertRawResult(
-  result: Record<string, any>,
+  result: ScreenFixture,
   lesson: (typeof infrastructureLessons)[number],
   inputs: ScreenInputs,
   model: ModelName,
@@ -129,11 +139,11 @@ function assertRawResult(
   expect(result.inputUnits).toEqual(
     Object.fromEntries(Object.keys(inputs).map((key) => [key, screenUnits(model).inputs[key]])),
   );
-  expect(Object.keys(result.outputUnits).sort()).toEqual(Object.keys(outputs).sort());
-  for (const [key, unit] of Object.entries(result.outputUnits))
+  expect(Object.keys(objectValue(result.outputUnits)).sort()).toEqual(Object.keys(outputs).sort());
+  for (const [key, unit] of Object.entries(objectValue(result.outputUnits)))
     expect(unit).toBe(screenUnits(model).outputs[key]);
-  expect(result.assumptions.length).toBeGreaterThan(0);
-  expect(result.limitations.length).toBeGreaterThan(0);
+  expect(arrayValue(result.assumptions).length).toBeGreaterThan(0);
+  expect(arrayValue(result.limitations).length).toBeGreaterThan(0);
   expect(result.sourceLocators).toEqual([
     {
       id: lesson.source.id,
@@ -165,7 +175,7 @@ async function runAndCheck(page: Page, id: string, inputs: ScreenInputs, predict
   await page.getByRole('button', { name: 'Run screen' }).click();
   await expect(page.getByTestId('infrastructure-run-state')).toContainText('Completed case');
   const result = calculateScreen(lesson.experiment.model, inputs);
-  for (const [key, value] of Object.entries(result))
+  for (const key of Object.keys(result))
     await expect(
       page.locator('[aria-label="Infrastructure experiment"]').locator(`[data-output="${key}"]`),
     ).toBeVisible();
@@ -179,13 +189,13 @@ async function runAndCheck(page: Page, id: string, inputs: ScreenInputs, predict
     );
     expect(payload.fuel).toEqual(expectedFuel);
     assertRawResult(
-      payload.fuel,
+      requiredPresent(payload.fuel, 'fuel screen result'),
       lesson,
       fuelInputs,
       'fuelScreen',
       calculateScreen('fuelScreen', fuelInputs),
     );
-    expect(payload.fuel.outputs.usableLitres).toBe(324000);
+    expect(requiredPresent(payload.fuel, 'fuel screen result').outputs.usableLitres).toBe(324000);
   } else {
     expect(payload.fuel).toBeNull();
   }
@@ -246,7 +256,7 @@ test('all twelve lessons run exact defaults and challenges, export canonical raw
       expect(defaultPayload.result.outputs.availableMW).toBeCloseTo(21.6, 10);
       expect(defaultPayload.result.outputs.marginMW).toBeCloseTo(-5.4, 10);
       expect(defaultPayload.result.outputs.availableMW).toBeLessThan(
-        defaultPayload.result.inputs.requiredMW,
+        numberValue(defaultPayload.result.inputs.requiredMW),
       );
     }
     if (lesson.id === 'ups-battery-station-dc') {
@@ -297,9 +307,12 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
   baseURL,
 }) => {
   test.setTimeout(300000);
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: requiredPresent(baseURL, 'baseURL'),
+  });
   const page = await context.newPage();
-  const requestContext = await page.context().request;
+  const requestContext = page.context().request;
   try {
     for (const lesson of infrastructureLessons) {
       const response = await page.goto(`./${lesson.readingRoute}`);
@@ -344,17 +357,17 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
         new URL('results.json', page.url()).toString(),
       );
       expect(resultsResponse.status()).toBe(200);
-      const results = await resultsResponse.json();
+      const results = objectValue(await resultsResponse.json());
       expect(results.engineeringDecision).toBe('HOLD');
       assertRawResult(
-        results.starting,
+        screenValue(results.starting),
         lesson,
         lesson.experiment.defaultInputs,
         lesson.experiment.model,
         calculateScreen(lesson.experiment.model, lesson.experiment.defaultInputs),
       );
       assertRawResult(
-        results.challenge,
+        screenValue(results.challenge),
         lesson,
         appliedInputs(lesson.id, true),
         lesson.experiment.model,
@@ -363,13 +376,13 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
       expect(results.fuel).toEqual(lesson.id === 'generator-bank-fuel' ? expect.any(Object) : null);
       if (lesson.id === 'generator-bank-fuel') {
         assertRawResult(
-          results.fuel,
+          screenValue(results.fuel),
           lesson,
           fuelInputs,
           'fuelScreen',
           calculateScreen('fuelScreen', fuelInputs),
         );
-        expect(results.fuel.outputs.usableLitres).toBe(324000);
+        expect(screenValue(results.fuel).outputs.usableLitres).toBe(324000);
       }
 
       const linkTargets = await page

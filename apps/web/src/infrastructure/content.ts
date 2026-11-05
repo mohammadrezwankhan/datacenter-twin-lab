@@ -2,10 +2,7 @@ import { requiredValue } from '../required-value';
 import type { LessonEvidence, ModelName, ScreenInputs } from './screens';
 
 export type EvidenceLabel =
-  | 'source-statement'
-  | 'editorial-derivation'
-  | 'illustrative-assumption'
-  | 'unresolved';
+  'source-statement' | 'editorial-derivation' | 'illustrative-assumption' | 'unresolved';
 export interface InfrastructureLesson extends LessonEvidence {
   number: number;
   chapter: number;

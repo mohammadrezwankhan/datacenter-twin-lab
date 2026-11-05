@@ -1,3 +1,4 @@
+import { jsonObject, numberValue, objectList, objectValue } from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 import { expect, test, devices } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
@@ -8,7 +9,7 @@ async function downloadJson(page: import('@playwright/test').Page, label: string
   const pending = page.waitForEvent('download');
   if (label === 'export-run') await page.getByRole('button', { name: 'Export run' }).click();
   else await page.getByTestId(label).click();
-  return JSON.parse(await readFile(await (await pending).path(), 'utf8'));
+  return jsonObject(await readFile(await (await pending).path(), 'utf8'));
 }
 
 async function screenPoint(svg: import('@playwright/test').Locator, viewX: number, viewY: number) {
@@ -95,7 +96,6 @@ test('EMT phone touch drag inspects exact signed rows without changing the appli
     const touch = await context.newCDPSession(page);
     await touch.send('Emulation.setTouchEmulationEnabled', {
       enabled: true,
-      configuration: 'mobile',
     });
     const from = await screenPoint(chart, 64 + (720 - 64 - 19) * 0.2, 130);
     const to = await screenPoint(chart, 64 + (720 - 64 - 19) * 0.7, 130);
@@ -114,7 +114,10 @@ test('EMT phone touch drag inspects exact signed rows without changing the appli
     );
 
     const currentChart = page.locator('.emt-chart').nth(1);
-    const rows = baseline.rows as { time_ms: number; source_a: number }[];
+    const rows = objectList(baseline.rows).map((row) => ({
+      time_ms: numberValue(row.time_ms),
+      source_a: numberValue(row.source_a),
+    }));
     const negativeIndex = rows.findIndex((row) => row.source_a < 0);
     expect(negativeIndex).toBeGreaterThanOrEqual(0);
     const negativeTime = requiredPresent(rows[negativeIndex], 'rows[negativeIndex]').time_ms;
@@ -145,7 +148,7 @@ test('power timeline pointer selects the containing interval and keyboard seek s
   await page.goto('./?preset=generator_failure');
   await page.getByRole('button', { name: 'Run scenario' }).click();
   const baseline = await downloadJson(page, 'export-run');
-  const rows = baseline.intervals as { start_s: string; end_s: string }[];
+  const rows = objectList(baseline.intervals);
   expect(rows.length).toBeGreaterThan(2);
   const svg = page.locator('.power-chart');
   await svg.scrollIntoViewIfNeeded();
@@ -157,7 +160,8 @@ test('power timeline pointer selects the containing interval and keyboard seek s
       (Number(requiredPresent(rows[index], 'rows[index]').start_s) +
         Number(requiredPresent(rows[index], 'rows[index]').end_s)) /
       2;
-    const viewX = 46 + ((940 - 46 - 16) * middle) / Number(baseline.scenario.duration_s);
+    const viewX =
+      46 + ((940 - 46 - 16) * middle) / Number(objectValue(baseline.scenario).duration_s);
     const point = await screenPoint(svg, viewX, 90);
     await page.mouse.move(point.x, point.y);
     await page.mouse.down();

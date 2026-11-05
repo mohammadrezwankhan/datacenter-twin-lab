@@ -1,12 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { nativeRun } from './course-test-helpers';
+import { requiredPresent } from '../src/required-value';
+import { continuityResultValue } from './continuity-contract';
+import { jsonObject } from './json-contracts';
 
 async function exportResult(page: import('@playwright/test').Page) {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export guided run (JSON)' }).click();
   const download = await pending;
-  return JSON.parse(await readFile(await download.path(), 'utf8'));
+  return continuityResultValue(jsonObject(await readFile(await download.path(), 'utf8')));
 }
 
 test('the five-minute guide requires a prediction and matches native results for both reserves', async ({
@@ -81,8 +84,9 @@ test('the five-minute guide requires a prediction and matches native results for
     expect(result.scenario.events).toContainEqual(
       expect.objectContaining({ at_s: 900, action: 'asset_up', target: 'utility' }),
     );
-    const depleted = result.events.find(
-      (event: { action: string }) => event.action === 'battery_depleted',
+    const depleted = requiredPresent(
+      result.events.find((event) => event.action === 'battery_depleted'),
+      'battery depletion event',
     );
     expect(Number(depleted.at_s) - 300).toBeCloseTo(item.rideThrough, 7);
     expect(Number(depleted.at_s)).toBeCloseTo(item.elapsed, 7);
@@ -93,7 +97,7 @@ test('the five-minute guide requires a prediction and matches native results for
     if (index === 0) expect(runtimeRequests).toEqual([]);
     await page.getByLabel('Verify against Python').check();
     await expect(page.getByTestId('python-verification-status')).toContainText(
-      `Exact match with Python: all inputs, hashes and calculated values (${String(result.run_id)}).`,
+      `Exact match with Python: all inputs, hashes and calculated values (${result.run_id}).`,
     );
     expect(await exportResult(page)).toEqual(result);
     await info.attach(`guided-${item.reserve}kwh-complete-result.json`, {

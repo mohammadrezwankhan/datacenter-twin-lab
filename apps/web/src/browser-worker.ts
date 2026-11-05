@@ -1,3 +1,5 @@
+import type { PyDict } from 'pyodide/ffi';
+import { workerRequest } from './worker-envelope';
 import type { PyodideInterface } from 'pyodide';
 import {
   fetchVerifiedArchive,
@@ -21,7 +23,10 @@ async function initialize() {
   let stage: RuntimeStage = 'initialize';
   const restoreFetch = observeRuntimeFetches(runtimeURL, () => stage, report);
   try {
-    const { loadPyodide } = await import(/* @vite-ignore */ `${runtimeURL}pyodide.mjs`);
+    const { loadPyodide } = (await import(/* @vite-ignore */ `${runtimeURL}pyodide.mjs`)) as Pick<
+      typeof import('pyodide'),
+      'loadPyodide'
+    >;
     stage = 'download';
     report({ stage, message: 'Downloading Pyodide runtime files; overall download total unknown' });
     const py: PyodideInterface = await loadPyodide({ indexURL: runtimeURL });
@@ -43,21 +48,28 @@ async function initialize() {
 
 // Serialize calls because all requests share one Python interpreter.
 let queue = Promise.resolve();
-self.addEventListener('message', (event: MessageEvent) => {
-  const { id, path, body } = event.data;
+self.addEventListener('message', (event: MessageEvent<unknown>) => {
+  // Dedicated-worker messages have no origin/source; reject window-style cross-origin input.
+  if (event.origin !== '' && event.origin !== self.location.origin) return;
+  if (event.source !== null) return;
+  const request = workerRequest(event.data);
+  if (!request) return;
+  const { id, path, body } = request;
   waitingIds.add(id);
   queue = queue.then(async () => {
     try {
       report({ stage: 'starting', message: 'Preparing the local Python verification runtime' });
-      const py = await (runtime ??= initialize().catch((error) => {
+      const py = await (runtime ??= initialize().catch((error: unknown) => {
         runtime = undefined;
         throw error;
       }));
       report({ stage: 'calculate', message: 'Running the Python verification calculation' });
-      py.globals.set('_request_path', path);
-      py.globals.set('_request_json', body);
-      const value = py.runPython('_bridge_dispatch(_request_path, _request_json)');
-      self.postMessage({ id, result: JSON.parse(value) });
+      (py.globals as PyDict).set('_request_path', path);
+      (py.globals as PyDict).set('_request_json', body);
+      const value: unknown = py.runPython('_bridge_dispatch(_request_path, _request_json)');
+      if (typeof value !== 'string') throw new Error('Python runtime did not return JSON text');
+      const result: unknown = JSON.parse(value);
+      self.postMessage({ id, result });
     } catch (error) {
       self.postMessage({ id, error: error instanceof Error ? error.message : String(error) });
     } finally {

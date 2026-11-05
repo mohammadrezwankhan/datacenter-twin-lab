@@ -136,7 +136,11 @@ function modeChoiceForPrediction(study: ResearchStudy, value: string) {
 
 function SolverDetails({ result }: { result: ResearchResult }) {
   const primitives = Object.entries(result.solver).filter(
-    ([, value]) => value === null || ['string', 'number', 'boolean'].includes(typeof value),
+    (entry): entry is [string, string | number | boolean | null] =>
+      entry[1] === null ||
+      typeof entry[1] === 'string' ||
+      typeof entry[1] === 'number' ||
+      typeof entry[1] === 'boolean',
   );
   return (
     <details className="research-data-details research-solver-details">
@@ -260,7 +264,7 @@ export function ResearchStudio() {
     setProgress({ stage: 'starting', message: 'Starting the local numerical runtime' });
     setRunError(null);
     try {
-      const response = await researchRequest<ResearchResult>(
+      const response = await researchRequest<ResearchResult | null>(
         'research',
         activeController.signal,
         {
@@ -416,7 +420,13 @@ export function ResearchStudio() {
           </div>
         </div>
 
-        <form className="research-run-panel" onSubmit={runStudy} noValidate>
+        <form
+          className="research-run-panel"
+          onSubmit={(event) => {
+            void runStudy(event);
+          }}
+          noValidate
+        >
           <div className="research-section-heading">
             <div>
               <span className="research-eyebrow">CONFIGURE THE CASE</span>

@@ -77,14 +77,18 @@ void test('a failed source download can retry and each attempt requests its file
   const archiveHash = createHash('sha256').update(data).digest('hex');
   const requested: string[] = [];
   let archiveAttempt = 0;
-  globalThis.fetch = async (input) => {
-    const url = new URL(String(input));
+  globalThis.fetch = (input) => {
+    const url = new URL(input instanceof Request ? input.url : input);
     requested.push(url.pathname);
     if (url.pathname.endsWith('engine-manifest.json'))
-      return Response.json({ archive_sha256: archiveHash, archive_bytes: data.byteLength });
+      return Promise.resolve(
+        Response.json({ archive_sha256: archiveHash, archive_bytes: data.byteLength }),
+      );
     archiveAttempt += 1;
-    if (archiveAttempt === 1) return new Response('offline', { status: 503 });
-    return new Response(data, { headers: { 'content-length': String(data.byteLength) } });
+    if (archiveAttempt === 1) return Promise.resolve(new Response('offline', { status: 503 }));
+    return Promise.resolve(
+      new Response(data, { headers: { 'content-length': String(data.byteLength) } }),
+    );
   };
   try {
     await assert.rejects(

@@ -79,8 +79,8 @@
     },
     {
       "path": "src/main.js",
-      "bytes": 5179,
-      "sha256": "156c01925d79e2b7c5d6ddd50205fe1bd13043b5e5e7541bed96727920b206d9"
+      "bytes": 5170,
+      "sha256": "25678b6c6dea68c64da0c0ce4d44d05a796afd87418314438d0044dd4589f0f8"
     },
     {
       "path": "src/scene/conduit.js",
@@ -104,8 +104,8 @@
     },
     {
       "path": "src/scene/objects.js",
-      "bytes": 6801,
-      "sha256": "0b444a2fa60442c6857bef0955259dd23cf031c558d05ca9a5447b63bda17443"
+      "bytes": 6780,
+      "sha256": "afdf51620518c789385c970e206b179c91ff912e4e1fc8457c2545ddee3ca012"
     },
     {
       "path": "src/styles/hero.css",
@@ -119,8 +119,8 @@
     },
     {
       "path": "src/ui/panels.js",
-      "bytes": 9178,
-      "sha256": "25ee98a7c1add3201b6838fad446a556c2f99599de84325376efd494622516be"
+      "bytes": 9159,
+      "sha256": "754872b35f01c35e3f2d893a96c58a91755def83354d5bfae82ed2caa3567dab"
     },
     {
       "path": "vendor/manifest.json",

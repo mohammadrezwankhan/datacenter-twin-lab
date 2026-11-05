@@ -1,3 +1,4 @@
+import { objectValue, objectList, stringValue } from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
@@ -18,7 +19,8 @@ test('search pages discovery manifest and cards preserve the 12/1/5 records in s
 }) => {
   const response = await request.get('./learn/manifest.json');
   expect(response.status()).toBe(200);
-  const manifest = await response.json();
+  const manifest = objectValue(await response.json());
+  const items = objectList(manifest.items);
   const expectedIds = [
     ...lessons.map(({ id }) => id),
     'emt',
@@ -27,8 +29,8 @@ test('search pages discovery manifest and cards preserve the 12/1/5 records in s
   ];
 
   expect(manifest.counts).toEqual({ continuity: 12, infrastructure: 12, emt: 1, dynamics: 5 });
-  expect(manifest.items).toHaveLength(30);
-  expect(manifest.items.map((item: { id: string }) => item.id)).toEqual(expectedIds);
+  expect(items).toHaveLength(30);
+  expect(items.map((item) => item.id)).toEqual(expectedIds);
   expect(manifest.sourceTextNormalization).toBe('UTF-8, CRLF normalized to LF');
 
   await page.goto('./learn/');
@@ -41,11 +43,12 @@ test('search pages discovery manifest and cards preserve the 12/1/5 records in s
     '12 continuity lessons · 12 infrastructure lessons · 1 EMT study · 5 advanced studies.',
   );
 
-  for (const item of manifest.items) {
+  for (const item of items) {
     const card = page.locator(`.learning-card[data-learning-id="${String(item.id)}"]`);
-    await expect(card.locator('h4 a')).toHaveText(item.title);
-    if (item.question) await expect(card.locator('p').first()).toHaveText(item.question);
-    await expect(card.locator('.card-description')).toHaveText(item.description);
+    await expect(card.locator('h4 a')).toHaveText(stringValue(item.title));
+    if (item.question)
+      await expect(card.locator('p').first()).toHaveText(stringValue(item.question));
+    await expect(card.locator('.card-description')).toHaveText(stringValue(item.description));
     await expect(card.locator('.card-links a').first()).toHaveAttribute(
       'href',
       `..${String(item.overviewPath)}`,
@@ -57,17 +60,23 @@ test('search pages discovery manifest and cards preserve the 12/1/5 records in s
   }
 
   for (const [index, lesson] of lessons.entries()) {
-    expect(manifest.items[index].title).toBe(lesson.title.replace(/^\d+\. /, ''));
-    expect(manifest.items[index].description).toBe(lesson.concept);
-    expect(manifest.items[index].question).toBe(lesson.question);
-    expect(manifest.items[index].sequence).toBe(index + 1);
+    expect(requiredPresent(items[index], 'continuity discovery item').title).toBe(
+      lesson.title.replace(/^\d+\. /, ''),
+    );
+    expect(requiredPresent(items[index], 'continuity discovery item').description).toBe(
+      lesson.concept,
+    );
+    expect(requiredPresent(items[index], 'continuity discovery item').question).toBe(
+      lesson.question,
+    );
+    expect(requiredPresent(items[index], 'continuity discovery item').sequence).toBe(index + 1);
   }
-  const emt = manifest.items[12];
+  const emt = requiredPresent(items[12], 'EMT discovery item');
   expect(emt.title).toBe(emtIntroduction.title);
   expect(emt.description).toBe(emtIntroduction.description);
   expect(emt.runtimePath).toBe('/?mode=emt');
   for (const [index, [id, title, question, description]] of researchStudies.entries()) {
-    const item = manifest.items[index + 13];
+    const item = requiredPresent(items[index + 13], 'research discovery item');
     expect(item).toMatchObject({
       id,
       title,
@@ -85,7 +94,10 @@ test('search pages discovery cards remain readable and linked with JavaScript di
   browser,
   baseURL,
 }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: requiredPresent(baseURL, 'baseURL'),
+  });
   const page = await context.newPage();
   try {
     await page.goto('./learn/');
@@ -192,7 +204,9 @@ test('search pages discovery loads no React or scientific runtime and stays unde
     .locator('script[src]')
     .evaluateAll((nodes) => nodes.map((node) => (node as HTMLScriptElement).src));
   expect(scripts).toHaveLength(1);
-  expect(new URL(scripts[0]).pathname).toMatch(/learn-discovery-[\w-]+\.js$/);
+  expect(new URL(requiredPresent(scripts[0], 'discovery script')).pathname).toMatch(
+    /learn-discovery-[\w-]+\.js$/,
+  );
 
   const artifactRoot = resolve(repositoryRoot, '.local/browser-demo-site');
   const html = await readFile(resolve(artifactRoot, 'learn/index.html'), 'utf8');
@@ -311,7 +325,7 @@ test('search pages discovery fits target widths, 48px controls and axe WCAG 2.2 
               element.getClientRects().length > 0 && element.getBoundingClientRect().height < 48,
           )
           .map((element) => ({
-            text: element.textContent?.trim(),
+            text: element.textContent.trim(),
             height: element.getBoundingClientRect().height,
           })),
       );

@@ -12,9 +12,10 @@ import {
 } from '../src/demand-timeline';
 import { simulateContinuitySync } from '../src/js-engine/continuity';
 import type { SiteScenario } from '../src/types';
+import { demoFixture } from './json-fixtures';
 
 const root = resolve(process.cwd(), '../..');
-const data = JSON.parse(
+const data = demoFixture(
   readFileSync(resolve(root, '.local/browser-demo-assets/demo-data.json'), 'utf8'),
 );
 const base = data.scenarios.normal as SiteScenario;
@@ -25,7 +26,7 @@ const step = (atS: string, demandKw: string, id = 'new') => ({
   originalIndex: null,
 });
 function assertNative(scenario: SiteScenario) {
-  const native = JSON.parse(
+  const native: unknown = JSON.parse(
     execFileSync(
       process.env.TWIN_PYTHON || 'python',
       [
@@ -102,8 +103,9 @@ void test('edits preserve non-demand events, custom load ids, precision and coin
   // 100 kWh * .90 * .95 = 85.5 kWh available to IT; a 600 s x 500 kW outage needs 83 1/3 kWh.
   assert.equal(result.summary.unserved_it_kwh, '0');
   const draft = demandDraft(edited);
-  draft.steps[0].atS = '900';
-  draft.steps[0].demandKw = '600';
+  const firstStep = requiredPresent(draft.steps[0], 'first edited demand step');
+  firstStep.atS = '900';
+  firstStep.demandKw = '600';
   const sameTime = scenarioWithDemand(edited, draft);
   assert.deepEqual(sameTime.events.slice(0, source.events.length), source.events);
   assertNative(sameTime);
@@ -134,7 +136,10 @@ void test('invalid inputs and event overflow never mutate the source; boundary v
   assertNative(zero);
   const unicode = scenarioWithDemand(base, { initialKw: '١٠٠٠', steps: [step('1', '1e-9')] });
   assert.equal(unicode.it_demand_kw, '1000');
-  assert.equal(unicode.events[0].value_kw, '0.000000001');
+  assert.equal(
+    requiredPresent(unicode.events[0], 'first Unicode demand event').value_kw,
+    '0.000000001',
+  );
 });
 
 void test('removing steps keeps all availability events and new steps bisect the largest gap', () => {

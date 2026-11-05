@@ -2,7 +2,7 @@ import { requiredPresent } from './required-value';
 import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { lessons, lessonScenario } from './course-lessons';
 import { courseTotal } from './curriculum';
-import { n, request } from './client';
+import { request } from './client';
 import { PythonVerification } from './PythonVerification';
 import { RunTools } from './RunTools';
 import type { Run, SiteScenario } from './types';

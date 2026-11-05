@@ -295,8 +295,8 @@ for (const width of [320, 1366]) {
       });
       expect(focusVisible, 'play control has a visible keyboard focus indicator').toBe(true);
     } finally {
-      releaseAdapter?.();
-      releaseCss?.();
+      releaseAdapter();
+      releaseCss();
       await context.close();
     }
   });
@@ -419,8 +419,8 @@ for (const width of [320, 1366]) {
         ),
       ).toBeLessThanOrEqual(2);
     } finally {
-      releaseTracks?.();
-      releaseStudy?.();
+      releaseTracks();
+      releaseStudy();
       await context.close();
     }
   });

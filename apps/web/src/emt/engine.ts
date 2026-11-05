@@ -100,25 +100,24 @@ const assumptions = [
   'RK4 integration; 100 us output sampling. Reported extrema are integration-endpoint samples.',
 ];
 
-export function validateEmt(config: EmtConfig): EmtConfig {
+export function validateEmt(input: unknown): EmtConfig {
   if (
-    !config ||
-    typeof config !== 'object' ||
-    Array.isArray(config) ||
-    Object.keys(config).length !== Object.keys(DEFAULT_EMT).length ||
-    Object.keys(config).some((key) => !(key in DEFAULT_EMT))
+    !input ||
+    typeof input !== 'object' ||
+    Array.isArray(input) ||
+    Object.keys(input).length !== Object.keys(DEFAULT_EMT).length ||
+    Object.keys(input).some((key) => !(key in DEFAULT_EMT))
   )
     throw new Error('EMT config must contain exactly the documented ten fields');
+  const fields = input as Record<string, unknown>;
   for (const key of Object.keys(EMT_LIMITS) as (keyof EmtConfig)[]) {
     const [low, high] = EMT_LIMITS[key];
-    if (
-      typeof config[key] !== 'number' ||
-      !Number.isFinite(config[key]) ||
-      config[key] < low ||
-      config[key] > high
-    )
+    const value = fields[key];
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < low || value > high)
       throw new Error(`${key} must be between ${String(low)} and ${String(high)}`);
   }
+  // Every documented field has been checked as a bounded finite number above.
+  const config = fields as EmtConfig;
   for (const key of ['sag_start_ms', 'sag_duration_ms', 'duration_ms'] as const)
     if (!Number.isInteger(config[key]))
       throw new Error(`${key} must be a whole number of milliseconds`);

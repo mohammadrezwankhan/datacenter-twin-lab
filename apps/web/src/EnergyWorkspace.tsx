@@ -344,7 +344,7 @@ export function EnergyGuide({
             <h3>{item.title}</h3>
             <h4>{item.subtitle}</h4>
             <p>{item.copy}</p>
-            {item.action && item.mode && (
+            {item.action && (
               <button
                 onClick={() => {
                   onScenario(item.mode);

@@ -1,3 +1,9 @@
+import {
+  appendLocalModuleScript,
+  htmlPageTitle,
+  removeSearchMetadata,
+  visiblePageText,
+} from './build-html';
 import { requiredValue } from './src/required-value';
 import type { Plugin } from 'vite';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
@@ -41,47 +47,6 @@ const entities: Record<string, string> = {
 const escape = (value: unknown) =>
   String(value).replace(/[&<>"']/g, (c) => requiredValue(entities[c], c));
 const json = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c');
-
-function decodeHtml(value: string): string {
-  return value.replace(
-    /&(?:#(\d+)|#x([\da-f]+)|amp|lt|gt|quot|apos|#39);/gi,
-    (entity, decimal, hex) => {
-      if (decimal) return String.fromCodePoint(Number(decimal));
-      if (hex) return String.fromCodePoint(Number.parseInt(hex, 16));
-      return (
-        {
-          '&amp;': '&',
-          '&lt;': '<',
-          '&gt;': '>',
-          '&quot;': '"',
-          '&apos;': "'",
-          '&#39;': "'",
-        }[entity.toLowerCase()] ?? entity
-      );
-    },
-  );
-}
-
-function visiblePageText(html: string): string {
-  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? html;
-  return decodeHtml(
-    main
-      .replace(/<(script|style|svg|form|button|select)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
-      // Accessible link context repeats adjacent titles; omit it from the reading export.
-      .replace(/<span\b[^>]*class="sr-only"[^>]*>[\s\S]*?<\/span>/gi, '')
-      .replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, '$1')
-      .replace(/<br\b[^>]*>/gi, '\n')
-      .replace(
-        /<\/(?:p|div|h[1-6]|li|tr|section|article|figure|table|caption|ul|ol|header|footer|main|nav|pre|blockquote)>/gi,
-        '\n',
-      )
-      .replace(/<[^>]+>/g, '')
-      .replace(/[ \t]+/g, ' ')
-      .replace(/\n[ \t]+/g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim(),
-  );
-}
 
 export function publicSiteUrl(value: string): string {
   const url = new URL(value);
@@ -178,6 +143,7 @@ ${site.bingSiteVerification && path === '' && base === site.url ? `<meta name="m
     path: string,
     content: string,
     schema: unknown,
+    modulePath?: string,
   ): string {
     const root = '../'.repeat(path.split('/').filter(Boolean).length);
     const learnIndex = path === 'learn/';
@@ -187,7 +153,7 @@ ${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/png" s
 <nav aria-label="Site"><a href="${root}learn/">Course notes</a><a href="${root}evidence/">Results &amp; sources</a><a href="${root}about/">About the lab</a><a href="${repository}">GitHub</a></nav></header>
 <main id="main">${content}</main><footer>Original teaching material by ${site.author} · Version ${ENGINE_VERSION} · Apache-2.0.<br>
 Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/">model scope and reproducibility guide</a>.</footer></body></html>`;
-    return page;
+    return modulePath ? appendLocalModuleScript(page, modulePath) : page;
   }
 
   function assumptions(lesson: Lesson, scenarios: Record<string, SiteScenario>): string {
@@ -253,24 +219,22 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
           inLanguage: 'en',
         },
       ];
-      const landingPage = html
+      const landingPage = removeSearchMetadata(html)
         .replace(
           '<!-- PUBLIC_COURSE_LINKS -->',
           `<a href="./learn/">Read all ${String(courseTotal)} course lessons</a> · <a href="./studies/emt/">Explore the EMT study</a> · <a href="./studies/power-dynamics/">Power dynamics studies</a> · <a href="./evidence/">Reference results and source records</a> · <a href="./about/">About the author and evidence</a> ·`,
         )
-        .replace(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
-        .replace(/<title>[\s\S]*?<\/title>/, '')
-        .replace(/<meta\s+(?:name="description"|property="og:[^"]+")[\s\S]*?>/g, '')
         .replace('</head>', `${metadata(title, description, '', schema)}</head>`);
       return landingPage;
     },
     async generateBundle() {
-      const scenarios = JSON.parse(
+      const demoData = JSON.parse(
         readFileSync(
           new URL('../../.local/browser-demo-assets/demo-data.json', import.meta.url),
           'utf8',
         ),
-      ).scenarios as Record<string, SiteScenario>;
+      ) as { scenarios: Record<string, SiteScenario> };
+      const scenarios = demoData.scenarios;
       const emit = (fileName: string, content: string) =>
         this.emitFile({ type: 'asset', fileName, source: content });
       const evidence = JSON.parse(
@@ -318,9 +282,9 @@ ${learningExplorer()}
 <h2>Build your power-systems intuition</h2><p>For datacenter engineers learning power continuity. Begin with power and energy, work through outages and shared failures, then compare aggregate AI demand and annual PUE planning. Basic arithmetic is enough to start.</p>${graphic}
 <section class="panel"><h2>Go inside a voltage sag</h2><p>Ready for a different timescale? The separate <a href="../studies/emt/">EMT fundamentals study</a> explores a 200 ms ideal DC-link RLC transient with waveforms, an energy ledger and step-refinement checks. Continue with five <a href="../studies/power-dynamics/">advanced power-dynamics studies</a> of converter response and grid modes.</p></section>
 <section class="panel"><h2>What the continuity lessons establish</h2><p>These are deterministic synthetic electrical examples with explicit units, input scenarios and downloadable results. They teach reserve accounting and failure-path reasoning. They do not predict GPU jobs, grid adequacy, electrical transients or certified facility uptime.</p><p><a href="../about/">Read about the author, model scope and reproducibility evidence →</a></p></section>
-<p class="small">${revision ? `Website source revision: <a href="${repository}/tree/${revision}">${revision.slice(0, 12)}</a>.` : 'Website source revision is not declared in this local build.'} The engine version does not identify every study model; see each guide and applied result.</p>
-<script type="module" src="../${this.getFileName(discoveryScript)}"></script>`,
+<p class="small">${revision ? `Website source revision: <a href="${repository}/tree/${revision}">${revision.slice(0, 12)}</a>.` : 'Website source revision is not declared in this local build.'} The engine version does not identify every study model; see each guide and applied result.</p>`,
           course,
+          `../${this.getFileName(discoveryScript)}`,
         ),
       );
 
@@ -328,7 +292,7 @@ ${learningExplorer()}
         const path = `learn/${lesson.id}/`;
         const cleanTitle = lesson.title.replace(/^\d+\. /, '');
         const records = lessonRecords(lesson, scenarios);
-        const sources = [
+        const sources: Array<[string, string]> = [
           ['Lesson definitions and input transformations', 'apps/web/src/course-lessons.ts'],
           ['Native Python default/challenge checks', 'tests/test_course_lessons.py'],
           ['Electrical continuity contract', 'docs/engineering/electrical-continuity.md'],
@@ -694,7 +658,7 @@ python scripts/build_evidence.py --verify outputs/reproduction-${ENGINE_VERSION}
         .map(([fileName, output]) => {
           if (output.type !== 'asset') throw new Error('Expected static HTML output');
           const html = Buffer.from(output.source).toString('utf8');
-          const pageTitle = decodeHtml(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? fileName);
+          const pageTitle = htmlPageTitle(html, fileName);
           const path = fileName === 'index.html' ? '' : fileName.replace(/index\.html$/, '');
           let body = html;
           // shortcut: summarize the expanded index and infrastructure notes to retain every page within 60 KiB; revisit if the course grows.

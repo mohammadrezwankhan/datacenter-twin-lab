@@ -11,15 +11,16 @@ import {
   simulateContinuitySync,
   validateScenario,
 } from '../src/js-engine/index';
-import type { DemoData } from '../src/js-engine/index';
+import type { SiteScenario } from '../src/js-engine/index';
+import { demoFixture, jsonObject } from './json-fixtures';
 
 const root = resolve(process.cwd(), '../..');
-const demoData = JSON.parse(
+const demoData = demoFixture(
   readFileSync(resolve(root, '.local/browser-demo-assets/demo-data.json'), 'utf8'),
-) as DemoData;
+);
 
-function preset(name: string): Record<string, unknown> {
-  return structuredClone(demoData.scenarios[name]) as Record<string, unknown>;
+function preset(name: string): SiteScenario {
+  return structuredClone(requiredPresent(demoData.scenarios[name], `preset ${name}`));
 }
 
 void test('exact arithmetic keeps Python-compatible decimal and money boundaries', () => {
@@ -116,7 +117,7 @@ void test('charging, depletion, demand events, partial paths, and unknown costs 
     battery_charge_efficiency: '1',
     step_s: 60,
   });
-  assert.equal(coincident.intervals[0].end_s, '36');
+  assert.equal(requiredPresent(coincident.intervals[0], 'first coincident interval').end_s, '36');
   assert.equal(coincident.summary.battery_final_kwh, '100');
 });
 
@@ -133,7 +134,7 @@ void test('validation rejects bounded-contract violations and preserves arbitrar
     { currency: 'GBP' },
   ])
     assert.throws(() => validateScenario({ ...preset('normal'), ...patch }));
-  const custom = structuredClone(preset('normal')) as Record<string, any>;
+  const custom = preset('normal');
   custom.assets.push({
     id: 'extra-bus',
     name: 'Extra bus',
@@ -159,7 +160,8 @@ function nativePython(payload: Record<string, unknown>): string | null {
     process.platform === 'win32'
       ? [resolve(root, '.venv/Scripts/python.exe'), 'python.exe', 'python3.exe', 'py.exe']
       : [resolve(root, '.venv/bin/python'), 'python3', 'python'];
-  candidates.unshift(process.env.TWIN_PYTHON);
+  const configuredPython = process.env.TWIN_PYTHON;
+  if (configuredPython) candidates.unshift(configuredPython);
   for (const executable of candidates.filter((value): value is string => Boolean(value))) {
     const result = spawnSync(executable, ['-c', source, root], {
       input: JSON.stringify(payload),
@@ -180,7 +182,7 @@ if (!pythonOutput)
     'Native Python differential harness unavailable; set TWIN_PYTHON to a Python 3.12+ interpreter.',
   );
 void test('complete run objects match native Python for all seven presets', () => {
-  const expected = JSON.parse(pythonOutput);
+  const expected = jsonObject(pythonOutput);
   for (const name of Object.keys(expected))
     assert.deepEqual(simulateContinuitySync(preset(name)), expected[name]);
 });
@@ -244,7 +246,7 @@ const edgeCases: Record<string, unknown> = {
   },
   long_unicode_name: { ...preset('normal'), name: '😀'.repeat(101) },
 };
-const unicodeIds = structuredClone(preset('normal')) as Record<string, any>;
+const unicodeIds = preset('normal');
 const unicodeAssetIds = [
   '𐀀-utility',
   '-generator',
@@ -256,25 +258,25 @@ const unicodeAssetIds = [
   'load-😀',
 ];
 const unicodeByOriginal = new Map(
-  unicodeIds.assets.map((asset: Record<string, string>, index: number) => [
+  unicodeIds.assets.map((asset, index) => [
     asset.id,
-    unicodeAssetIds[index],
+    requiredPresent(unicodeAssetIds[index], `Unicode asset ${String(index)}`),
   ]),
 );
 unicodeIds.id = 'unicode-identifiers';
 unicodeIds.name = 'non-BMP identifier ordering';
 unicodeIds.source_ids = ['source-𐀀-😀'];
-unicodeIds.assets = unicodeIds.assets.map((asset: Record<string, any>, index: number) => ({
+unicodeIds.assets = unicodeIds.assets.map((asset, index) => ({
   ...asset,
-  id: unicodeAssetIds[index],
+  id: requiredPresent(unicodeAssetIds[index], `Unicode asset ${String(index)}`),
   source_ids: ['source-𐀀-😀'],
 }));
-unicodeIds.dependencies = unicodeIds.dependencies.map((edge: Record<string, string>) => ({
+unicodeIds.dependencies = unicodeIds.dependencies.map((edge) => ({
   ...edge,
-  source: unicodeByOriginal.get(edge.source),
-  target: unicodeByOriginal.get(edge.target),
+  source: requiredPresent(unicodeByOriginal.get(edge.source), `source ${edge.source}`),
+  target: requiredPresent(unicodeByOriginal.get(edge.target), `target ${edge.target}`),
 }));
-unicodeIds.events = unicodeIds.events.map((event: Record<string, any>) => ({
+unicodeIds.events = unicodeIds.events.map((event) => ({
   ...event,
   target: unicodeByOriginal.get(event.target) ?? event.target,
 }));
@@ -285,7 +287,7 @@ if (!edgePythonOutput)
     'Native Python edge differential harness unavailable; set TWIN_PYTHON to a Python 3.12+ interpreter.',
   );
 void test('complete run objects match native Python for bounded edge scenarios', () => {
-  const expected = JSON.parse(edgePythonOutput);
+  const expected = jsonObject(edgePythonOutput);
   for (const name of Object.keys(expected))
     assert.deepEqual(simulateContinuitySync(edgeCases[name]), expected[name]);
 });

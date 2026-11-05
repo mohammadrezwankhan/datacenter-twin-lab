@@ -1,5 +1,13 @@
 title = "Rezwan default secret detection"
-# Keep the complete upstream rule set. There are no repository-wide ignores,
-# baseline suppressions, or path-based allowances for historical findings.
+# Keep the complete upstream rule set. Reviewed exceptions require an exact
+# non-secret value, field, path and rule; no whole file or commit is skipped.
 [extend]
 useDefault = true
+
+[[allowlists]]
+description = "Verified historical CSS SHA-256; see .github/security/reviews/demo-checksum.json"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''(^|/)docs/images/demo-walkthrough\.json$''']
+regexTarget = "line"
+regexes = ['''^\s*"apps/web/src/tokens\.css"\s*:\s*"50193e895bf17bb104523f3780c981aa82619a60dcebefe49d3ac4629315373e",?\s*$''']

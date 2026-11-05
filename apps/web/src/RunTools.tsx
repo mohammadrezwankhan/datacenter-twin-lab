@@ -16,9 +16,7 @@ function download(text: string, name: string, type: string) {
 }
 
 type ComparisonParameter =
-  | 'battery_initial_kwh'
-  | 'generator_start_delay_s'
-  | 'distribution_path_capacity_kw';
+  'battery_initial_kwh' | 'generator_start_delay_s' | 'distribution_path_capacity_kw';
 
 type ComparisonRow = {
   value: string;

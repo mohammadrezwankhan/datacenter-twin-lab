@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { requiredPresent } from '../src/required-value';
 import {
   buildScreenResult,
   canonicalHash,
@@ -82,7 +83,8 @@ function hash(value: string): string {
 }
 
 function verifiedResultHash(result: InfrastructureScreenResult): string {
-  const { resultHash: _, ...material } = result;
+  const entries: [string, unknown][] = Object.entries(result);
+  const material = Object.fromEntries(entries.filter(([key]) => key !== 'resultHash'));
   return hash(canonicalJson(material));
 }
 
@@ -149,9 +151,11 @@ void test('integer counts, availability bounds and overflow are rejected', () =>
   assert.throws(() => calculateScreen('capacityBank', { ...bank, unavailable: 8 }));
   assert.throws(() => calculateScreen('capacityBank', { ...bank, loading: 1.1 }));
   assert.throws(() => calculateScreen('loadLedger', { ...loadInputs, rackKW: 1e308 }));
+  const stageSeconds: number[] = [];
+  stageSeconds[1] = 1;
   assert.throws(() =>
     calculateScreen('commissioningScreen', {
-      stageSeconds: [, 1],
+      stageSeconds,
       electricalSeconds: 1,
       thermalSeconds: 1,
       itMW: 1,
@@ -295,14 +299,15 @@ void test('screen result hashes are canonical, tamper evident, and the completed
     'Illustration: The design ratio is an assumption.',
   ]);
   assert.equal(result.limitations.at(-1), 'No facility calibration.');
-  assert.deepEqual(result.sourceLocators[0].pdfPages, [10, 13]);
+  const sourceLocator = requiredPresent(result.sourceLocators[0], 'screen source locator');
+  assert.deepEqual(sourceLocator.pdfPages, [10, 13]);
   assert.equal(result.sourceRevision, 'revision-a');
   assert.equal(result.independentEngineeringVerification, false);
   assert.ok(Object.isFrozen(result));
   assert.ok(Object.isFrozen(result.inputs));
   assert.ok(Object.isFrozen(result.outputs));
   assert.ok(Object.isFrozen(result.assumptions));
-  assert.ok(Object.isFrozen(result.sourceLocators[0].pdfPages));
+  assert.ok(Object.isFrozen(sourceLocator.pdfPages));
   assert.equal(result.resultHash, verifiedResultHash(result));
 
   const reordered = await buildScreenResult(

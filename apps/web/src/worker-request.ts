@@ -8,6 +8,26 @@ type Pending = {
   progress?: (progress: RuntimeProgress) => void;
 };
 
+function progressValue(value: unknown): RuntimeProgress | undefined {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return undefined;
+  const progress = value as Record<string, unknown>;
+  if (
+    typeof progress.stage !== 'string' ||
+    !['starting', 'download', 'initialize', 'packages', 'verify', 'calculate', 'complete'].includes(
+      progress.stage,
+    ) ||
+    typeof progress.message !== 'string'
+  )
+    return undefined;
+  if (progress.resource !== undefined && typeof progress.resource !== 'string') return undefined;
+  for (const key of ['loadedBytes', 'totalBytes']) {
+    const count = progress[key];
+    if (count !== undefined && (typeof count !== 'number' || !Number.isFinite(count) || count < 0))
+      return undefined;
+  }
+  return progress as RuntimeProgress;
+}
+
 /** A bounded, cancellable request channel. Workers are created on first use. */
 export function createWorkerRequest(createWorker: () => Worker, label: string) {
   let worker: Worker | undefined;
@@ -34,12 +54,18 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
       throw new Error('Request exceeds the 4 MiB input limit');
     if (!worker) {
       worker = createWorker();
-      worker.onmessage = ({ data }) => {
+      worker.onmessage = (event: MessageEvent<unknown>) => {
+        if (event.data === null || typeof event.data !== 'object' || Array.isArray(event.data))
+          return;
+        const data = event.data as Record<string, unknown>;
+        if (typeof data.id !== 'number' || !Number.isSafeInteger(data.id)) return;
         const item = pending.get(data.id);
         if (!item) return;
         if (data.progress) {
+          const progress = progressValue(data.progress);
+          if (!progress) return;
           try {
-            item.progress?.(data.progress as RuntimeProgress);
+            item.progress?.(progress);
           } catch {
             // A view callback cannot interrupt a worker request.
           }
@@ -47,7 +73,14 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
         }
         pending.delete(data.id);
         item.cleanup();
-        if (data.error) item.reject(new Error(data.error));
+        if (data.error)
+          item.reject(
+            new Error(
+              typeof data.error === 'string'
+                ? data.error
+                : 'The worker returned an invalid error response.',
+            ),
+          );
         else item.resolve(data.result);
       };
       worker.onerror = () => {

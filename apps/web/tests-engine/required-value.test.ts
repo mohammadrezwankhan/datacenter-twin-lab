@@ -21,8 +21,12 @@ void test('sparse, missing and out-of-range collection entries fail before consu
 });
 
 void test('required present entries reject null DOM/model lookups and keep present values', () => {
-  assert.throws(() => requiredPresent(null, 'DOM node'), /DOM node/);
-  assert.throws(() => requiredPresent(undefined, 'DOM node'), /DOM node/);
+  assert.throws(() => {
+    requiredPresent(null, 'DOM node');
+  }, /DOM node/);
+  assert.throws(() => {
+    requiredPresent(undefined, 'DOM node');
+  }, /DOM node/);
   assert.equal(requiredPresent(0, 'zero'), 0);
   assert.equal(requiredPresent(false, 'boolean'), false);
 });

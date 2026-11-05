@@ -22,7 +22,7 @@ test('infrastructure lesson labels wrap at 320px with enlarged text', async ({
         const range = document.createRange();
         range.selectNodeContents(button);
         const text = range.getBoundingClientRect();
-        return text.left < box.left || text.right > box.right ? [button.textContent?.trim()] : [];
+        return text.left < box.left || text.right > box.right ? [button.textContent.trim()] : [];
       }),
     );
     expect(overflow).toEqual([]);
@@ -74,7 +74,7 @@ test('responsive-20261028 infrastructure track heading stays inside its panel at
               {
                 tag: node.tagName,
                 className: node.className,
-                text: node.textContent?.trim().slice(0, 120),
+                text: node.textContent.trim().slice(0, 120),
                 left: rect.left,
                 right: rect.right,
                 contentRight: content.right,
@@ -127,7 +127,7 @@ for (const width of [320, 360, 390, 560, 768, 900, 1440]) {
             range.selectNodeContents(button);
             const text = range.getBoundingClientRect();
             return {
-              name: button.textContent?.trim(),
+              name: button.textContent.trim(),
               contained: text.left >= box.left && text.right <= box.right,
               width: box.width,
               height: box.height,
@@ -175,7 +175,7 @@ for (const width of [320, 390]) {
                 range.selectNodeContents(element);
                 const text = range.getBoundingClientRect();
                 return text.left < box.left - 2 || text.right > box.right + 2
-                  ? [element.textContent?.trim()]
+                  ? [element.textContent.trim()]
                   : [];
               }),
           );
