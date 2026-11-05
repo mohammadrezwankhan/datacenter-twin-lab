@@ -1,0 +1,17 @@
+{
+  "checked_at": "2026-11-05T21:33:28.828180+00:00",
+  "source_commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
+  "production_paths": [
+    "languages/python/ast/AST_python.ml",
+    "languages/python/generic/Python_to_generic.ml",
+    "languages/python/menhir/Parser_python.mly",
+    "languages/python/menhir/Parsing_hacks_python.ml",
+    "languages/python/menhir/Token_helpers_python.ml",
+    "languages/python/tree-sitter/Parse_python_tree_sitter.ml"
+  ],
+  "combined_patch_applies": true,
+  "combined_equals_two_stage_result": true,
+  "source_changes_only_these_six": true,
+  "native_compile_performed": false,
+  "native_controls_executed": false
+}

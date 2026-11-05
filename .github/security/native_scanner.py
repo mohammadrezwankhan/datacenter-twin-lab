@@ -18,9 +18,10 @@ import sys
 import tarfile
 import tempfile
 import time
+from collections.abc import Mapping
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import IO, Any
 from urllib.parse import urlsplit
 
 HERE = Path(__file__).resolve().parent
@@ -35,6 +36,97 @@ def verify_blob(blob: bytes, expected: str) -> None:
         raise ValueError("Source lock must contain a complete SHA-256")
     if hashlib.sha256(blob).hexdigest() != expected:
         raise RuntimeError("Source digest mismatch; refusing to use downloaded bytes")
+
+
+def run_process(
+    arguments: list[str],
+    *,
+    cwd: Path,
+    environment: Mapping[str, str] | None = None,
+    stdout: IO[str] | int = subprocess.PIPE,
+    stderr: IO[str] | int = subprocess.PIPE,
+    input_text: str | None = None,
+    timeout: int = 900,
+) -> subprocess.CompletedProcess[str]:
+    """Execute the verified build and qualification commands without a shell."""
+    return subprocess.run(  # noqa: S603 -- no shell or external command text
+        arguments,
+        cwd=cwd,
+        env=environment,
+        stdout=stdout,
+        stderr=stderr,
+        input=input_text,
+        timeout=timeout,
+        check=False,
+        text=True,
+    )
+
+
+def local_source_path(root: Path, name: str) -> Path:
+    """Restrict reviewed inputs and patch targets to ordinary local paths."""
+    relative = PurePosixPath(name)
+    if not relative.parts or relative.is_absolute() or ".." in relative.parts:
+        raise ValueError("Reviewed source paths must be nonempty and relative")
+    target = root / relative
+    for node in (target, *target.parents):
+        if node == root:
+            break
+        if node.is_symlink():
+            raise ValueError("Reviewed source paths cannot traverse symbolic links")
+    return target
+
+
+def source_inventory(root: Path) -> dict[str, str]:
+    """Detect any unreviewed file, mode or link change while applying a patch."""
+    result: dict[str, str] = {}
+    for path in root.rglob("*"):
+        name = path.relative_to(root).as_posix()
+        if path.is_symlink():
+            result[name] = "link:" + str(path.readlink())
+        elif path.is_file():
+            result[name] = (
+                f"{stat.S_IMODE(path.stat().st_mode):o}:"
+                + hashlib.sha256(path.read_bytes()).hexdigest()
+            )
+    return result
+
+
+def apply_reviewed_patch(
+    source: Path, blob: bytes, digest: str, records: list[dict[str, str]]
+) -> None:
+    """Require exact patch bytes, scope, preimages and postimages before building."""
+    verify_blob(blob, digest)
+    if not records or len({item["path"] for item in records}) != len(records):
+        raise ValueError("A parser patch needs a nonempty unique reviewed file scope")
+    names = {item["path"] for item in records}
+    text = blob.decode()
+    old = re.findall(r"^--- a/([^\t\n]+)$", text, re.M)
+    new = re.findall(r"^\+\+\+ b/([^\t\n]+)$", text, re.M)
+    if (
+        set(old) != names or set(new) != names
+        or len(old) != len(records) or len(new) != len(records)
+    ):
+        raise ValueError("Parser patch targets differ from the reviewed scope")
+    for item in records:
+        path = local_source_path(source, item["path"])
+        verify_blob(path.read_bytes(), item["before_sha256"])
+    before = source_inventory(source)
+    command = ["patch", "--batch", "--forward", "--fuzz=0", "-p1"]
+    # Exact reviewed bytes, safe header paths and preimages precede application.
+    for arguments in ([*command, "--dry-run"], command):
+        process = run_process(arguments, input_text=blob.decode(), cwd=source, timeout=60)
+        if process.returncode:
+            raise RuntimeError("Reviewed parser patch failed exact application: " + process.stderr)
+    after = source_inventory(source)
+    if {name: value for name, value in before.items() if name not in names} != {
+        name: value for name, value in after.items() if name not in names
+    }:
+        raise RuntimeError("Parser patch changed an unreviewed source file or mode")
+    for item in records:
+        path = local_source_path(source, item["path"])
+        verify_blob(path.read_bytes(), item["after_sha256"])
+        if before[item["path"]].split(":", 1)[0] != after[item["path"]].split(":", 1)[0]:
+            raise RuntimeError("Parser patch changed a reviewed source file mode")
 
 
 def extract_source(blob: bytes, destination: Path) -> None:
@@ -303,6 +395,16 @@ def load_manifest() -> dict[str, Any]:
             raise ValueError("Native switch export contains duplicate packages")
         inventory[name] = version
     validate_inventory(manifest["installed_packages"], inventory)
+    reviewed = manifest.get("reviewed_inputs")
+    required = {"scanner_contracts.py", "run.py", "parser-backports/source-manifest.json"}
+    required.update(
+        path.relative_to(HERE).as_posix()
+        for path in (HERE / "parser-backports").rglob("*") if path.is_file()
+    )
+    if not isinstance(reviewed, dict) or set(reviewed) != required:
+        raise ValueError("Custom scanner inputs must identify the complete reviewed parser package")
+    for name, digest in reviewed.items():
+        verify_blob(local_source_path(HERE, name).read_bytes(), digest)
     return manifest
 
 
@@ -435,7 +537,7 @@ def download(asset: dict[str, Any], directory: Path) -> Path:
 
 def input_identity() -> str:
     """Bind cached outputs to scanner sources, locks and the complete build code."""
-    names = (
+    names = [
         "native_scanner.py",
         "bootstrap.py",
         "native-scanner.json",
@@ -443,11 +545,139 @@ def input_identity() -> str:
         "requirements.txt",
         "requirements-bootstrap.txt",
         "requirements-build.txt",
-    )
+    ]
+    names.extend(sorted(load_manifest()["reviewed_inputs"]))
     digest = hashlib.sha256()
     for name in names:
         digest.update(name.encode() + b"\0" + (HERE / name).read_bytes() + b"\0")
     return digest.hexdigest()
+
+
+def native_executable(root: Path, name: str) -> Path:
+    """Require the verified native output instead of a script or CLI fallback."""
+    if name not in {"opengrep-core", "python-parser-controls"}:
+        raise ValueError("Unknown native scanner executable")
+    path = local_source_path(root, name)
+    if (
+        not path.is_file() or not os.access(path, os.X_OK)
+        or stat.S_IMODE(path.stat().st_mode) != 0o755
+    ):
+        raise RuntimeError("Native scanner output is absent, non-native or not executable")
+    with path.open("rb") as stream:
+        if stream.read(4) != b"\x7fELF":
+            raise RuntimeError("Native scanner output is not an ELF executable")
+    return path
+
+
+def inspect_parser_qualification(report: object, fixtures: list[dict[str, Any]]) -> None:
+    """Independently require every AST assertion and malformed-source rejection."""
+    if (
+        not fixtures or not isinstance(report, dict)
+        or report.get("status") != "passed"
+        or report.get("frontend") != "Parse_python.Python3 (Menhir)"
+        or not isinstance(report.get("fixtures"), list)
+    ):
+        raise ValueError("Actual native AST qualification is missing or unsuccessful")
+    results = report["fixtures"]
+    if len(results) != len(fixtures):
+        raise ValueError("Native AST qualification omitted or added fixtures")
+    for result, fixture in zip(results, fixtures, strict=True):
+        expected = "rejected" if fixture["expect_parse"] == "reject" else "parsed-and-asserted"
+        if (
+            not isinstance(result, dict) or result.get("id") != fixture["id"]
+            or result.get("result") != expected
+            or (expected == "parsed-and-asserted"
+                and result.get("declarations_checked") != len(fixture["declarations"]))
+        ):
+            raise ValueError("Native AST qualification has missing or changed outcomes")
+
+
+def installed_scanner(destination: Path) -> Path:
+    """Bind the installed Python entrypoint to the exact freshly built native core."""
+    core = native_executable(destination / "native", "opengrep-core")
+    candidates = list(
+        (destination / "venv/lib").glob("python*/site-packages/semgrep/bin/opengrep-core")
+    )
+    if len(candidates) != 1:
+        raise RuntimeError("Installed scanner must contain exactly one native core")
+    installed = local_source_path(destination, candidates[0].relative_to(destination).as_posix())
+    verify_blob(installed.read_bytes(), hashlib.sha256(core.read_bytes()).hexdigest())
+    cli = local_source_path(destination, "venv/bin/opengrep")
+    if not cli.is_file() or not os.access(cli, os.X_OK):
+        raise RuntimeError("Installed scanner entrypoint is absent or not executable")
+    return cli
+
+
+def qualify_native(destination: Path, output: Path) -> dict[str, Any]:
+    """Require actual AST and exact-finding controls on new builds and cache reuse."""
+    output.mkdir(parents=True, exist_ok=False)
+    root = destination / "native"
+    scanner = installed_scanner(destination)
+    core = native_executable(root, "opengrep-core")
+    control = native_executable(root, "python-parser-controls")
+    environment = {**os.environ, "LD_LIBRARY_PATH": str(root / "lib")}
+    for name in ("libtree-sitter.so.0", "libgmp.so.10", "libev.so.4"):
+        if not local_source_path(root, "lib/" + name).is_file():
+            raise RuntimeError("Native scanner is missing a verified private runtime library")
+    ldd = shutil.which("ldd")
+    if ldd is None:
+        raise RuntimeError("Native runtime qualification requires the runner's ldd")
+    for binary in (core, control):
+        linked = run_process([ldd, str(binary)], cwd=output, environment=environment, timeout=60)
+        (output / (binary.name + ".libraries.log")).write_text(linked.stdout)
+        if linked.returncode:
+            raise RuntimeError("A native qualification executable has unresolved runtime libraries")
+        validate_scanner_libraries(linked.stdout)
+    fixture_path = HERE / "parser-backports/python-parser-fixtures.json"
+    fixtures = json.loads(fixture_path.read_text())["fixtures"]
+    process = run_process(
+        [str(control), str(fixture_path)], cwd=output, environment=environment, timeout=180,
+    )
+    (output / "ast.stdout.json").write_text(process.stdout)
+    (output / "ast.stderr.log").write_text(process.stderr)
+    if process.returncode:
+        raise RuntimeError("The compiled Python AST preservation controls failed")
+    ast = json.loads(process.stdout)
+    inspect_parser_qualification(ast, fixtures)
+    cli_output = output / "cli"
+    process = run_process(
+        [sys.executable, str(HERE / "scanner_contracts.py"), "--scanner", str(scanner),
+         "--output", str(cli_output), "--python-fixtures", str(fixture_path),
+         "--cli-fixtures", str(HERE / "parser-backports/cli-fixtures.json")],
+        cwd=output, environment=environment, timeout=900,
+    )
+    (output / "cli.stdout.log").write_text(process.stdout)
+    (output / "cli.stderr.log").write_text(process.stderr)
+    if process.returncode:
+        raise RuntimeError("The installed scanner parser compatibility controls failed")
+    cli = json.loads((cli_output / "summary.json").read_text())
+    cli_cases = json.loads((HERE / "parser-backports/cli-fixtures.json").read_text())["cases"]
+    names = [fixture["id"] for fixture in fixtures] + [case["id"] for case in cli_cases]
+    results = cli.get("cases")
+    if (
+        cli.get("status") != "passed" or cli.get("expected_cases") != names
+        or not isinstance(results, list) or len(results) != len(names)
+        or any(not isinstance(case, dict) or case.get("status") != "passed"
+               or case.get("id") != name for case, name in zip(results, names, strict=True))
+    ):
+        raise RuntimeError("Scanner qualification omitted or changed required cases")
+    receipt = {"status": "passed", "ast": ast, "cli": cli}
+    (output / "summary.json").write_text(json.dumps(receipt, indent=2) + "\n")
+    return receipt
+
+
+def seal_cache(root: Path, identity: str, qualification: dict[str, Any]) -> None:
+    """Record reusable output hashes only after actual qualification succeeded."""
+    if qualification.get("status") != "passed":
+        raise ValueError("Cannot seal an unqualified native scanner cache")
+    (root / "qualification.json").write_text(json.dumps(qualification, indent=2) + "\n")
+    files = {
+        path.relative_to(root).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+        for path in root.rglob("*") if path.is_file() and path.name != "receipt.json"
+    }
+    (root / "receipt.json").write_text(
+        json.dumps({"input_sha256": identity, "files": files}, indent=2) + "\n"
+    )
 
 
 class Builder:
@@ -489,14 +719,13 @@ class Builder:
         try:
             with stdout.open("w") as out, stderr.open("w") as err:
                 # Build commands are fixed here; source inputs are hash verified.
-                result = subprocess.run(  # noqa: S603 -- no shell or external command text
+                result = run_process(
                     arguments,
                     cwd=cwd or self.work,
-                    env=self.environment,
+                    environment=self.environment,
                     stdout=out,
                     stderr=err,
                     timeout=timeout,
-                    check=False,
                 )
             receipt.update(
                 exit_code=result.returncode,
@@ -570,6 +799,36 @@ class Builder:
             TREESITTER_INCDIR=str(tree / "include"),
             TREESITTER_LIBDIR=str(tree / "lib"),
         )
+
+        self.patch_source()
+
+    def patch_source(self) -> None:
+        """Apply the separately identified custom parser and add its real AST controls."""
+        folder = HERE / "parser-backports"
+        package = json.loads((folder / "source-manifest.json").read_text())
+        if package["upstream_base"] != self.manifest["scanner"]["commit"]:
+            raise ValueError("Parser adaptation does not match the frozen scanner source")
+        patch = package["patch"]
+        apply_reviewed_patch(
+            self.source, local_source_path(folder, patch["path"]).read_bytes(),
+            patch["sha256"], package["production_files"],
+        )
+        for item in package["build_source_overlay"]:
+            if item["preimage"] != "absent" or item["mode"] != "100644":
+                raise ValueError("Parser controls require ordinary new source files")
+            source = local_source_path(folder, item["source_path"])
+            blob = source.read_bytes()
+            verify_blob(blob, item["sha256"])
+            target = local_source_path(self.source, item["path"])
+            if target.exists() or target.is_symlink():
+                raise ValueError("Parser qualification overlay would replace existing source")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(blob)
+            target.chmod(0o644)
+        (self.output / "parser-source-adaptation.json").write_text(
+            json.dumps({"status": "passed", "package": package}, indent=2) + "\n"
+        )
+
 
     def foundations(self) -> None:
         """Build the accepted PCRE2 source with JIT and every upstream test suite."""
@@ -811,6 +1070,7 @@ class Builder:
     def scanner(self) -> None:
         """Build the upstream scanner target and package its complete Python CLI."""
         opam = str(self.work / "tools/opam")
+        control = "tools/rezwan_python_parser_controls/python_parser_controls.exe"
         self.command(
             "opengrep-core",
             [
@@ -824,6 +1084,7 @@ class Builder:
                 "_build/install/default/bin/opengrep-core",
                 "_build/install/default/bin/opengrep-cli",
                 "_build/install/default/bin/opengrep",
+                control,
             ],
             cwd=self.source,
             timeout=1800,
@@ -836,6 +1097,12 @@ class Builder:
         binary.chmod(0o755)
         self.command("strip-scanner", ["strip", str(binary)])
         self.native.mkdir(parents=True, exist_ok=False)
+        shutil.copyfile(binary, self.native / "opengrep-core")
+        (self.native / "opengrep-core").chmod(0o755)
+        control_binary = self.native / "python-parser-controls"
+        shutil.copyfile(self.source / "_build/default" / control, control_binary)
+        control_binary.chmod(0o755)
+        self.command("strip-parser-controls", ["strip", str(control_binary)])
         libraries = self.native / "lib"
         libraries.mkdir()
         tree = self.source / "libs/ocaml-tree-sitter-core/tree-sitter/lib"
@@ -849,6 +1116,8 @@ class Builder:
         self.environment["LD_LIBRARY_PATH"] = str(libraries)
         linked = self.command("scanner-libraries", ["ldd", str(binary)])
         validate_scanner_libraries(linked)
+        control_linked = self.command("parser-control-libraries", ["ldd", str(control_binary)])
+        validate_scanner_libraries(control_linked)
         wheel_output = self.work / "wheel-output"
         wheel_output.mkdir()
         self.command(
@@ -892,21 +1161,15 @@ class Builder:
                     "installed_packages": self.manifest["installed_packages"],
                     "components": self.manifest["components"],
                     "linked_libraries": linked,
+                    "parser_control_libraries": control_linked,
+                    "parser_package_sha256": self.manifest["reviewed_inputs"][
+                        "parser-backports/source-manifest.json"
+                    ],
                     "stages": self.timings,
                 },
                 indent=2,
             )
             + "\n"
-        )
-        files = {
-            path.relative_to(self.native).as_posix(): hashlib.sha256(
-                path.read_bytes()
-            ).hexdigest()
-            for path in self.native.rglob("*")
-            if path.is_file()
-        }
-        (self.native / "receipt.json").write_text(
-            json.dumps({"input_sha256": self.identity, "files": files}, indent=2) + "\n"
         )
 
 
@@ -974,11 +1237,15 @@ def main() -> int:
                 builder.foundations()
                 builder.compiler()
                 builder.scanner()
+            install_wheel(destination, args.output)
+            qualification = qualify_native(destination, args.output / "qualification")
+            receipt["qualification"] = qualification
+            if not hit:
+                seal_cache(destination / "native", input_identity(), qualification)
             if not verify_cache(destination / "native", input_identity()):
                 raise RuntimeError(
                     "Native scanner build did not create a verified cache"
                 )
-            install_wheel(destination, args.output)
         receipt["status"] = "passed"
         return 0
     except (

@@ -1,0 +1,177 @@
+{
+  "checked_at": "2026-11-05T21:34:32.983473+00:00",
+  "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+  "status": "passed",
+  "scope": "CPython syntax expectation and fixture source binding only; no scanner/native tests",
+  "count": 27,
+  "changed_sources": [
+    {
+      "id": "repository_scripts_reproduce_demand_timing",
+      "ast_identical": true
+    }
+  ],
+  "results": [
+    {
+      "id": "bounded_function_and_defaults",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "34e85381f6101dd6f7fad73caa781a644623a166aa8e13beb5fdf28b9846f6fe"
+    },
+    {
+      "id": "generic_class_method_variadics",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "d672f97969e283c89dd2108e70d139c321fc0cc841be5a9c83e88b789d53ba9c"
+    },
+    {
+      "id": "aliases_retain_expression_trees",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "2858faa2da23fb56096d16cafa7791c78862c925dc6b6a1b6b6d91f1ef5d5c00"
+    },
+    {
+      "id": "multiline_tuple_bound_and_trailing_comma",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "e8179dfd64c3b5717581174c120f784b070cfc5ba8bfe74bd0c3c6af75b8fddc"
+    },
+    {
+      "id": "async_and_decorated_generics",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "6cfa79ce8d892a2f815758d27c35c63aa4045c38a5d20c8019c4bd6bd098cc3f"
+    },
+    {
+      "id": "type_remains_a_soft_keyword",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "31d405fafdd09784f7b97bfc65cebfe95cc38e96739018cee255a80a84318cbd"
+    },
+    {
+      "id": "inline_alias_soft_keyword_boundaries",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "5634fe2b17d708a365ccdef333df13a7accceafcd6668b8dfd435cef695698c7"
+    },
+    {
+      "id": "generic_method_flow_before_inside_after",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "cf6c85624daae083a1a4c3bee404f8fee32cc6f588a5ee4337f6dca28fe5c91c"
+    },
+    {
+      "id": "bound_and_alias_calls_remain_searchable",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "349873c98688ce862f6f01d09779f91815b2a1bbe91286e34c45fc4483cc0670"
+    },
+    {
+      "id": "missing_type_bound",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "ff0a9502b4b173d5ac7c83adfc34f24af5ed284851ec6175cc21b57e12d59401"
+    },
+    {
+      "id": "empty_function_type_parameters",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "4469dd2308e3839d215f6197b318cdaaad40b6dabc1b7ab6e18508d522172477"
+    },
+    {
+      "id": "empty_alias_type_parameters",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "d9701ebfdb22814ade411c423d19aa9e0aa100aee55ee69c0c90730352f983c2"
+    },
+    {
+      "id": "unclosed_alias_type_parameters",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "0f6b3db9504cfd28f22fa86bc322cff1c0d8822a793fc837b06a44e5927a8194"
+    },
+    {
+      "id": "mismatched_alias_delimiter",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "b93070b202536d5ae14e3b8612b8aac32aad55c9750b68f0390e2a80bd859c4c"
+    },
+    {
+      "id": "missing_alias_rhs",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "5f49cd379d45ea89981904234df8df07a1e15fb91fe767a28e55a82a2b423da2"
+    },
+    {
+      "id": "missing_generic_function_body",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "2d703ba49920a8994ad3977300f9c685eca67432557e9a3839af31d2a80ce4f4"
+    },
+    {
+      "id": "malformed_body_after_valid_header",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "c9009b1187f1ee52a241969a65349a339dd2281b23686032ee4f9c65987d43fb"
+    },
+    {
+      "id": "non_identifier_type_parameter",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "f97aedc849a3a75778481fcaef9e3b320db304de0901ac07c17d090f015dbcf7"
+    },
+    {
+      "id": "unsupported_pep696_default",
+      "expected": "reject",
+      "actual": "reject",
+      "sha256": "e67d725e5c510ad0cc13bd118da940c3f24be036b94d96e9154d7bbaa37f10b4"
+    },
+    {
+      "id": "upstream_match_as_sink",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "14b0c03dd32690a0728562f987645747456fb62a6deb50649abe57c5c374d012"
+    },
+    {
+      "id": "upstream_match_guard_sink",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "72c770e09d8fdf9a287915c082b0732ff0c960e5cbc9605ba56047d739b3fddd"
+    },
+    {
+      "id": "upstream_match_pattern_binding_sink",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "f503c87c253b400f04d4e43f7c198c155637a3d000f456961cff33ad6fb1c029"
+    },
+    {
+      "id": "repository_tests_test_audit_security",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "02ec7157f10f3662f0b28ef64a938e361b24676b171b7543defc7e604f2e35f5"
+    },
+    {
+      "id": "repository_scripts_reproduce_demand_timing",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "7e4c27b3b8ca5cbf796b501f36315d868428ffb2f843e4b9af41742f7952d012"
+    },
+    {
+      "id": "repository_scripts_audit_public_site",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "6577709ae49294ae1a461304e0634853fb6437766474b37f023b1710443dece7"
+    },
+    {
+      "id": "repository_datacenter_twin_research_common",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "4b21255209e8deff095f281312178209c729ef5fd3fb67cf8a4ec89bb8c6ac5a"
+    },
+    {
+      "id": "repository_datacenter_twin_research_types",
+      "expected": "success",
+      "actual": "success",
+      "sha256": "0c8b546eb2a7e49924fdcad27ad74328204c98fadf83eb1d74d1998ce6a7a6f6"
+    }
+  ]
+}

@@ -5,14 +5,18 @@ from __future__ import annotations
 import hashlib
 import io
 import json
+import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
+from unittest.mock import patch
 
 import native_scanner
+import scanner_contracts
 
 
 def archive_bytes(name: str, *, link: str | None = None) -> bytes:
@@ -71,6 +75,293 @@ class SourceIntegrityTests(unittest.TestCase):
                 with self.assertRaises((ValueError, tarfile.TarError)):
                     native_scanner.extract_source(blob, destination)
                 self.assertFalse((Path(temporary) / "outside").exists())
+
+
+class ParserPatchIntegrityTests(unittest.TestCase):
+    """The custom parser patch may modify only its reviewed exact preimages."""
+
+    def test_exact_patch_changes_only_its_recorded_file(self) -> None:
+        """A valid preimage and postimage permit the reviewed transformation."""
+        before = b"old\n"
+        after = b"new\n"
+        patch = b"--- a/a.ml\n+++ b/a.ml\n@@ -1 +1 @@\n-old\n+new\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source"
+            source.mkdir()
+            (source / "a.ml").write_bytes(before)
+            (source / "untouched.ml").write_bytes(b"preserved\n")
+            native_scanner.apply_reviewed_patch(
+                source, patch, hashlib.sha256(patch).hexdigest(),
+                [{"path": "a.ml", "before_sha256": hashlib.sha256(before).hexdigest(),
+                  "after_sha256": hashlib.sha256(after).hexdigest()}],
+            )
+            self.assertEqual((source / "a.ml").read_bytes(), after)
+            self.assertEqual((source / "untouched.ml").read_bytes(), b"preserved\n")
+
+    def test_changed_patch_or_unreviewed_target_is_rejected_before_application(self) -> None:
+        """A matching source file cannot authorize changed patch bytes or scope."""
+        patch = b"--- a/a.ml\n+++ b/a.ml\n@@ -1 +1 @@\n-old\n+new\n"
+        cases = [([], hashlib.sha256(patch).hexdigest()),
+                 ([{"path": "a.ml", "before_sha256": "0" * 64,
+                    "after_sha256": "1" * 64}], hashlib.sha256(patch).hexdigest()),
+                 ([{"path": "../a.ml", "before_sha256": "0" * 64,
+                    "after_sha256": "1" * 64}], hashlib.sha256(patch).hexdigest()),
+                 ([{"path": "a.ml", "before_sha256": "0" * 64,
+                    "after_sha256": "1" * 64}], "0" * 64)]
+        for records, digest in cases:
+            with self.subTest(records=records), tempfile.TemporaryDirectory() as temporary:
+                source = Path(temporary)
+                (source / "a.ml").write_bytes(b"old\n")
+                with self.assertRaises((RuntimeError, ValueError)):
+                    native_scanner.apply_reviewed_patch(source, patch, digest, records)
+                self.assertEqual((source / "a.ml").read_bytes(), b"old\n")
+
+    def test_hidden_extra_patch_target_is_rejected(self) -> None:
+        """An otherwise valid patch cannot include an unrecorded second file."""
+        patch = (b"--- a/a.ml\n+++ b/a.ml\n@@ -1 +1 @@\n-old\n+new\n"
+                 b"--- a/b.ml\n+++ b/b.ml\n@@ -1 +1 @@\n-safe\n+changed\n")
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary)
+            (source / "a.ml").write_bytes(b"old\n")
+            (source / "b.ml").write_bytes(b"safe\n")
+            with self.assertRaises(ValueError):
+                native_scanner.apply_reviewed_patch(
+                    source, patch, hashlib.sha256(patch).hexdigest(),
+                    [{"path": "a.ml", "before_sha256": hashlib.sha256(b"old\n").hexdigest(),
+                      "after_sha256": hashlib.sha256(b"new\n").hexdigest()}],
+                )
+            self.assertEqual((source / "b.ml").read_bytes(), b"safe\n")
+
+
+    def test_wrong_postimage_cannot_be_accepted(self) -> None:
+        """A successful patch command still must produce the reviewed exact bytes."""
+        patch = b"--- a/a.ml\n+++ b/a.ml\n@@ -1 +1 @@\n-old\n+new\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Path(temporary)
+            (source / "a.ml").write_bytes(b"old\n")
+            with self.assertRaisesRegex(RuntimeError, "digest mismatch"):
+                native_scanner.apply_reviewed_patch(
+                    source, patch, hashlib.sha256(patch).hexdigest(),
+                    [{"path": "a.ml", "before_sha256": hashlib.sha256(b"old\n").hexdigest(),
+                      "after_sha256": hashlib.sha256(b"different\n").hexdigest()}],
+                )
+
+    def test_linked_target_or_parent_cannot_change_external_source(self) -> None:
+        """Neither a target symlink nor an ancestor may redirect a reviewed patch."""
+        for linked_parent in (False, True):
+            with (
+                self.subTest(linked_parent=linked_parent),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
+                root = Path(temporary)
+                source = root / "source"
+                outside = root / "outside"
+                source.mkdir()
+                outside.mkdir()
+                (outside / "a.ml").write_bytes(b"old\n")
+                name = "nested/a.ml" if linked_parent else "a.ml"
+                if linked_parent:
+                    (source / "nested").symlink_to(outside, target_is_directory=True)
+                else:
+                    (source / "a.ml").symlink_to(outside / "a.ml")
+                patch = f"--- a/{name}\n+++ b/{name}\n@@ -1 +1 @@\n-old\n+new\n".encode()
+                with self.assertRaisesRegex(ValueError, "symbolic links"):
+                    native_scanner.apply_reviewed_patch(
+                        source, patch, hashlib.sha256(patch).hexdigest(),
+                        [{"path": name, "before_sha256": hashlib.sha256(b"old\n").hexdigest(),
+                          "after_sha256": hashlib.sha256(b"new\n").hexdigest()}],
+                    )
+                self.assertEqual((outside / "a.ml").read_bytes(), b"old\n")
+
+
+class NativeCLIContractTests(unittest.TestCase):
+    """A reported clean scan cannot hide missing schema, targets or findings."""
+
+    def test_precise_findings_and_scope_are_accepted(self) -> None:
+        """The verifier accepts only the complete expected real CLI result."""
+        case = {"exit_code": 1, "scanned_paths": ["input.py"],
+                "findings": [["control", "input.py", 2]]}
+        report = {"errors": [], "paths": {"scanned": ["input.py"]},
+                  "results": [{"check_id": "control", "path": "input.py", "start": {"line": 2}}]}
+        self.assertEqual(scanner_contracts.inspect_case(report, 1, case)["findings"], 1)
+
+    def test_missing_or_changed_result_fields_are_rejected(self) -> None:
+        """Zero errors alone cannot certify a complete compatible result."""
+        case = {"exit_code": 1, "scanned_paths": ["input.py"],
+                "findings": [["control", "input.py", 2]]}
+        baseline: dict[str, Any] = {"errors": [], "paths": {"scanned": ["input.py"]},
+                    "results": [{"check_id": "control", "path": "input.py", "start": {"line": 2}}]}
+        changes: list[dict[str, Any]] = [
+                   {"errors": None}, {"paths": {}}, {"paths": {"scanned": []}},
+                   {"results": []}, {"results": [{"check_id": "control"}]},
+                   {"errors": [{"type": "PartialParsing"}]}]
+        for change in changes:
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                scanner_contracts.inspect_case({**baseline, **change}, 1, case)
+        with self.assertRaises(ValueError):
+            scanner_contracts.inspect_case(baseline, 0, case)
+
+    def test_unrelated_failure_cannot_satisfy_a_negative_parser_control(self) -> None:
+        """A crashed scanner cannot masquerade as intentional syntax rejection."""
+        case = {"exit_code": 3, "scanned_paths": [], "findings": [],
+                "error_types": ["PartialParsing"], "error_file": "broken.py"}
+        for errors in ([], [{"type": "Fatal error", "path": "broken.py"}],
+                       [{"type": "PartialParsing", "path": "unrelated.py"}]):
+            with self.subTest(errors=errors), self.assertRaises(ValueError):
+                scanner_contracts.inspect_case(
+                    {"errors": errors, "results": [], "paths": {"scanned": []}}, 3, case,
+                )
+
+    def test_missing_duplicate_or_foreign_profile_rules_are_rejected(self) -> None:
+        """A pre-scan dump cannot replace complete actual fixture scan profiling."""
+        expected = ["first", "second"]
+        self.assertEqual(
+            scanner_contracts.rule_ids_from_profile(
+                {"time": {"rules": ["second", "first"]}}, expected,
+            ), expected,
+        )
+        for rules in (None, [], ["first"], ["first", "first", "second"],
+                      ["first", "foreign"], ["first", 2]):
+            with self.subTest(rules=rules), self.assertRaises(ValueError):
+                scanner_contracts.rule_ids_from_profile({"time": {"rules": rules}}, expected)
+        reports: tuple[dict[str, Any], ...] = ({}, {"time": None}, {"time": []})
+        for report in reports:
+            with self.subTest(report=report), self.assertRaises(ValueError):
+                scanner_contracts.rule_ids_from_profile(report, expected)
+
+    def test_actual_cli_controls_request_production_profile(self) -> None:
+        """Every real fixture scan must produce the profile consumed by production."""
+        command = scanner_contracts.scan_arguments(Path("native/opengrep"), ["rules.json"],
+                                                  Path("report.json"))
+        self.assertEqual(command.count("--time"), 1)
+        self.assertEqual(command[command.index("--max-target-bytes") + 1], "0")
+
+    def test_cli_failure_keeps_all_diagnostics_and_fails_overall(self) -> None:
+        """An early failed control cannot hide later failures or become a pass."""
+        source = "value = 1\n"
+        fixtures = {
+            "fixtures": [
+                {"id": name, "source": source,
+                 "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+                 "expect_parse": "success"}
+                for name in ("first", "middle")
+            ]
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            python_fixtures = root / "python.json"
+            python_fixtures.write_text(json.dumps(fixtures))
+            cli_fixtures = root / "cli.json"
+            cli_fixtures.write_text(json.dumps({"cases": [{"id": "last"}]}))
+            output = root / "output"
+            arguments = [
+                "controls", "--scanner", str(root / "scanner"), "--output", str(output),
+                "--python-fixtures", str(python_fixtures), "--cli-fixtures", str(cli_fixtures),
+            ]
+            with (
+                patch.object(sys, "argv", arguments),
+                patch.object(scanner_contracts, "run_case", side_effect=[
+                    ValueError("first control failed"),
+                    {"id": "middle", "status": "passed"},
+                    ValueError("last control failed"),
+                ]) as execute,
+            ):
+                self.assertEqual(scanner_contracts.main(), 1)
+            self.assertEqual(execute.call_count, 3)
+            report = json.loads((output / "summary.json").read_text())
+            self.assertEqual(report["status"], "failed")
+            self.assertEqual(report["expected_cases"], ["first", "middle", "last"])
+            self.assertEqual([case["id"] for case in report["cases"]], report["expected_cases"])
+            self.assertEqual([case["status"] for case in report["cases"]],
+                             ["failed", "passed", "failed"])
+
+    def test_ast_qualification_rejects_missing_or_wrong_outcomes(self) -> None:
+        """Every native fixture must produce its specific parsing/AST outcome."""
+        fixtures: list[dict[str, Any]] = [
+                    {"id": "valid", "expect_parse": "success", "declarations": [{}]},
+                    {"id": "invalid", "expect_parse": "reject", "declarations": []}]
+        report = {"status": "passed", "frontend": "Parse_python.Python3 (Menhir)",
+                  "fixtures": [{"id": "valid", "result": "parsed-and-asserted",
+                                "declarations_checked": 1},
+                               {"id": "invalid", "result": "rejected"}]}
+        native_scanner.inspect_parser_qualification(report, fixtures)
+        for change in ({"fixtures": report["fixtures"][:1]}, {"status": "failed"},
+                       {"frontend": "other parser"},
+                       {"fixtures": [{"id": "valid", "result": "parsed-and-asserted",
+                                      "declarations_checked": 0}, report["fixtures"][1]]}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                native_scanner.inspect_parser_qualification({**report, **change}, fixtures)
+
+    def test_non_native_or_unexecutable_cache_entry_is_rejected(self) -> None:
+        """A receipt cannot authorize a script, missing output, or unusable binary."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            target = root / "opengrep-core"
+            for blob, mode in ((b"#!/bin/sh\nexit 0\n", 0o755), (b"\x7fELF", 0o644)):
+                target.write_bytes(blob)
+                target.chmod(mode)
+                with self.subTest(mode=mode), self.assertRaises(RuntimeError):
+                    native_scanner.native_executable(root, "opengrep-core")
+
+
+class ParserQualificationIntegrityTests(unittest.TestCase):
+    """A cached wheel must still execute the reviewed parser and control inputs."""
+
+    def test_installed_core_must_equal_the_built_core(self) -> None:
+        """Another executable in site-packages cannot satisfy native qualification."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            native = root / "native"
+            native.mkdir()
+            core = native / "opengrep-core"
+            core.write_bytes(b"\x7fELFfixture-core")
+            core.chmod(0o755)
+            installed = root / "venv/lib/python3.12/site-packages/semgrep/bin/opengrep-core"
+            installed.parent.mkdir(parents=True)
+            installed.write_bytes(core.read_bytes())
+            cli = root / "venv/bin/opengrep"
+            cli.parent.mkdir()
+            cli.write_text("# fixture entrypoint\n")
+            cli.chmod(0o755)
+            self.assertEqual(native_scanner.installed_scanner(root), cli)
+            installed.write_bytes(b"\x7fELFdifferent-core")
+            with self.assertRaisesRegex(RuntimeError, "digest mismatch"):
+                native_scanner.installed_scanner(root)
+
+    def test_changed_patch_overlay_fixture_or_runner_invalidates_cache_inputs(self) -> None:
+        """Cached outputs cannot conceal edits to any reviewed executable input."""
+        package = json.loads(
+            (native_scanner.HERE / "parser-backports/source-manifest.json").read_text()
+        )
+        names = (
+            "parser-backports/" + package["patch"]["path"],
+            "parser-backports/" + package["build_source_overlay"][1]["source_path"],
+            "parser-backports/python-parser-fixtures.json",
+            "scanner_contracts.py",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / "security"
+            shutil.copytree(native_scanner.HERE, root, ignore=shutil.ignore_patterns("__pycache__"))
+            with patch.object(native_scanner, "HERE", root):
+                expected = native_scanner.input_identity()
+                for name in names:
+                    with self.subTest(name=name):
+                        target = root / name
+                        before = target.read_bytes()
+                        target.write_bytes(before + b"\nchanged\n")
+                        with self.assertRaisesRegex(RuntimeError, "digest mismatch"):
+                            native_scanner.input_identity()
+                        target.write_bytes(before)
+                        self.assertEqual(native_scanner.input_identity(), expected)
+
+    def test_failed_qualification_cannot_produce_a_cache_receipt(self) -> None:
+        """A completed build with failed controls remains unusable as a cache."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with self.assertRaisesRegex(ValueError, "unqualified"):
+                native_scanner.seal_cache(root, "0" * 64, {"status": "failed"})
+            self.assertFalse((root / "receipt.json").exists())
 
 
 class AuditCompletenessTests(unittest.TestCase):

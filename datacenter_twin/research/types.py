@@ -3,18 +3,17 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import NotRequired, TypeAliasType, TypedDict
+from typing import NotRequired, TypedDict
 
 import numpy as np
 from numpy.typing import NDArray
 from scipy.optimize import OptimizeResult
 
-# OpenGrep 1.33 cannot parse PEP 695 statements. Keep real alias objects and concrete values.
-FloatArray = TypeAliasType("FloatArray", NDArray[np.float64])  # noqa: UP040
-ComplexArray = TypeAliasType("ComplexArray", NDArray[np.complex128])  # noqa: UP040
-Real = TypeAliasType("Real", float | np.float64)  # noqa: UP040
-Complex = TypeAliasType("Complex", complex | np.complex128)  # noqa: UP040
-LoadCommand = TypeAliasType("LoadCommand", Real | Callable[[float], Real])  # noqa: UP040
+type FloatArray = NDArray[np.float64]
+type ComplexArray = NDArray[np.complex128]
+type Real = float | np.float64
+type Complex = complex | np.complex128
+type LoadCommand = Real | Callable[[float], Real]
 
 
 class DCReferences(TypedDict):

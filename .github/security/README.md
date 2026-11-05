@@ -229,14 +229,41 @@ and their corrections. These are local staged measurements, not GitHub Actions
 usage or a claim that the full cold hosted job has passed. Its first same-head
 execution is required before merge.
 
-The cache stores only the built wheel, pinned shared libraries and their receipts.
-Its exact key includes Ubuntu 24.04, runner architecture and all seven source,
-builder and lock inputs; there are no broad restore keys. Every reuse verifies
-input identity and every output hash, rejects extra or altered files, reruns the
-complete native vulnerability audit, and installs the wheel without dependency
-resolution. A fresh environment with an existing verified cache took 136.33
-seconds locally and created no native build directory. Cache upload follows a
-successful bootstrap, so app findings cannot force another compiler build.
+The cache stores the built wheel, its exact native core, the parser control
+executable, pinned shared libraries and their receipts. Its exact key includes
+Ubuntu 24.04, runner architecture, all seven original source/build/lock inputs,
+the complete reviewed parser package and its qualification runner. There are no
+broad restore keys. Every reuse verifies input identity and every output hash,
+rejects extra or altered files, reruns the complete native vulnerability audit,
+installs the wheel without dependency resolution, and verifies that its installed
+core matches the built core byte for byte. Both actual parser qualification and
+the full repository security gate must succeed before cache upload. Earlier
+136.33-second cache timing predates the parser controls and is not a measurement
+of this build.
+
+### Python typing syntax and parser qualification
+
+The Datacenter scanner is a custom build of the pinned OpenGrep 1.33.1 source,
+not an unchanged official release. The six-file Python parser patch combines
+official PR #845's simple type-alias support with the reviewed Menhir PEP 695
+adaptation documented in `parser-backports/source-manifest.json`. The existing
+Python CLI, complete native and Python dependency locks, TypeScript source,
+parser ordering, rules, target inventory, sandbox and strict error policy remain
+in force. Application aliases and the bounded plotting helper use their original
+PEP 695 declarations, without UP040 or UP047 exceptions.
+
+Before compilation, the builder checks the exact patch digest, every source
+preimage and postimage, all file modes and the unchanged inventory outside the
+six reviewed paths. The AST control program is compiled in the same frozen
+switch as the scanner. Before accepting or reusing the cache, it must pass all
+27 parser fixtures, including bounds, variadics, declaration scope, soft-keyword
+handling and malformed syntax. The installed Python CLI must then produce the
+exact expected findings and complete target/rule inventories for those fixtures
+and reject an invalid rule. A nonzero result, missing declaration, missing finding,
+unexpected parser error, changed fixture or runtime-library discrepancy fails
+qualification. The source manifest records the custom-build provenance; actual
+hosted compilation, controls and complete source-bound SAST evidence are required
+before this candidate can be merged.
 
 The frozen opam switch retains all package metadata and required strong checksums.
 Its two development dependencies use byte-for-byte equivalent archives of their

@@ -4,7 +4,12 @@
     "name": "OpenGrep",
     "version": "1.33.1",
     "commit": "092c80faa0817840228349f93eff12a50fb9cf6b",
-    "source_date_epoch": 1793265646
+    "source_date_epoch": 1793265646,
+    "customization": {
+      "name": "Python PEP 695 parser backport",
+      "description": "Custom source build of pinned OpenGrep 1.33.1 with official PR845 simple-alias support and the separately reviewed authored Menhir adaptation; not an unchanged official release.",
+      "source_manifest": "parser-backports/source-manifest.json"
+    }
   },
   "platform": {
     "system": "Linux",
@@ -860,5 +865,22 @@
   "compiler_configuration": {
     "version": "5.5.2",
     "compression_c_libraries": ""
+  },
+  "reviewed_inputs": {
+    "parser-backports/LICENSE.upstream": "20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331",
+    "parser-backports/README.md": "8b296ec54f2973db0f858866454a1f729a6dfdf3a997b4d0c2a757b805b544fa",
+    "parser-backports/adaptation-decisions.json": "86996ffd58f76b8234ecde3605177a8424e50f4c4fff2211e3283818b81598f1",
+    "parser-backports/clean-apply-receipt.json": "dbbc2ed8123d561d334aefdc84a00455305fc0cd178cf1229d6392a028e351a5",
+    "parser-backports/cli-fixtures.json": "90d4c4a3c99bc65c6369a008aa46b903d9a7aa119509d8549a63addae3c18206",
+    "parser-backports/fixture-oracle-current.json": "9487f3352c215dd0f6c937ffcb81758afda52d6b045eb3a9c32f01e8bee6c16f",
+    "parser-backports/fixture-oracle.json": "d6a5b667c8e9c949a0430ca26fe9fde99f60092d8fe54d4cb880b350870790f8",
+    "parser-backports/overlay/tools/rezwan_python_parser_controls/dune": "b47205b16ec54e97b4146993bb426fc65502b03f384987ef94118a448f3c99ed",
+    "parser-backports/overlay/tools/rezwan_python_parser_controls/python_parser_controls.ml": "edce723135b834564ec7a1ef31c8b83761487a072123134002fff0f08debda2e",
+    "parser-backports/python-parser-fixtures.json": "4a6573ded194f710b207bcb3e36c9516a6c7911e95dc4fb04a4b94d4b5c92d1f",
+    "parser-backports/python-pep695-menhir.patch": "07514ee5a99a722e4a7d87eb359b94071e0033929446b17f22f3d6a1474ecb67",
+    "parser-backports/repository-fixture-binding.json": "0c089c7898fd6a60e983594f4bb6c7ab9572c59af190a2eb74d2fd62820d8926",
+    "parser-backports/source-manifest.json": "d936e7a4869809d274c3be3a49ce400b35f6ddb1cf83699f57d3aee7e683e006",
+    "run.py": "76492e77a371dff0f4c03225f83fdbefc8437533b79d3293f31e46391e4e2668",
+    "scanner_contracts.py": "b0c52daeb3f776b79bad4ae95b3c0550d282b16d9014c0293e0a774e8c9bf428"
   }
 }

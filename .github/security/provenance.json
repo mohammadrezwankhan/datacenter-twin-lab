@@ -4,7 +4,7 @@
   "python_tools": {
     "zizmor": "1.31.1",
     "pip-audit": "2.10.1",
-    "opengrep": "1.33.1 (complete Python CLI built from pinned upstream source)"
+    "opengrep": "1.33.1 (custom source build: complete pinned Python CLI plus reviewed Python PEP 695 parser backport)"
   },
   "sources": [
     "https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1",
@@ -41,7 +41,11 @@
     "https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/install-docker.sh",
     "https://github.com/actions/runner-images/blob/add4380b0d6685806e9192c33c37359ee0aa4023/images/ubuntu/scripts/build/install-nodejs.sh",
     "https://github.com/ocaml/opam-repository/blob/7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9/packages/ocaml-variants/ocaml-variants.5.5.2%2Boptions/opam",
-    "https://github.com/ocaml/opam-repository/blob/7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9/packages/ocaml-option-no-compression/ocaml-option-no-compression.1/opam"
+    "https://github.com/ocaml/opam-repository/blob/7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9/packages/ocaml-option-no-compression/ocaml-option-no-compression.1/opam",
+    "https://github.com/opengrep/opengrep/pull/845",
+    "https://github.com/semgrep/semgrep/commit/667292117cd8a70b7750c9f1545ee85ddaab9083",
+    "https://github.com/semgrep/semgrep/commit/53e29c30eef5aecfb4e466806d7290194c5a0823",
+    "https://peps.python.org/pep-0695/"
   ],
   "new_actions": {
     "step-security/harden-runner": {
@@ -80,7 +84,7 @@
     "native_audit_queries": 237,
     "audit_policy": "Every returned advisory, missing result or unfinished response fails; no ignored IDs or dependency overrides",
     "platform": "Ubuntu 24.04 x86_64, Python 3.12",
-    "cache_policy": "Verified wheel and native libraries only, bound to source/build locks and builder code; fresh dependency audit on reuse",
+    "cache_policy": "Verified wheel, matching native core, same-switch parser control executable and pinned native libraries; complete parser package/runner hashes in input identity; fresh dependency audit and actual parser qualification on every reuse; upload only after complete security gate succeeds",
     "bundled_runtime": "GMP, libev and tree-sitter are pinned Ubuntu/source inputs; the runner supplies its Ubuntu C/C++ runtime",
     "timeout_evidence": "native-build-timings.json: measured local phases and explicit margin; actual hosted cold run still required",
     "opam_sources": "Full switch metadata, mandatory SHA256/SHA512 verification, official content-addressed mirror and upstream fallback; both dev commits use byte-equivalent SHA256 archives",
@@ -107,6 +111,12 @@
         }
       ],
       "verification": "Record ocamlc -config after the frozen import; require version 5.5.2 and a present, unambiguous empty compression_c_libraries field. The original library closure still rejects libzstd and every unknown dependency."
+    },
+    "parser_backport": {
+      "manifest": "parser-backports/source-manifest.json",
+      "distribution": "Custom build of pinned stable1.33.1; not an unchanged official release",
+      "scope": "Six Python parser files; existing CLI, dependency closure and parser ordering retained",
+      "qualification": "Same-switch native AST controls and installed CLI exact-finding/invalid-rule controls before acceptance and on every cache reuse; full source-bound SAST before cache upload and merge"
     }
   }
 }
