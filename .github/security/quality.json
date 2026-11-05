@@ -10,7 +10,8 @@
   "python_paths": [],
   "test_targets": [
     "tests",
-    ".github/security/test_contracts.py"
+    ".github/security/test_contracts.py",
+    ".github/security/test_native_scanner.py"
   ],
   "coverage_sources": [
     "datacenter_twin",

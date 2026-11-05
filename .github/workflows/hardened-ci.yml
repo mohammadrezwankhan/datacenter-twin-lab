@@ -20,7 +20,7 @@ jobs:
   security:
     name: Security / ${{ matrix.mode }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: ${{ matrix.mode == 'sast' && 90 || 40 }}
     strategy:
       fail-fast: false
       matrix:
@@ -47,8 +47,21 @@ jobs:
           package-manager-cache: false
       - name: Configure scanner location
         run: echo "SECURITY_TOOL_DIR=$RUNNER_TEMP/rezwan-security-$SECURITY_SCAN_MODE" >> "$GITHUB_ENV"
+      - name: Restore verified native scanner outputs
+        if: matrix.mode == 'sast'
+        id: native-scanner-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rezwan-security-sast/native
+          key: native-scanner-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('.github/security/native_scanner.py', '.github/security/bootstrap.py', '.github/security/native-scanner.json', '.github/security/native-switch.export', '.github/security/requirements.txt', '.github/security/requirements-bootstrap.txt', '.github/security/requirements-build.txt') }}
       - name: Install verified development scanners
         run: python .github/security/bootstrap.py "$SECURITY_SCAN_MODE" --destination "$SECURITY_TOOL_DIR"
+      - name: Cache verified native scanner outputs
+        if: matrix.mode == 'sast' && steps.native-scanner-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/rezwan-security-sast/native
+          key: native-scanner-ubuntu-24.04-${{ runner.arch }}-${{ hashFiles('.github/security/native_scanner.py', '.github/security/bootstrap.py', '.github/security/native-scanner.json', '.github/security/native-switch.export', '.github/security/requirements.txt', '.github/security/requirements-bootstrap.txt', '.github/security/requirements-build.txt') }}
       - name: Run the security gate
         run: python .github/security/run.py "$SECURITY_SCAN_MODE"
       - name: Preserve scanner reports and execution receipts

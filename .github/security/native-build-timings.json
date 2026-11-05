@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "recorded_on": "2026-11-05",
+  "measurement_environment": "Ubuntu24.04 x86_64 local workspace; independent completed stages, not a complete same-head hosted run",
+  "phases": [
+    {
+      "phase": "Fresh Python/CMake environment and initial native audit",
+      "seconds": 115.275729,
+      "evidence": "evidence/cold-bootstrap and cold-proof native audit timestamps",
+      "cache": "Fresh tool virtualenv; shared pip download cache already populated"
+    },
+    {
+      "phase": "Verified source downloads, private C libraries, PCRE2 build and four upstream tests, tree-sitter",
+      "seconds": 522.5142072879826,
+      "evidence": "cold-proof/hardening-artifacts/native-scanner/native-build-stages.json",
+      "cache": "Cold source and C build directories"
+    },
+    {
+      "phase": "Empty opam repository initialization",
+      "seconds": 1.6777912919933442,
+      "evidence": "same native-build-stages.json",
+      "cache": "Fresh opam root"
+    },
+    {
+      "phase": "OCaml 5.5.2 compiler build",
+      "seconds": 715,
+      "evidence": "STATUS.json compiler checkpoint and evidence/opam-compiler stdout/stderr",
+      "cache": "Cold compiler build"
+    },
+    {
+      "phase": "Remaining native dependencies and successful installed closure confirmation",
+      "seconds": 1143.9747292995453,
+      "evidence": "evidence/opam-dependencies-local-libs.receipt.json and opam-dependencies-confirmed.receipt.json",
+      "cache": "Initial compile; final confirmation reused its completed packages",
+      "qualification": "Initial command returned99 on build-directory cleanup; supported --keep-build-dir confirmation exited0. Original constraints retained;182installed packages matched full export."
+    },
+    {
+      "phase": "Complete OpenGrep native core targets",
+      "seconds": 1447.1093990802765,
+      "evidence": "evidence/native-core-build-final.receipt.json",
+      "cache": "Cold core target compilation, four jobs"
+    },
+    {
+      "phase": "Wheel packaging, platform retag, verified install and CLI/link checks",
+      "seconds": 123.06145966300392,
+      "evidence": "evidence/patched-cli-build/stages.json",
+      "cache": "Fresh packaging of built native core"
+    },
+    {
+      "phase": "Full Power repository SAST",
+      "seconds": 51.145,
+      "evidence": "Power hardening-artifacts/sast/run-wdp0m13t/summary.json",
+      "cache": "237configured rules,103targets,0findings/errors,unchanged source hashes"
+    }
+  ],
+  "local_staged_total_seconds": 4119.758315622802,
+  "sast_job_timeout_minutes": 90,
+  "explicit_margin_seconds": 1280.241684377198,
+  "explicit_margin_percent": 31.075650227400736,
+  "non_sast_security_timeout_minutes": 40,
+  "warm_bootstrap": {
+    "exit_code": 0,
+    "status": "passed",
+    "duration_seconds": 136.32922004399006,
+    "native_build_directory_created": false,
+    "native_status": {
+      "status": "passed",
+      "mode": "build",
+      "audit": 234,
+      "cache_hit": true,
+      "duration_seconds": 39.38875673500297
+    }
+  },
+  "remaining_validation": "Actual same-head hosted cold job and full frozen import required before merge. No GitHub Actions usage savings claimed.",
+  "cold_import_issue_and_fix": "Initial full frozen import rejected two VCS pins for missing checksum and some source URLs returned504. Same-commit archives now have SHA256 and byte-equivalence proof. Both archives and a previously failing source passed real opam --require-checksums via a fresh small repository using the official content-addressed mirror. The initial failed run remains separate evidence."
+}

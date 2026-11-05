@@ -18,6 +18,7 @@ import time
 from typing import Any
 
 from dependencies import expand_local_editable, manifests_for
+from native_scanner import audit_queries, inspect_audit_report, load_manifest
 from report_validation import inspect_findings, inspect_npm, inspect_pip, inspect_trivy
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -265,10 +266,11 @@ class Gate:
 
     def sast(self) -> None:
         """Run registered security rules and local forbidden-operation rules."""
+        self.coverage["sast_scanner"] = "OpenGrep 1.33.1 from pinned audited source"
         self.run(
             "semgrep",
             [
-                str(self.tools / "venv/bin/semgrep"),
+                str(self.tools / "venv/bin/opengrep"),
                 "scan",
                 "--config",
                 "p/security-audit",
@@ -276,8 +278,6 @@ class Gate:
                 ".semgrep.yml",
                 "--strict",
                 "--error",
-                "--metrics",
-                "off",
                 "--disable-version-check",
                 "--jobs",
                 "1",
@@ -292,6 +292,7 @@ class Gate:
                 ".",
             ],
             timeout=1800,
+            environment_overrides={"LD_LIBRARY_PATH": str(self.tools / "native/lib")},
         )
         expected = {
             relative(path)
@@ -329,6 +330,41 @@ class Gate:
 
     def dependencies(self, files: list[pathlib.Path]) -> None:
         """Audit every Python declaration, requirements file and npm lockfile."""
+        self.run(
+            "native-scanner-dependencies",
+            [
+                str(self.tools / "venv/bin/python"),
+                str(ROOT / ".github/security/native_scanner.py"),
+                "audit",
+                "--output",
+                str(self.out / "native-scanner"),
+            ],
+            cwd=ROOT,
+        )
+        self.coverage["native_scanner_audit"] = "native-scanner/native-dependencies.json"
+        try:
+            native_report = json.loads(
+                (self.out / "native-scanner/native-dependencies.json").read_text()
+            )
+            native_counts = inspect_audit_report(native_report, audit_queries(load_manifest()))
+            self.coverage["native_scanner_analysis"] = native_counts
+            native_code = 1 if native_counts["blocking_findings"] else 0
+            self.checks.append(
+                {
+                    "name": "native-scanner-report",
+                    "exit_code": native_code,
+                    "status": "failed" if native_code else "passed",
+                }
+            )
+        except (OSError, RuntimeError, ValueError, KeyError) as error:
+            self.checks.append(
+                {
+                    "name": "native-scanner-report",
+                    "exit_code": 2,
+                    "status": "failed",
+                    "error": f"{type(error).__name__}: {error}",
+                }
+            )
         pyprojects = [p for p in files if p.name == "pyproject.toml"]
         requirements = [
             p for p in files if p.name.startswith("requirements") and p.suffix in {".txt", ".lock"}

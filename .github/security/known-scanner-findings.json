@@ -1,7 +1,7 @@
 {
   "recorded_at": "2026-11-04",
-  "status": "blocked-upstream-dependency-constraints",
-  "scope": "Development scanner dependencies only; every advisory remains blocking in pip-audit.",
+  "status": "historical-upstream-blocker",
+  "scope": "Historical Semgrep distribution findings retained for traceability; this file is not an audit allowlist.",
   "semgrep_version": "1.183.0",
   "latest_release_checked": "1.183.0",
   "upstream_constraints": [
@@ -138,11 +138,14 @@
       "github_source": "https://api.github.com/advisories/GHSA-xcq7-p3pf-p88h"
     }
   ],
-  "resolution": "Both checked releases constrain vulnerable versions; the patched dependency combination is unsatisfiable. No dependency overrides, ignored advisory IDs or false passing result are applied.",
+  "resolution": "The scanner is replaced with the complete OpenGrep 1.33.1 source distribution, OCaml 5.5.2 and audited native source inputs. The new Python lock contains no MCP or OpenTelemetry packages. Every newly resolved Python and native dependency remains audited. Actual same-head CI is required before merge.",
   "severity_note": "CVE-2026-59951 has GitHub severity medium but CVSS v3.1 7.5 and a lower CVSS v4 assessment. It is not evidence of zero high-scoring findings.",
   "metadata_sources": [
     "https://pypi.org/pypi/semgrep/1.182.1/json",
     "https://pypi.org/pypi/semgrep/1.183.0/json"
   ],
-  "continuation_evidence": "Fresh metadata and unsatisfiable resolver receipt retained in the 2026-11-04 continuation package."
+  "continuation_evidence": "Fresh metadata and unsatisfiable resolver receipt retained in the 2026-11-04 continuation package.",
+  "historical_status": "blocked-upstream-dependency-constraints",
+  "historical_resolution": "Both checked releases constrain vulnerable versions; the patched dependency combination is unsatisfiable. No dependency overrides, ignored advisory IDs or false passing result are applied.",
+  "replacement_manifest": "native-scanner.json"
 }

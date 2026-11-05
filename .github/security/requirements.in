@@ -1,3 +1,22 @@
-semgrep==1.183.0
+# OpenGrep v1.33.1 runtime constraints, unchanged from cli/setup.py.
+attrs>=21.3
+boltons~=21.0
+click-option-group~=0.5
+click~=8.5
+colorama~=0.4.0
+glom~=22.1
+jsonschema~=4.6
+packaging>=21.0
+peewee~=3.14
+requests~=2.22
+rich~=13.5.2
+ruamel.yaml>=0.18.5
+typing-extensions~=4.2
+urllib3~=2.0
+wcmatch~=8.3
+# Existing scanners and pinned source-build tooling.
 zizmor==1.31.1
 pip-audit==2.10.1
+pip==26.2.2
+setuptools==84.2.1
+wheel==0.48.0
