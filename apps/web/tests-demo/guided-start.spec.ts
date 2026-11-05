@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { nativeRun } from './course-test-helpers';
@@ -5,7 +6,7 @@ import { requiredPresent } from '../src/required-value';
 import { continuityResultValue } from './continuity-contract';
 import { jsonObject } from './json-contracts';
 
-async function exportResult(page: import('@playwright/test').Page) {
+async function exportResult(page: Page) {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export guided run (JSON)' }).click();
   const download = await pending;

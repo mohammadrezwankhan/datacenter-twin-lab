@@ -21,7 +21,7 @@ from hashlib import sha256
 from html.parser import HTMLParser
 from http.client import HTTPMessage, HTTPResponse
 from pathlib import Path, PurePosixPath
-from typing import IO, override
+from typing import IO, TypeAliasType, override
 from urllib.error import HTTPError, URLError
 from urllib.parse import unquote, urljoin, urlsplit, urlunsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -47,9 +47,10 @@ MAX_REDIRECTS = 10
 MAX_NUMERIC_TEXT = 512
 MAX_NUMERIC_EXPONENT = 512
 
-type FetchResult = tuple[int, str, bytes, str]
-type ProbeResult = tuple[int, str]
-type AuditResponse = HTTPResponse | addinfourl
+# OpenGrep 1.33 cannot parse PEP 695 statements; preserve concrete runtime alias values.
+FetchResult = TypeAliasType("FetchResult", tuple[int, str, bytes, str])  # noqa: UP040
+ProbeResult = TypeAliasType("ProbeResult", tuple[int, str])  # noqa: UP040
+AuditResponse = TypeAliasType("AuditResponse", HTTPResponse | addinfourl)  # noqa: UP040
 
 
 def _record(value: object, label: str) -> dict[str, object]:

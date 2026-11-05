@@ -1,3 +1,4 @@
+import type { RuntimeProgress } from './runtime-progress';
 export const n = (value: unknown, digits = 1) =>
   value === null || value === undefined
     ? 'Unknown'
@@ -11,7 +12,7 @@ export async function request<T>(
   path: string,
   signal?: AbortSignal,
   body?: unknown,
-  onProgress?: (progress: import('./runtime-progress').RuntimeProgress) => void,
+  onProgress?: (progress: RuntimeProgress) => void,
 ): Promise<T> {
   if (import.meta.env.MODE === 'demo') {
     const { browserRequest } = await import('./browser-client');

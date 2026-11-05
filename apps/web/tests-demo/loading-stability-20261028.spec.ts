@@ -1,3 +1,4 @@
+import type { Page, TestInfo } from '@playwright/test';
 import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -5,7 +6,7 @@ import { resolve } from 'node:path';
 
 type Rect = { x: number; y: number; width: number; height: number } | null;
 
-async function geometry(page: import('@playwright/test').Page) {
+async function geometry(page: Page) {
   return page.evaluate(() => {
     const rect = (element: Element | null | undefined): Rect => {
       if (!element) return null;
@@ -39,7 +40,7 @@ async function geometry(page: import('@playwright/test').Page) {
   });
 }
 
-async function emtGeometry(page: import('@playwright/test').Page) {
+async function emtGeometry(page: Page) {
   return page.evaluate(() => {
     const rect = (element: Element | null | undefined): Rect => {
       if (!element) return null;
@@ -59,12 +60,7 @@ async function emtGeometry(page: import('@playwright/test').Page) {
   });
 }
 
-async function capture(
-  page: import('@playwright/test').Page,
-  testInfo: import('@playwright/test').TestInfo,
-  width: number,
-  stage: string,
-) {
+async function capture(page: Page, testInfo: TestInfo, width: number, stage: string) {
   const metrics = await geometry(page);
   await testInfo.attach(`responsive-20261028-${String(width)}-${stage}.json`, {
     body: Buffer.from(JSON.stringify(metrics, null, 2)),

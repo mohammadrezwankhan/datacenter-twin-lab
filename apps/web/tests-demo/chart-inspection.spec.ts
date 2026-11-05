@@ -1,3 +1,4 @@
+import type { Locator, Page } from '@playwright/test';
 import { jsonObject, numberValue, objectList, objectValue } from './json-contracts';
 import { requiredPresent } from '../src/required-value';
 import { expect, test, devices } from '@playwright/test';
@@ -5,14 +6,14 @@ import { readFile } from 'node:fs/promises';
 
 const demoBase = `http://127.0.0.1:4174${process.env.TWIN_DEMO_BASE || '/datacenter-twin-lab/'}`;
 
-async function downloadJson(page: import('@playwright/test').Page, label: string) {
+async function downloadJson(page: Page, label: string) {
   const pending = page.waitForEvent('download');
   if (label === 'export-run') await page.getByRole('button', { name: 'Export run' }).click();
   else await page.getByTestId(label).click();
   return jsonObject(await readFile(await (await pending).path(), 'utf8'));
 }
 
-async function screenPoint(svg: import('@playwright/test').Locator, viewX: number, viewY: number) {
+async function screenPoint(svg: Locator, viewX: number, viewY: number) {
   return svg.evaluate(
     (element, point) => {
       const svg = element as SVGSVGElement;

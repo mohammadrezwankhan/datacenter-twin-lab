@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import site from '../site.config.json' with { type: 'json' };
+const { default: site } = await import('../site.config.json', { with: { type: 'json' } });
 import { courseCatalog } from '../src/curriculum.ts';
 import { ENGINE_VERSION } from '../src/js-engine/version.ts';
 import {

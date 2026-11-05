@@ -14,7 +14,7 @@ import { lessons, lessonScenario, type Lesson } from './src/course-lessons.ts';
 import { ENGINE_VERSION } from './src/js-engine/version.ts';
 import type { SiteScenario } from './src/types.ts';
 import type { Run } from './src/types.ts';
-import site from './site.config.json' with { type: 'json' };
+const { default: site } = await import('./site.config.json', { with: { type: 'json' } });
 import { displayQuantity, lessonRecords, type EvidenceIndex } from './seo-records';
 import { emtPage } from './seo-emt';
 import { researchPage } from './seo-research';

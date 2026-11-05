@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from email.message import Message
 from fractions import Fraction
 from io import BytesIO
-from typing import SupportsIndex, override
+from typing import SupportsIndex, TypeAliasType, override
 from unittest.mock import patch
 from urllib import request
 from urllib.error import URLError
@@ -17,7 +17,8 @@ from urllib.response import addinfourl
 from scripts import audit_public_site as auditor
 
 BASE = "https://example.invalid/"
-type TransportReply = tuple[int, str | None, BytesIO]
+# OpenGrep 1.33 cannot parse PEP 695 statements; retain the concrete transport alias.
+TransportReply = TypeAliasType("TransportReply", tuple[int, str | None, BytesIO])  # noqa: UP040
 
 
 class SimulatedResponse(addinfourl):

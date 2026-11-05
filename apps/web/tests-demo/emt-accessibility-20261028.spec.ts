@@ -1,19 +1,17 @@
+import type { Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 const accessibilityTags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
-async function openEmt(page: import('@playwright/test').Page) {
+async function openEmt(page: Page) {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./?mode=emt');
   await expect(page.getByRole('heading', { name: 'Inside a voltage sag' })).toBeVisible();
 }
 
-async function openResearch(
-  page: import('@playwright/test').Page,
-  study: 'load-step' | 'modal' = 'load-step',
-) {
+async function openResearch(page: Page, study: 'load-step' | 'modal' = 'load-step') {
   await page.setViewportSize({ width: 320, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(`./?study=${study}`);

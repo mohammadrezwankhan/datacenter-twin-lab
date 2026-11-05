@@ -12,7 +12,7 @@ from contextlib import redirect_stdout
 from importlib.util import find_spec
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 _NUMERICS_AVAILABLE = find_spec("numpy") is not None and find_spec("scipy") is not None
 
@@ -54,15 +54,75 @@ class NumericalHelperTests(unittest.TestCase):
         np.testing.assert_allclose(matlab_hann(4), [0.0, 0.75, 0.75, 0.0], atol=1e-15)
 
     def test_plot_style_preserves_axes_identity_and_updates_each_spine(self) -> None:
-        from datacenter_twin.research.common import set_ieee_axes
+        from collections.abc import Mapping
+        from typing import assert_type
 
-        axes = Mock()
-        axes.spines = {"left": Mock(), "bottom": Mock()}
-        self.assertIs(set_ieee_axes(axes, fontsize=10), axes)
-        axes.grid.assert_called_once_with(True, alpha=0.18)
-        axes.tick_params.assert_called_once_with(direction="out", width=0.8, labelsize=10)
-        for spine in axes.spines.values():
-            spine.set_linewidth.assert_called_once_with(0.8)
+        from datacenter_twin.research.common import _Spine, set_ieee_axes
+
+        class PlotSpine:
+            def __init__(self) -> None:
+                self.widths: list[float] = []
+
+            def set_linewidth(self, width: float) -> None:
+                self.widths.append(width)
+
+        class PlotAxes:
+            def __init__(self) -> None:
+                self.spine_records = {"left": PlotSpine(), "bottom": PlotSpine()}
+                self.spines: Mapping[str, _Spine] = self.spine_records
+                self.grids: list[tuple[bool, float]] = []
+                self.ticks: list[tuple[str, float, int]] = []
+
+            def grid(self, visible: bool, *, alpha: float) -> None:
+                self.grids.append((visible, alpha))
+
+            def tick_params(self, *, direction: str, width: float, labelsize: int) -> None:
+                self.ticks.append((direction, width, labelsize))
+
+        axes = PlotAxes()
+        styled = assert_type(set_ieee_axes(axes, fontsize=10), PlotAxes)
+        self.assertIs(styled, axes)
+        self.assertEqual(axes.grids, [(True, 0.18)])
+        self.assertEqual(axes.ticks, [("out", 0.8, 10)])
+        for spine in axes.spine_records.values():
+            self.assertEqual(spine.widths, [0.8])
+
+    def test_research_type_aliases_keep_runtime_and_annotation_contracts(self) -> None:
+        from collections.abc import Callable
+        from typing import TypeAliasType, get_type_hints
+
+        import numpy as np
+        from numpy.typing import NDArray
+
+        from datacenter_twin.research.datacenter_port_model import datacenter_core_equations
+        from datacenter_twin.research.types import (
+            Complex,
+            ComplexArray,
+            FloatArray,
+            LoadCommand,
+            Real,
+        )
+
+        for alias, name, value in (
+            (FloatArray, "FloatArray", NDArray[np.float64]),
+            (ComplexArray, "ComplexArray", NDArray[np.complex128]),
+            (Real, "Real", float | np.float64),
+            (Complex, "Complex", complex | np.complex128),
+            (LoadCommand, "LoadCommand", Real | Callable[[float], Real]),
+        ):
+            with self.subTest(alias=name):
+                self.assertIsInstance(alias, TypeAliasType)
+                self.assertEqual(alias.__name__, name)
+                self.assertEqual(alias.__module__, "datacenter_twin.research.types")
+                self.assertEqual(alias.__type_params__, ())
+                self.assertEqual(alias.__value__, value)
+
+        hints = get_type_hints(datacenter_core_equations)
+        self.assertIs(hints["x"], FloatArray)
+        self.assertIs(hints["vport"], Complex)
+        self.assertIs(hints["p_load"], Real)
+        self.assertIs(hints["omega_sys"], Real)
+        self.assertEqual(hints["return"], tuple[FloatArray, Complex, Real])
 
     def test_newton_solves_linear_equation_without_mutating_initial_state(self) -> None:
         import numpy as np

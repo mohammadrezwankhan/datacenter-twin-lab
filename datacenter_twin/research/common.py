@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping
 from types import SimpleNamespace
-from typing import Protocol
+from typing import Protocol, TypeVar
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -87,7 +87,11 @@ class _Axes(Protocol):
     def tick_params(self, *, direction: str, width: float, labelsize: int) -> None: ...
 
 
-def set_ieee_axes[AxesType: _Axes](ax: AxesType, fontsize: int = 8) -> AxesType:
+# OpenGrep 1.33 cannot parse PEP 695 parameters; retain the bound and concrete return type.
+AxesType = TypeVar("AxesType", bound=_Axes)
+
+
+def set_ieee_axes(ax: AxesType, fontsize: int = 8) -> AxesType:  # noqa: UP047
     ax.grid(True, alpha=0.18)
     ax.tick_params(direction="out", width=0.8, labelsize=fontsize)
     for spine in ax.spines.values():

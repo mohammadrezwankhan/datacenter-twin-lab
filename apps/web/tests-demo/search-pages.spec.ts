@@ -9,7 +9,7 @@ import { infrastructureLessons } from '../seo-infrastructure';
 import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { join, resolve } from 'node:path';
-import site from '../site.config.json' with { type: 'json' };
+const { default: site } = await import('../site.config.json', { with: { type: 'json' } });
 import { nativeRun } from './course-test-helpers';
 
 const demoSite = resolve(process.env.TWIN_DEMO_OUT_DIR ?? '../../.local/browser-demo-site');
