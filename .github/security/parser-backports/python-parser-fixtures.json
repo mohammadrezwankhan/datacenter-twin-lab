@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "upstream_base": "092c80faa0817840228349f93eff12a50fb9cf6b",
-  "native_status": "stable-rebase-prepared-uncompiled-unexecuted",
+  "native_status": "hosted-cold-compile-passed-corrected-controls-awaiting-fresh-qualification",
   "rulesets": {
     "pep695-flow": {
       "rules": [
@@ -275,23 +275,16 @@
           "decorator_names": [],
           "body_names": [],
           "alias_value": [
-            "slices",
+            "subscript",
             [
-              "subscript",
-              [
-                "name",
-                "Mapping"
-              ],
+              "name",
+              "Mapping"
+            ],
+            [
+              "tuple",
               [
                 "name",
                 "str"
-              ]
-            ],
-            [
-              "subscript",
-              [
-                "name",
-                "Mapping"
               ],
               [
                 "name",

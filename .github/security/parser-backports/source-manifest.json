@@ -2,7 +2,7 @@
   "schema_version": 1,
   "upstream_base": "092c80faa0817840228349f93eff12a50fb9cf6b",
   "upstream_url": "https://github.com/opengrep/opengrep/tree/092c80faa0817840228349f93eff12a50fb9cf6b",
-  "status": "stable-rebase-review-frozen-uncompiled-unexecuted",
+  "status": "hosted-cold-compile-passed-corrected-controls-awaiting-fresh-qualification",
   "not_an_unchanged_official_release": true,
   "adaptation": "Official merged PR845 simple-alias production patch plus reviewed authored Menhir PEP695 declaration-parameter backport; retains stable CLI and all unrelated stable semantics",
   "specification_url": "https://peps.python.org/pep-0695/",
@@ -80,8 +80,8 @@
     },
     {
       "path": "tools/rezwan_python_parser_controls/python_parser_controls.ml",
-      "sha256": "9eb2d65fb506fe3cfd51af198128aec9cd07807557e5db7fe9c4b60bd3bb852f",
-      "bytes": 10225,
+      "sha256": "edce723135b834564ec7a1ef31c8b83761487a072123134002fff0f08debda2e",
+      "bytes": 10930,
       "preimage": "absent",
       "source_path": "overlay/tools/rezwan_python_parser_controls/python_parser_controls.ml",
       "mode": "100644"
@@ -89,8 +89,8 @@
   ],
   "fixtures": {
     "path": "python-parser-fixtures.json",
-    "sha256": "6a3fc192e703b09a53ad1823ae20ab3ef71dc452d86c975c172c0452e1122753",
-    "bytes": 86959,
+    "sha256": "4a6573ded194f710b207bcb3e36c9516a6c7911e95dc4fb04a4b94d4b5c92d1f",
+    "bytes": 86842,
     "total": 27,
     "valid": 17,
     "malformed": 10,
@@ -116,8 +116,8 @@
     },
     {
       "path": "README.md",
-      "sha256": "48516ff97eb8f169652dc793cabce8c46cd272142ee91fdb5b9f544332bedb33",
-      "bytes": 3161
+      "sha256": "9750e06900aeb1cefaa74d35cc068ffb4410e936a2b182886c2734aed9c5af4b",
+      "bytes": 4309
     },
     {
       "path": "repository-fixture-binding.json",
@@ -142,7 +142,44 @@
     "hosted_compile_ast_controls_native_scan_controls_required": true,
     "full_current_head_repository_scan_required": true,
     "same_frozen_switch_as_patched_stable_core": true,
-    "cli": "Existing pinned PythonCLI with patched stable core; full-native CLI migration excluded"
+    "cli": "Existing pinned PythonCLI with patched stable core; full-native CLI migration excluded",
+    "first_hosted_attempt": {
+      "commit": "0576fe05ef9e21980013ff73efefa264460def03",
+      "run_id": 42116619867,
+      "job_id": 127557850553,
+      "artifact_id": 13458086057,
+      "artifact_sha256": "45f78319f5d15bccd7ae05fa0bb942507fa11b28cbf68175aed9652a2724c000",
+      "cold_compile": "passed: all stable core targets and AST control executable in same frozen switch",
+      "ast_controls": "failed on authored MappingAlias multi-index oracle",
+      "cli_controls": "not reached",
+      "full_repository_scan": "not reached",
+      "cache_saved": false
+    },
+    "oracle_correction": {
+      "declaration": "aliases_retain_expression_trees/MappingAlias/alias_value",
+      "reason": "Stable Menhir preserves multiple ordinary subscript arguments as a single tuple index; source production unchanged by the backport.",
+      "expected": [
+        "subscript",
+        [
+          "name",
+          "Mapping"
+        ],
+        [
+          "tuple",
+          [
+            "name",
+            "str"
+          ],
+          [
+            "name",
+            "bytes"
+          ]
+        ]
+      ],
+      "independent_runtime_support": "Official OpenGrep 1.33.1 show dump-ast, asset SHA256 46e8133cc490f9f50518061590ce2f6be5a08afaeda034471c0ceda4b3899808; CPython AST agrees.",
+      "other_expectations_and_fixture_sources": "unchanged",
+      "fresh_native_qualification_required": true
+    }
   },
   "preserved": {
     "python_tree_sitter_grammar_asset": true,

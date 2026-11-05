@@ -266,15 +266,34 @@ let () =
     let document = Yojson.Basic.from_file Sys.argv.(1) in
     let fixtures = list "fixtures" document in
     if List.length fixtures = 0 then fail "controls" "empty fixture inventory";
-    let results = List.map check_fixture fixtures in
+    (* Keep evaluating every mandatory fixture so one failed assertion does not
+     * hide later diagnostics. The exact assertions and syntax-error
+     * classification above are unchanged; any failure keeps the process
+     * unsuccessful and prevents CLI qualification or cache acceptance. *)
+    let failed = ref false in
+    let results =
+      List.map
+        (fun fixture ->
+          try check_fixture fixture
+          with exn ->
+            failed := true;
+            `Assoc
+              [
+                ("id", member "id" fixture);
+                ("result", `String "failed");
+                ("error", `String (Printexc.to_string exn));
+              ])
+        fixtures
+    in
     Yojson.Basic.to_channel stdout
       (`Assoc
         [
-          ("status", `String "passed");
+          ("status", `String (if !failed then "failed" else "passed"));
           ("frontend", `String "Parse_python.Python3 (Menhir)");
           ("fixtures", `List results);
         ]);
-    output_char stdout '\n'
+    output_char stdout '\n';
+    if !failed then exit 1
   with exn ->
     prerr_endline (Printexc.to_string exn);
     exit 1

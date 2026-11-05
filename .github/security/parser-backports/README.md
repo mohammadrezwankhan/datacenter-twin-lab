@@ -26,7 +26,7 @@ against all six hashes, and compared byte-for-byte with the two original patch
 stages. The existing stable generic AST APIs and Dune libraries used by the
 overlay are present. These are source/applicability checks, not a native compile.
 
-All 19 declaration checks and their expected native findings are unchanged.
+All 19 declaration checks and their expected native findings are retained.
 Twenty-six fixture source strings are exact preserved bytes; the actual restored
 reproduce_demand_timing.py differs only by its retained review comment and has an
 identical CPython AST. The three upstream match/guard/as-pattern fixtures
@@ -45,5 +45,24 @@ Python CLI error JSON must be qualified directly; do not assume the unreleased
 full-native CLI schema or `show dump-config` subcommand. Finally run the full
 repository scanner, all registered/local rules, strict errors, source binding,
 advisory audit, numerical, lint/type and browser gates on the exact new head.
-No native build, native AST execution, patched scanner execution or hosted run
-has been performed by this package-preparation review.
+
+## First hosted qualification and oracle correction
+
+Run `42116619867` at commit `0576fe05ef9e21980013ff73efefa264460def03`
+completed a cold build of the patched stable core and the AST control executable
+in the same frozen switch. Its first AST failure exposed an incorrect authored
+expectation for `Mapping[str, bytes]`: the unchanged stable Menhir grammar
+represents ordinary comma-separated subscript arguments as one tuple index.
+The official 1.33.1 executable and CPython independently reproduce that shape.
+Only `MappingAlias.alias_value` is corrected to the exact nested subscript/tuple
+tree; both argument names and their order remain mandatory. There is no
+normalization or alternative-form acceptance. All fixture source bytes, other
+assertions, malformed-source outcomes and exact finding expectations remain
+unchanged. Per-fixture failures are now collected into a complete report, with
+a nonzero exit whenever any fixture fails.
+
+That failed build was not cached, and it did not reach CLI qualification or the
+repository scan. The corrected package still requires a fresh hosted build,
+every AST and actual CLI control, and the full source-bound repository gate
+before it can be accepted. The original package-preparation checks alone do not
+claim that qualification.
