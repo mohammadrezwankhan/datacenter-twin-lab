@@ -213,6 +213,8 @@ test('the verified adapter fits mobile, tablet, and desktop without clipping cop
       };
       const hostBounds = element.getBoundingClientRect();
       const hostStyle = getComputedStyle(element);
+      const wrapper = element.parentElement;
+      if (!wrapper) throw new Error('Expected engineering hero wrapper');
       return {
         viewportWidth: window.innerWidth,
         host: rect(element),
@@ -222,9 +224,7 @@ test('the verified adapter fits mobile, tablet, and desktop without clipping cop
         hostHeight: hostBounds.height,
         hostScrollHeight: element.scrollHeight,
         hostOverflow: hostStyle.overflow,
-        wrapperOverflow: getComputedStyle(
-          requiredPresent(element.parentElement, 'element.parentElement'),
-        ).overflow,
+        wrapperOverflow: getComputedStyle(wrapper).overflow,
       };
     });
     expect(layout.host).not.toBeNull();
