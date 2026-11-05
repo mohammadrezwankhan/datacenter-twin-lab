@@ -1,3 +1,4 @@
+import { requiredPresent } from './required-value';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { n, request } from './client';
 import type { Asset, Run } from './types';
@@ -9,11 +10,15 @@ function download(text: string, name: string, type: string) {
   link.href = url;
   link.download = name;
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 type ComparisonParameter =
-  'battery_initial_kwh' | 'generator_start_delay_s' | 'distribution_path_capacity_kw';
+  | 'battery_initial_kwh'
+  | 'generator_start_delay_s'
+  | 'distribution_path_capacity_kw';
 
 type ComparisonRow = {
   value: string;
@@ -45,7 +50,7 @@ function decimalMultiple(value: string, numerator: number, denominator = 1): str
   const extraPlaces = denominator === 2 ? 1 : 0;
   const scale = fraction.length + extraPlaces;
   const multiplier = (BigInt(numerator) * 10n ** BigInt(extraPlaces)) / BigInt(denominator);
-  const amount = BigInt(`${whole}${fraction}`) * multiplier;
+  const amount = BigInt(`${String(whole)}${fraction}`) * multiplier;
   if (!scale) return amount.toString();
   const digits = amount.toString().padStart(scale + 1, '0');
   const integer = digits.slice(0, -scale);
@@ -368,7 +373,9 @@ export function RunTools({ run }: { run: Run }) {
           values.map(async (value) => {
             const scenario = structuredClone(run.scenario);
             scenario.assets = scenario.assets.map((asset) =>
-              asset.id === path!.id ? { ...asset, capacity_kw: value } : asset,
+              asset.id === requiredPresent(path, 'path').id
+                ? { ...asset, capacity_kw: value }
+                : asset,
             );
             const result = await request<Run>('simulations', controller.signal, scenario);
             return {
@@ -391,7 +398,10 @@ export function RunTools({ run }: { run: Run }) {
           source_scenario: run.scenario,
           parameter: 'distribution_path_capacity_kw',
           parameter_unit: units.distribution_path_capacity_kw,
-          target_asset: { id: path!.id, name: path!.name },
+          target_asset: {
+            id: requiredPresent(path, 'path').id,
+            name: requiredPresent(path, 'path').name,
+          },
           values,
           runs: results,
           assumptions: [
@@ -405,7 +415,7 @@ export function RunTools({ run }: { run: Run }) {
           ],
         };
         setComparison({
-          label: `${labels[parameter]} — ${path!.name}`,
+          label: `${labels[parameter]} — ${requiredPresent(path, 'path').name}`,
           unit: units[parameter],
           sourceRunId: run.run_id,
           sourceInputSha256: run.input_sha256,
@@ -486,19 +496,24 @@ export function RunTools({ run }: { run: Run }) {
             }))}
           />
           <button
-            onClick={() =>
+            onClick={() => {
               download(
                 JSON.stringify(sweep, null, 2),
                 `twin-sweep-${sweep.base_input_sha256.slice(0, 12)}.json`,
                 'application/json',
-              )
-            }
+              );
+            }}
           >
             Download sensitivity JSON
           </button>
         </div>
       )}
-      <details className="scenario-comparison" onToggle={() => setError('')}>
+      <details
+        className="scenario-comparison"
+        onToggle={() => {
+          setError('');
+        }}
+      >
         <summary>Advanced scenario comparison</summary>
         <div className="scenario-comparison__body">
           <p>
@@ -542,7 +557,7 @@ export function RunTools({ run }: { run: Run }) {
               </label>
             )}
             {selectedValues.map((value, index) => (
-              <label key={`${run.run_id}-${index}`}>
+              <label key={`${run.run_id}-${String(index)}`}>
                 Comparison value {index + 1} (
                 {parameter === 'battery_initial_kwh'
                   ? 'kWh'
@@ -605,13 +620,13 @@ export function RunTools({ run }: { run: Run }) {
           </p>
           <MetricTable label={comparison.label} unit={comparison.unit} rows={comparison.rows} />
           <button
-            onClick={() =>
+            onClick={() => {
               download(
                 JSON.stringify(comparison.artifact, null, 2),
                 `twin-comparison-${comparison.sourceInputSha256.slice(0, 12)}.json`,
                 'application/json',
-              )
-            }
+              );
+            }}
           >
             Download comparison JSON
           </button>

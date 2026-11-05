@@ -1,0 +1,97 @@
+name: Hardened CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hardened-ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  security:
+    name: Security / ${{ matrix.mode }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [workflow, secrets, sast, dependencies, trivy]
+    env:
+      SECURITY_SCAN_MODE: ${{ matrix.mode }}
+    steps:
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Set up Node for lockfile audits
+        if: matrix.mode == 'dependencies'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Configure scanner location
+        run: echo "SECURITY_TOOL_DIR=$RUNNER_TEMP/rezwan-security-$SECURITY_SCAN_MODE" >> "$GITHUB_ENV"
+      - name: Install verified development scanners
+        run: python .github/security/bootstrap.py "$SECURITY_SCAN_MODE" --destination "$SECURITY_TOOL_DIR"
+      - name: Run the security gate
+        run: python .github/security/run.py "$SECURITY_SCAN_MODE"
+      - name: Preserve scanner reports and execution receipts
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: security-${{ matrix.mode }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: hardening-artifacts/
+          if-no-files-found: error
+          retention-days: 14
+
+  language-quality:
+    name: Quality / ${{ matrix.mode }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [python-lint, python-types, python-tests, browser-lint, browser-types, browser-format, browser-tests]
+    steps:
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Execute the required language quality gate
+        env:
+          QUALITY_MODE: ${{ matrix.mode }}
+        run: python .github/security/quality.py "$QUALITY_MODE" --install
+      - name: Preserve commands, diagnostics and test coverage
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: quality-${{ matrix.mode }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: hardening-artifacts/
+          if-no-files-found: error
+          retention-days: 14

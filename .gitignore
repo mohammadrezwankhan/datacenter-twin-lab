@@ -17,6 +17,7 @@ dist/
 *.egg-info/
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 outputs/
 .DS_Store
@@ -30,3 +31,9 @@ playwright-report-demo/
 playwright-report-root/
 test-results/
 test-results-root/
+
+# Development tools and generated verification output
+.mypy_cache/
+.ruff_cache/
+hardening-artifacts/
+.security-tools/

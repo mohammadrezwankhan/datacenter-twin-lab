@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput, textOutput } from './types';
 import { SceneDiagram } from './primitives';
@@ -64,7 +65,7 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
 
   const bank = (name: 'A' | 'B', y: number, busY: number) => {
     const state = hasCapacityResult
-      ? `${installed} installed · ${unavailable} unavailable · ${available} available`
+      ? `${String(installed)} installed · ${String(unavailable)} unavailable · ${String(available)} available`
       : 'topology preview · capacity counts pending';
     const directIndices = Array.from({ length: shownUnits }, (_, index) => index);
     const visibleUnavailable = Math.max(0, shownUnits - Math.max(0, installed - unavailable));
@@ -85,8 +86,8 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
           const x = UNIT_X + index * UNIT_STEP;
           return (
             <g
-              key={`${name}-${index}`}
-              aria-label={`Generator ${index + 1}${unavailableUnit ? ', unavailable' : ', available'}`}
+              key={`${name}-${String(index)}`}
+              aria-label={`Generator ${String(index + 1)}${unavailableUnit ? ', unavailable' : ', available'}`}
             >
               <rect
                 x={x}
@@ -99,7 +100,7 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
                 strokeWidth="2"
               />
               <path
-                d={`M${x + 8} ${y + 13}v26M${x + 18} ${y + 13}v26M${x + 28} ${y + 13}v26`}
+                d={`M${String(x + 8)} ${String(y + 13)}v26M${String(x + 18)} ${String(y + 13)}v26M${String(x + 28)} ${String(y + 13)}v26`}
                 stroke="#b98448"
                 strokeWidth="1.5"
               />
@@ -124,7 +125,7 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
                 </text>
               )}
               <path
-                d={`M${x + UNIT_WIDTH / 2} ${y + 52}V${busY}`}
+                d={`M${String(x + UNIT_WIDTH / 2)} ${String(y + 52)}V${String(busY)}`}
                 stroke="#ffd17e"
                 strokeWidth="2"
               />
@@ -133,9 +134,9 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
         })}
         {overflow > 0 && (
           <g
-            aria-label={`${overflow} additional generators grouped: ${aggregateAvailable} available and ${aggregateUnavailable} unavailable`}
+            aria-label={`${String(overflow)} additional generators grouped: ${String(aggregateAvailable)} available and ${String(aggregateUnavailable)} unavailable`}
           >
-            <title>{`${overflow} additional generator units grouped as aggregate overflow: ${aggregateAvailable} available, ${aggregateUnavailable} unavailable.`}</title>
+            <title>{`${String(overflow)} additional generator units grouped as aggregate overflow: ${String(aggregateAvailable)} available, ${String(aggregateUnavailable)} unavailable.`}</title>
             <rect
               x={overflowX}
               y={y}
@@ -153,14 +154,19 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
               aggregate
             </text>
             <path
-              d={`M${overflowX + 32} ${y + 52}V${busY}`}
+              d={`M${String(overflowX + 32)} ${String(y + 52)}V${String(busY)}`}
               stroke="#a0b1c3"
               strokeWidth="2"
               strokeDasharray="4 3"
             />
           </g>
         )}
-        <path d={`M${UNIT_X} ${busY}H720`} fill="none" stroke="#ffd17e" strokeWidth="4" />
+        <path
+          d={`M${String(UNIT_X)} ${String(busY)}H720`}
+          fill="none"
+          stroke="#ffd17e"
+          strokeWidth="4"
+        />
       </g>
     );
   };
@@ -171,7 +177,7 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
       opacity={hasCapacityResult ? 1 : 0.58}
     >
       <path
-        d={`M720 ${routeY}H740V${y + 52}H758`}
+        d={`M720 ${String(routeY)}H740V${String(y + 52)}H758`}
         fill="none"
         stroke={name === 'A' ? '#63e6bc' : '#83bcff'}
         strokeWidth="4"
@@ -214,7 +220,7 @@ export default function GeneratorScene({ result, fuelResult, step }: SceneProps)
     <SceneDiagram
       id="generator"
       title="Independent generator-bank capacity and fuel boundary"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >

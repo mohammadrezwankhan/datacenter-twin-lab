@@ -1,3 +1,4 @@
+import { requiredValue } from '../required-value';
 export const MODEL_VERSION = '1.0.0';
 
 export type ModelName =
@@ -76,7 +77,9 @@ type Runner = (p: InputRecord) => OutputRecord;
 
 const num = (x: unknown, name: string, lo = 0, hi = Infinity): number => {
   if (typeof x !== 'number' || !Number.isFinite(x) || x < lo || x > hi)
-    throw new RangeError(name + ' must be a finite number in [' + lo + ', ' + hi + ']');
+    throw new RangeError(
+      name + ' must be a finite number in [' + String(lo) + ', ' + String(hi) + ']',
+    );
   return x;
 };
 const pos = (x: unknown, name: string): number => {
@@ -329,7 +332,7 @@ const runners: Record<ModelName, Runner> = {
     if (!Array.isArray(p.stageSeconds) || p.stageSeconds.length === 0)
       throw new RangeError('stageSeconds is empty');
     const stageSeconds = p.stageSeconds.map((value: unknown, i: number) =>
-      num(value, 'stage ' + i),
+      num(value, 'stage ' + String(i)),
     );
     const electricalSeconds = num(p.electricalSeconds, 'electricalSeconds');
     const thermalSeconds = num(p.thermalSeconds, 'thermalSeconds');
@@ -670,7 +673,7 @@ function cloneInputRecord(input: unknown, model: ModelName): InputRecord {
     else if (Array.isArray(value) && key === 'stageSeconds') {
       cloned[key] = Array.from({ length: value.length }, (_, index) => {
         if (!Object.hasOwn(value, index)) throw new TypeError('stageSeconds must not be sparse');
-        return num(value[index], key + '[' + index + ']');
+        return num(value[index], key + '[' + String(index) + ']');
       });
     } else {
       throw new TypeError(key + ' must be a number, number array, or null');
@@ -789,7 +792,10 @@ function sourceLocator(lesson: LessonEvidence): SourceLocator {
   return {
     id: lesson.source.id,
     chapter: lesson.source.chapter,
-    pdfPages: [pages[0], pages[pages.length - 1]],
+    pdfPages: [
+      requiredValue(pages[0], 'pages[0]'),
+      requiredValue(pages[pages.length - 1], 'pages[pages.length - 1]'),
+    ],
     evidenceStatus: lesson.source.evidenceStatus,
   };
 }

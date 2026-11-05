@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.integrate import solve_ivp
+from scipy.integrate._ivp.ivp import OdeResult
 from scipy.sparse import block_diag, csc_matrix
 
 from .model_validation import build_params, get_sys_derivatives
-
+from .types import FloatArray
 
 _ORIGINAL_STEP_TIME = 1.025
 _STEP_TIME = 0.04
@@ -16,7 +17,7 @@ _RTOL = 1e-8
 _ATOL = 1e-10
 
 
-def _initial_state(p: dict[str, float]) -> np.ndarray:
+def _initial_state(p: dict[str, float]) -> FloatArray:
     """Preserve the hand-set startup state from the imported ModelValidation script."""
     load0 = 0.5
     g_load = load0 / (3.0 * p["v_eq_ref"] ** 2)
@@ -50,17 +51,17 @@ def _initial_state(p: dict[str, float]) -> np.ndarray:
 
 
 def _integrate_segment(
-    x0: np.ndarray,
+    x0: FloatArray,
     t0: float,
     t1: float,
-    values: np.ndarray,
+    values: FloatArray,
     load: float,
     p: dict[str, float],
     *,
     rtol: float,
     atol: float,
-):
-    def rhs(_t: float, x: np.ndarray) -> np.ndarray:
+) -> OdeResult[np.float64]:
+    def rhs(_t: float, x: FloatArray) -> FloatArray:
         return get_sys_derivatives(_t, x, load, p)[0]
 
     # The imported full-abc (41 states) and reduced-uv (21 states) equations
@@ -82,13 +83,14 @@ def _integrate_segment(
     )
     if not sol.success or sol.y.shape[1] != len(values):
         raise ValueError(
-            f"62-state BDF integration did not complete on {t0:g}–{t1:g} s: {sol.message}"
+            f"62-state BDF integration did not complete on {t0:g}\u2013{t1:g} s: {sol.message}"
         )
     if not np.all(np.isfinite(sol.y)):
         raise ValueError("62-state BDF integration returned non-finite values; result withheld.")
     if float(np.max(np.abs(sol.y))) > 1e6:
         raise ValueError(
-            "62-state response exceeded the 1e6 pu numerical runaway guard; result withheld without clipping."
+            "62-state response exceeded the 1e6 pu numerical runaway"
+            " guard; result withheld without clipping."
         )
     return sol
 
@@ -115,7 +117,7 @@ def run_model_comparison(
     output = np.array(
         [
             get_sys_derivatives(float(tt), xx, float(uu), p)[1:]
-            for tt, xx, uu in zip(t, states, load)
+            for tt, xx, uu in zip(t, states, load, strict=True)
         ]
     )
     if not np.all(np.isfinite(output)):
@@ -125,12 +127,18 @@ def run_model_comparison(
     vsi_difference = p_vsi_abc[post] - p_vsi_uv[post]
     pcc_difference = p_pcc_abc[post] - p_pcc_uv[post]
     initial_derivative = get_sys_derivatives(0.0, initial, 0.5, p)[0]
-    result = {
+    return {
         "study_id": "model-comparison",
-        "model": "Supplied 41-state full-abc and 21-state reduced-uv equations (62-state ModelValidation pair)",
+        "model": (
+            "Supplied 41-state full-abc and 21-state reduced-uv equations"
+            " (62-state ModelValidation pair)"
+        ),
         "config": dict(config),
         "solver": {
-            "method": "SciPy BDF with exact 41+21 state-block Jacobian sparsity; two segments at the lesson load step",
+            "method": (
+                "SciPy BDF with exact 41+21 state-block Jacobian sparsity;"
+                " two segments at the lesson load step"
+            ),
             "rtol": float(rtol),
             "atol": float(atol),
             "nfev": int(first.nfev + second.nfev),
@@ -138,10 +146,26 @@ def run_model_comparison(
             "nlu": int(first.nlu + second.nlu),
         },
         "assumptions": [
-            "The imported ModelValidation startup values are preserved; this is a hand-set initial condition, not a solved joint equilibrium.",
-            "The full-abc and reduced-uv model outputs are compared under the same per-unit load command; they are not assumed identical.",
-            "To keep the lesson responsive, the supplied hand-set startup is simulated for 0.08 s and its 1.025 s load step is retimed to 0.04 s; no equilibrium or pre-settled state is substituted.",
-            "This model-pair comparison is not external validation and does not use measured GPU data.",
+            (
+                "The imported ModelValidation startup values are preserved;"
+                " this is a hand-set initial condition, not a solved joint"
+                " equilibrium."
+            ),
+            (
+                "The full-abc and reduced-uv model outputs are compared under"
+                " the same per-unit load command; they are not assumed"
+                " identical."
+            ),
+            (
+                "To keep the lesson responsive, the supplied hand-set startup"
+                " is simulated for 0.08 s and its 1.025 s load step is"
+                " retimed to 0.04 s; no equilibrium or pre-settled state is"
+                " substituted."
+            ),
+            (
+                "This model-pair comparison is not external validation and"
+                " does not use measured GPU data."
+            ),
         ],
         "metrics": [
             {
@@ -208,4 +232,3 @@ def run_model_comparison(
             "post_step_sample_count": int(np.count_nonzero(post)),
         },
     }
-    return result

@@ -49,8 +49,12 @@ function DeviceButton({
       aria-pressed={selected}
       aria-labelledby={`${labelId} ${valueId}`}
       aria-describedby={descriptionId}
-      onClick={() => onSelect(id)}
-      onKeyDown={(event) => selectOnKey(event, id, onSelect)}
+      onClick={() => {
+        onSelect(id);
+      }}
+      onKeyDown={(event) => {
+        selectOnKey(event, id, onSelect);
+      }}
     >
       <title>{devices[id].title}</title>
       {children}
@@ -288,7 +292,13 @@ export function EmtScene({
           {[0, 1, 2, 3].map((index) => (
             <path
               key={index}
-              d={'M' + (328 + index * 11) + ' ' + (208 + index * 3.5) + ' q7 -17 14 -6 q7 11 14 -6'}
+              d={
+                'M' +
+                String(328 + index * 11) +
+                ' ' +
+                String(208 + index * 3.5) +
+                ' q7 -17 14 -6 q7 11 14 -6'
+              }
               fill="none"
               stroke="#d0bdff"
               strokeWidth="2.3"
@@ -495,7 +505,7 @@ export function EmtScene({
           </strong>
           <em>
             {referenceStatus.bus.exceeds
-              ? `+${Math.round(referenceStatus.bus.delta)} V above nominal · ${(
+              ? `+${String(Math.round(referenceStatus.bus.delta))} V above nominal · ${(
                   referenceStatus.bus.ratio * 100
                 ).toFixed(1)}%`
               : `${(referenceStatus.bus.ratio * 100).toFixed(1)}% of source nominal`}
@@ -534,9 +544,9 @@ export function EmtScene({
           {selected === 'source'
             ? row.source_v.toFixed(1) + ' V'
             : selected === 'reactor'
-              ? config.inductance_mh + ' mH'
+              ? String(config.inductance_mh) + ' mH'
               : selected === 'capacitor'
-                ? config.capacitance_mf +
+                ? String(config.capacitance_mf) +
                   ' mF · ' +
                   (((0.5 * config.capacitance_mf) / 1000) * row.bus_v ** 2).toFixed(1) +
                   ' J'

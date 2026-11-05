@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 /** Expand coverage beyond the original 12 native-equal continuity lessons.
  * Infrastructure educational screens are a separate result family and must
  * retain their explicit engineering HOLD; do not assert Python parity here.
@@ -13,7 +14,7 @@ test('curriculum inventory has 12 continuity and 12 infrastructure lessons', () 
 });
 
 for (const lesson of lessons) {
-  test(`${lesson.number}: ${lesson.id} default, challenge, evidence HOLD and exported envelope`, async ({
+  test(`${String(lesson.number)}: ${lesson.id} default, challenge, evidence HOLD and exported envelope`, async ({
     page,
   }, testInfo) => {
     test.setTimeout(120_000);
@@ -40,7 +41,7 @@ for (const lesson of lessons) {
       .locator('pre')
       .textContent();
     expect(before).not.toBeNull();
-    const baselineHash = JSON.parse(before!).result.inputHash;
+    const baselineHash = JSON.parse(requiredPresent(before, 'before')).result.inputHash;
     await studio.getByRole('button', { name: 'Apply challenge' }).click();
     await expect(status).toContainText('Inputs changed');
     await runButton.click();

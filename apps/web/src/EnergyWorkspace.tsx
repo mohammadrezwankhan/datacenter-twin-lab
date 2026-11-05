@@ -1,3 +1,4 @@
+import { requiredValue } from './required-value';
 import type { CSSProperties } from 'react';
 import { facilityProfiles, scenarioModes } from './facility-profiles';
 import type { Run, SiteScenario } from './types';
@@ -26,13 +27,18 @@ export function ScenarioMilestones({
       ]
     : run.events
         .filter((event) => event.action === 'set_demand')
-        .map((event, index) => ({ label: `Demand step ${index + 1}`, at: event.at_s }));
+        .map((event, index) => ({ label: `Demand step ${String(index + 1)}`, at: event.at_s }));
   if (!markers.length) return null;
   return (
     <section className="scenario-milestones" aria-label="Scenario milestones">
       <div className="demo-stages">
         {markers.map((marker) => (
-          <button key={`${marker.label}-${marker.at}`} onClick={() => onSelect(Number(marker.at))}>
+          <button
+            key={`${marker.label}-${marker.at}`}
+            onClick={() => {
+              onSelect(Number(marker.at));
+            }}
+          >
             {marker.label}
             <strong>{n(marker.at, 1)} s</strong>
           </button>
@@ -67,7 +73,9 @@ export function FacilitySelector({
             style={{ '--profile-color': item.color } as CSSProperties}
             aria-pressed={profile?.id === item.id}
             disabled={busy}
-            onClick={() => onSelect(item.presets[mode])}
+            onClick={() => {
+              onSelect(item.presets[mode]);
+            }}
           >
             <span className="facility-card-top">
               <span className="facility-glyph" aria-hidden="true">
@@ -96,7 +104,12 @@ export function FacilitySelector({
               aria-pressed={!!profile && mode === item.id}
               disabled={busy}
               title={item.description}
-              onClick={() => onSelect((profile ?? facilityProfiles[0]).presets[item.id])}
+              onClick={() => {
+                onSelect(
+                  (profile ?? requiredValue(facilityProfiles[0], 'default facility profile'))
+                    .presets[item.id],
+                );
+              }}
             >
               <span aria-hidden="true">0{index + 1}</span>
               {item.name}
@@ -131,7 +144,7 @@ export function RunInsight({ run }: { run: Run }) {
       <p>See what reaches the load when the supply changes.</p>
       <div
         className="energy-ring"
-        style={{ '--served-angle': `${fraction * 3.6}deg` } as CSSProperties}
+        style={{ '--served-angle': `${String(fraction * 3.6)}deg` } as CSSProperties}
       >
         <div>
           <strong>
@@ -194,7 +207,7 @@ export function ScenarioSettings({
       }}
     >
       <summary>
-        Configure storage, losses & asset limits <span>Advanced inputs</span>
+        Configure storage, losses &amp; asset limits <span>Advanced inputs</span>
       </summary>
       <p>
         Changing these assumptions creates an editable scenario. Run it again to update the results.
@@ -213,7 +226,9 @@ export function ScenarioSettings({
               step="any"
               disabled={busy}
               value={draft[field]}
-              onChange={(event) => onChange({ ...draft, [field]: event.target.value })}
+              onChange={(event) => {
+                onChange({ ...draft, [field]: event.target.value });
+              }}
             />
           </label>
         ))}
@@ -232,14 +247,14 @@ export function ScenarioSettings({
                 step="any"
                 disabled={busy}
                 value={asset.capacity_kw}
-                onChange={(event) =>
+                onChange={(event) => {
                   onChange({
                     ...draft,
                     assets: draft.assets.map((item) =>
                       item.id === asset.id ? { ...item, capacity_kw: event.target.value } : item,
                     ),
-                  })
-                }
+                  });
+                }}
               />
             </label>
           ))}
@@ -330,7 +345,11 @@ export function EnergyGuide({
             <h4>{item.subtitle}</h4>
             <p>{item.copy}</p>
             {item.action && item.mode && (
-              <button onClick={() => onScenario(item.mode!)}>
+              <button
+                onClick={() => {
+                  onScenario(item.mode);
+                }}
+              >
                 {item.action}
                 <span aria-hidden="true">↗</span>
               </button>

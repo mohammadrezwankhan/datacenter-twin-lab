@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import test from 'node:test';
@@ -17,7 +18,7 @@ function chunks(values: number[]) {
   });
 }
 
-test('archive reader reports actual bytes and a known manifest-sized file total', async () => {
+void test('archive reader reports actual bytes and a known manifest-sized file total', async () => {
   const states: RuntimeProgress[] = [];
   const bytes = [11, 22, 33, 44];
   const output = await readResponseBytes(
@@ -37,7 +38,7 @@ test('archive reader reports actual bytes and a known manifest-sized file total'
   });
 });
 
-test('compressed, missing, and mismatched lengths never become a byte meter', async () => {
+void test('compressed, missing, and mismatched lengths never become a byte meter', async () => {
   for (const headers of [{ 'content-length': '4', 'content-encoding': 'gzip' }, {}]) {
     const states: RuntimeProgress[] = [];
     await readResponseBytes(
@@ -46,7 +47,13 @@ test('compressed, missing, and mismatched lengths never become a byte meter', as
       (state) => states.push(state),
     );
     assert.ok(states.every((state) => state.totalBytes === undefined));
-    assert.ok(states.at(-1)!.loadedBytes! > 0);
+    assert.ok(states.every((state) => !Object.hasOwn(state, 'totalBytes')));
+    assert.ok(
+      requiredPresent(
+        requiredPresent(states.at(-1), 'states.at(-1)').loadedBytes,
+        'states.at(-1)!.loadedBytes',
+      ) > 0,
+    );
   }
 
   const mismatched: RuntimeProgress[] = [];
@@ -61,9 +68,10 @@ test('compressed, missing, and mismatched lengths never become a byte meter', as
     (state) => mismatched.push(state),
   );
   assert.equal(mismatched.at(-1)?.totalBytes, undefined);
+  assert.ok(!Object.hasOwn(requiredPresent(mismatched.at(-1), 'final progress'), 'totalBytes'));
 });
 
-test('a failed source download can retry and each attempt requests its files once', async () => {
+void test('a failed source download can retry and each attempt requests its files once', async () => {
   const originalFetch = globalThis.fetch;
   const data = new Uint8Array([4, 5, 6]);
   const archiveHash = createHash('sha256').update(data).digest('hex');

@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 from datacenter_twin.output import write_result
+
 from . import STUDY_DEFAULTS, run_study
 
 
@@ -30,9 +32,9 @@ def main() -> None:
                 protected_paths=[args.config] if args.config else [],
                 force=args.force,
             )
-            print(f"Saved power-dynamics study: {args.output}")
+            sys.stdout.write(f"Saved power-dynamics study: {args.output}\n")
         else:
-            print(content, end="")
+            sys.stdout.write(content)
     except (OSError, ValueError, RuntimeError) as exc:
         parser.error(str(exc))
 

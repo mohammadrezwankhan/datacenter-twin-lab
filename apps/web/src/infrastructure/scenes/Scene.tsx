@@ -74,7 +74,9 @@ export function InfrastructureScene({
       if (!enabled) setPlaying(false);
     };
     preference.addEventListener('change', updateMotion);
-    return () => preference.removeEventListener('change', updateMotion);
+    return () => {
+      preference.removeEventListener('change', updateMotion);
+    };
   }, []);
 
   useEffect(() => {
@@ -87,7 +89,7 @@ export function InfrastructureScene({
       element && typeof IntersectionObserver !== 'undefined'
         ? new IntersectionObserver(
             ([entry]) => {
-              if (!entry.isIntersecting) setPlaying(false);
+              if (entry && !entry.isIntersecting) setPlaying(false);
             },
             { threshold: 0.08 },
           )
@@ -108,7 +110,9 @@ export function InfrastructureScene({
       }
       setStep((current) => current + 1);
     }, 2200);
-    return () => window.clearInterval(timer);
+    return () => {
+      window.clearInterval(timer);
+    };
   }, [motion, playing, storyboard.length]);
 
   if (!Composition) {
@@ -156,10 +160,22 @@ export function InfrastructureScene({
         >
           {playing ? 'Pause' : 'Play'}
         </button>
-        <button type="button" onClick={() => move(-1)} disabled={step === 0}>
+        <button
+          type="button"
+          onClick={() => {
+            move(-1);
+          }}
+          disabled={step === 0}
+        >
           Previous step
         </button>
-        <button type="button" onClick={() => move(1)} disabled={step >= storyboard.length - 1}>
+        <button
+          type="button"
+          onClick={() => {
+            move(1);
+          }}
+          disabled={step >= storyboard.length - 1}
+        >
           Next step
         </button>
         <label className="infra-scrub-label" htmlFor={scrubId}>
@@ -176,9 +192,15 @@ export function InfrastructureScene({
             setPlaying(false);
             setStep(Number(event.currentTarget.value));
           }}
-          aria-valuetext={`Step ${step + 1} of ${storyboard.length}`}
+          aria-valuetext={`Step ${String(step + 1)} of ${String(storyboard.length)}`}
         />
-        <button type="button" onClick={() => setFlat((value) => !value)} aria-pressed={flat}>
+        <button
+          type="button"
+          onClick={() => {
+            setFlat((value) => !value);
+          }}
+          aria-pressed={flat}
+        >
           {flat ? 'Show 2.5D diagram' : 'Show 2D table'}
         </button>
         <button
@@ -215,7 +237,7 @@ export function InfrastructureScene({
       >
         <SceneMotionContext.Provider value={motion}>
           <SceneViewContext.Provider value={flat}>
-            <Composition result={result} fuelResult={fuelResult} step={step} flat={flat} />
+            <Composition result={result} fuelResult={fuelResult ?? null} step={step} flat={flat} />
           </SceneViewContext.Provider>
         </SceneMotionContext.Provider>
       </Suspense>

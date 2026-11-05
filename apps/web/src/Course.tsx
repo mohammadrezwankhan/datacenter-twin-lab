@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { lessons, lessonScenario, lessonPlanningScenario } from './course-lessons';
@@ -76,14 +77,23 @@ function download(value: Run | Planning, name: string) {
   link.href = url;
   link.download = name;
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 export function Course() {
   const route = new URLSearchParams(window.location.search).get('lesson');
-  const [id, setId] = useState(lessons.some((item) => item.id === route) ? route! : lessons[0].id);
-  const lesson = lessons.find((item) => item.id === id)!;
-  const theme = courseThemes[id];
+  const [id, setId] = useState(
+    lessons.some((item) => item.id === route)
+      ? requiredPresent(route, 'route')
+      : requiredValue(lessons[0], 'lessons[0]').id,
+  );
+  const lesson = requiredPresent(
+    lessons.find((item) => item.id === id),
+    'lessons.find((item) => item.id === id)',
+  );
+  const theme = requiredValue(courseThemes[id], 'courseThemes[id]');
   const position = lessons.indexOf(lesson);
   const [value, setValue] = useState(lesson.initial);
   const [usedValue, setUsedValue] = useState('');
@@ -128,7 +138,9 @@ export function Course() {
       if (nextId && lessons.some((item) => item.id === nextId)) setId(nextId);
     };
     window.addEventListener('popstate', update);
-    return () => window.removeEventListener('popstate', update);
+    return () => {
+      window.removeEventListener('popstate', update);
+    };
   }, []);
 
   async function calculate(input: string, submittedPrediction = '') {
@@ -157,7 +169,7 @@ export function Course() {
       setUsedValue(input);
       setWorksheet({
         lessonId: lesson.id,
-        runId: (nextRun ?? nextPlanning)!.run_id,
+        runId: requiredPresent(nextRun ?? nextPlanning, '(nextRun ?? nextPlanning)').run_id,
         input,
         prediction: submittedPrediction,
       });
@@ -215,7 +227,7 @@ export function Course() {
         lesson,
         input: worksheet.input,
         prediction: worksheet.prediction,
-        equation: equations[id],
+        equation: requiredValue(equations[id], `lesson equation ${id}`),
         calculation,
         sourceRevision: import.meta.env.VITE_PUBLIC_SOURCE_REVISION || null,
       });
@@ -268,8 +280,8 @@ export function Course() {
           />
           <div className="lesson-principle">
             <span className="eyebrow">THE RELATIONSHIP</span>
-            <strong>{equations[id].formula}</strong>
-            <p>{equations[id].note}</p>
+            <strong>{requiredValue(equations[id], 'equations[id]').formula}</strong>
+            <p>{requiredValue(equations[id], 'equations[id]').note}</p>
           </div>
         </div>
         <section className="lesson-lab" aria-label="Lesson experiment">
@@ -297,7 +309,9 @@ export function Course() {
                 min={lesson.min}
                 max={lesson.max}
                 step={lesson.step}
-                onChange={(event) => setValue(event.target.value)}
+                onChange={(event) => {
+                  setValue(event.target.value);
+                }}
               />
             </label>
             <input
@@ -308,7 +322,9 @@ export function Course() {
               max={lesson.max}
               step={lesson.step}
               value={Number.isFinite(Number(value)) && value !== '' ? value : lesson.min}
-              onChange={(event) => setValue(event.target.value)}
+              onChange={(event) => {
+                setValue(event.target.value);
+              }}
             />
             <div className="lesson-range-labels">
               <span>
@@ -319,13 +335,23 @@ export function Course() {
               </span>
             </div>
             <div className="lesson-presets">
-              <button type="button" onClick={() => setValue(lesson.initial)}>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue(lesson.initial);
+                }}
+              >
                 <span>Starting input</span>
                 <strong>
                   {lesson.initial} {lesson.unit}
                 </strong>
               </button>
-              <button type="button" onClick={() => setValue(lesson.challenge)}>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue(lesson.challenge);
+                }}
+              >
                 <span>Try the challenge value</span>
                 <strong>
                   {lesson.challenge} {lesson.unit}
@@ -344,7 +370,9 @@ export function Course() {
                 step="any"
                 value={prediction}
                 placeholder="What do you expect?"
-                onChange={(event) => setPrediction(event.target.value)}
+                onChange={(event) => {
+                  setPrediction(event.target.value);
+                }}
               />
             </label>
             <button className="lesson-run-button" type="submit" disabled={busy}>
@@ -452,7 +480,9 @@ export function Course() {
           <button
             className="answer-button"
             aria-expanded={answer}
-            onClick={() => setAnswer(!answer)}
+            onClick={() => {
+              setAnswer(!answer);
+            }}
           >
             {answer ? 'Hide worked answer' : 'Show worked answer'}{' '}
             <span aria-hidden="true">{answer ? '−' : '+'}</span>
@@ -472,17 +502,17 @@ export function Course() {
           <h3>Carry the idea forward.</h3>
           <p>
             {position === lessons.length - 1
-              ? `Next: ${lessonNavigation('evidence-load-ledger')!.title}`
-              : `Next: ${lessons[position + 1].title.replace(/^\d+\. /, '')}`}
+              ? `Next: ${requiredPresent(lessonNavigation('evidence-load-ledger'), "lessonNavigation('evidence-load-ledger')").title}`
+              : `Next: ${requiredValue(lessons[position + 1], 'lessons[position + 1]').title.replace(/^\d+\. /, '')}`}
           </p>
           <button
             className="lesson-review-toggle"
             aria-pressed={reviewed}
-            onClick={() =>
+            onClick={() => {
               setReviewedIds((current) =>
                 reviewed ? current.filter((item) => item !== id) : [...current, id],
-              )
-            }
+              );
+            }}
           >
             {reviewed ? 'Marked as reviewed' : 'Mark as reviewed'}{' '}
             <span aria-hidden="true">{reviewed ? '✓' : '○'}</span>
@@ -491,16 +521,17 @@ export function Course() {
           <div className="lesson-paging">
             <button
               disabled={position === 0}
-              onClick={() => chooseLesson(lessons[position - 1].id)}
+              onClick={() => {
+                chooseLesson(requiredValue(lessons[position - 1], 'lessons[position - 1]').id);
+              }}
             >
               Previous lesson
             </button>
             <button
-              onClick={() =>
-                position === lessons.length - 1
-                  ? navigateLesson('evidence-load-ledger')
-                  : chooseLesson(lessons[position + 1].id)
-              }
+              onClick={() => {
+                if (position === lessons.length - 1) navigateLesson('evidence-load-ledger');
+                else chooseLesson(requiredValue(lessons[position + 1], 'lessons[position + 1]').id);
+              }}
             >
               Next lesson <span aria-hidden="true">→</span>
             </button>
@@ -536,12 +567,20 @@ export function Course() {
               </p>
             </div>
             {run && (
-              <button onClick={() => download(run, `lesson-${lesson.id}-${run.run_id}.json`)}>
+              <button
+                onClick={() => {
+                  download(run, `lesson-${lesson.id}-${run.run_id}.json`);
+                }}
+              >
                 Export lesson run <span aria-hidden="true">↗</span>
               </button>
             )}
             {planning && (
-              <button onClick={() => download(planning, 'pue-lesson.json')}>
+              <button
+                onClick={() => {
+                  download(planning, 'pue-lesson.json');
+                }}
+              >
                 Export PUE calculation <span aria-hidden="true">↗</span>
               </button>
             )}
@@ -561,7 +600,7 @@ export function Course() {
             {worksheetError && <p role="alert">{worksheetError}</p>}
           </div>
           {run && <RunTools run={run} />}
-          <PythonVerification run={(run ?? planning)!} />
+          <PythonVerification run={requiredPresent(run ?? planning, '(run ?? planning)')} />
         </section>
       )}
       <details className="panel assumptions lesson-assumptions">

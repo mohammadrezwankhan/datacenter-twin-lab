@@ -27,7 +27,9 @@ const media = [
 
 function fixture(t: test.TestContext) {
   const root = mkdtempSync(resolve(tmpdir(), 'twin-stage-'));
-  t.after(() => rmSync(root, { recursive: true, force: true }));
+  t.after(() => {
+    rmSync(root, { recursive: true, force: true });
+  });
   const write = (name: string, bytes: string) => {
     const path = resolve(root, name);
     mkdirSync(dirname(path), { recursive: true });
@@ -38,8 +40,9 @@ function fixture(t: test.TestContext) {
     engine_version: version,
     artifacts: { [artifact]: { sha256: createHash('sha256').update(bytes).digest('hex') } },
   };
-  const saveManifest = () =>
+  const saveManifest = () => {
     write(`data/evidence/v${version}/manifest.json`, JSON.stringify(manifest));
+  };
   write(`data/evidence/v${version}/${artifact}`, bytes);
   saveManifest();
   write(`data/evidence/index-v${version}.json`, '{"current":true}\n');
@@ -63,7 +66,7 @@ function snapshot(directory: string): Record<string, string> {
   );
 }
 
-test('repeated staging includes only the current allowlist and preserves source packets', (t) => {
+void test('repeated staging includes only the current allowlist and preserves source packets', (t) => {
   const { root, write } = fixture(t);
   const before = snapshot(resolve(root, 'data'));
   const output = stageLocalEvidenceAssets(root, version);
@@ -92,13 +95,13 @@ test('repeated staging includes only the current allowlist and preserves source 
   assert.deepEqual(snapshot(resolve(root, 'data')), before);
 });
 
-test('a mismatched artifact hash fails staging', (t) => {
+void test('a mismatched artifact hash fails staging', (t) => {
   const { root, write } = fixture(t);
   write(`data/evidence/v${version}/${artifact}`, 'tampered');
   assert.throws(() => stageLocalEvidenceAssets(root, version), /Evidence hash mismatch/);
 });
 
-test('traversal artifact names fail without altering source files', (t) => {
+void test('traversal artifact names fail without altering source files', (t) => {
   const { root, manifest, saveManifest } = fixture(t);
   manifest.artifacts['../outside.json'] = manifest.artifacts[artifact];
   saveManifest();
@@ -107,24 +110,26 @@ test('traversal artifact names fail without altering source files', (t) => {
   assert.deepEqual(snapshot(resolve(root, 'data')), before);
 });
 
-test('an evidence version mismatch fails staging', (t) => {
+void test('an evidence version mismatch fails staging', (t) => {
   const { root, manifest, saveManifest } = fixture(t);
   manifest.engine_version = '1.0.0';
   saveManifest();
   assert.throws(() => stageLocalEvidenceAssets(root, version), /Evidence version mismatch/);
 });
 
-test('missing required media fails staging', (t) => {
+void test('missing required media fails staging', (t) => {
   const { root } = fixture(t);
   rmSync(resolve(root, media[0]));
   assert.throws(() => stageLocalEvidenceAssets(root, version), /ENOENT/);
 });
 
 for (const linkPath of ['.local', '.local/local-dashboard-assets']) {
-  test(`refuses linked staging directory ${linkPath} without changing its target`, (t) => {
+  void test(`refuses linked staging directory ${linkPath} without changing its target`, (t) => {
     const { root } = fixture(t);
     const outside = mkdtempSync(resolve(tmpdir(), 'twin-outside-'));
-    t.after(() => rmSync(outside, { recursive: true, force: true }));
+    t.after(() => {
+      rmSync(outside, { recursive: true, force: true });
+    });
     writeFileSync(resolve(outside, 'preserve.txt'), 'preserve');
     mkdirSync(dirname(resolve(root, linkPath)), { recursive: true });
     symlinkSync(outside, resolve(root, linkPath), 'junction');

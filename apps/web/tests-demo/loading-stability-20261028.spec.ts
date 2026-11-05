@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -65,12 +66,12 @@ async function capture(
   stage: string,
 ) {
   const metrics = await geometry(page);
-  await testInfo.attach(`responsive-20261028-${width}-${stage}.json`, {
+  await testInfo.attach(`responsive-20261028-${String(width)}-${stage}.json`, {
     body: Buffer.from(JSON.stringify(metrics, null, 2)),
     contentType: 'application/json',
   });
   const screenshot = await page.screenshot({ fullPage: true, animations: 'disabled' });
-  await testInfo.attach(`responsive-20261028-${width}-${stage}.png`, {
+  await testInfo.attach(`responsive-20261028-${String(width)}-${stage}.png`, {
     body: screenshot,
     contentType: 'image/png',
   });
@@ -78,11 +79,11 @@ async function capture(
   if (destination) {
     mkdirSync(resolve(destination), { recursive: true });
     writeFileSync(
-      resolve(destination, `responsive-20261028-${width}-${stage}.json`),
+      resolve(destination, `responsive-20261028-${String(width)}-${stage}.json`),
       JSON.stringify(metrics, null, 2),
     );
     await page.screenshot({
-      path: resolve(destination, `responsive-20261028-${width}-${stage}.png`),
+      path: resolve(destination, `responsive-20261028-${String(width)}-${stage}.png`),
       fullPage: true,
       animations: 'disabled',
     });
@@ -91,7 +92,7 @@ async function capture(
 }
 
 for (const width of [320, 1366]) {
-  test(`responsive-20261028 home hero stays stable while its host and shadow CSS are delayed at ${width}px`, async ({
+  test(`responsive-20261028 home hero stays stable while its host and shadow CSS are delayed at ${String(width)}px`, async ({
     browser,
   }, testInfo) => {
     test.setTimeout(45000);
@@ -174,11 +175,17 @@ for (const width of [320, 1366]) {
       expect(pending.hero).not.toBeNull();
       expect(before.hero).not.toBeNull();
       expect(
-        Math.abs(pending.hero!.y - before.hero!.y),
+        Math.abs(
+          requiredPresent(pending.hero, 'pending.hero').y -
+            requiredPresent(before.hero, 'before.hero').y,
+        ),
         'hero top remains stable while CSS is delayed',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(pending.hero!.height - before.hero!.height),
+        Math.abs(
+          requiredPresent(pending.hero, 'pending.hero').height -
+            requiredPresent(before.hero, 'before.hero').height,
+        ),
         'hero height remains stable while CSS is delayed',
       ).toBeLessThanOrEqual(2);
 
@@ -201,48 +208,78 @@ for (const width of [320, 1366]) {
       expect(enhanced.heading).not.toBeNull();
       expect(before.heading).not.toBeNull();
       expect(
-        Math.abs(enhanced.heading!.y - before.heading!.y),
+        Math.abs(
+          requiredPresent(enhanced.heading, 'enhanced.heading').y -
+            requiredPresent(before.heading, 'before.heading').y,
+        ),
         'preceding experiment heading remains stable',
       ).toBeLessThanOrEqual(2);
       expect(enhanced.navigation).not.toBeNull();
       expect(before.navigation).not.toBeNull();
       expect(
-        Math.abs(enhanced.navigation!.y - before.navigation!.y),
+        Math.abs(
+          requiredPresent(enhanced.navigation, 'enhanced.navigation').y -
+            requiredPresent(before.navigation, 'before.navigation').y,
+        ),
         'navigation remains stable during enhancement',
       ).toBeLessThanOrEqual(2);
       expect(enhanced.hero).not.toBeNull();
       expect(
-        Math.abs(enhanced.hero!.x - before.hero!.x),
+        Math.abs(
+          requiredPresent(enhanced.hero, 'enhanced.hero').x -
+            requiredPresent(before.hero, 'before.hero').x,
+        ),
         'hero x geometry remains stable',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(enhanced.hero!.y - before.hero!.y),
+        Math.abs(
+          requiredPresent(enhanced.hero, 'enhanced.hero').y -
+            requiredPresent(before.hero, 'before.hero').y,
+        ),
         'hero y geometry remains stable',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(enhanced.hero!.width - before.hero!.width),
+        Math.abs(
+          requiredPresent(enhanced.hero, 'enhanced.hero').width -
+            requiredPresent(before.hero, 'before.hero').width,
+        ),
         'hero width remains stable',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(enhanced.hero!.height - before.hero!.height),
+        Math.abs(
+          requiredPresent(enhanced.hero, 'enhanced.hero').height -
+            requiredPresent(before.hero, 'before.hero').height,
+        ),
         'hero height remains stable',
       ).toBeLessThanOrEqual(3);
       expect(before.fallbackCopyText).not.toBeNull();
       expect(enhanced.shadowCopyText).not.toBeNull();
       expect(
-        Math.abs(enhanced.shadowCopyText!.x - before.fallbackCopyText!.x),
+        Math.abs(
+          requiredPresent(enhanced.shadowCopyText, 'enhanced.shadowCopyText').x -
+            requiredPresent(before.fallbackCopyText, 'before.fallbackCopyText').x,
+        ),
         'caption x position matches between poster and enhanced states',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(enhanced.shadowCopyText!.y - before.fallbackCopyText!.y),
+        Math.abs(
+          requiredPresent(enhanced.shadowCopyText, 'enhanced.shadowCopyText').y -
+            requiredPresent(before.fallbackCopyText, 'before.fallbackCopyText').y,
+        ),
         'caption y position matches between poster and enhanced states',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(enhanced.shadowCopyText!.width - before.fallbackCopyText!.width),
+        Math.abs(
+          requiredPresent(enhanced.shadowCopyText, 'enhanced.shadowCopyText').width -
+            requiredPresent(before.fallbackCopyText, 'before.fallbackCopyText').width,
+        ),
         'caption width matches between poster and enhanced states',
       ).toBeLessThanOrEqual(2);
       expect(
-        Math.abs(enhanced.shadowCopyText!.height - before.fallbackCopyText!.height),
+        Math.abs(
+          requiredPresent(enhanced.shadowCopyText, 'enhanced.shadowCopyText').height -
+            requiredPresent(before.fallbackCopyText, 'before.fallbackCopyText').height,
+        ),
         'caption height matches between poster and enhanced states',
       ).toBeLessThanOrEqual(2);
       await expect(hero.getByRole('button', { name: 'Play animation' })).toBeVisible();
@@ -266,7 +303,7 @@ for (const width of [320, 1366]) {
 }
 
 for (const width of [320, 1366]) {
-  test(`responsive-20261028 EMT keeps curriculum and footer stable while the study is loading at ${width}px`, async ({
+  test(`responsive-20261028 EMT keeps curriculum and footer stable while the study is loading at ${String(width)}px`, async ({
     browser,
   }, testInfo) => {
     test.setTimeout(45000);
@@ -299,18 +336,18 @@ for (const width of [320, 1366]) {
         await studyGate;
         await route.continue();
       });
-      await page.goto(`${testInfo.project.use.baseURL}?mode=emt`, {
+      await page.goto(`${String(testInfo.project.use.baseURL)}?mode=emt`, {
         waitUntil: 'domcontentloaded',
       });
       await studyRequested;
       await expect(page.getByText('Opening the transient study…', { exact: true })).toBeVisible();
       const loading = await emtGeometry(page);
-      await testInfo.attach(`responsive-20261028-emt-${width}-loading.json`, {
+      await testInfo.attach(`responsive-20261028-emt-${String(width)}-loading.json`, {
         body: Buffer.from(JSON.stringify(loading, null, 2)),
         contentType: 'application/json',
       });
       const loadingScreenshot = await page.screenshot({ fullPage: true, animations: 'disabled' });
-      await testInfo.attach(`responsive-20261028-emt-${width}-loading.png`, {
+      await testInfo.attach(`responsive-20261028-emt-${String(width)}-loading.png`, {
         body: loadingScreenshot,
         contentType: 'image/png',
       });
@@ -318,11 +355,14 @@ for (const width of [320, 1366]) {
       if (screenshotDirectory) {
         mkdirSync(resolve(screenshotDirectory), { recursive: true });
         writeFileSync(
-          resolve(screenshotDirectory, `responsive-20261028-emt-${width}-loading.json`),
+          resolve(screenshotDirectory, `responsive-20261028-emt-${String(width)}-loading.json`),
           JSON.stringify(loading, null, 2),
         );
         await page.screenshot({
-          path: resolve(screenshotDirectory, `responsive-20261028-emt-${width}-loading.png`),
+          path: resolve(
+            screenshotDirectory,
+            `responsive-20261028-emt-${String(width)}-loading.png`,
+          ),
           fullPage: true,
           animations: 'disabled',
         });
@@ -336,7 +376,9 @@ for (const width of [320, 1366]) {
         loading.footer,
         'footer stays below the first viewport while the study loads',
       ).not.toBeNull();
-      expect(loading.footer!.y).toBeGreaterThanOrEqual(viewport.height - 1);
+      expect(requiredPresent(loading.footer, 'loading.footer').y).toBeGreaterThanOrEqual(
+        viewport.height - 1,
+      );
       expect(loading.documentWidth).toBeLessThanOrEqual(width + 1);
 
       releaseTracks();
@@ -345,27 +387,37 @@ for (const width of [320, 1366]) {
       await expect(page.locator('.emt-study')).toBeVisible();
       const loaded = await emtGeometry(page);
       const loadedScreenshot = await page.screenshot({ fullPage: true, animations: 'disabled' });
-      await testInfo.attach(`responsive-20261028-emt-${width}-loaded.png`, {
+      await testInfo.attach(`responsive-20261028-emt-${String(width)}-loaded.png`, {
         body: loadedScreenshot,
         contentType: 'image/png',
       });
       if (screenshotDirectory) {
         writeFileSync(
-          resolve(screenshotDirectory, `responsive-20261028-emt-${width}-loaded.json`),
+          resolve(screenshotDirectory, `responsive-20261028-emt-${String(width)}-loaded.json`),
           JSON.stringify(loaded, null, 2),
         );
         await page.screenshot({
-          path: resolve(screenshotDirectory, `responsive-20261028-emt-${width}-loaded.png`),
+          path: resolve(screenshotDirectory, `responsive-20261028-emt-${String(width)}-loaded.png`),
           fullPage: true,
           animations: 'disabled',
         });
       }
       expect(loaded.documentWidth).toBeLessThanOrEqual(width + 1);
-      expect(loaded.footer!.y).toBeGreaterThanOrEqual(viewport.height - 1);
-      expect(Math.abs(loaded.curriculum!.y - loading.curriculum!.y)).toBeLessThanOrEqual(2);
-      expect(Math.abs(loaded.curriculum!.height - loading.curriculum!.height)).toBeLessThanOrEqual(
-        2,
+      expect(requiredPresent(loaded.footer, 'loaded.footer').y).toBeGreaterThanOrEqual(
+        viewport.height - 1,
       );
+      expect(
+        Math.abs(
+          requiredPresent(loaded.curriculum, 'loaded.curriculum').y -
+            requiredPresent(loading.curriculum, 'loading.curriculum').y,
+        ),
+      ).toBeLessThanOrEqual(2);
+      expect(
+        Math.abs(
+          requiredPresent(loaded.curriculum, 'loaded.curriculum').height -
+            requiredPresent(loading.curriculum, 'loading.curriculum').height,
+        ),
+      ).toBeLessThanOrEqual(2);
     } finally {
       releaseTracks?.();
       releaseStudy?.();

@@ -112,7 +112,9 @@ test('cold first result requests no Python runtime or cover and records observed
   );
 });
 
-test('course works at phone width and navigation returns to the simulator', async ({ page }) => {
+test('course works at phone width and navigation returns to the simulator', async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('./?lesson=ai-outage');
   await expect(page.getByTestId('lesson-result')).toContainText('607.8');

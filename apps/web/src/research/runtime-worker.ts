@@ -44,7 +44,9 @@ async function initialize() {
     // The pinned Pyodide callback reports package work by phase. The
     // worker fetch wrapper supplies byte counts for actual local wheel reads.
     await py.loadPackage(['numpy', 'scipy'], {
-      messageCallback: (message) => report({ stage, message }),
+      messageCallback: (message) => {
+        report({ stage, message });
+      },
     });
     py.runPython('import json\nfrom datacenter_twin.research import run_study as _run_study');
     return py;

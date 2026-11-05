@@ -1,0 +1,7 @@
+# The legacy deploy job is deliberately disabled because the existing Pages
+# publisher owns deployment. Preserve that state; every other lint check applies.
+# Source: rhysd/actionlint v1.7.12 docs/config.md (path-specific ignore support).
+paths:
+  .github/workflows/deploy-dashboard.yml:
+    ignore:
+      - '^constant expression "false" in condition\. remove the if: section$'

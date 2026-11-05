@@ -1,3 +1,4 @@
+import { requiredPresent } from './required-value';
 import type { RuntimeProgress } from './runtime-progress';
 
 type Pending = {
@@ -49,7 +50,9 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
         if (data.error) item.reject(new Error(data.error));
         else item.resolve(data.result);
       };
-      worker.onerror = () => stop(new Error(`${label} could not start. Try again or reload.`));
+      worker.onerror = () => {
+        stop(new Error(`${label} could not start. Try again or reload.`));
+      };
     }
     return new Promise<T>((resolve, reject) => {
       const id = ++sequence;
@@ -60,21 +63,22 @@ export function createWorkerRequest(createWorker: () => Worker, label: string) {
         reject(new DOMException('Cancelled', 'AbortError'));
         if (!pending.size) stop(new DOMException('Cancelled', 'AbortError'));
       };
-      const timer = setTimeout(
-        () => stop(new Error(`${label} timed out. Try a smaller scenario or retry.`)),
-        90_000,
-      );
+      const timer = setTimeout(() => {
+        stop(new Error(`${label} timed out. Try a smaller scenario or retry.`));
+      }, 90_000);
       pending.set(id, {
-        resolve: (value) => resolve(value as T),
+        resolve: (value) => {
+          resolve(value as T);
+        },
         reject,
-        progress: onProgress,
+        ...(onProgress === undefined ? {} : { progress: onProgress }),
         cleanup: () => {
           clearTimeout(timer);
           signal?.removeEventListener('abort', abort);
         },
       });
       signal?.addEventListener('abort', abort, { once: true });
-      worker!.postMessage({ id, path, body: json });
+      requiredPresent(worker, 'worker').postMessage({ id, path, body: json });
     });
   }
   return request;

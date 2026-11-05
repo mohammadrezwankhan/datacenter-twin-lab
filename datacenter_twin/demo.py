@@ -1,8 +1,9 @@
 """Bundled synthetic presets; no vendor or facility parameters inferred."""
 
+import json
 from decimal import Decimal
 from importlib.resources import files
-import json
+from typing import Any, TypedDict
 
 from .contracts import InputError
 from .topology import SiteScenario
@@ -24,10 +25,18 @@ _AI_CLUSTER_EVENT_PRESETS = {
     "ai_cluster_generator_failure": "generator_failure",
 }
 
+
 # These are illustrative scaling anchors for teaching cases, not measured
 # facility designs. Power is an aggregate IT load in MW; stored energy is
 # scaled at 100 kWh per MW (0.1 h gross initial reserve).
-FACILITY_PROFILES = {
+class FacilityProfile(TypedDict):
+    name: str
+    load_mw: int
+    scale: Decimal
+    source_id: str
+
+
+FACILITY_PROFILES: dict[str, FacilityProfile] = {
     "ai_cluster_50mw": {
         "name": "AI cluster",
         "load_mw": 50,
@@ -96,15 +105,17 @@ for _profile_id, _modes in FACILITY_PRESETS.items():
             "ramp": "aggregate IT load steps",
             "reserve": "3 h grid + generator outage",
         }[_mode]
-        PRESETS[_preset] = f"{FACILITY_PROFILES[_profile_id]['name']} / {_load_mw} MW / {_description}"
+        PRESETS[_preset] = (
+            f"{FACILITY_PROFILES[_profile_id]['name']} / {_load_mw} MW / {_description}"
+        )
 
 
-def _scenario_event(at_s: int, action: str, target: str) -> dict:
+def _scenario_event(at_s: int, action: str, target: str) -> dict[str, Any]:
     """Create an availability event with the contract's explicit null value."""
     return {"at_s": at_s, "action": action, "target": target, "value_kw": None}
 
 
-def _demand_event(at_s: int, demand_kw: Decimal) -> dict:
+def _demand_event(at_s: int, demand_kw: Decimal) -> dict[str, Any]:
     """Create an aggregate IT load step; this does not model a transient."""
     return {
         "at_s": at_s,
@@ -114,7 +125,7 @@ def _demand_event(at_s: int, demand_kw: Decimal) -> dict:
     }
 
 
-def _events_for_preset(preset: str) -> list[dict]:
+def _events_for_preset(preset: str) -> list[dict[str, Any]]:
     """Return deterministic outage or aggregate-load event inputs."""
     facility_case = _FACILITY_PRESET_LOOKUP.get(preset)
     if facility_case is not None:
@@ -128,13 +139,12 @@ def _events_for_preset(preset: str) -> list[dict]:
                 _demand_event(900, load_kw),
             ]
         recovery_s = 900 if mode == "outage" else 11_100
-        events = [
+        return [
             _scenario_event(300, "asset_down", "utility"),
             _scenario_event(300, "asset_down", "generator"),
             _scenario_event(recovery_s, "asset_up", "utility"),
             _scenario_event(recovery_s, "asset_up", "generator"),
         ]
-        return events
 
     event_preset = _AI_CLUSTER_EVENT_PRESETS.get(preset, preset)
     events = []
@@ -154,7 +164,7 @@ def _events_for_preset(preset: str) -> list[dict]:
     return events
 
 
-def _scale_ai_cluster(data: dict) -> None:
+def _scale_ai_cluster(data: dict[str, Any]) -> None:
     """Scale aggregate electrical quantities while retaining all timing inputs.
 
     The result is a 50 MW electrical teaching case.  It carries no GPU count,
@@ -169,13 +179,11 @@ def _scale_ai_cluster(data: dict) -> None:
     ):
         data[field] = str(Decimal(data[field]) * _AI_CLUSTER_SCALE)
     for asset in data["assets"]:
-        asset["capacity_kw"] = str(
-            Decimal(asset["capacity_kw"]) * _AI_CLUSTER_SCALE
-        )
+        asset["capacity_kw"] = str(Decimal(asset["capacity_kw"]) * _AI_CLUSTER_SCALE)
     data["source_ids"] = [*data["source_ids"], _AI_CLUSTER_SOURCE_ID]
 
 
-def _scale_facility(data: dict, profile_id: str) -> None:
+def _scale_facility(data: dict[str, Any], profile_id: str) -> None:
     """Scale the reference topology linearly for an aggregate IT load profile."""
     profile = FACILITY_PROFILES[profile_id]
     scale = profile["scale"]
@@ -207,9 +215,7 @@ def demo_scenario(preset: str = "utility_loss") -> SiteScenario:
             data["source_ids"].append("SYN-ENERGY-WORKSPACE-001")
         if mode == "ramp":
             # The 110% input step is inside this declared IT envelope.
-            data["it_capacity_kw"] = str(
-                Decimal(data["it_demand_kw"]) * Decimal("1.1")
-            )
+            data["it_capacity_kw"] = str(Decimal(data["it_demand_kw"]) * Decimal("1.1"))
         if mode == "reserve":
             # Four-hour gross stored reserve; finite 4 h run and a 3 h outage.
             reserve_kwh = Decimal(data["it_demand_kw"]) * Decimal("4")

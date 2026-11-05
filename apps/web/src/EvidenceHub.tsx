@@ -22,7 +22,7 @@ type EvidenceIndex = {
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const suppliedRevision = import.meta.env.VITE_PUBLIC_SOURCE_REVISION || '';
 const revision = /^[a-f0-9]{40}$/.test(suppliedRevision) ? suppliedRevision : null;
-const source = (path: string) => `${repository}/blob/${revision || 'main'}/${path}`;
+const source = (path: string) => `${repository}/blob/${String(revision || 'main')}/${path}`;
 const media = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 
 export function EvidenceHub() {
@@ -46,7 +46,9 @@ export function EvidenceHub() {
       .catch((cause: Error) => {
         if (!controller.signal.aborted) setError(cause.message);
       });
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return (
@@ -78,7 +80,9 @@ export function EvidenceHub() {
           {import.meta.env.MODE === 'demo' && (
             <a href="./evidence/">Readable reference results ↗</a>
           )}
-          <a href={`${repository}/tree/v${ENGINE_VERSION}`}>Versioned source v{ENGINE_VERSION} ↗</a>
+          <a href={`${repository}/tree/v${ENGINE_VERSION}`}>
+            Versioned source v{ENGINE_VERSION} ↗
+          </a>
           <a href={`${repository}/releases`}>Published releases ↗</a>
           <a href={`${repository}/actions/workflows/tests.yml`}>Inspect actual CI runs ↗</a>
         </div>
@@ -123,8 +127,8 @@ export function EvidenceHub() {
             {revision ? (
               <>
                 published source{' '}
-                <a href={`${repository}/commit/${revision}`}>{revision.slice(0, 12)}</a>; result
-                links contain the full immutable commit and input hash.
+                <a href={`${repository}/commit/${String(revision)}`}>{revision.slice(0, 12)}</a>;
+                result links contain the full immutable commit and input hash.
               </>
             ) : (
               'Development build: immutable source links become available in the published build.'

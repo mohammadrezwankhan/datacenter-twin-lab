@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { execFileSync } from 'node:child_process';
@@ -35,7 +36,9 @@ function compare(a: unknown, b: unknown, path = ''): void {
     expect(Math.abs(a - b), path).toBeLessThanOrEqual(2e-5 * Math.max(1, Math.abs(b)));
   } else if (Array.isArray(a) && Array.isArray(b)) {
     expect(a.length, path).toBe(b.length);
-    a.forEach((value, i) => compare(value, b[i], `${path}[${i}]`));
+    a.forEach((value, i) => {
+      compare(value, b[i], `${path}[${String(i)}]`);
+    });
   } else if (a && b && typeof a === 'object' && typeof b === 'object') {
     expect(Object.keys(a).sort(), path).toEqual(Object.keys(b).sort());
     for (const key of Object.keys(a))
@@ -54,7 +57,7 @@ test('power dynamics runtime versions match the selected Pyodide lock', async ({
 }, info) => {
   // Use the same locally staged runtime as the application. No CDN fallback can
   // conceal a missing wheel or a package imported from the wrong distribution.
-  const allowedOrigin = `${new URL(baseURL!).origin}/`;
+  const allowedOrigin = `${new URL(requiredPresent(baseURL, 'baseURL')).origin}/`;
   await context.route('**/*', (route) =>
     route.request().url().startsWith(allowedOrigin) ? route.continue() : route.abort(),
   );
@@ -161,7 +164,7 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
     const pending = page.waitForEvent('download');
     await page.getByTestId('research-export-json').click();
     const result = JSON.parse(
-      await readFile((await (await pending).path())!, 'utf8'),
+      await readFile(await (await pending).path(), 'utf8'),
     ) as ResearchResult;
     expect(result.study_id).toBe(id);
     const reference = native(result);
@@ -181,7 +184,7 @@ for (const id of ['load-step', 'modal', 'forced-response', 'model-comparison', '
     ).toBe(true);
     const csv = page.waitForEvent('download');
     await page.getByTestId('research-export-csv').click();
-    const text = await readFile((await (await csv).path())!, 'utf8');
+    const text = await readFile(await (await csv).path(), 'utf8');
     const points = result.charts.reduce(
       (sum, chart) => sum + chart.x.length * chart.lines.length,
       0,
@@ -216,7 +219,7 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   await expect(page.getByText('Showing prior applied run', { exact: true })).toBeVisible();
   const priorDownload = page.waitForEvent('download');
   await page.getByTestId('research-export-json').click();
-  const prior = JSON.parse(await readFile((await (await priorDownload).path())!, 'utf8'));
+  const prior = JSON.parse(await readFile(await (await priorDownload).path(), 'utf8'));
   expect(prior.config.load_initial_pu).toBe(0.5);
   expect(prior.config.load_final_pu).toBe(0.6);
   await page.getByTestId('research-input-load_initial_pu').fill('0.5');
@@ -224,7 +227,7 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   await expect(page.getByTestId('research-run')).toBeDisabled();
   const pending = page.waitForEvent('download');
   await page.getByTestId('research-export-json').click();
-  const result = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  const result = JSON.parse(await readFile(await (await pending).path(), 'utf8'));
   expect(result.config.dc_capacitance_pu).toBe(2);
   await page.getByTestId('research-input-dc_capacitance_pu').fill('3');
   await page.getByTestId('research-run').click();
@@ -233,7 +236,7 @@ test('power dynamics cancellation and invalid drafts preserve the applied result
   const changed = page.waitForEvent('download');
   await page.getByTestId('research-export-json').click();
   const updated = JSON.parse(
-    await readFile((await (await changed).path())!, 'utf8'),
+    await readFile(await (await changed).path(), 'utf8'),
   ) as ResearchResult;
   expect(updated.config.dc_capacitance_pu).toBe(3);
   compare(updated, native(updated));

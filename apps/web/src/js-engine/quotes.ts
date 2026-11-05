@@ -24,7 +24,7 @@ function stringValue(value: unknown, name: string): string {
 
 function integer(value: unknown, name: string, low: number, high: number): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < low || value > high)
-    throw new InputError(`${name}: expected an integer from ${low} to ${high}`);
+    throw new InputError(`${name}: expected an integer from ${String(low)} to ${String(high)}`);
   return value;
 }
 

@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -12,7 +13,7 @@ import { buildLearningManifest } from '../learn-manifest.ts';
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex');
 
-test('manifest preserves the existing prose, categories and verified destinations', () => {
+void test('manifest preserves the existing prose, categories and verified destinations', () => {
   const manifest = buildLearningManifest(null);
   assert.equal(manifest.schemaVersion, 1);
   assert.equal(manifest.sourceRevision, null);
@@ -64,7 +65,7 @@ test('manifest preserves the existing prose, categories and verified destination
   }
 });
 
-test('only the five power-dynamics records share a canonical overview', () => {
+void test('only the five power-dynamics records share a canonical overview', () => {
   const sourceRevision = 'a'.repeat(40);
   const manifest = buildLearningManifest(sourceRevision);
   const { items } = manifest;
@@ -87,12 +88,13 @@ test('only the five power-dynamics records share a canonical overview', () => {
   assert.equal(items[0].sourceFiles.length > 0, true);
 });
 
-test('source and display hashes are reproducible from their declared inputs', () => {
+void test('source and display hashes are reproducible from their declared inputs', () => {
   const { items } = buildLearningManifest(null);
   assert.ok(
-    items
-      .find(({ id }) => id === 'generator-bank-fuel')!
-      .sourceFiles.some(({ path }) => path === 'apps/web/src/infrastructure/fuel.ts'),
+    requiredPresent(
+      items.find(({ id }) => id === 'generator-bank-fuel'),
+      "items\n      .find(({ id }) => id === 'generator-bank-fuel')",
+    ).sourceFiles.some(({ path }) => path === 'apps/web/src/infrastructure/fuel.ts'),
     'The separate generator fuel defaults must be covered by source provenance',
   );
   for (const item of items) {

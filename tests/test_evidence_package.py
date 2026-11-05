@@ -1,10 +1,10 @@
-import json
-from decimal import Decimal
-from fractions import Fraction
 import hashlib
-from pathlib import Path
+import json
 import tempfile
 import unittest
+from decimal import Decimal
+from fractions import Fraction
+from pathlib import Path
 
 from datacenter_twin.contracts import InputError
 from scripts.build_evidence import (
@@ -17,7 +17,7 @@ from scripts.build_evidence import (
 
 
 class EvidencePackageTests(unittest.TestCase):
-    def test_independent_expectations_match_lesson_and_path_observations(self):
+    def test_independent_expectations_match_lesson_and_path_observations(self) -> None:
         cases = _cases()
         self.assertEqual(
             [case["case_id"] for case in cases],
@@ -28,8 +28,7 @@ class EvidencePackageTests(unittest.TestCase):
             ],
         )
         expected_by_case = {
-            case["case_id"]: {check["metric"]: check for check in case["checks"]}
-            for case in cases
+            case["case_id"]: {check["metric"]: check for check in case["checks"]} for case in cases
         }
         self.assertEqual(
             expected_by_case["canonical-1mw-100kwh"]["ride_through_s"]["expected"],
@@ -62,12 +61,14 @@ class EvidencePackageTests(unittest.TestCase):
         self.assertEqual(path["unserved_duration_s"]["expected"], "600")
         path_unserved = Fraction(Decimal(path["unserved_it_kwh"]["expected"]))
         self.assertLess(abs(path_unserved - Fraction(335, 6)), Fraction(1, 10**90))
-        self.assertTrue(all(check["status"] == "match" for case in cases for check in case["checks"]))
+        self.assertTrue(
+            all(check["status"] == "match" for case in cases for check in case["checks"])
+        )
         self.assertTrue(all(case["ledger"]["status"] == "pass" for case in cases))
 
-    def test_course_scenarios_follow_the_browser_lesson_recipe(self):
+    def test_course_scenarios_follow_the_browser_lesson_recipe(self) -> None:
         cases = _cases()
-        for case, initial in zip(cases[:2], ("100", "50")):
+        for case, initial in zip(cases[:2], ("100", "50"), strict=True):
             with self.subTest(initial=initial):
                 self.assertEqual(case["scenario_id"], "course-ride-through")
                 self.assertEqual(case["checks"][0]["observed"], "500")
@@ -76,7 +77,7 @@ class EvidencePackageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             packet = Path(tmp) / "packet"
             build_packet(packet)
-            for case, initial in zip(cases[:2], ("100", "50")):
+            for case, initial in zip(cases[:2], ("100", "50"), strict=True):
                 scenario_path = packet / case["scenario_file"]
                 scenario = json.loads(scenario_path.read_text(encoding="utf-8"))
                 self.assertEqual(scenario["name"], "3. Calculate battery ride-through")
@@ -84,7 +85,7 @@ class EvidencePackageTests(unittest.TestCase):
                 self.assertEqual(scenario["battery_initial_kwh"], initial)
                 self.assertEqual(scenario["source_ids"].count("EDU-POWER-001"), 1)
 
-    def test_repeated_packet_artifacts_are_identical_and_content_addressed(self):
+    def test_repeated_packet_artifacts_are_identical_and_content_addressed(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             first = Path(tmp) / "first"
             second = Path(tmp) / "second"
@@ -108,21 +109,19 @@ class EvidencePackageTests(unittest.TestCase):
                 {"repository": "owner/public-repo", "revision": "abc123"},
             )
 
-    def test_manifest_verification_detects_tampering(self):
+    def test_manifest_verification_detects_tampering(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             packet = Path(tmp) / "packet"
             build_packet(packet)
             result = verify_packet(packet)
             self.assertEqual(result["status"], "integrity_and_reproduction_verified")
             manifest = json.loads((packet / "manifest.json").read_text(encoding="utf-8"))
-            target = packet / next(
-                case["run_file"] for case in manifest["cases"]
-            )
+            target = packet / next(case["run_file"] for case in manifest["cases"])
             target.write_bytes(target.read_bytes() + b" ")
             with self.assertRaisesRegex(InputError, "SHA-256 mismatch"):
                 verify_packet(packet)
 
-    def test_rehashed_forged_run_is_rejected_by_semantic_reproduction(self):
+    def test_rehashed_forged_run_is_rejected_by_semantic_reproduction(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             packet = Path(tmp) / "packet"
             build_packet(packet)
@@ -135,16 +134,16 @@ class EvidencePackageTests(unittest.TestCase):
                 run_path.read_bytes()
             ).hexdigest()
             manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
-            with self.assertRaisesRegex(InputError, "hash for .* does not match current reproduction"):
+            with self.assertRaisesRegex(
+                InputError, "hash for .* does not match current reproduction"
+            ):
                 verify_packet(packet)
 
-    def test_empty_packet_and_forged_expected_checks_are_rejected(self):
+    def test_empty_packet_and_forged_expected_checks_are_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             empty = Path(tmp) / "empty"
             empty.mkdir()
-            (empty / "manifest.json").write_text(
-                json.dumps({"artifacts": {}}), encoding="utf-8"
-            )
+            (empty / "manifest.json").write_text(json.dumps({"artifacts": {}}), encoding="utf-8")
             with self.assertRaises(InputError):
                 verify_packet(empty)
 
@@ -167,7 +166,7 @@ class EvidencePackageTests(unittest.TestCase):
             with self.assertRaisesRegex(InputError, "Duplicate JSON object key"):
                 verify_packet(duplicate)
 
-    def test_unsupported_version_malformed_context_and_missing_case_are_rejected(self):
+    def test_unsupported_version_malformed_context_and_missing_case_are_rejected(self) -> None:
         mutations = (
             ("engine_version", "0.0.0"),
             ("public_context", {"repository": ["not", "a", "string"]}),
@@ -187,7 +186,7 @@ class EvidencePackageTests(unittest.TestCase):
                 with self.assertRaises(InputError):
                     verify_packet(packet)
 
-    def test_cross_environment_metadata_is_shape_checked_but_not_host_pinned(self):
+    def test_cross_environment_metadata_is_shape_checked_but_not_host_pinned(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             packet = Path(tmp) / "packet"
             build_packet(packet)
@@ -201,7 +200,9 @@ class EvidencePackageTests(unittest.TestCase):
                 operating_system_release="6.12.0",
                 machine_architecture="x86_64",
             )
-            environment_path.write_text(json.dumps(environment, sort_keys=True) + "\n", encoding="utf-8")
+            environment_path.write_text(
+                json.dumps(environment, sort_keys=True) + "\n", encoding="utf-8"
+            )
             manifest["artifacts"]["environment.json"]["sha256"] = hashlib.sha256(
                 environment_path.read_bytes()
             ).hexdigest()
@@ -211,7 +212,7 @@ class EvidencePackageTests(unittest.TestCase):
                 "integrity_and_reproduction_verified",
             )
 
-    def test_manifest_artifact_paths_reject_windows_separators_and_drives(self):
+    def test_manifest_artifact_paths_reject_windows_separators_and_drives(self) -> None:
         for unsafe_name in (r"..\outside.json", "C:/outside.json", "C:outside.json"):
             with self.subTest(name=unsafe_name), tempfile.TemporaryDirectory() as tmp:
                 packet = Path(tmp) / "packet"
@@ -224,7 +225,7 @@ class EvidencePackageTests(unittest.TestCase):
                 with self.assertRaisesRegex(InputError, "Unsafe artifact path"):
                     verify_packet(packet)
 
-    def test_verifier_rejects_symlinked_packet_path_component(self):
+    def test_verifier_rejects_symlinked_packet_path_component(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
             actual_root = base / "actual"
@@ -238,7 +239,7 @@ class EvidencePackageTests(unittest.TestCase):
             with self.assertRaisesRegex(InputError, "symbolic-link directory"):
                 verify_packet(alias / "packet")
 
-    def test_build_refuses_existing_destination_and_protects_source_tree(self):
+    def test_build_refuses_existing_destination_and_protects_source_tree(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             destination = Path(tmp) / "existing"
             destination.mkdir()
@@ -250,7 +251,7 @@ class EvidencePackageTests(unittest.TestCase):
         with self.assertRaisesRegex(InputError, "under outputs"):
             build_packet(ROOT / "datacenter_twin" / "evidence-test")
 
-    def test_flag_style_cli_build_and_verify(self):
+    def test_flag_style_cli_build_and_verify(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             destination = Path(tmp) / "packet"
             self.assertEqual(

@@ -34,7 +34,9 @@ test('workspace Back and Forward restore views and remove unrelated fragments', 
   );
 });
 
-test('study history restores the selection and invalidates pending results', async ({ page }) => {
+test('study history restores the selection and invalidates pending results', async ({
+  page,
+}) => {
   await page.goto('./?study=load-step');
   const studio = page.getByTestId('research-studio');
   const choices = page

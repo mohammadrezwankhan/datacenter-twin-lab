@@ -6,7 +6,7 @@ async function exportResult(page: import('@playwright/test').Page) {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export guided run (JSON)' }).click();
   const download = await pending;
-  return JSON.parse(await readFile((await download.path())!, 'utf8'));
+  return JSON.parse(await readFile(await download.path(), 'utf8'));
 }
 
 test('the five-minute guide requires a prediction and matches native results for both reserves', async ({
@@ -57,8 +57,12 @@ test('the five-minute guide requires a prediction and matches native results for
     await expect(page.getByTestId('guide-result')).toHaveCount(0);
     await page.getByTestId('guide-run').click();
     await expect(page.getByTestId('guide-result')).toBeVisible();
-    await expect(page.getByTestId('guide-result')).toContainText(`${item.rideThrough} seconds`);
-    await expect(page.getByTestId('guide-result')).toContainText(`${item.elapsed} s elapsed`);
+    await expect(page.getByTestId('guide-result')).toContainText(
+      `${String(item.rideThrough)} seconds`,
+    );
+    await expect(page.getByTestId('guide-result')).toContainText(
+      `${String(item.elapsed)} s elapsed`,
+    );
     await expect(page.getByTestId('guide-result')).toContainText('300 s elapsed');
 
     const result = await exportResult(page);
@@ -89,7 +93,7 @@ test('the five-minute guide requires a prediction and matches native results for
     if (index === 0) expect(runtimeRequests).toEqual([]);
     await page.getByLabel('Verify against Python').check();
     await expect(page.getByTestId('python-verification-status')).toContainText(
-      `Exact match with Python: all inputs, hashes and calculated values (${result.run_id}).`,
+      `Exact match with Python: all inputs, hashes and calculated values (${String(result.run_id)}).`,
     );
     expect(await exportResult(page)).toEqual(result);
     await info.attach(`guided-${item.reserve}kwh-complete-result.json`, {

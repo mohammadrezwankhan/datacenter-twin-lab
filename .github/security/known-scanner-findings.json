@@ -1,0 +1,148 @@
+{
+  "recorded_at": "2026-11-04",
+  "status": "blocked-upstream-dependency-constraints",
+  "scope": "Development scanner dependencies only; every advisory remains blocking in pip-audit.",
+  "semgrep_version": "1.183.0",
+  "latest_release_checked": "1.183.0",
+  "upstream_constraints": [
+    "mcp==1.29.0",
+    "opentelemetry-api~=1.37.0"
+  ],
+  "patched_requirements": [
+    "mcp>=1.30.0",
+    "opentelemetry-api>=1.45.1"
+  ],
+  "advisories": [
+    {
+      "package": "mcp",
+      "version": "1.29.0",
+      "advisory": "CVE-2026-59951",
+      "aliases": [
+        "GHSA-84m7-p3x7-pcfv"
+      ],
+      "fixed_versions": [
+        "1.30.0",
+        "2.2.0"
+      ],
+      "osv_severity": [
+        {
+          "type": "CVSS_V4",
+          "score": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+        }
+      ],
+      "source": "https://api.osv.dev/v1/vulns/CVE-2026-59951",
+      "github_severity": "medium",
+      "github_cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "score": 7.5
+      },
+      "github_source": "https://api.github.com/advisories/GHSA-84m7-p3x7-pcfv"
+    },
+    {
+      "package": "mcp",
+      "version": "1.29.0",
+      "advisory": "CVE-2026-116685",
+      "aliases": [
+        "GHSA-5h93-6whr-6q8j"
+      ],
+      "fixed_versions": [
+        "1.30.0",
+        "2.2.0"
+      ],
+      "osv_severity": [
+        {
+          "type": "CVSS_V3",
+          "score": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N"
+        }
+      ],
+      "source": "https://api.osv.dev/v1/vulns/CVE-2026-116685",
+      "github_severity": "medium",
+      "github_cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+        "score": 5.9
+      },
+      "github_source": "https://api.github.com/advisories/GHSA-5h93-6whr-6q8j"
+    },
+    {
+      "package": "mcp",
+      "version": "1.29.0",
+      "advisory": "CVE-2026-116684",
+      "aliases": [
+        "GHSA-w4fh-qvv9-3v23"
+      ],
+      "fixed_versions": [
+        "1.30.0",
+        "2.2.0"
+      ],
+      "osv_severity": [
+        {
+          "type": "CVSS_V3",
+          "score": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N"
+        }
+      ],
+      "source": "https://api.osv.dev/v1/vulns/CVE-2026-116684",
+      "github_severity": "medium",
+      "github_cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:H/PR:L/UI:N/S:U/C:H/I:H/A:N",
+        "score": 6.8
+      },
+      "github_source": "https://api.github.com/advisories/GHSA-w4fh-qvv9-3v23"
+    },
+    {
+      "package": "mcp",
+      "version": "1.29.0",
+      "advisory": "CVE-2026-116686",
+      "aliases": [
+        "GHSA-rwrf-2pqf-9j8j"
+      ],
+      "fixed_versions": [
+        "1.30.0",
+        "2.2.0"
+      ],
+      "osv_severity": [
+        {
+          "type": "CVSS_V3",
+          "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H"
+        }
+      ],
+      "source": "https://api.osv.dev/v1/vulns/CVE-2026-116686",
+      "github_severity": "medium",
+      "github_cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:N/I:N/A:H",
+        "score": 6.5
+      },
+      "github_source": "https://api.github.com/advisories/GHSA-rwrf-2pqf-9j8j"
+    },
+    {
+      "package": "opentelemetry-api",
+      "version": "1.37.0",
+      "advisory": "CVE-2026-114603",
+      "aliases": [
+        "GHSA-xcq7-p3pf-p88h"
+      ],
+      "fixed_versions": [
+        "1.45.1"
+      ],
+      "osv_severity": [
+        {
+          "type": "CVSS_V3",
+          "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+        }
+      ],
+      "source": "https://api.osv.dev/v1/vulns/CVE-2026-114603",
+      "github_severity": "medium",
+      "github_cvss": {
+        "vector_string": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L",
+        "score": 5.3
+      },
+      "github_source": "https://api.github.com/advisories/GHSA-xcq7-p3pf-p88h"
+    }
+  ],
+  "resolution": "Both checked releases constrain vulnerable versions; the patched dependency combination is unsatisfiable. No dependency overrides, ignored advisory IDs or false passing result are applied.",
+  "severity_note": "CVE-2026-59951 has GitHub severity medium but CVSS v3.1 7.5 and a lower CVSS v4 assessment. It is not evidence of zero high-scoring findings.",
+  "metadata_sources": [
+    "https://pypi.org/pypi/semgrep/1.182.1/json",
+    "https://pypi.org/pypi/semgrep/1.183.0/json"
+  ],
+  "continuation_evidence": "Fresh metadata and unsatisfiable resolver receipt retained in the 2026-11-04 continuation package."
+}

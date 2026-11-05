@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import type { SiteScenario } from './types';
 import { validateScenario, parseQuantity } from './js-engine/contract';
 import { decimalText, Rational } from './js-engine/decimal';
@@ -17,10 +18,10 @@ export function demandDraft(scenario: SiteScenario): DemandDraft {
       event.action === 'set_demand'
         ? [
             {
-              id: `event-${index}`,
+              id: `event-${String(index)}`,
               originalIndex: index,
               atS: String(event.at_s),
-              demandKw: event.value_kw!,
+              demandKw: requiredPresent(event.value_kw, 'event.value_kw'),
             },
           ]
         : [],
@@ -37,13 +38,15 @@ export function scenarioWithDemand(current: SiteScenario, draft: DemandDraft): S
   if (!load) throw new Error('The scenario needs a load asset.');
   const steps = draft.steps.map((step, index) => {
     if (!/^\d+$/.test(step.atS.trim()))
-      throw new Error(`Step ${index + 1}: enter a whole number of seconds.`);
+      throw new Error(`Step ${String(index + 1)}: enter a whole number of seconds.`);
     const at = Number(step.atS);
     if (!Number.isSafeInteger(at) || at < 0 || at >= current.duration_s)
-      throw new Error(`Step ${index + 1}: time must be from 0 to ${current.duration_s - 1} s.`);
+      throw new Error(
+        `Step ${String(index + 1)}: time must be from 0 to ${String(current.duration_s - 1)} s.`,
+      );
     let power: string;
     try {
-      power = decimalText(parseQuantity(step.demandKw, `Step ${index + 1} demand (kW)`));
+      power = decimalText(parseQuantity(step.demandKw, `Step ${String(index + 1)} demand (kW)`));
     } catch (error) {
       throw new Error((error as Error).message);
     }
@@ -58,10 +61,14 @@ export function scenarioWithDemand(current: SiteScenario, draft: DemandDraft): S
     event.action !== 'set_demand'
       ? [event]
       : replacements.has(index)
-        ? [replacements.get(index)!]
+        ? [requiredPresent(replacements.get(index), 'replacements.get(index)')]
         : [],
   );
-  events.push(...steps.filter((_, index) => draft.steps[index].originalIndex === null));
+  events.push(
+    ...steps.filter(
+      (_, index) => requiredValue(draft.steps[index], 'draft.steps[index]').originalIndex === null,
+    ),
+  );
   if (events.length > 128)
     throw new Error('A scenario supports at most 128 events, including failures and recoveries.');
   return validateScenario({ ...current, it_demand_kw: draft.initialKw, events });
@@ -73,7 +80,11 @@ export function scenarioWithDemand(current: SiteScenario, draft: DemandDraft): S
 export function demandPreview(scenario: SiteScenario) {
   const changes = scenario.events
     .filter((event) => event.action === 'set_demand')
-    .map((event, index) => ({ at: event.at_s, kw: event.value_kw!, index }))
+    .map((event, index) => ({
+      at: event.at_s,
+      kw: requiredPresent(event.value_kw, 'event.value_kw'),
+      index,
+    }))
     .sort((a, b) => a.at - b.at || a.index - b.index);
   let start = 0;
   let kw = scenario.it_demand_kw;
@@ -105,9 +116,13 @@ export function nextStepTime(draft: DemandDraft, duration: number): number {
   let start = 0;
   let span = 0;
   for (let index = 1; index < times.length; index++) {
-    if (times[index] - times[index - 1] > span) {
-      start = times[index - 1];
-      span = times[index] - start;
+    if (
+      requiredValue(times[index], 'times[index]') -
+        requiredValue(times[index - 1], 'times[index - 1]') >
+      span
+    ) {
+      start = requiredValue(times[index - 1], 'previous demand time');
+      span = requiredValue(times[index], 'times[index]') - start;
     }
   }
   return Math.min(duration - 1, start + Math.floor(span / 2));

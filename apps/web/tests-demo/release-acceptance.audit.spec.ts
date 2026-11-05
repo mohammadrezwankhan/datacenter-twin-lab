@@ -262,7 +262,9 @@ test('Back during initial workspace loading restores the URL preset', async ({ p
   await expect(scenario).toHaveValue('normal', { timeout: 10000 });
 });
 
-test('changing workspace subview preserves an in-progress preset restoration', async ({ page }) => {
+test('changing workspace subview preserves an in-progress preset restoration', async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     const state = window as typeof window & {
       holdSimulation?: boolean;
@@ -270,7 +272,9 @@ test('changing workspace subview preserves an in-progress preset restoration', a
     };
     const postMessage = Worker.prototype.postMessage;
     Worker.prototype.postMessage = function (...args: Parameters<Worker['postMessage']>) {
-      const deliver = () => postMessage.apply(this, args);
+      const deliver = () => {
+        postMessage.apply(this, args);
+      };
       if (state.holdSimulation && args[0]?.path === 'simulations') {
         state.holdSimulation = false;
         state.releaseSimulation = deliver;

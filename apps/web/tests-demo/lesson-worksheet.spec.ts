@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
@@ -11,7 +12,7 @@ async function worksheet(page: Page) {
   await page.getByRole('button', { name: 'Download lesson worksheet', exact: true }).click();
   const download = await pending;
   expect(download.suggestedFilename()).toMatch(/^lesson-.+-worksheet\.html$/);
-  return readFile((await download.path())!, 'utf8');
+  return readFile(await download.path(), 'utf8');
 }
 
 for (const lesson of lessons) {
@@ -32,7 +33,12 @@ for (const lesson of lessons) {
       const run = await exported(page, lesson.id === 'pue');
       const html = await worksheet(page);
       await paper.setContent(html);
-      const packet = JSON.parse((await paper.locator('#worksheet-evidence').textContent())!);
+      const packet = JSON.parse(
+        requiredPresent(
+          await paper.locator('#worksheet-evidence').textContent(),
+          "(await paper.locator('#worksheet-evidence').textContent())",
+        ),
+      );
       expect(packet.lesson_id).toBe(lesson.id);
       expect(packet.selected_input).toBe(input);
       expect(packet.submitted_prediction).toBe('123.45');
@@ -45,7 +51,7 @@ for (const lesson of lessons) {
       expect(externalRequests).toEqual([]);
       for (const format of ['A4', 'Letter'] as const) {
         const pdf = await paper.pdf({
-          path: testInfo.outputPath(`${lesson.id}-${exercise}-${format}.pdf`),
+          path: testInfo.outputPath(`${lesson.id}-${String(exercise)}-${format}.pdf`),
           format,
           printBackground: true,
           displayHeaderFooter: false,
@@ -67,7 +73,12 @@ test('worksheet captures the submitted estimate and completed input, preserving 
   await expect(page.getByTestId('lesson-result')).toBeVisible();
   const paper = await context.newPage();
   await paper.setContent(await worksheet(page));
-  let packet = JSON.parse((await paper.locator('#worksheet-evidence').textContent())!);
+  let packet = JSON.parse(
+    requiredPresent(
+      await paper.locator('#worksheet-evidence').textContent(),
+      "(await paper.locator('#worksheet-evidence').textContent())",
+    ),
+  );
   expect(packet.submitted_prediction).toBeNull();
   await page.locator('.lesson-input-label input').fill('50');
   await page.locator('.lesson-prediction-label input').fill('450');
@@ -76,7 +87,12 @@ test('worksheet captures the submitted estimate and completed input, preserving 
   await page.locator('.lesson-input-label input').fill('100');
   await page.locator('.lesson-prediction-label input').fill('999');
   await paper.setContent(await worksheet(page));
-  packet = JSON.parse((await paper.locator('#worksheet-evidence').textContent())!);
+  packet = JSON.parse(
+    requiredPresent(
+      await paper.locator('#worksheet-evidence').textContent(),
+      "(await paper.locator('#worksheet-evidence').textContent())",
+    ),
+  );
   expect(packet.selected_input).toBe('50');
   expect(packet.submitted_prediction).toBe('450');
   expect(packet.calculation.scenario.battery_initial_kwh).toBe('50');
@@ -87,7 +103,12 @@ test('worksheet captures the submitted estimate and completed input, preserving 
   await page.getByLabel('Choose a lesson').selectOption('pue');
   await expect(page.getByTestId('lesson-result')).toContainText('Result for 1.25');
   await paper.setContent(await worksheet(page));
-  packet = JSON.parse((await paper.locator('#worksheet-evidence').textContent())!);
+  packet = JSON.parse(
+    requiredPresent(
+      await paper.locator('#worksheet-evidence').textContent(),
+      "(await paper.locator('#worksheet-evidence').textContent())",
+    ),
+  );
   expect(packet.submitted_prediction).toBeNull();
   expect(packet.lesson_id).toBe('pue');
   expect(packet.calculation.energy_only_cost).toBeNull();
@@ -103,14 +124,19 @@ test('empty battery and no generator interval remain explicit absent events', as
     ['ride-through', '0', 'Battery starts empty'],
     ['generator-delay', '600', 'No generator-running interval'],
   ]) {
-    await page.goto(`./?lesson=${lesson}`);
+    await page.goto(`./?lesson=${String(lesson)}`);
     await expect(page.getByTestId('lesson-result')).toBeVisible();
     await page.locator('.lesson-input-label input').fill(input);
     await page.getByRole('button', { name: 'Run lesson', exact: true }).click();
-    await expect(page.getByTestId('lesson-result')).toContainText(`Result for ${input}`);
+    await expect(page.getByTestId('lesson-result')).toContainText(`Result for ${String(input)}`);
     await paper.setContent(await worksheet(page));
     await expect(paper.locator('#worksheet-result')).toHaveText(label);
-    const packet = JSON.parse((await paper.locator('#worksheet-evidence').textContent())!);
+    const packet = JSON.parse(
+      requiredPresent(
+        await paper.locator('#worksheet-evidence').textContent(),
+        "(await paper.locator('#worksheet-evidence').textContent())",
+      ),
+    );
     expect(packet.calculation).toEqual(nativeRun(packet.calculation));
   }
 });
@@ -125,7 +151,13 @@ test('standalone worksheet escapes supplied text and remains usable on a phone',
   const injection = '<img src="https://invalid.example/" onerror="alert(1)">';
   run.scenario.source_ids = [injection];
   const html = buildLessonWorksheet({
-    lesson: { ...lessons.find((lesson) => lesson.id === 'ride-through')!, title: injection },
+    lesson: {
+      ...requiredPresent(
+        lessons.find((lesson) => lesson.id === 'ride-through'),
+        "lessons.find((lesson) => lesson.id === 'ride-through')",
+      ),
+      title: injection,
+    },
     input: '100',
     prediction: '500',
     equation: { formula: 'Energy / power = duration', note: injection },

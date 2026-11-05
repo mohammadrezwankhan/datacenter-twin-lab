@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test, devices } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 
@@ -7,7 +8,7 @@ async function downloadJson(page: import('@playwright/test').Page, label: string
   const pending = page.waitForEvent('download');
   if (label === 'export-run') await page.getByRole('button', { name: 'Export run' }).click();
   else await page.getByTestId(label).click();
-  return JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  return JSON.parse(await readFile(await (await pending).path(), 'utf8'));
 }
 
 async function screenPoint(svg: import('@playwright/test').Locator, viewX: number, viewY: number) {
@@ -53,7 +54,10 @@ test('research curve drag selects real samples with letterboxing, keyboard seek,
   const domainMin = min - padding;
   const domainMax = max + padding;
   for (const index of [0, Math.floor((samples.length - 1) / 2), samples.length - 1]) {
-    const viewX = plotLeft + ((samples[index]! - domainMin) / (domainMax - domainMin)) * plotWidth;
+    const viewX =
+      plotLeft +
+      ((requiredPresent(samples[index], 'samples[index]') - domainMin) / (domainMax - domainMin)) *
+        plotWidth;
     const point = await screenPoint(svg, viewX, plotTop + plotHeight / 2);
     await page.mouse.move(point.x, point.y);
     await page.mouse.down();
@@ -61,7 +65,7 @@ test('research curve drag selects real samples with letterboxing, keyboard seek,
     await page.mouse.up();
     await expect(input).toHaveValue(String(index), { timeout: 5000 });
     await expect(chart.locator('.research-chart-values')).toContainText(
-      `Nearest sampled point · Time (s): ${samples[index]}`,
+      `Nearest sampled point · Time (s): ${String(samples[index])}`,
     );
   }
 
@@ -113,12 +117,12 @@ test('EMT phone touch drag inspects exact signed rows without changing the appli
     const rows = baseline.rows as { time_ms: number; source_a: number }[];
     const negativeIndex = rows.findIndex((row) => row.source_a < 0);
     expect(negativeIndex).toBeGreaterThanOrEqual(0);
-    const negativeTime = rows[negativeIndex]!.time_ms;
+    const negativeTime = requiredPresent(rows[negativeIndex], 'rows[negativeIndex]').time_ms;
     const viewX = 64 + ((720 - 64 - 19) * negativeTime) / 200;
     const currentPoint = await screenPoint(currentChart, viewX, 130);
     await page.mouse.move(currentPoint.x, currentPoint.y);
     await expect(page.locator('.emt-chart-inspection').nth(1)).toContainText(
-      `Source current: ${new Intl.NumberFormat('en', { maximumFractionDigits: 3, minimumFractionDigits: 3 }).format(rows[negativeIndex]!.source_a)} A`,
+      `Source current: ${new Intl.NumberFormat('en', { maximumFractionDigits: 3, minimumFractionDigits: 3 }).format(requiredPresent(rows[negativeIndex], 'rows[negativeIndex]').source_a)} A`,
     );
 
     await slider.focus();
@@ -149,7 +153,10 @@ test('power timeline pointer selects the containing interval and keyboard seek s
   for (const index of [0, Math.floor((rows.length - 1) / 2), rows.length - 1]) {
     // Inspect inside each interval: a boundary mapped through CSS pixels can
     // legitimately land infinitesimally on either side of that boundary.
-    const middle = (Number(rows[index]!.start_s) + Number(rows[index]!.end_s)) / 2;
+    const middle =
+      (Number(requiredPresent(rows[index], 'rows[index]').start_s) +
+        Number(requiredPresent(rows[index], 'rows[index]').end_s)) /
+      2;
     const viewX = 46 + ((940 - 46 - 16) * middle) / Number(baseline.scenario.duration_s);
     const point = await screenPoint(svg, viewX, 90);
     await page.mouse.move(point.x, point.y);
@@ -158,7 +165,7 @@ test('power timeline pointer selects the containing interval and keyboard seek s
     await page.mouse.up();
     await expect(slider).toHaveValue(String(index), { timeout: 5000 });
     await expect(page.getByTestId('power-chart-inspection')).toContainText(
-      `${Number(rows[index]!.start_s).toLocaleString('en-US')}–${Number(rows[index]!.end_s).toLocaleString('en-US')} s`,
+      `${Number(requiredPresent(rows[index], 'rows[index]').start_s).toLocaleString('en-US')}–${Number(requiredPresent(rows[index], 'rows[index]').end_s).toLocaleString('en-US')} s`,
     );
   }
   const selected = Number(await slider.inputValue());

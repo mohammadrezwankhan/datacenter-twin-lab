@@ -1,3 +1,4 @@
+import { requiredValue } from '../required-value';
 import { canonicalJson, compareUnicode } from './canonical';
 import { decimalText, InputError, Rational } from './decimal';
 import { simulateValidated } from './continuity';
@@ -21,10 +22,10 @@ function summary(run: ReturnType<typeof simulateValidated>): Summary {
       warningCounts[warning] = (warningCounts[warning] ?? 0) + 1;
   const firstBattery = run.events.find((event) => event.action === 'battery_depleted');
   const result: Summary = { ...run.summary };
-  result.requested_kwh = run.summary.requested_it_kwh;
-  result.served_kwh = run.summary.served_it_kwh;
-  result.unserved_kwh = run.summary.unserved_it_kwh;
-  result.unserved_seconds = run.summary.unserved_duration_s;
+  result.requested_kwh = requiredValue(run.summary.requested_it_kwh, 'requested_it_kwh');
+  result.served_kwh = requiredValue(run.summary.served_it_kwh, 'served_it_kwh');
+  result.unserved_kwh = requiredValue(run.summary.unserved_it_kwh, 'unserved_it_kwh');
+  result.unserved_seconds = requiredValue(run.summary.unserved_duration_s, 'unserved_duration_s');
   result.first_battery_depletion_s = firstBattery?.at_s ?? null;
   result.cost_unknowns = ['generator_energy_charge', 'total_incremental_energy_charge'].filter(
     (key) => run.summary[key] === null,
@@ -39,11 +40,11 @@ function parseSweepValue(
   index: number,
 ): { label: string; parsed: Rational } {
   if (typeof value !== 'string' && typeof value !== 'number')
-    throw new InputError(`values[${index}]: expected a finite decimal value`);
-  const parsed = Rational.fromDecimal(value, `values[${index}]`);
+    throw new InputError(`values[${String(index)}]: expected a finite decimal value`);
+  const parsed = Rational.fromDecimal(value, `values[${String(index)}]`);
   if (parameter === 'generator_start_delay_s' && parsed.denominator !== 1n)
     throw new InputError(
-      `values[${index}]: generator_start_delay_s must be an integer number of seconds`,
+      `values[${String(index)}]: generator_start_delay_s must be an integer number of seconds`,
     );
   return { label: decimalText(parsed), parsed };
 }
@@ -83,15 +84,19 @@ export function sweepContinuity(input: unknown, parameter: string, values: unkno
     }
     runs.push({
       value: item.label,
-      value_label: `${item.label} ${UNITS[parameter]}`,
-      value_unit: UNITS[parameter],
+      value_label: `${item.label} ${String(UNITS[parameter])}`,
+      value_unit: requiredValue(UNITS[parameter], 'sweep parameter unit'),
       run_id: run.run_id,
       input_sha256: run.input_sha256,
       summary: summary(run),
     });
   }
   if (includeFull)
-    for (let index = 0; index < runs.length; index++) runs[index].result = fullResults[index];
+    for (let index = 0; index < runs.length; index++)
+      requiredValue(runs[index], 'runs[index]').result = requiredValue(
+        fullResults[index],
+        'full sweep result',
+      );
   return {
     schema_version: 2,
     model: 'single_load_electrical_continuity_sensitivity_v1',
@@ -100,7 +105,7 @@ export function sweepContinuity(input: unknown, parameter: string, values: unkno
     base_input_sha256: baseRun.input_sha256,
     base_scenario: scenario,
     parameter,
-    parameter_unit: UNITS[parameter],
+    parameter_unit: requiredValue(UNITS[parameter], 'sweep parameter unit'),
     values: parsed.map((item) => item.label),
     runs,
     full_results_included: includeFull,

@@ -277,7 +277,9 @@ export const lessons: Lesson[] = [
 export function lessonScenario(lesson: Lesson, base: SiteScenario, value: string): SiteScenario {
   const parsed = Number(value);
   if (!value.trim() || !Number.isFinite(parsed) || parsed < lesson.min || parsed > lesson.max)
-    throw new Error(`${lesson.label}: enter a value from ${lesson.min} to ${lesson.max}`);
+    throw new Error(
+      `${lesson.label}: enter a value from ${String(lesson.min)} to ${String(lesson.max)}`,
+    );
   if (lesson.step >= 1 && !Number.isInteger(parsed)) throw new Error('Enter a whole number.');
   const scenario = structuredClone(base);
   scenario.id = `course-${lesson.id}`;

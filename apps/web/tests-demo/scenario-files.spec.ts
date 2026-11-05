@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
@@ -8,7 +9,7 @@ import type { SiteScenario } from '../src/types';
 async function download(page: Page, name: string) {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name, exact: true }).click();
-  return JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  return JSON.parse(await readFile(await (await pending).path(), 'utf8'));
 }
 
 async function choose(page: Page, data: unknown, name = 'scenario.json') {
@@ -51,7 +52,7 @@ test('all eighteen saved scenarios preview without execution and reproduce nativ
     const previous = await page.getByTestId('run-id').textContent();
     await choose(page, scenario, `${id}.json`);
     await expect(page.getByTestId('scenario-file-preview')).toContainText('Ready to run');
-    await expect(page.getByTestId('run-id')).toHaveText(previous!);
+    await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
     const run = await runImported(page);
     expect(run).toEqual(nativeRun(run));
     expect(run.scenario.id).toBe((scenario as { id: string }).id);
@@ -184,7 +185,9 @@ const invalidFiles: {
 // Each case keeps complete export comparisons in its own browser context.
 // A single loop can produce a burst of downloads that the browser suppresses.
 for (const item of invalidFiles) {
-  test(`invalid import ${item.name} preserves the completed result and draft`, async ({ page }) => {
+  test(`invalid import ${item.name} preserves the completed result and draft`, async ({
+    page,
+  }) => {
     const panel = await openFiles(page);
     const original = await download(page, 'Export run');
     await choose(page, item.make(structuredClone(original.scenario)));
@@ -245,7 +248,9 @@ test('preview is keyboard accessible, shows assumptions and discards without los
   expect((await download(page, 'Download current scenario')).battery_initial_kwh).toBe('80');
 });
 
-test('a late file read cannot resurrect an import after the draft changes', async ({ page }) => {
+test('a late file read cannot resurrect an import after the draft changes', async ({
+  page,
+}) => {
   await page.addInitScript(() => {
     const read = File.prototype.text;
     File.prototype.text = function () {
@@ -262,7 +267,9 @@ test('a late file read cannot resurrect an import after the draft changes', asyn
   await choose(page, original.scenario, 'delayed.json');
   await expect(panel.getByRole('status')).toContainText('Reading and validating');
   await page.getByLabel('Initial battery (kWh)').fill('70');
-  await page.evaluate(() => (window as unknown as { finishRead: () => void }).finishRead());
+  await page.evaluate(() => {
+    (window as unknown as { finishRead: () => void }).finishRead();
+  });
   await expect(panel.getByRole('status')).toHaveCount(0);
   await expect(page.getByTestId('scenario-file-preview')).toHaveCount(0);
   await choose(page, { ...original.scenario, battery_initial_kwh: '30' });

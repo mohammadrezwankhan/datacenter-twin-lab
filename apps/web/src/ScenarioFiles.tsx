@@ -130,7 +130,9 @@ export function ScenarioFiles({
       link.href = url;
       link.download = 'twin-scenario.json';
       link.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
     } catch (cause) {
       setError(`Cannot export these draft inputs: ${(cause as Error).message}`);
     }
@@ -186,7 +188,7 @@ export function ScenarioFiles({
           )}
           <p>
             {changes.length
-              ? `${changes.length} input fields differ from the current draft. Running this file replaces that draft.`
+              ? `${String(changes.length)} input fields differ from the current draft. Running this file replaces that draft.`
               : 'The validated inputs match the current draft.'}
           </p>
           {changes.length > 0 && (
@@ -225,7 +227,9 @@ export function ScenarioFiles({
             <button
               className="primary"
               disabled={busy || reading}
-              onClick={() => onRun(preview.scenario)}
+              onClick={() => {
+                onRun(preview.scenario);
+              }}
             >
               Run imported scenario
             </button>

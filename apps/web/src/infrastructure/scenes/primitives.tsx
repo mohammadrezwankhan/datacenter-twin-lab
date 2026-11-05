@@ -24,7 +24,15 @@ export function Cable({
 }: {
   d: string;
   kind?:
-    'power' | 'path-b' | 'liquid' | 'air' | 'network' | 'logical' | 'fuel' | 'shared' | 'ground';
+    | 'power'
+    | 'path-b'
+    | 'liquid'
+    | 'air'
+    | 'network'
+    | 'logical'
+    | 'fuel'
+    | 'shared'
+    | 'ground';
   label?: string;
   x?: number;
   y?: number;
@@ -90,9 +98,9 @@ export function Device({
 }) {
   const color = accents[accent];
   const opacity = muted ? 0.38 : 1;
-  const top = `${x},${y - h} ${x + d},${y - h - d * 0.44} ${x + w + d},${y - h - d * 0.44} ${x + w},${y - h}`;
-  const side = `${x + w},${y - h} ${x + w + d},${y - h - d * 0.44} ${x + w + d},${y - d * 0.44} ${x + w},${y}`;
-  const face = `${x},${y - h} ${x + w},${y - h} ${x + w},${y} ${x},${y}`;
+  const top = `${String(x)},${String(y - h)} ${String(x + d)},${String(y - h - d * 0.44)} ${String(x + w + d)},${String(y - h - d * 0.44)} ${String(x + w)},${String(y - h)}`;
+  const side = `${String(x + w)},${String(y - h)} ${String(x + w + d)},${String(y - h - d * 0.44)} ${String(x + w + d)},${String(y - d * 0.44)} ${String(x + w)},${String(y)}`;
+  const face = `${String(x)},${String(y - h)} ${String(x + w)},${String(y - h)} ${String(x + w)},${String(y)} ${String(x)},${String(y)}`;
   return (
     <g className="infra-device" opacity={opacity}>
       <polygon points={top} fill="#263f50" stroke="#678092" />
@@ -116,7 +124,7 @@ export function Device({
       {variant === 'transformer' && (
         <g fill="none" stroke={color} strokeWidth="2.4" opacity=".82">
           <path
-            d={`M${x + 12} ${y - h + 18}v${h - 36}M${x + 20} ${y - h + 18}v${h - 36}M${x + 28} ${y - h + 18}v${h - 36}`}
+            d={`M${String(x + 12)} ${String(y - h + 18)}v${String(h - 36)}M${String(x + 20)} ${String(y - h + 18)}v${String(h - 36)}M${String(x + 28)} ${String(y - h + 18)}v${String(h - 36)}`}
           />
         </g>
       )}
@@ -131,7 +139,11 @@ export function Device({
         />
       )}
       {variant === 'bus' && (
-        <path d={`M${x + 8} ${y - h / 2}H${x + w - 8}`} stroke={color} strokeWidth="6" />
+        <path
+          d={`M${String(x + 8)} ${String(y - h / 2)}H${String(x + w - 8)}`}
+          stroke={color}
+          strokeWidth="6"
+        />
       )}
       <text className="infra-device-label" x={x + w / 2 + d / 2} y={y + 20} textAnchor="middle">
         {label}

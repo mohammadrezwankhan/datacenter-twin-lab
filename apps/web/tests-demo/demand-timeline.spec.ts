@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
@@ -6,7 +7,7 @@ import { nativeRun } from './course-test-helpers';
 async function download(page: Page, name = 'Export run') {
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name, exact: true }).click();
-  return readFile((await (await pending).path())!, 'utf8');
+  return readFile(await (await pending).path(), 'utf8');
 }
 async function openEditor(page: Page, preset = 'normal') {
   await page.goto(`./?preset=${preset}`);
@@ -32,7 +33,7 @@ test('visual demand edits preview requested energy, then reproduce native and op
   await expect(page.getByLabel('Selected time (seconds)')).toHaveValue('900');
   await page.getByLabel('Selected demand (kW)').fill('500');
   await expect(page.getByTestId('demand-preview-energy')).toHaveText('375 kWh');
-  await expect(page.getByTestId('run-id')).toHaveText(previous!);
+  await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
   const oldRun = JSON.parse(await download(page));
   expect(oldRun.summary.requested_it_kwh).toBe('500');
   const run = await runEdited(page);
@@ -108,7 +109,7 @@ test('invalid fields preserve results and changing the scenario discards the old
     await expect(
       page.getByRole('button', { name: 'Run edited timeline', exact: true }),
     ).toBeDisabled();
-    await expect(page.getByTestId('run-id')).toHaveText(previous!);
+    await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
   }
   await page.getByLabel('Selected time (seconds)').fill('300');
   for (const demand of ['', '-1', 'NaN', '1.0000000001']) {
@@ -180,7 +181,7 @@ test('editor is lazy, keyboard-accessible, responsive and explicit about request
     expect(audit.violations).toEqual([]);
     await page
       .locator('#demand-timeline')
-      .screenshot({ path: testInfo.outputPath(`demand-editor-${width}.png`) });
+      .screenshot({ path: testInfo.outputPath(`demand-editor-${String(width)}.png`) });
   }
   expect(
     await page

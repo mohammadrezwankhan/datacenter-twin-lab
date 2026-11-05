@@ -1,0 +1,43 @@
+{
+  "reviewed_on": "2026-11-04",
+  "binary_verification": "Downloaded bytes matched official release checksum entries; not a claim of independent signature verification",
+  "python_tools": {
+    "semgrep": "1.183.0",
+    "zizmor": "1.31.1",
+    "pip-audit": "2.10.1"
+  },
+  "sources": [
+    "https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1",
+    "https://github.com/rhysd/actionlint/releases/tag/v1.7.12",
+    "https://github.com/aquasecurity/trivy/releases/tag/v0.76.1",
+    "https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23",
+    "https://github.com/step-security/harden-runner/releases/tag/v2.22.3",
+    "https://github.com/github/codeql-action/releases/tag/v4.39.1",
+    "https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference",
+    "https://github.com/pypa/pip-audit",
+    "https://semgrep.dev/p/security-audit",
+    "https://pypi.org/pypi/semgrep/1.183.0/json",
+    "https://pypi.org/pypi/zizmor/1.31.1/json",
+    "https://pypi.org/pypi/pip-audit/2.10.1/json"
+  ],
+  "new_actions": {
+    "step-security/harden-runner": {
+      "version": "v2.22.3",
+      "sha": "46b06cea07f9e64621fdf066ba77ac6915163d43"
+    },
+    "github/codeql-action": {
+      "version": "v4.39.1",
+      "sha": "9b3254085494b55a0f7c4c2b3d2d52cc712ce370"
+    }
+  },
+  "cooldown": {
+    "version_updates_days": 7,
+    "security_updates": "Exempt per GitHub documentation; no cooldown bypass parameter"
+  },
+  "pending_external_validation": [
+    "Actual GitHub Actions executions",
+    "CodeQL availability and upload authorization",
+    "MATLAB execution on runners where configured",
+    "SonarQube Cloud project provisioning and quality gate"
+  ]
+}

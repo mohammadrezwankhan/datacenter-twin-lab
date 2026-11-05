@@ -24,7 +24,9 @@ function pathParts(path: string): URL {
 async function fetchJson(url: URL): Promise<any> {
   const response = await fetch(url);
   if (!response.ok)
-    throw new Error(`Browser asset request failed (${response.status}) for ${url.pathname}`);
+    throw new Error(
+      `Browser asset request failed (${String(response.status)}) for ${url.pathname}`,
+    );
   return response.json();
 }
 

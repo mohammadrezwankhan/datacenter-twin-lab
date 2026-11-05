@@ -1,17 +1,16 @@
 """Independent native expectations for the twelve browser course lessons."""
 
-from dataclasses import replace
-from fractions import Fraction
 import unittest
+from dataclasses import replace
+from decimal import Decimal
+from fractions import Fraction
+from typing import Any
 
 from datacenter_twin.continuity import simulate_continuity
 from datacenter_twin.contracts import Scenario
 from datacenter_twin.demo import demo_scenario
 from datacenter_twin.engine import simulate
-from datacenter_twin.topology import Event
-
-
-
+from datacenter_twin.topology import Event, SiteScenario
 
 LESSON_CASES = (
     {
@@ -137,16 +136,16 @@ LESSON_CASES = (
 )
 
 
-def _scenario_for_lesson(case: dict, value: str):
+def _scenario_for_lesson(case: dict[str, str], value: str) -> SiteScenario:
     """Apply lesson changes independently of the TypeScript transformation."""
     lesson_id = case["id"]
     scenario = demo_scenario(case["preset"])
     if lesson_id == "power-energy":
-        return replace(scenario, it_demand_kw=value)
+        return replace(scenario, it_demand_kw=Decimal(value))
     if lesson_id == "distribution-loss":
-        return replace(scenario, distribution_efficiency=value)
+        return replace(scenario, distribution_efficiency=Decimal(value))
     if lesson_id == "ride-through":
-        return replace(scenario, battery_initial_kwh=value, battery_charge_kw=0)
+        return replace(scenario, battery_initial_kwh=Decimal(value), battery_charge_kw=Decimal(0))
     if lesson_id == "generator-delay":
         return replace(scenario, generator_start_delay_s=int(value))
     if lesson_id == "generator-failure":
@@ -158,9 +157,7 @@ def _scenario_for_lesson(case: dict, value: str):
         return scenario
     if lesson_id == "n-plus-one":
         assets = tuple(
-            replace(asset, capacity_kw=value)
-            if asset.kind == "distribution"
-            else asset
+            replace(asset, capacity_kw=Decimal(value)) if asset.kind == "distribution" else asset
             for asset in scenario.assets
         )
         return replace(scenario, assets=assets)
@@ -170,9 +167,7 @@ def _scenario_for_lesson(case: dict, value: str):
                 replace(
                     asset,
                     failure_domains=tuple(
-                        domain
-                        for domain in asset.failure_domains
-                        if domain != "shared-controls"
+                        domain for domain in asset.failure_domains if domain != "shared-controls"
                     ),
                 )
                 if asset.id == "path-b"
@@ -182,15 +177,19 @@ def _scenario_for_lesson(case: dict, value: str):
             scenario = replace(scenario, assets=assets)
         return scenario
     if lesson_id == "single-point":
-        events = () if int(value) == 1 else (
-            Event(300, "asset_down", "main-bus", None),
-            Event(900, "asset_up", "main-bus", None),
+        events: tuple[Event, ...] = (
+            ()
+            if int(value) == 1
+            else (
+                Event(300, "asset_down", "main-bus", None),
+                Event(900, "asset_up", "main-bus", None),
+            )
         )
         return replace(scenario, events=events)
     if lesson_id == "precharge":
-        return replace(scenario, battery_initial_kwh=50, battery_charge_kw=value)
+        return replace(scenario, battery_initial_kwh=Decimal(50), battery_charge_kw=Decimal(value))
     if lesson_id == "ai-outage":
-        return replace(scenario, battery_initial_kwh=value)
+        return replace(scenario, battery_initial_kwh=Decimal(value))
     if lesson_id == "recovery-deadline":
         events = tuple(
             replace(event, at_s=500)
@@ -198,11 +197,11 @@ def _scenario_for_lesson(case: dict, value: str):
             else event
             for event in scenario.events
         )
-        return replace(scenario, battery_initial_kwh=value, events=events)
+        return replace(scenario, battery_initial_kwh=Decimal(value), events=events)
     raise AssertionError(f"Unhandled lesson {lesson_id}")
 
 
-def _planning_result(pue: str) -> dict:
+def _planning_result(pue: str) -> dict[str, Any]:
     scenario = Scenario.from_dict(
         {
             "schema_version": 1,
@@ -234,7 +233,7 @@ class CourseLessonTests(unittest.TestCase):
         # digits to check the independent result without copying that formatter.
         self.assertLess(difference, Fraction(1, 10**50))
 
-    def assert_lesson_result(self, case: dict, value: str, expected: str) -> None:
+    def assert_lesson_result(self, case: dict[str, str], value: str, expected: str) -> None:
         if case["id"] == "pue":
             result = _planning_result(value)
             self.assert_quantity_close(result[case["result_key"]], expected)
@@ -252,16 +251,12 @@ class CourseLessonTests(unittest.TestCase):
             actual = result["summary"][case["result_key"]]
         self.assert_quantity_close(actual, expected)
 
-    def test_defaults_and_challenges_match_independent_native_expectations(self):
+    def test_defaults_and_challenges_match_independent_native_expectations(self) -> None:
         for case in LESSON_CASES:
             with self.subTest(lesson=case["id"], value="initial"):
-                self.assert_lesson_result(
-                    case, case["initial"], case["expected_initial"]
-                )
+                self.assert_lesson_result(case, case["initial"], case["expected_initial"])
             with self.subTest(lesson=case["id"], value="challenge"):
-                self.assert_lesson_result(
-                    case, case["challenge"], case["expected_challenge"]
-                )
+                self.assert_lesson_result(case, case["challenge"], case["expected_challenge"])
 
 
 if __name__ == "__main__":

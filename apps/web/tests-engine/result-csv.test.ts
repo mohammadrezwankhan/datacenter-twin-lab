@@ -32,7 +32,7 @@ function parseCsv(csv: string): string[][] {
   return rows;
 }
 
-test('EMT CSV preserves every sample and the completed configuration', () => {
+void test('EMT CSV preserves every sample and the completed configuration', () => {
   const result = simulateEmt(DEFAULT_EMT);
   const rows = parseCsv(csvFor(result));
   assert.deepEqual(rows[0].slice(0, 7), [
@@ -63,7 +63,7 @@ test('EMT CSV preserves every sample and the completed configuration', () => {
   }
 });
 
-test('exports change only when a new result is applied', () => {
+void test('exports change only when a new result is applied', () => {
   const applied = simulateEmt(DEFAULT_EMT);
   const before = csvFor(applied);
   const draft = { ...applied.config, capacitance_mf: 24 };
@@ -74,7 +74,7 @@ test('exports change only when a new result is applied', () => {
   assert.notEqual(csvFor(next), before);
 });
 
-test('research CSV round-trips commas, quotes and newlines alongside solver context', () => {
+void test('research CSV round-trips commas, quotes and newlines alongside solver context', () => {
   const result: ResearchResult = {
     study_id: 'forced-response',
     model: 'Model, "A"\nB',

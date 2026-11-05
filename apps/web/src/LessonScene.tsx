@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import { useEffect, useId, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import type { Lesson } from './course-lessons';
@@ -73,7 +74,9 @@ function Selectable({
       tabIndex={0}
       aria-pressed={selected === id}
       aria-describedby={descriptionId}
-      onClick={() => onSelect(id)}
+      onClick={() => {
+        onSelect(id);
+      }}
       onKeyDown={keyDown}
     >
       <desc id={descriptionId}>
@@ -133,7 +136,10 @@ function ServerHall({
   scale?: number;
 }) {
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`} aria-hidden="true">
+    <g
+      transform={`translate(${String(x)} ${String(y)}) scale(${String(scale)})`}
+      aria-hidden="true"
+    >
       <path d="m0 51 97-37 103 37-101 42Z" fill={`url(#${sceneId}-roof)`} stroke="#708a91" />
       <path d="m0 51 99 42v102L0 153Z" fill={`url(#${sceneId}-face)`} stroke="#53717d" />
       <path d="m99 93 101-42v102l-101 42Z" fill="#142936" stroke="#45616d" />
@@ -142,8 +148,15 @@ function ServerHall({
         const yPos = 61 + index * 7.5;
         return (
           <g key={index}>
-            <path d={`m${xPos} ${yPos} 12 5v69l-12-5Z`} fill="#0d1b24" stroke="#46616d" />
-            <path d={`m${xPos + 2} ${yPos + 12} 8 3v46l-8-3Z`} fill={`url(#${sceneId}-rack)`} />
+            <path
+              d={`m${String(xPos)} ${String(yPos)} 12 5v69l-12-5Z`}
+              fill="#0d1b24"
+              stroke="#46616d"
+            />
+            <path
+              d={`m${String(xPos + 2)} ${String(yPos + 12)} 8 3v46l-8-3Z`}
+              fill={`url(#${sceneId}-rack)`}
+            />
           </g>
         );
       })}
@@ -353,7 +366,7 @@ function EfficiencyArt({
           strokeWidth="13"
           strokeLinecap="round"
           pathLength="100"
-          strokeDasharray={`${clamp(efficiency * 100, 0, 100)} 100`}
+          strokeDasharray={`${String(clamp(efficiency * 100, 0, 100))} 100`}
         />
         <path d="m306 169 27-37" stroke="#f3d49b" strokeWidth="4" strokeLinecap="round" />
         <circle cx="306" cy="169" r="7" fill="#f3d49b" />
@@ -506,7 +519,7 @@ function BatteryArt({
         <Selectable
           id="timeline"
           title="Run battery history"
-          detail={`${run.intervals.length} modeled intervals; outage and charging values reflect run`}
+          detail={`${String(run.intervals.length)} modeled intervals; outage and charging values reflect run`}
           selected={selected}
           onSelect={onSelect}
         >
@@ -522,7 +535,7 @@ function BatteryArt({
                 (capacity > 0 ? clamp(numeric(sample.battery_end_kwh) / capacity, 0, 1) * 35 : 0);
               return (
                 <circle
-                  key={`${sample.start_s}-${index}`}
+                  key={`${sample.start_s}-${String(index)}`}
                   cx={x}
                   cy={y}
                   r={numeric(sample.battery_charge_kw) > 0 ? 4 : 2.5}
@@ -702,14 +715,14 @@ function GeneratorArt({
         <circle cx="64" cy="283" r="6" fill="#e6a35d" />
         {utilityDown && (
           <path
-            d={`M${64 + 476 * clamp(numeric(utilityDown.at_s) / Math.max(run.scenario.duration_s, 1), 0, 1)} 273v20`}
+            d={`M${String(64 + 476 * clamp(numeric(utilityDown.at_s) / Math.max(run.scenario.duration_s, 1), 0, 1))} 273v20`}
             stroke="#ee816e"
             strokeWidth="3"
           />
         )}
         {ready && (
           <path
-            d={`M${64 + 476 * clamp(numeric(ready) / Math.max(run.scenario.duration_s, 1), 0, 1)} 273v20`}
+            d={`M${String(64 + 476 * clamp(numeric(ready) / Math.max(run.scenario.duration_s, 1), 0, 1))} 273v20`}
             stroke="#72d9c5"
             strokeWidth="3"
           />
@@ -726,7 +739,7 @@ function GeneratorArt({
       <text x="29" y="37" className="lesson-scene-overline">
         {failedLesson
           ? `Generator: ${genState}`
-          : `${run.scenario.generator_start_delay_s} s configured start delay`}
+          : `${String(run.scenario.generator_start_delay_s)} s configured start delay`}
       </text>
       <text x="29" y="56" className="lesson-scene-subline">
         {everRunning
@@ -796,7 +809,7 @@ function PathArt({
           return (
             <path
               key={`domain-link-${asset.id}`}
-              d={`M418 ${centerY + 13}H438`}
+              d={`M418 ${String(centerY + 13)}H438`}
               fill="none"
               stroke="#d6aa6d"
               strokeOpacity=".62"
@@ -843,7 +856,7 @@ function PathArt({
             y={177}
             width={126}
             title="CONTROL LINKS"
-            value={`${paths.filter((asset) => asset.failure_domains.includes('shared-controls')).length} paths`}
+            value={`${String(paths.filter((asset) => asset.failure_domains.includes('shared-controls')).length)} paths`}
           />
         </Selectable>
       ) : bus ? (
@@ -915,7 +928,7 @@ function PathArt({
               onSelect={onSelect}
             >
               <path
-                d={`m${x} ${centerY} 48-20 49 20-49 22Z`}
+                d={`m${String(x)} ${String(centerY)} 48-20 49 20-49 22Z`}
                 fill={
                   state === 'available'
                     ? '#39535d'
@@ -925,14 +938,18 @@ function PathArt({
                 }
                 stroke={stateColor}
               />
-              <path d={`M${x} ${centerY}v34l48 24v-36Z`} fill="#263c47" stroke="#55717b" />
               <path
-                d={`M${x + 48} ${centerY + 22}v36l49-24v-34Z`}
+                d={`M${String(x)} ${String(centerY)}v34l48 24v-36Z`}
+                fill="#263c47"
+                stroke="#55717b"
+              />
+              <path
+                d={`M${String(x + 48)} ${String(centerY + 22)}v36l49-24v-34Z`}
                 fill="#1a2d38"
                 stroke="#4d6873"
               />
               <path
-                d={`M${x + 101} ${centerY + 12}h${shared ? 19 : bus ? 19 : 14}`}
+                d={`M${String(x + 101)} ${String(centerY + 12)}h${String(shared ? 19 : bus ? 19 : 14)}`}
                 stroke={stateColor}
                 strokeWidth="5"
                 strokeDasharray={stateDash}
@@ -1168,9 +1185,11 @@ function RecoveryArt({
             opacity=".92"
           />
         )}
-        {down && <path d={`M${pos(down.at_s)} 104v65`} stroke="#e8b16c" strokeWidth="3" />}
-        {depleted && <path d={`M${pos(depleted.at_s)} 103v68`} stroke="#f18472" strokeWidth="3" />}
-        {up && <path d={`M${pos(up.at_s)} 104v65`} stroke="#70d5c1" strokeWidth="3" />}
+        {down && <path d={`M${String(pos(down.at_s))} 104v65`} stroke="#e8b16c" strokeWidth="3" />}
+        {depleted && (
+          <path d={`M${String(pos(depleted.at_s))} 103v68`} stroke="#f18472" strokeWidth="3" />
+        )}
+        {up && <path d={`M${String(pos(up.at_s))} 104v65`} stroke="#70d5c1" strokeWidth="3" />}
         <circle cx="38" cy="139" r="6" fill="#d4e0df" />
         <text
           x={down ? labelPos(down.at_s) : 78}
@@ -1463,7 +1482,12 @@ function inspectorsFor(
             {
               label: 'Depleted at',
               value: run.events.find((event) => event.action === 'battery_depleted')
-                ? seconds(run.events.find((event) => event.action === 'battery_depleted')!.at_s)
+                ? seconds(
+                    requiredPresent(
+                      run.events.find((event) => event.action === 'battery_depleted'),
+                      "run.events.find((event) => event.action === 'battery_depleted')",
+                    ).at_s,
+                  )
                 : numeric(run.scenario.battery_initial_kwh) === 0
                   ? 'Empty at start'
                   : 'No event',
@@ -1520,8 +1544,10 @@ function inspectorsFor(
               value: run.events.find((item) => item.action === 'generator_start_requested')
                 ?.ready_at_s
                 ? seconds(
-                    run.events.find((item) => item.action === 'generator_start_requested')!
-                      .ready_at_s,
+                    requiredPresent(
+                      run.events.find((item) => item.action === 'generator_start_requested'),
+                      "run.events.find((item) => item.action === 'generator_start_requested')",
+                    ).ready_at_s,
                   )
                 : 'Not recorded',
             },
@@ -1566,9 +1592,12 @@ function inspectorsFor(
                 (flow) => flow.source === asset.id || flow.target === asset.id,
               )
                 ? kw(
-                    row.feed_flows_kw.find(
-                      (flow) => flow.source === asset.id || flow.target === asset.id,
-                    )!.kw,
+                    requiredPresent(
+                      row.feed_flows_kw.find(
+                        (flow) => flow.source === asset.id || flow.target === asset.id,
+                      ),
+                      'row.feed_flows_kw.find(\n                      (flow) => flow.source === asset.id || flow.target === asset.id,\n                    )',
+                    ).kw,
                   )
                 : 'Not reported',
             },
@@ -1694,7 +1723,12 @@ function inspectorsFor(
             {
               label: 'Event',
               value: run.events.find((event) => event.action === 'battery_depleted')
-                ? seconds(run.events.find((event) => event.action === 'battery_depleted')!.at_s)
+                ? seconds(
+                    requiredPresent(
+                      run.events.find((event) => event.action === 'battery_depleted'),
+                      "run.events.find((event) => event.action === 'battery_depleted')",
+                    ).at_s,
+                  )
                 : 'No event',
             },
           ],
@@ -1751,10 +1785,14 @@ export function LessonScene({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setPrefersReducedMotion(query.matches);
+    const update = () => {
+      setPrefersReducedMotion(query.matches);
+    };
     update();
     query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
+    return () => {
+      query.removeEventListener('change', update);
+    };
   }, []);
 
   const intervals = run?.intervals ?? [];
@@ -1774,7 +1812,7 @@ export function LessonScene({
     // Intervals are half-open [start_s, end_s): boundary events belong to the interval starting there.
     // The final endpoint has no next row, so clamp that one to the last interval.
     const lastIndex = intervals.length - 1;
-    if (time >= numeric(intervals[lastIndex].end_s)) {
+    if (time >= numeric(requiredValue(intervals[lastIndex], 'intervals[lastIndex]').end_s)) {
       onIntervalChange(lastIndex);
       return;
     }
@@ -1951,7 +1989,7 @@ export function LessonScene({
 
   const relevantEvents = run?.events.slice(0, 6) ?? [];
   const intervalLabel = row
-    ? `Interval ${safeIndex + 1} of ${intervals.length} · ${seconds(row.start_s)}–${seconds(row.end_s)}`
+    ? `Interval ${String(safeIndex + 1)} of ${String(intervals.length)} · ${seconds(row.start_s)}–${seconds(row.end_s)}`
     : 'No simulation intervals';
 
   return (
@@ -1975,7 +2013,9 @@ export function LessonScene({
         <button
           type="button"
           className="lesson-scene-motion-control"
-          onClick={() => onMotionChange(!motion)}
+          onClick={() => {
+            onMotionChange(!motion);
+          }}
           disabled={prefersReducedMotion}
           aria-pressed={!motionActive}
           aria-label={
@@ -2031,21 +2071,38 @@ export function LessonScene({
             step={1}
             value={safeIndex}
             disabled={intervals.length < 2}
-            onChange={(event) => changeInterval(event.currentTarget.value)}
+            onChange={(event) => {
+              changeInterval(event.currentTarget.value);
+            }}
             aria-label="Lesson replay interval"
             aria-valuetext={intervalLabel}
           />
           <div className="lesson-scene-replay-endpoints" aria-hidden="true">
-            <span>{intervals.length ? seconds(intervals[0].start_s) : '—'}</span>
-            <span>{intervals.length ? seconds(intervals[intervals.length - 1].end_s) : '—'}</span>
+            <span>
+              {intervals.length
+                ? seconds(requiredValue(intervals[0], 'intervals[0]').start_s)
+                : '—'}
+            </span>
+            <span>
+              {intervals.length
+                ? seconds(
+                    requiredValue(
+                      intervals[intervals.length - 1],
+                      'intervals[intervals.length - 1]',
+                    ).end_s,
+                  )
+                : '—'}
+            </span>
           </div>
           {!!relevantEvents.length && intervals.length > 0 && (
             <div className="lesson-scene-event-jumps" aria-label="Jump to run event">
               {relevantEvents.map((event, index) => (
                 <button
-                  key={`${event.action}-${event.at_s}-${index}`}
+                  key={`${event.action}-${event.at_s}-${String(index)}`}
                   type="button"
-                  onClick={() => handleEventJump(event.at_s)}
+                  onClick={() => {
+                    handleEventJump(event.at_s);
+                  }}
                   title={`Jump to ${eventTitle(event.action, event.target)} at ${seconds(event.at_s)}`}
                 >
                   <span aria-hidden="true">{index + 1}</span>
@@ -2066,7 +2123,9 @@ export function LessonScene({
           <select
             id={`${svgId}-inspect`}
             value={activeSelection}
-            onChange={(event) => setSelected(event.currentTarget.value)}
+            onChange={(event) => {
+              setSelected(event.currentTarget.value);
+            }}
           >
             {inspectors.map((inspector) => (
               <option key={inspector.id} value={inspector.id}>

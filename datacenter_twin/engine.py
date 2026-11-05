@@ -1,8 +1,9 @@
 """Coarse assumed-PUE energy demand, with a reproducible accounting boundary."""
 
-from decimal import Context, Decimal, ROUND_HALF_EVEN, localcontext
 import hashlib
 import json
+from decimal import ROUND_HALF_EVEN, Context, Decimal, localcontext
+from typing import Any
 
 from . import __version__
 from .contracts import InputError, Scenario, decimal_text
@@ -12,11 +13,9 @@ from .contracts import InputError, Scenario, decimal_text
 ARITHMETIC = Context(prec=100, rounding=ROUND_HALF_EVEN)
 
 
-def simulate(scenario: Scenario) -> dict:
+def simulate(scenario: Scenario) -> dict[str, Any]:
     if not isinstance(scenario, Scenario):
-        raise InputError(
-            "Expected a validated Scenario; use Scenario.from_dict for JSON objects"
-        )
+        raise InputError("Expected a validated Scenario; use Scenario.from_dict for JSON objects")
     canonical = json.dumps(scenario.to_dict(), sort_keys=True, separators=(",", ":"))
     input_hash = hashlib.sha256(canonical.encode()).hexdigest()
     run_id = hashlib.sha256(f"{__version__}:{input_hash}".encode()).hexdigest()[:20]
@@ -63,22 +62,19 @@ def simulate(scenario: Scenario) -> dict:
             "assumptions": scenario.to_dict(),
             "currency": scenario.currency,
             "boundary": (
-                "IT demand plus aggregate non-IT overhead; all facility energy assumed grid-imported"
+                "IT demand plus aggregate non-IT overhead; all facility"
+                " energy assumed grid-imported"
             ),
             "duration_hours": decimal_text(total_hours),
             "it_energy_kwh": decimal_text(it_energy),
             "facility_energy_kwh": decimal_text(facility_energy),
             "non_it_energy_kwh": decimal_text(facility_energy - it_energy),
-            "period_pue": None
-            if it_energy == 0
-            else decimal_text(facility_energy / it_energy),
+            "period_pue": None if it_energy == 0 else decimal_text(facility_energy / it_energy),
             "pue_undefined_reason": "No IT energy in this period" if it_energy == 0 else None,
             "peak_it_demand_kw": decimal_text(peak_it),
             "it_capacity_margin_kw": decimal_text(scenario.it_capacity_kw - peak_it),
             "capacity_screen": (
-                "exceeds_envelope"
-                if peak_it > scenario.it_capacity_kw
-                else "within_envelope"
+                "exceeds_envelope" if peak_it > scenario.it_capacity_kw else "within_envelope"
             ),
             "energy_only_cost": cost,
             "cost_unknown_reason": "Tariff is unknown" if cost is None else None,
@@ -87,30 +83,32 @@ def simulate(scenario: Scenario) -> dict:
                 "Demand estimate; supply continuity and delivered service are not simulated.",
                 "PUE is an input assumption; cooling and losses must not be added again.",
                 "Energy-only cost excludes demand charges, CAPEX, taxes and all other charges.",
-                "Capacity screen does not establish electrical feasibility, resilience or certification.",
+                (
+                    "Capacity screen does not establish electrical feasibility,"
+                    " resilience or certification."
+                ),
             ],
         }
 
 
-def compare(baseline: Scenario, alternative: Scenario) -> dict:
+def compare(baseline: Scenario, alternative: Scenario) -> dict[str, Any]:
     with localcontext(ARITHMETIC):
         if baseline.currency != alternative.currency:
             raise InputError(
                 "Comparison requires the same currency; no FX conversion is implemented"
             )
         left, right = simulate(baseline), simulate(alternative)
-        # Comparisons preserve workload and time so lower demand is not sold as an efficiency saving.
+        # Comparisons preserve workload and time so lower demand is not
+        # sold as an efficiency saving.
         left_work = [(s.hours, s.it_load_kw) for s in baseline.segments]
         right_work = [(s.hours, s.it_load_kw) for s in alternative.segments]
         if left_work != right_work:
             raise InputError("Comparison requires identical interval durations and IT loads")
         savings = (
             None
-            if left["energy_only_cost"] is None
-            or right["energy_only_cost"] is None
+            if left["energy_only_cost"] is None or right["energy_only_cost"] is None
             else format(
-                Decimal(left["energy_only_cost"])
-                - Decimal(right["energy_only_cost"]),
+                Decimal(left["energy_only_cost"]) - Decimal(right["energy_only_cost"]),
                 ".2f",
             )
         )
@@ -119,8 +117,7 @@ def compare(baseline: Scenario, alternative: Scenario) -> dict:
             "alternative": right,
             "currency": baseline.currency,
             "facility_energy_saving_kwh": decimal_text(
-                Decimal(left["facility_energy_kwh"])
-                - Decimal(right["facility_energy_kwh"])
+                Decimal(left["facility_energy_kwh"]) - Decimal(right["facility_energy_kwh"])
             ),
             "energy_only_cost_saving": savings,
             "comparison_boundary": (

@@ -25,7 +25,7 @@ export async function exported(page: Page, planning = false) {
   await page
     .getByRole('button', { name: planning ? 'Export PUE calculation' : 'Export lesson run' })
     .click();
-  return JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+  return JSON.parse(await readFile(await (await pending).path(), 'utf8'));
 }
 
 export function nativeRun(run: {

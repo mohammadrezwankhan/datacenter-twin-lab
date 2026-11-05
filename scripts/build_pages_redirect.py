@@ -4,13 +4,16 @@ import argparse
 import html
 import json
 import os
+import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
 
 def build(site: Path, output: Path) -> None:
     root = Path(__file__).resolve().parents[1]
-    destination = json.loads((root / "apps/web/site.config.json").read_text(encoding="utf-8"))["url"]
+    destination = json.loads((root / "apps/web/site.config.json").read_text(encoding="utf-8"))[
+        "url"
+    ]
     parsed = urlparse(destination)
     if parsed.scheme != "https" or not parsed.hostname or parsed.query or parsed.fragment:
         raise ValueError("Expected a public HTTPS destination without query or fragment")
@@ -21,9 +24,13 @@ def build(site: Path, output: Path) -> None:
     # Hashed evidence names can exceed MAX_PATH in a nested Windows checkout.
     # Use extended filesystem syntax without changing operating-system policy.
     if os.name == "nt":
-        absolute = os.path.abspath(output)
+        absolute = os.path.normpath(output.absolute())
         if not absolute.startswith("\\\\?\\"):
-            absolute = "\\\\?\\UNC\\" + absolute[2:] if absolute.startswith("\\\\") else "\\\\?\\" + absolute
+            absolute = (
+                "\\\\?\\UNC\\" + absolute[2:]
+                if absolute.startswith("\\\\")
+                else "\\\\?\\" + absolute
+            )
         output = Path(absolute)
     output.mkdir(parents=True, exist_ok=False)
     # Keep public media/download URLs usable in older posts and cached clients.
@@ -73,7 +80,7 @@ window.location.replace(target.href);
         target.write_text(document, encoding="utf-8", newline="\n")
     for name in ("robots.txt", "sitemap.xml", ".nojekyll"):
         (output / name).write_bytes((site / name).read_bytes())
-    print(f"Prepared {len(pages)} legacy entry points for {destination}")
+    sys.stdout.write((f"Prepared {len(pages)} legacy entry points for {destination}") + "\n")
 
 
 if __name__ == "__main__":

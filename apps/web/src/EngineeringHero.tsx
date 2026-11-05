@@ -44,7 +44,9 @@ function loadAdapter(): Promise<void> {
         resolve();
         return;
       }
-      customElements.whenDefined('khan-grid-hero').then(() => resolve(), reject);
+      customElements.whenDefined('khan-grid-hero').then(() => {
+        resolve();
+      }, reject);
     };
     const onError = () => {
       cleanup();
@@ -103,9 +105,13 @@ export function EngineeringHero() {
       return;
     }
 
-    const onLoad = () => setAdapterStylesReady(true);
+    const onLoad = () => {
+      setAdapterStylesReady(true);
+    };
     stylesheet.addEventListener('load', onLoad, { once: true });
-    return () => stylesheet.removeEventListener('load', onLoad);
+    return () => {
+      stylesheet.removeEventListener('load', onLoad);
+    };
   }, [adapterReady]);
 
   const enhancedReady = adapterReady && adapterStylesReady;

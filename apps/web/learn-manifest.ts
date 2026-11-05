@@ -1,3 +1,4 @@
+import { requiredValue } from './src/required-value';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -168,7 +169,7 @@ export function buildLearningManifest(sourceRevision: string | null) {
             'tests/test_research.py',
           ],
         },
-        [...dynamicsSources, dynamicsModelSources[id]],
+        [...dynamicsSources, requiredValue(dynamicsModelSources[id], 'dynamicsModelSources[id]')],
         cache,
       ),
     ),
@@ -193,7 +194,7 @@ export function buildLearningManifest(sourceRevision: string | null) {
           ],
         },
         [
-          `apps/web/src/infrastructure/content/${lesson.number}-${lesson.id}.json`,
+          `apps/web/src/infrastructure/content/${String(lesson.number)}-${lesson.id}.json`,
           'apps/web/src/infrastructure/screens.ts',
           ...(lesson.id === 'generator-bank-fuel' ? ['apps/web/src/infrastructure/fuel.ts'] : []),
           'scripts/verify_infrastructure.py',

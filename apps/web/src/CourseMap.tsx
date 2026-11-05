@@ -1,3 +1,4 @@
+import { requiredValue } from './required-value';
 import { useRef, type CSSProperties } from 'react';
 import { lessons } from './course-lessons';
 import { courseChapters, courseThemes } from './course-themes';
@@ -20,9 +21,15 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
     if (atlas.current) atlas.current.open = false;
     onSelect(id);
   };
-  const selectedLesson = lessons.find((lesson) => lesson.id === selectedId) ?? lessons[0];
+  const selectedLesson = requiredValue(
+    lessons.find((lesson) => lesson.id === selectedId) ?? lessons[0],
+    'lessons.find((lesson) => lesson.id === selectedId) ?? lessons[0]',
+  );
   const selectedIndex = lessons.indexOf(selectedLesson);
-  const selectedTheme = courseThemes[selectedLesson.id];
+  const selectedTheme = requiredValue(
+    courseThemes[selectedLesson.id],
+    'courseThemes[selectedLesson.id]',
+  );
   const reviewed = new Set(reviewedIds);
   const reviewedCount = courseCatalog.filter((lesson) => reviewed.has(lesson.id)).length;
   const chapterIndex = courseChapters.findIndex((chapter) =>
@@ -51,7 +58,12 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
         <div className="course-map-current-tools">
           <label className="course-map-select-label">
             Choose a lesson
-            <select value={selectedLesson.id} onChange={(event) => choose(event.target.value)}>
+            <select
+              value={selectedLesson.id}
+              onChange={(event) => {
+                choose(event.target.value);
+              }}
+            >
               {courseCatalog.map((lesson) => (
                 <option value={lesson.id} key={lesson.id}>
                   {lesson.number}. {lesson.title}
@@ -61,7 +73,7 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
           </label>
           <p
             className="course-map-reviewed"
-            aria-label={`${reviewedCount} lessons self-marked as reviewed in this visit`}
+            aria-label={`${String(reviewedCount)} lessons self-marked as reviewed in this visit`}
           >
             <span className="course-map-reviewed-count">
               {reviewedCount} / {courseTotal}
@@ -101,7 +113,7 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
                 <div className="course-map-grid">
                   {chapterLessons.map((lesson) => {
                     const lessonIndex = lessons.indexOf(lesson);
-                    const theme = courseThemes[lesson.id];
+                    const theme = requiredValue(courseThemes[lesson.id], 'courseThemes[lesson.id]');
                     const isSelected = lesson.id === selectedLesson.id;
                     const isReviewed = reviewed.has(lesson.id);
 
@@ -112,9 +124,11 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
                         type="button"
                         key={lesson.id}
                         style={lessonStyle(theme.accent, theme.softAccent)}
-                        aria-label={`Open lesson ${lessonIndex + 1}: ${theme.shortTitle}`}
+                        aria-label={`Open lesson ${String(lessonIndex + 1)}: ${theme.shortTitle}`}
                         aria-current={isSelected ? 'step' : undefined}
-                        onClick={() => choose(lesson.id)}
+                        onClick={() => {
+                          choose(lesson.id);
+                        }}
                       >
                         <span className="course-map-card-top">
                           <span className="course-map-glyph" aria-hidden="true">
@@ -147,8 +161,10 @@ export function CourseMap({ selectedId, reviewedIds, onSelect }: CourseMapProps)
                   <button
                     className="course-map-card"
                     key={item.id}
-                    onClick={() => choose(item.id)}
-                    aria-label={`Open lesson ${item.number}: ${item.title}`}
+                    onClick={() => {
+                      choose(item.id);
+                    }}
+                    aria-label={`Open lesson ${String(item.number)}: ${item.title}`}
                   >
                     <span>{item.number}</span>
                     <strong>{item.title}</strong>

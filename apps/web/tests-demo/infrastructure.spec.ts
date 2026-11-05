@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test, type Download, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { createHash } from 'node:crypto';
@@ -69,7 +70,7 @@ function assertScreenOutputsMatchAcrossRuntimes(actual: ScreenOutputs, expected:
       );
       expect(
         Math.abs(actualNumber - expectedValue),
-        `${key} should match across runtimes within rel=${SCREEN_REL_TOL} / abs=${SCREEN_ABS_TOL}`,
+        `${key} should match across runtimes within rel=${String(SCREEN_REL_TOL)} / abs=${String(SCREEN_ABS_TOL)}`,
       ).toBeLessThanOrEqual(tolerance);
       continue;
     }
@@ -306,7 +307,7 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
       await expect(page.getByRole('heading', { level: 1 })).toContainText(lesson.title);
       await expect(page.getByText('Engineering HOLD', { exact: false }).first()).toBeVisible();
       await expect(
-        page.getByText(new RegExp(`chapter ${lesson.source.chapter}`, 'i')).first(),
+        page.getByText(new RegExp(`chapter ${String(lesson.source.chapter)}`, 'i')).first(),
       ).toBeVisible();
       await expect(page.getByText('Worked default — unrounded educational outputs')).toBeVisible();
       await expect(page.getByText('Worked challenge')).toBeVisible();
@@ -379,7 +380,7 @@ test('twelve static notes work without JavaScript and preserve source, worked ca
             .filter((href) => new URL(href).origin === location.origin),
         );
       expect(linkTargets.length).toBeGreaterThanOrEqual(3);
-      const mountPath = new URL(baseURL!).pathname;
+      const mountPath = new URL(requiredPresent(baseURL, 'baseURL')).pathname;
       for (const href of linkTargets) {
         const target = new URL(href);
         expect(target.pathname.startsWith(mountPath), `${lesson.id} relative link ${href}`).toBe(
@@ -525,7 +526,9 @@ test('scene keyboard controls, reduced-motion and visibility pauses, route histo
     'false',
   );
 
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
   await page.goto('./?lesson=evidence-load-ledger');
   const offscreenScene = page.locator('.infra-scene');
   await offscreenScene.getByRole('button', { name: 'Play' }).click();
@@ -533,12 +536,16 @@ test('scene keyboard controls, reduced-motion and visibility pauses, route histo
     'aria-pressed',
     'true',
   );
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
   await expect(offscreenScene.getByRole('button', { name: 'Play' })).toHaveAttribute(
     'aria-pressed',
     'false',
   );
-  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+  });
   const nextLesson = page.getByRole('button', { name: /Next lesson/ });
   await nextLesson.click();
   await expect(page.locator('.infrastructure-course')).toHaveAttribute(
@@ -584,13 +591,13 @@ test('responsive capstone keeps page bounds and provides screenshots at target w
     await page.setViewportSize({ width, height: 1000 });
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), {
-        message: `no horizontal document overflow at ${width} CSS pixels`,
+        message: `no horizontal document overflow at ${String(width)} CSS pixels`,
       })
       .toBe(true);
     const name =
       width === 720
         ? 'infrastructure-capstone-200-percent-css-equivalent.png'
-        : `infrastructure-capstone-${width}.png`;
+        : `infrastructure-capstone-${String(width)}.png`;
     await page.screenshot({ path: testInfo.outputPath(name), fullPage: false });
   }
 });

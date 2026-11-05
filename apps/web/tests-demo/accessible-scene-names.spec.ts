@@ -13,7 +13,7 @@ async function visibleNameIsAvailable(control: Locator) {
 }
 
 for (const width of [1440, 390]) {
-  test(`power scene names and interval details remain available at ${width}px`, async ({
+  test(`power scene names and interval details remain available at ${String(width)}px`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height: 1000 });

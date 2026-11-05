@@ -3,7 +3,7 @@ import test from 'node:test';
 import { powerTickLabel } from '../src/client.ts';
 
 for (const demand of [0, 0.1, 1, 10, 1000]) {
-  test(`power-chart ticks stay distinct for ${demand} kW`, () => {
+  void test(`power-chart ticks stay distinct for ${String(demand)} kW`, () => {
     const maximum = Math.max(1, demand) * 1.12;
     const labels = [0, 0.5, 1].map((fraction) => powerTickLabel(fraction * maximum, maximum));
     assert.equal(new Set(labels).size, 3);

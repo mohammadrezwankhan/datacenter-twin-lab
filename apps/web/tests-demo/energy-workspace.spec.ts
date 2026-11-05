@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { test, expect, type Page } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
@@ -6,7 +7,7 @@ import { facilityProfiles, scenarioModes } from '../src/facility-profiles';
 async function exportRun(page: Page) {
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
-  return JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  return JSON.parse(await readFile(await (await download).path(), 'utf8'));
 }
 
 function nativeRun(scenario: unknown) {
@@ -119,7 +120,10 @@ test('scene is visible and keyboard operable at desktop, tablet and phone widths
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    await page.screenshot({ path: testInfo.outputPath(`workspace-${width}.png`), fullPage: true });
+    await page.screenshot({
+      path: testInfo.outputPath(`workspace-${String(width)}.png`),
+      fullPage: true,
+    });
   }
 });
 
@@ -134,7 +138,10 @@ test('scene pointer tilt follows motion preferences while explicit view controls
   const movePointerOverStage = async (xRatio = 0.85, yRatio = 0.2) => {
     const bounds = await stage.boundingBox();
     expect(bounds).not.toBeNull();
-    await page.mouse.move(bounds!.x + bounds!.width * xRatio, bounds!.y + bounds!.height * yRatio);
+    await page.mouse.move(
+      requiredPresent(bounds, 'bounds').x + requiredPresent(bounds, 'bounds').width * xRatio,
+      requiredPresent(bounds, 'bounds').y + requiredPresent(bounds, 'bounds').height * yRatio,
+    );
   };
   const pointerTilt = () =>
     stage.evaluate((element) => [

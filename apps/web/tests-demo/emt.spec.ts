@@ -19,7 +19,7 @@ test('EMT study exports applied inputs, preserves drafts and verifies every samp
     if (run) await page.getByTestId('emt-run').click();
     const pending = page.waitForEvent('download');
     await page.getByTestId('emt-export-json').click();
-    const exported = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+    const exported = JSON.parse(await readFile(await (await pending).path(), 'utf8'));
     const result = exported.result ?? exported;
     expect(result.config.capacitance_mf).toBe(expected);
     const native = JSON.parse(

@@ -64,11 +64,11 @@ function native(op: string, payload: unknown): any {
     maxBuffer: 64 * 1024 * 1024,
   });
   if (result.status !== 0)
-    throw new Error(result.stderr || `Native Python failed (${result.status})`);
+    throw new Error(result.stderr || `Native Python failed (${String(result.status)})`);
   return JSON.parse(result.stdout);
 }
 
-test('dispatcher covers fixed demo, catalog, simulation, sweep, report, planning, and quote routes', () => {
+void test('dispatcher covers fixed demo, catalog, simulation, sweep, report, planning, and quote routes', () => {
   assert.deepEqual(dispatchParsed('presets', null, assets), demoData.presets);
   assert.deepEqual(
     dispatchParsed('demo?preset=ai_cluster_generator_failure', null, assets),

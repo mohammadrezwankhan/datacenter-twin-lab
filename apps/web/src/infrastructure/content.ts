@@ -1,7 +1,11 @@
+import { requiredValue } from '../required-value';
 import type { LessonEvidence, ModelName, ScreenInputs } from './screens';
 
 export type EvidenceLabel =
-  'source-statement' | 'editorial-derivation' | 'illustrative-assumption' | 'unresolved';
+  | 'source-statement'
+  | 'editorial-derivation'
+  | 'illustrative-assumption'
+  | 'unresolved';
 export interface InfrastructureLesson extends LessonEvidence {
   number: number;
   chapter: number;
@@ -44,6 +48,8 @@ const modules = import.meta.glob('./content/*.json');
 export async function loadInfrastructureLesson(id: string): Promise<InfrastructureLesson> {
   const path = Object.keys(modules).find((key) => key.endsWith(`-${id}.json`));
   if (!path) throw new Error('Unknown infrastructure lesson');
-  const module = (await modules[path]()) as { default: InfrastructureLesson };
+  const module = (await requiredValue(modules[path], 'modules[path]')()) as {
+    default: InfrastructureLesson;
+  };
   return module.default;
 }

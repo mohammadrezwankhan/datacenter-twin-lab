@@ -1,0 +1,121 @@
+rules:
+  - id: rezwan.python.tls-verification-disabled
+    languages: [python]
+    message: Enable certificate and hostname verification; configure a trusted CA bundle when needed.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-295, confidence: HIGH}
+    pattern-either:
+      - pattern: requests.$METHOD(..., verify=False, ...)
+      - pattern: $SESSION.request(..., verify=False, ...)
+      - pattern: httpx.$METHOD(..., verify=False, ...)
+      - pattern: ssl._create_unverified_context(...)
+      - pattern: $CONTEXT.check_hostname = False
+      - pattern: $CONTEXT.verify_mode = ssl.CERT_NONE
+  - id: rezwan.python.unsafe-yaml-loader
+    languages: [python]
+    message: Use yaml.safe_load for untrusted YAML.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-502, confidence: HIGH}
+    pattern-either:
+      - pattern: yaml.unsafe_load(...)
+      - pattern: yaml.load(..., Loader=yaml.UnsafeLoader, ...)
+      - pattern: yaml.load(..., Loader=yaml.Loader, ...)
+      - pattern: yaml.load($DATA)
+  - id: rezwan.python.dynamic-evaluation
+    languages: [python]
+    message: Replace executable input with a data parser or an explicit dispatch table.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-95, confidence: HIGH}
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+      - pattern: compile(...)
+  - id: rezwan.python.executable-deserialization
+    languages: [python]
+    message: Pickle-compatible deserialization can execute code. Use a data-only format and validate the schema.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-502, confidence: HIGH}
+    pattern-either:
+      - pattern: pickle.load(...)
+      - pattern: pickle.loads(...)
+      - pattern: dill.load(...)
+      - pattern: dill.loads(...)
+      - pattern: cloudpickle.load(...)
+      - pattern: cloudpickle.loads(...)
+      - pattern: marshal.load(...)
+      - pattern: marshal.loads(...)
+      - pattern: joblib.load(...)
+  - id: rezwan.python.array-pickle-enabled
+    languages: [python]
+    message: Disable pickle loading for NumPy data and use data-only arrays.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-502, confidence: HIGH}
+    pattern-either:
+      - pattern: numpy.load(..., allow_pickle=True, ...)
+      - pattern: numpy.lib.format.read_array(..., allow_pickle=True, ...)
+  - id: rezwan.python.unsafe-torch-load
+    languages: [python]
+    message: Load data-only model weights with explicit weights_only=True or a non-executable format.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-502, confidence: HIGH}
+    patterns:
+      - pattern: torch.load(...)
+      - pattern-not: torch.load(..., weights_only=True, ...)
+  - id: rezwan.python.shell-execution
+    languages: [python]
+    message: Use subprocess argument arrays with shell=False and validate arguments.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-78, confidence: HIGH}
+    pattern-either:
+      - pattern: subprocess.$FUNCTION(..., shell=True, ...)
+      - pattern: os.system(...)
+      - pattern: os.popen(...)
+      - pattern: asyncio.create_subprocess_shell(...)
+  - id: rezwan.javascript.dynamic-evaluation
+    languages: [javascript, typescript]
+    message: Avoid evaluation of executable strings; parse data with JSON.parse.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-95, confidence: HIGH}
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+      - pattern: Function(...)
+      - pattern: $WINDOW.eval(...)
+      - pattern: setTimeout("...", ...)
+      - pattern: setInterval("...", ...)
+  - id: rezwan.javascript.raw-html-assignment
+    languages: [javascript, typescript]
+    message: Build DOM nodes and assign textContent; raw HTML assignment requires a reviewed, enforced sanitization boundary.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-79, confidence: HIGH}
+    pattern-either:
+      - pattern: $NODE.innerHTML = $HTML
+      - pattern: $NODE.outerHTML = $HTML
+      - pattern: $NODE.srcdoc = $HTML
+      - pattern: $NODE.innerHTML += $HTML
+  - id: rezwan.javascript.html-insertion
+    languages: [javascript, typescript]
+    message: Replace executable HTML insertion with DOM construction and textContent.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-79, confidence: HIGH}
+    pattern-either:
+      - pattern: $NODE.insertAdjacentHTML(...)
+      - pattern: document.write(...)
+      - pattern: document.writeln(...)
+      - pattern: $JQUERY.html($HTML)
+  - id: rezwan.javascript.shell-execution
+    languages: [javascript, typescript]
+    message: Use execFile or spawn with an argument array and shell disabled.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-78, confidence: HIGH}
+    pattern-either:
+      - pattern: child_process.exec(...)
+      - pattern: child_process.execSync(...)
+      - pattern: 'child_process.spawn(..., {shell: true, ...})'
+      - pattern: 'child_process.spawnSync(..., {shell: true, ...})'
+  - id: rezwan.javascript.react-raw-html
+    languages: [javascript, typescript]
+    message: Render text or components instead of dangerouslySetInnerHTML.
+    severity: ERROR
+    metadata: {category: security, cwe: CWE-79, confidence: HIGH}
+    pattern: <$TAG ... dangerouslySetInnerHTML={$HTML} ... />

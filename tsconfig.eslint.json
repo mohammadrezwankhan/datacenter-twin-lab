@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/vendor/**",
+    "**/.local/**",
+    "**/.cloudflare/**",
+    "**/.hallmark/**",
+    "**/_site/**",
+    "**/.venv/**",
+    "**/venv/**",
+    "**/hardening-artifacts/**",
+    "**/.security-tools/**",
+    "**/datacenter_twin/web/**"
+  ]
+}

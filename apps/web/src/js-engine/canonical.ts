@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from '../required-value';
 import type { JsonValue } from './types';
 
 // Browser builds already provide TextEncoder.  The declaration keeps the
@@ -9,8 +10,11 @@ export function compareUnicode(left: string, right: string): number {
   let leftIndex = 0;
   let rightIndex = 0;
   while (leftIndex < left.length && rightIndex < right.length) {
-    const leftCode = left.codePointAt(leftIndex)!;
-    const rightCode = right.codePointAt(rightIndex)!;
+    const leftCode = requiredPresent(left.codePointAt(leftIndex), 'left.codePointAt(leftIndex)');
+    const rightCode = requiredPresent(
+      right.codePointAt(rightIndex),
+      'right.codePointAt(rightIndex)',
+    );
     if (leftCode < rightCode) return -1;
     if (leftCode > rightCode) return 1;
     leftIndex += leftCode > 0xffff ? 2 : 1;
@@ -31,7 +35,7 @@ function quote(value: string): string {
     else if (code === 0x22) result += '\\"';
     else if (code === 0x5c) result += '\\\\';
     else if (code < 0x20 || code >= 0x80) result += `\\u${code.toString(16).padStart(4, '0')}`;
-    else result += value[index];
+    else result += value.charAt(index);
   }
   return `${result}"`;
 }
@@ -47,7 +51,7 @@ export function canonicalJson(value: JsonValue): string {
   if (typeof value === 'boolean') return value ? 'true' : 'false';
   if (Array.isArray(value)) return `[${value.map((item) => canonicalJson(item)).join(',')}]`;
   const keys = Object.keys(value).sort(compareUnicode);
-  return `{${keys.map((key) => `${quote(key)}:${canonicalJson(value[key])}`).join(',')}}`;
+  return `{${keys.map((key) => `${quote(key)}:${canonicalJson(requiredValue(value[key], 'value[key]'))}`).join(',')}}`;
 }
 
 // SHA-256 is kept local so the engine has no Node-only dependency and works
@@ -88,11 +92,16 @@ export function sha256Hex(value: string): string {
     const words = new Uint32Array(64);
     for (let i = 0; i < 16; i++) words[i] = view.getUint32(offset + i * 4);
     for (let i = 16; i < 64; i++) {
-      const x = words[i - 15];
-      const y = words[i - 2];
+      const x = requiredValue(words[i - 15], 'words[i - 15]');
+      const y = requiredValue(words[i - 2], 'words[i - 2]');
       const small0 = rotr(x, 7) ^ rotr(x, 18) ^ (x >>> 3);
       const small1 = rotr(y, 17) ^ rotr(y, 19) ^ (y >>> 10);
-      words[i] = add(words[i - 16], small0, words[i - 7], small1);
+      words[i] = add(
+        requiredValue(words[i - 16], 'words[i - 16]'),
+        small0,
+        requiredValue(words[i - 7], 'words[i - 7]'),
+        small1,
+      );
     }
     let a = h0,
       b = h1,
@@ -105,7 +114,13 @@ export function sha256Hex(value: string): string {
     for (let i = 0; i < 64; i++) {
       const big1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
       const choose = (e & f) ^ (~e & g);
-      const temp1 = add(h, big1, choose, K[i], words[i]);
+      const temp1 = add(
+        h,
+        big1,
+        choose,
+        requiredValue(K[i], 'K[i]'),
+        requiredValue(words[i], 'words[i]'),
+      );
       const big0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
       const majority = (a & b) ^ (a & c) ^ (b & c);
       const temp2 = add(big0, majority);

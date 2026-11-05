@@ -40,13 +40,13 @@ test('evidence hub exposes three complete native-equal cases, reports and captio
   await page.goto('./?mode=evidence');
   await expect(page.locator('.proof-case')).toHaveCount(3);
   for (const item of index.cases) {
-    const response = await request.get(`./${item.run_path}`);
+    const response = await request.get(`./${String(item.run_path)}`);
     expect(response.ok()).toBe(true);
     const run = await response.json();
     expect(run.input_sha256).toBe(item.input_sha256);
     expect(run.run_id).toBe(item.run_id);
     expect(run).toEqual(nativeRun(run));
-    const report = await request.get(`./${item.report_path}`);
+    const report = await request.get(`./${String(item.report_path)}`);
     expect(report.ok()).toBe(true);
     expect(await report.text()).toContain(item.input_sha256);
   }

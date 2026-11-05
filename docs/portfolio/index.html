@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' 'sha256-Ja/Kb0hFCXeD8iQYNvAjFZn5b9FmS04NetBJAoIUYBs='; script-src-attr 'none'; style-src 'self' 'sha256-hEuiThOa39e43lPj0gVwF37lpuALfro2sCarlGuZiJA=' 'sha256-RdJjUoS5R9qyzupXabFWuOKtjpioQqtScsDPwHOLaKg='; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; frame-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="A synthetic datacenter power-continuity lab with interactive lessons, source-linked evidence and reproducible scenarios.">
@@ -16,6 +17,9 @@
 
 .native-catalog-link{white-space:nowrap}@media(max-width:700px){.toplinks a.native-catalog-link{display:inline}}
 </style>
+<style>
+.document-style-1{margin-top:8px}
+</style>
 </head>
 <body>
 <a class="skip" href="#learning">Skip to learning paths</a>
@@ -28,7 +32,7 @@
 <div class="tools"><label for="search">SEARCH PATHS & SOURCE FILES<input id="search" type="search" placeholder="Search a concept, lesson or file" autocomplete="off"></label><label for="level">PATH LEVEL<select id="level"><option value="all">All levels</option><option value="Foundation">Foundation</option><option value="Applied">Applied</option><option value="Advanced">Advanced</option></select></label><button id="reset">Reset filters</button></div>
 <div class="tags" id="tags" role="group" aria-label="Filter by topic"></div><p id="count" class="result-count" role="status" aria-live="polite" aria-atomic="true"></p><div class="cards" id="cards"></div>
 <noscript><p>This workspace needs JavaScript for filtering. The repository and the JSON source map remain available.</p><a href="lesson-config.json">Read the lesson source map</a></noscript></section>
-<section class="boundary" aria-label="Learning scope and provenance"><div><h3>Work from the original evidence</h3><p>Each path links to a recorded version of the repository. Use the original tools for computation and the checkpoint to review your reasoning. Marking a path reviewed records your progress; it does not certify a numerical result.</p></div><div><h3>Scope follows the source</h3><p>The original repository remains the source of its equations, configuration, evidence and operating limits. Existing applications and documentation retain their own entry points.</p><p style="margin-top:8px"><a href="lesson-config.json" download>Download the source map</a></p></div></section>
+<section class="boundary" aria-label="Learning scope and provenance"><div><h3>Work from the original evidence</h3><p>Each path links to a recorded version of the repository. Use the original tools for computation and the checkpoint to review your reasoning. Marking a path reviewed records your progress; it does not certify a numerical result.</p></div><div><h3>Scope follows the source</h3><p>The original repository remains the source of its equations, configuration, evidence and operating limits. Existing applications and documentation retain their own entry points.</p><p class="document-style-1"><a href="lesson-config.json" download>Download the source map</a></p></div></section>
 </main><footer class="footer"><div>Companion guide for mohammadrezwankhan/datacenter-twin-lab</div><div>Source snapshot · 2026-10-19 · <a href="https://github.com/mohammadrezwankhan/datacenter-twin-lab/commit/887ca4e2cc283692c86a885fac9ad760ca08d3e2">887ca4e</a></div></footer>
 </div>
 <dialog id="inspector" aria-labelledby="lessonTitle"><div class="drawer-head"><span id="lessonNumber">Learning path</span><button class="close" id="close" aria-label="Close lesson inspector">×</button></div><div class="drawer-body"><h2 id="lessonTitle"></h2><p id="lessonSummary"></p><h3>Learning objective</h3><p id="objective"></p><h3>Source files</h3><ul id="sources"></ul><h3>Verification checkpoint</h3><p class="disclosure" id="checkpoint"></p><div id="commandBlock"><h3>Run in the repository environment</h3><pre id="command"></pre><p>Commands are source-derived guidance. This guide does not run the repository or change its configuration.</p></div><details id="paramsBlock"><summary>Inspect configuration references</summary><pre id="parameters"></pre></details><h3>Your study notes</h3><label for="notes">Record assumptions, parameter choices or questions</label><textarea id="notes" placeholder="For example: Which assumption would change the result?"></textarea><p id="storageNote">Notes and reviewed paths are saved in this browser when local storage is available.</p><div class="drawer-actions"><button class="primary" id="complete">Mark as reviewed</button><button id="export">Export study plan</button></div><p class="status" id="status" role="status" aria-live="polite"></p></div></dialog>

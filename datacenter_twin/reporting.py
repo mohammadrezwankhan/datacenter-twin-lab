@@ -7,7 +7,7 @@ from typing import Any
 from .contracts import InputError
 
 
-def _require_result(result: dict) -> dict:
+def _require_result(result: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(result, dict):
         raise InputError("Report result must be an object")
     if not isinstance(result.get("scenario", result.get("base_scenario")), dict):
@@ -28,34 +28,57 @@ def _md(value: Any) -> str:
     return text
 
 
-def _scenario(result: dict) -> dict:
-    return result.get("scenario") or result.get("base_scenario") or {}
+def _scenario(result: dict[str, Any]) -> dict[str, Any]:
+    value: dict[str, Any] = result.get("scenario") or result.get("base_scenario") or {}
+    return value
 
 
-def _scenario_rows(scenario: dict) -> list[tuple[str, str, str]]:
+def _scenario_rows(scenario: dict[str, Any]) -> list[tuple[str, str, str]]:
     units = {
-        "duration_s": "s", "step_s": "s", "it_demand_kw": "kW", "it_capacity_kw": "kW",
-        "distribution_efficiency": "ratio", "generator_start_delay_s": "s",
-        "battery_capacity_kwh": "kWh", "battery_initial_kwh": "kWh", "battery_charge_kw": "kW",
-        "battery_charge_efficiency": "ratio", "battery_discharge_efficiency": "ratio",
-        "tariff_per_kwh": "currency/kWh", "generator_cost_per_kwh": "currency/kWh",
+        "duration_s": "s",
+        "step_s": "s",
+        "it_demand_kw": "kW",
+        "it_capacity_kw": "kW",
+        "distribution_efficiency": "ratio",
+        "generator_start_delay_s": "s",
+        "battery_capacity_kwh": "kWh",
+        "battery_initial_kwh": "kWh",
+        "battery_charge_kw": "kW",
+        "battery_charge_efficiency": "ratio",
+        "battery_discharge_efficiency": "ratio",
+        "tariff_per_kwh": "currency/kWh",
+        "generator_cost_per_kwh": "currency/kWh",
     }
-    keys = ("id", "name", "currency", "duration_s", "step_s", "it_demand_kw", "it_capacity_kw",
-            "distribution_efficiency", "generator_start_delay_s", "battery_capacity_kwh",
-            "battery_initial_kwh", "battery_charge_kw", "battery_charge_efficiency",
-            "battery_discharge_efficiency", "tariff_per_kwh", "generator_cost_per_kwh")
+    keys = (
+        "id",
+        "name",
+        "currency",
+        "duration_s",
+        "step_s",
+        "it_demand_kw",
+        "it_capacity_kw",
+        "distribution_efficiency",
+        "generator_start_delay_s",
+        "battery_capacity_kwh",
+        "battery_initial_kwh",
+        "battery_charge_kw",
+        "battery_charge_efficiency",
+        "battery_discharge_efficiency",
+        "tariff_per_kwh",
+        "generator_cost_per_kwh",
+    )
     return [(key, str(scenario.get(key, "unknown")), units.get(key, "")) for key in keys]
 
 
-def _warnings(run: dict) -> Counter:
-    counts: Counter = Counter()
+def _warnings(run: dict[str, Any]) -> Counter[str]:
+    counts: Counter[str] = Counter()
     for interval in run.get("intervals", []):
         for warning in interval.get("warnings", []):
             counts[str(warning)] += 1
     return counts
 
 
-def _single_summary(result: dict) -> dict:
+def _single_summary(result: dict[str, Any]) -> dict[str, Any]:
     summary = dict(result.get("summary", {}))
     summary.setdefault("requested_kwh", summary.get("requested_it_kwh", "unknown"))
     summary.setdefault("served_kwh", summary.get("served_it_kwh", "unknown"))
@@ -78,7 +101,7 @@ def _single_summary(result: dict) -> dict:
     return summary
 
 
-def _summary_rows(summary: dict) -> list[tuple[str, str, str]]:
+def _summary_rows(summary: dict[str, Any]) -> list[tuple[str, str, str]]:
     depletion = summary.get("first_battery_depletion_s")
     return [
         ("Requested IT energy", summary.get("requested_kwh", "unknown"), "kWh"),
@@ -97,68 +120,84 @@ def _summary_rows(summary: dict) -> list[tuple[str, str, str]]:
 
 def _markdown_table(headers: tuple[str, ...], rows: list[tuple[Any, ...]]) -> list[str]:
     # Headers are fixed report labels; only caller data needs escaping.
-    lines = ["| " + " | ".join(str(h) for h in headers) + " |",
-             "| " + " | ".join("---" for _ in headers) + " |"]
+    lines = [
+        "| " + " | ".join(str(h) for h in headers) + " |",
+        "| " + " | ".join("---" for _ in headers) + " |",
+    ]
     lines.extend("| " + " | ".join(_md(value) for value in row) + " |" for row in rows)
     return lines
 
 
-def _sweep_rows(result: dict) -> tuple[list[tuple[str, ...]], list[str]]:
+def _sweep_rows(result: dict[str, Any]) -> tuple[list[tuple[Any, ...]], list[str]]:
     rows = []
-    warnings: Counter = Counter()
+    warnings: Counter[str] = Counter()
     for entry in result.get("runs", []):
         summary = entry.get("summary", {})
-        rows.append((
-            entry.get("value_label", entry.get("value", "unknown")),
-            summary.get("requested_kwh", summary.get("requested_it_kwh", "unknown")),
-            summary.get("served_kwh", summary.get("served_it_kwh", "unknown")),
-            summary.get("unserved_kwh", summary.get("unserved_it_kwh", "unknown")),
-            summary.get("unserved_seconds", summary.get("unserved_duration_s", "unknown")),
+        rows.append(
             (
-                "none"
-                if summary.get("first_battery_depletion_s") is None
-                else summary.get("first_battery_depletion_s")
-            ),
-            summary.get("service_status", "unknown"),
-            ", ".join(summary.get("cost_unknowns", [])) or "none",
-            entry.get("run_id", "unknown"),
-            entry.get("input_sha256", "unknown"),
-        ))
+                entry.get("value_label", entry.get("value", "unknown")),
+                summary.get("requested_kwh", summary.get("requested_it_kwh", "unknown")),
+                summary.get("served_kwh", summary.get("served_it_kwh", "unknown")),
+                summary.get("unserved_kwh", summary.get("unserved_it_kwh", "unknown")),
+                summary.get("unserved_seconds", summary.get("unserved_duration_s", "unknown")),
+                (
+                    "none"
+                    if summary.get("first_battery_depletion_s") is None
+                    else summary.get("first_battery_depletion_s")
+                ),
+                summary.get("service_status", "unknown"),
+                ", ".join(summary.get("cost_unknowns", [])) or "none",
+                entry.get("run_id", "unknown"),
+                entry.get("input_sha256", "unknown"),
+            )
+        )
         detail = entry.get("result")
         if detail:
             warnings.update(_warnings(detail))
         else:
             warning_counts = {
-                str(name): int(count)
-                for name, count in summary.get("warning_counts", {}).items()
+                str(name): int(count) for name, count in summary.get("warning_counts", {}).items()
             }
             warnings.update(warning_counts)
     return rows, [f"{name}: {count} interval(s)" for name, count in sorted(warnings.items())]
 
 
-def _event_rows(result: dict) -> list[tuple[Any, ...]]:
+def _event_rows(result: dict[str, Any]) -> list[tuple[Any, ...]]:
     return [
-        (event.get("at_s", "unknown"), event.get("action", "unknown"),
-         event.get("target", "unknown"), event.get("origin", "scenario"),
-         event.get("ready_at_s", ""))
+        (
+            event.get("at_s", "unknown"),
+            event.get("action", "unknown"),
+            event.get("target", "unknown"),
+            event.get("origin", "scenario"),
+            event.get("ready_at_s", ""),
+        )
         for event in result.get("events", [])
     ]
 
 
-def render_markdown(result: dict) -> str:
+def render_markdown(result: dict[str, Any]) -> str:
     """Render a continuity run or sweep as byte-reproducible Markdown."""
 
     result = _require_result(result)
     is_sweep = "runs" in result and "parameter" in result
     scenario = _scenario(result)
-    lines = ["# Datacenter Twin Lab continuity report", "", f"Model: {_md(result.get('model', 'unknown'))}",
-             f"Engine version: {_md(result.get('engine_version', 'unknown'))}"]
+    lines = [
+        "# Datacenter Twin Lab continuity report",
+        "",
+        f"Model: {_md(result.get('model', 'unknown'))}",
+        f"Engine version: {_md(result.get('engine_version', 'unknown'))}",
+    ]
     if is_sweep:
-        lines.extend([
-            f"Base input SHA-256: {_md(result.get('base_input_sha256', 'unknown'))}",
-            f"Parameter: {_md(result.get('parameter', 'unknown'))} ({_md(result.get('parameter_unit', ''))})",
-            "", "## Sensitivity outcomes", "",
-        ])
+        lines.extend(
+            [
+                f"Base input SHA-256: {_md(result.get('base_input_sha256', 'unknown'))}",
+                f"Parameter: {_md(result.get('parameter', 'unknown'))} "
+                f"({_md(result.get('parameter_unit', ''))})",
+                "",
+                "## Sensitivity outcomes",
+                "",
+            ]
+        )
         rows, warning_lines = _sweep_rows(result)
         lines.extend(
             _markdown_table(
@@ -178,10 +217,18 @@ def render_markdown(result: dict) -> str:
             )
         )
     else:
-        lines.extend([f"Run ID: {_md(result.get('run_id', 'unknown'))}",
-                      f"Input SHA-256: {_md(result.get('input_sha256', 'unknown'))}",
-                      "", "## Outcome", ""])
-        lines.extend(_markdown_table(("Measure", "Value", "Unit"), _summary_rows(_single_summary(result))))
+        lines.extend(
+            [
+                f"Run ID: {_md(result.get('run_id', 'unknown'))}",
+                f"Input SHA-256: {_md(result.get('input_sha256', 'unknown'))}",
+                "",
+                "## Outcome",
+                "",
+            ]
+        )
+        lines.extend(
+            _markdown_table(("Measure", "Value", "Unit"), _summary_rows(_single_summary(result)))
+        )
         lines.extend(["", "## Event timeline", ""])
         event_rows = _event_rows(result)
         lines.extend(
@@ -193,7 +240,9 @@ def render_markdown(result: dict) -> str:
             else ["No events were emitted."]
         )
         warning_counts = _warnings(result)
-        warning_lines = [f"{name}: {count} interval(s)" for name, count in sorted(warning_counts.items())]
+        warning_lines = [
+            f"{name}: {count} interval(s)" for name, count in sorted(warning_counts.items())
+        ]
     lines.extend(["", "## Scenario assumptions", ""])
     lines.extend(_markdown_table(("Field", "Value", "Unit"), _scenario_rows(scenario)))
     lines.extend(["", "## Warning summary", ""])
@@ -218,18 +267,13 @@ def render_markdown(result: dict) -> str:
 def _html_table(headers: tuple[str, ...], rows: list[tuple[Any, ...]]) -> str:
     head = "".join(f"<th>{escape(str(value), quote=True)}</th>" for value in headers)
     body = "".join(
-        "<tr>"
-        + "".join(
-            f"<td>{escape(str(value), quote=True)}</td>"
-            for value in row
-        )
-        + "</tr>"
+        "<tr>" + "".join(f"<td>{escape(str(value), quote=True)}</td>" for value in row) + "</tr>"
         for row in rows
     )
     return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
 
 
-def render_html(result: dict) -> str:
+def render_html(result: dict[str, Any]) -> str:
     """Render a continuity run or sweep as self-contained deterministic HTML."""
 
     result = _require_result(result)
@@ -237,9 +281,7 @@ def render_html(result: dict) -> str:
     scenario = _scenario(result)
     title = "Datacenter Twin Lab continuity report"
     style = (
-        "<head><meta charset=\"utf-8\"><title>"
-        + escape(title, quote=True)
-        + "</title><style>"
+        '<head><meta charset="utf-8"><title>' + escape(title, quote=True) + "</title><style>"
         "body{font-family:system-ui,sans-serif;max-width:1100px;margin:2rem auto;"
         "padding:0 1rem}table{border-collapse:collapse;margin:1rem 0;width:100%}"
         "th,td{border:1px solid #ccc;padding:.35rem;text-align:left}"
@@ -289,7 +331,9 @@ def render_html(result: dict) -> str:
         )
         parts.append(run_details)
         warning_counts = _warnings(result)
-        warning_lines = [f"{name}: {count} interval(s)" for name, count in sorted(warning_counts.items())]
+        warning_lines = [
+            f"{name}: {count} interval(s)" for name, count in sorted(warning_counts.items())
+        ]
         outcome_rows = _summary_rows(_single_summary(result))
         parts.extend(
             [

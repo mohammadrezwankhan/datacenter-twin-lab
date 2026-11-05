@@ -1,3 +1,4 @@
+import { requiredValue } from './src/required-value';
 import type { Plugin } from 'vite';
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
@@ -24,8 +25,8 @@ import {
 
 const repository = 'https://github.com/mohammadrezwankhan/datacenter-twin-lab';
 const title = 'Datacenter Power Systems: Free Interactive Course | Datacenter Twin Lab';
-const description = `Learn datacenter continuity and Infrastructure Engineering with ${courseTotal} free browser lessons, EMT and power-dynamics studies. Inspect assumptions, run educational screens and reproduce the evidence.`;
-const catalogDescription = `Browse all ${courseTotal} free datacenter power lessons with worked assumptions, examples and source records. Search by topic, choose a learning path, and continue into EMT and power-dynamics studies.`;
+const description = `Learn datacenter continuity and Infrastructure Engineering with ${String(courseTotal)} free browser lessons, EMT and power-dynamics studies. Inspect assumptions, run educational screens and reproduce the evidence.`;
+const catalogDescription = `Browse all ${String(courseTotal)} free datacenter power lessons with worked assumptions, examples and source records. Search by topic, choose a learning path, and continue into EMT and power-dynamics studies.`;
 const courseName = 'Power Systems for Datacenter Engineers';
 const authorId = 'https://mrkhan.co.technology/#person';
 const authorUrl = 'https://mrkhan.co.technology/';
@@ -37,7 +38,8 @@ const entities: Record<string, string> = {
   '"': '&quot;',
   "'": '&#39;',
 };
-const escape = (value: unknown) => String(value).replace(/[&<>"']/g, (c) => entities[c]);
+const escape = (value: unknown) =>
+  String(value).replace(/[&<>"']/g, (c) => requiredValue(entities[c], c));
 const json = (value: unknown) => JSON.stringify(value).replaceAll('<', '\\u003c');
 
 function decodeHtml(value: string): string {
@@ -191,9 +193,16 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
   function assumptions(lesson: Lesson, scenarios: Record<string, SiteScenario>): string {
     if (lesson.id === 'pue')
       return `<p>Constant 50,000 kW IT demand over 8,760 hours; assumed PUE of 1.25 or 1.15. This annual planning case has no outage timeline. PUE includes non-IT energy; do not add continuity losses again.</p>`;
-    const scenario = lessonScenario(lesson, scenarios[lesson.preset], lesson.initial);
+    const scenario = lessonScenario(
+      lesson,
+      requiredValue(scenarios[lesson.preset], 'scenarios[lesson.preset]'),
+      lesson.initial,
+    );
     const rows = [
-      ['IT demand / simulated duration', `${scenario.it_demand_kw} kW / ${scenario.duration_s} s`],
+      [
+        'IT demand / simulated duration',
+        `${scenario.it_demand_kw} kW / ${String(scenario.duration_s)} s`,
+      ],
       [
         'Opening battery / energy capacity',
         `${scenario.battery_initial_kwh} kWh / ${scenario.battery_capacity_kwh} kWh`,
@@ -204,10 +213,10 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
         `${scenario.battery_charge_efficiency} / ${scenario.battery_discharge_efficiency}`,
       ],
       ['Distribution efficiency', scenario.distribution_efficiency],
-      ['Generator start delay', `${scenario.generator_start_delay_s} s`],
+      ['Generator start delay', `${String(scenario.generator_start_delay_s)} s`],
     ];
     return `<div class="table-wrap"><table><caption>Starting case assumptions</caption><tbody>${rows.map(([name, value]) => `<tr><th scope="row">${escape(name)}</th><td>${escape(value)}</td></tr>`).join('')}</tbody></table></div>
-<h3>Scheduled events</h3>${scenario.events.length ? `<ul>${scenario.events.map((event) => `<li>${event.at_s} s: ${escape(event.target)} — ${escape(event.action.replaceAll('_', ' '))}${event.value_kw === null ? '' : `, ${escape(event.value_kw)} kW`}</li>`).join('')}</ul>` : '<p>No failure or recovery events are scheduled.</p>'}`;
+<h3>Scheduled events</h3>${scenario.events.length ? `<ul>${scenario.events.map((event) => `<li>${String(event.at_s)} s: ${escape(event.target)} — ${escape(event.action.replaceAll('_', ' '))}${event.value_kw === null ? '' : `, ${escape(event.value_kw)} kW`}</li>`).join('')}</ul>` : '<p>No failure or recovery events are scheduled.</p>'}`;
   }
 
   return {
@@ -247,7 +256,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
       const landingPage = html
         .replace(
           '<!-- PUBLIC_COURSE_LINKS -->',
-          `<a href="./learn/">Read all ${courseTotal} course lessons</a> · <a href="./studies/emt/">Explore the EMT study</a> · <a href="./studies/power-dynamics/">Power dynamics studies</a> · <a href="./evidence/">Reference results and source records</a> · <a href="./about/">About the author and evidence</a> ·`,
+          `<a href="./learn/">Read all ${String(courseTotal)} course lessons</a> · <a href="./studies/emt/">Explore the EMT study</a> · <a href="./studies/power-dynamics/">Power dynamics studies</a> · <a href="./evidence/">Reference results and source records</a> · <a href="./about/">About the author and evidence</a> ·`,
         )
         .replace(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
         .replace(/<title>[\s\S]*?<\/title>/, '')
@@ -298,7 +307,7 @@ Read the <a href="${source}NOTICE">source notices</a> and <a href="${root}about/
           catalogDescription,
           'learn/',
           `
-<p class="eyebrow">The power playbook / ${courseTotal} practical lessons</p><h1>${courseName}</h1>
+<p class="eyebrow">The power playbook / ${String(courseTotal)} practical lessons</p><h1>${courseName}</h1>
 <p class="lead">A generator fails. The battery takes over. Can you predict when the lights go out?</p>
 <p>Start with a 1 MW load and a 100 kWh battery, then change one assumption at a time. Read the calculations here, run each experiment in your browser, and compare the result with the reference Python engine.</p>
 <p class="byline">Original course by <a href="../about/#author">${site.author}</a> · Engine ${ENGINE_VERSION} · <a href="../evidence/">Reference results and citation records</a></p>
@@ -372,7 +381,7 @@ ${learningExplorer()}
         emit(
           path + 'index.html',
           document(
-            `${cleanTitle} | Datacenter Power Lesson ${index + 1}`,
+            `${cleanTitle} | Datacenter Power Lesson ${String(index + 1)}`,
             lesson.question,
             path,
             `
@@ -381,7 +390,7 @@ ${learningExplorer()}
 <p class="byline">By <a href="../../about/#author">${site.author}</a> · Engine ${ENGINE_VERSION} · <a href="#cite">Cite this lesson</a></p>
 <p><a class="button" rel="nofollow" href="../../?lesson=${lesson.id}">Run this browser lesson →</a></p>
 <section class="panel"><h2>Predict before you run</h2><p>Write down your prediction, then change only the input below. In the interactive lesson, compare the starting case with the challenge and export a worksheet to retain your reasoning.</p>
-<div class="table-wrap"><table><caption>The two lesson configurations</caption><thead><tr><th scope="col">Input</th><th scope="col">Starting value</th><th scope="col">Challenge value</th></tr></thead><tbody><tr><th scope="row">${escape(lesson.label)}</th><td>${escape(lesson.initial)} ${escape(lesson.unit)}</td><td>${escape(lesson.challenge)} ${escape(lesson.unit)}</td></tr></tbody></table></div><p class="small">Reported quantity: ${escape(lesson.resultUnit)}. The live control accepts ${lesson.min}–${lesson.max}${lesson.unit ? ` ${escape(lesson.unit)}` : ''}.</p></section>
+<div class="table-wrap"><table><caption>The two lesson configurations</caption><thead><tr><th scope="col">Input</th><th scope="col">Starting value</th><th scope="col">Challenge value</th></tr></thead><tbody><tr><th scope="row">${escape(lesson.label)}</th><td>${escape(lesson.initial)} ${escape(lesson.unit)}</td><td>${escape(lesson.challenge)} ${escape(lesson.unit)}</td></tr></tbody></table></div><p class="small">Reported quantity: ${escape(lesson.resultUnit)}. The live control accepts ${String(lesson.min)}–${String(lesson.max)}${lesson.unit ? ` ${escape(lesson.unit)}` : ''}.</p></section>
 <section class="panel answer section-link" id="worked-answer"><h2>Worked answer <a class="anchor" href="#worked-answer">Link to this answer</a></h2><p>${escape(lesson.explanation)}</p>
 <div class="table-wrap"><table id="calculated-results"><caption>Calculated results · ${escape(lesson.resultUnit)}</caption><thead><tr><th scope="col">Configuration</th><th scope="col">${escape(lesson.label)}</th><th scope="col">Result (${escape(lesson.resultUnit)})</th></tr></thead><tbody>${records.map((record, row) => `<tr><th scope="row">${row ? 'Challenge' : 'Starting case'}</th><td>${escape(record.input)} ${escape(lesson.unit)}</td><td class="result-value" data-result="${escape(record.result)}">${escape(displayQuantity(record.result))}</td></tr>`).join('')}</tbody></table></div>
 <p class="small">Calculated from the same inputs as the interactive lesson. Display rounded to six decimal places; full decimal strings, inputs and energy records are in the <a href="results.json">downloadable result record</a>. ${lesson.resultUnit === 's elapsed' ? 'Elapsed seconds start at simulation time zero; ride-through starts at the outage.' : ''}</p></section>
@@ -390,7 +399,7 @@ ${learningExplorer()}
 <h2>Sources and verification</h2><ul class="sources">${sources.map(([name, file]) => `<li><a href="${escape(source + file)}">${escape(name)}</a></li>`).join('')}<li><a href="../../evidence/">Three reference cases, equations and versioned source records</a></li></ul>
 <section id="cite" class="panel section-link"><h2>Cite this lesson</h2><p class="citation">${site.author}. “${escape(cleanTitle)}.” Datacenter Twin Lab, engine ${ENGINE_VERSION}. <a href="${escape(url(path))}">${escape(url(path))}</a></p><p class="small">Documentation source: <a href="${escape(source)}apps/web/src/course-lessons.ts">${revision || `v${ENGINE_VERSION}`}</a>. For a numerical claim, also retain the completed inputs and the <a href="results.json">result record</a>; the live lesson can be changed by its controls.</p></section>
 <p class="small">Original material by ${site.author}, engine ${ENGINE_VERSION}. Synthetic teaching cases; no facility calibration or independent external reproduction has been established. Annual PUE planning and outage continuity are different calculations. <a href="../../about/">Full scope and evidence</a>.</p>
-<nav class="pager" aria-label="Lesson sequence">${index ? `<a href="../${lessons[index - 1].id}/">← ${escape(lessons[index - 1].title)}</a>` : '<a href="../">← Course index</a>'}${index < lessons.length - 1 ? `<a href="../${lessons[index + 1].id}/">${escape(lessons[index + 1].title)} →</a>` : '<a href="../">Back to all lessons →</a>'}</nav>`,
+<nav class="pager" aria-label="Lesson sequence">${index ? `<a href="../${requiredValue(lessons[index - 1], 'lessons[index - 1]').id}/">← ${escape(requiredValue(lessons[index - 1], 'lessons[index - 1]').title)}</a>` : '<a href="../">← Course index</a>'}${index < lessons.length - 1 ? `<a href="../${requiredValue(lessons[index + 1], 'lessons[index + 1]').id}/">${escape(requiredValue(lessons[index + 1], 'lessons[index + 1]').title)} →</a>` : '<a href="../">Back to all lessons →</a>'}</nav>`,
             [
               resource,
               breadcrumbs,
@@ -417,7 +426,7 @@ ${learningExplorer()}
           'about/',
           `
 <p class="eyebrow">About the lab / evidence you can inspect</p><h1>Understand the model. Reproduce the result.</h1>
-<p class="lead">Datacenter Twin Lab is a local-first power-continuity what-if simulator and a ${courseTotal}-lesson course for datacenter engineers.</p>
+<p class="lead">Datacenter Twin Lab is a local-first power-continuity what-if simulator and a ${String(courseTotal)}-lesson course for datacenter engineers.</p>
 <p id="author">Created and maintained by <a href="https://mrkhan.co.technology/" rel="me">Mohammad Rezwan Khan</a>. Visit the <a href="https://mrkhan.co.technology/">engineering profile and publications</a>. The project is open source under Apache-2.0. It runs on your device without an account or shared simulation backend.</p>
 <p>Development and educational writing use AI assistance. Numerical examples are checked with stated equations, the Python reference engine and browser tests; those maintainer checks are distinct from independent external review. Inspect the <a href="../evidence/">reference results and complete records</a> to follow a claim back to its inputs.</p>
 <section class="panel answer"><h2>How long does 100 kWh support a 1 MW load?</h2><p>For this fixed-load example, 100 kWh × 0.90 discharge efficiency × 0.95 distribution efficiency = 85.5 kWh delivered. That is 307.8 seconds at 1,000 kW. With 50 kWh, it is 153.9 seconds. Charging is disabled; utility and generator fail at 300 seconds and recover at 900 seconds.</p><p><a href="../learn/ride-through/">Read the assumptions and run the experiment →</a></p></section>
@@ -425,7 +434,7 @@ ${learningExplorer()}
 <h2>What the evidence means</h2><p>The tests and published packets establish reproducible software behavior for the declared inputs. They do not establish facility calibration, AC transients, protection coordination, GPU workload performance, grid adequacy, certified uptime or equipment safety. This software does not control equipment. Independent external reproduction has not yet been obtained.</p>
 <h2>Inspect or cite the work</h2><ul class="sources"><li><a href="${repository}/tree/v${ENGINE_VERSION}">Version ${ENGINE_VERSION} source</a></li><li><a href="${repository}/releases">Published releases and packages</a></li><li><a href="${source}docs/canonical-case.md">Canonical input equations and reconstruction instructions</a></li><li><a href="../data/evidence/v${ENGINE_VERSION}/manifest.json">Versioned evidence manifest with per-file hashes</a></li><li><a href="${source}CITATION.cff">Author and software citation record</a></li><li><a href="${source}docs/validation/review-protocol.md">External reproduction protocol and scope</a></li><li><a href="${source}docs/quickstart.md">Install and run with Python</a></li></ul>
 <h2>How to contribute</h2><p>Try one lesson, note anything confusing and describe the steps to reproduce it. A clearer explanation, a documentation fix or an independently derived example can help the next learner. Read the <a href="${source}CONTRIBUTING.md">contribution guide</a> or <a href="${repository}/issues">open an issue</a>.</p>
-<p><a class="button" href="../learn/">Explore all ${courseTotal} lessons →</a></p>`,
+<p><a class="button" href="../learn/">Explore all ${String(courseTotal)} lessons →</a></p>`,
           {
             '@type': 'AboutPage',
             name: 'About Datacenter Twin Lab',
@@ -537,7 +546,7 @@ python scripts/build_evidence.py --verify outputs/reproduction-${ENGINE_VERSION}
 <p>For numerical reuse, include the case name, input SHA-256, engine version, result file and exact source revision. Documentation for this build: <a href="${source}docs/canonical-case.md">${revision || `v${ENGINE_VERSION}`}</a>. Use the <a href="${source}CITATION.cff">software citation record</a> for author and repository details.</p>
 <p class="small">This is a software reproduction record, not a peer-reviewed paper or a calibrated facility dataset. No DOI or independent external reproduction is asserted. Original code and inputs are Apache-2.0; <a href="${source}NOTICE">source notices</a> describe the material included.</p></section>
 <h2>What can these results support?</h2><p>They support learning about finite reserve, losses, outage timing and path capacity for the stated synthetic inputs. They do not establish equipment suitability, facility uptime, grid adequacy, GPU job performance or physical safety. See the <a href="../about/">model scope and authorship</a> and <a href="${source}docs/validation/review-protocol.md">external reproduction protocol</a>.</p>
-<p><a href="../learn/">Explore all ${courseTotal} worked lessons →</a></p>`,
+<p><a href="../learn/">Explore all ${String(courseTotal)} worked lessons →</a></p>`,
           [
             dataset,
             {
@@ -657,7 +666,7 @@ python scripts/build_evidence.py --verify outputs/reproduction-${ENGINE_VERSION}
       );
       if (ownershipFiles.length !== 1)
         throw new Error('Expected one 32-character IndexNow ownership file in apps/web/public');
-      const ownershipFile = ownershipFiles[0];
+      const ownershipFile = requiredValue(ownershipFiles[0], 'ownershipFiles[0]');
       const ownershipKey = readFileSync(
         new URL(`./public/${ownershipFile}`, import.meta.url),
         'utf8',

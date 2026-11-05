@@ -18,7 +18,7 @@ export async function request<T>(
     return browserRequest<T>(path, signal, body, onProgress);
   }
   const response = await fetch(`/api/v1/${path}`, {
-    signal,
+    ...(signal === undefined ? {} : { signal }),
     ...(body === undefined
       ? {}
       : {
@@ -29,6 +29,6 @@ export async function request<T>(
   });
   const data = await response.json();
   if (!response.ok)
-    throw new Error(data.error || data.detail || `Request failed (${response.status})`);
+    throw new Error(data.error || data.detail || `Request failed (${String(response.status)})`);
   return data;
 }

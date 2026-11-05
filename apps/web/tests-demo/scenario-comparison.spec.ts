@@ -5,13 +5,13 @@ import { readFile } from 'node:fs/promises';
 async function exportedRun(page: Page) {
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
-  return JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  return JSON.parse(await readFile(await (await download).path(), 'utf8'));
 }
 
 async function downloadedComparison(page: Page) {
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Download comparison JSON' }).click();
-  return JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+  return JSON.parse(await readFile(await (await download).path(), 'utf8'));
 }
 
 function nativeRun(scenario: unknown) {
@@ -53,7 +53,7 @@ function nativeSweep(scenario: unknown, parameter: string, values: string[]) {
 async function selectedValues(page: Page, unit: string) {
   const values: string[] = [];
   for (let index = 1; index <= 3; index++) {
-    const select = page.getByLabel(`Comparison value ${index} (${unit})`);
+    const select = page.getByLabel(`Comparison value ${String(index)} (${unit})`);
     if (await select.count()) values.push(await select.inputValue());
   }
   return values;
@@ -138,7 +138,9 @@ test('surviving distribution path capacity changes only the selected path and ma
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('a comparison clears when its assumptions change or a new run completes', async ({ page }) => {
+test('a comparison clears when its assumptions change or a new run completes', async ({
+  page,
+}) => {
   await page.goto('./?mode=advanced&preset=utility_loss');
   await expect(page.getByTestId('served-power')).toBeVisible();
   await page.getByText('Advanced scenario comparison', { exact: true }).click();

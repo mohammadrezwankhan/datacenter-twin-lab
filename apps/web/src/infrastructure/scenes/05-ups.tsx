@@ -1,3 +1,4 @@
+import { requiredValue } from '../../required-value';
 import type { SceneProps } from './types';
 import { numberOutput } from './types';
 import { Cable, Device, SceneDiagram } from './primitives';
@@ -19,7 +20,7 @@ export default function UpsScene({ result, step }: SceneProps) {
     <SceneDiagram
       id="ups"
       title="Exploded UPS and station DC"
-      description={story}
+      description={requiredValue(story, 'scene storyboard step')}
       rows={rows}
       flat={false}
     >

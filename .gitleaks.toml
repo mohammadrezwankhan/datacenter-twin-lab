@@ -1,0 +1,5 @@
+title = "Rezwan default secret detection"
+# Keep the complete upstream rule set. There are no repository-wide ignores,
+# baseline suppressions, or path-based allowances for historical findings.
+[extend]
+useDefault = true

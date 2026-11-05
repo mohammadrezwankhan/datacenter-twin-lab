@@ -139,7 +139,7 @@ function LineChart({
       </div>
       <svg
         className="emt-chart"
-        viewBox={'0 0 ' + width + ' ' + height}
+        viewBox={'0 0 ' + String(width) + ' ' + String(height)}
         role="img"
         aria-label={description}
         onPointerDown={startInspecting}
@@ -162,9 +162,9 @@ function LineChart({
         {ticks.map((value, index) => {
           const yPos = y(value);
           return (
-            <g key={'y' + index}>
+            <g key={'y' + String(index)}>
               <path
-                d={'M' + left + ' ' + yPos + 'H' + (width - right)}
+                d={'M' + String(left) + ' ' + String(yPos) + 'H' + String(width - right)}
                 className="emt-chart-grid"
               />
               <text x={left - 10} y={yPos + 4} textAnchor="end">
@@ -176,9 +176,9 @@ function LineChart({
         {timeTicks.map((value, index) => {
           const xPos = x(value);
           return (
-            <g key={'x' + index}>
+            <g key={'x' + String(index)}>
               <path
-                d={'M' + xPos + ' ' + top + 'V' + (top + plotHeight)}
+                d={'M' + String(xPos) + ' ' + String(top) + 'V' + String(top + plotHeight)}
                 className="emt-chart-grid vertical"
               />
               <text
@@ -192,11 +192,11 @@ function LineChart({
           );
         })}
         <path
-          d={'M' + left + ' ' + (top + plotHeight) + 'H' + (width - right)}
+          d={'M' + String(left) + ' ' + String(top + plotHeight) + 'H' + String(width - right)}
           className="emt-chart-axis"
         />
         <text
-          transform={'rotate(-90 15 ' + (top + plotHeight / 2) + ')'}
+          transform={'rotate(-90 15 ' + String(top + plotHeight / 2) + ')'}
           x="15"
           y={top + plotHeight / 2}
           textAnchor="middle"
@@ -224,7 +224,7 @@ function LineChart({
           />
         ))}
         <path
-          d={'M' + cursorX + ' ' + top + 'V' + (top + plotHeight)}
+          d={'M' + String(cursorX) + ' ' + String(top) + 'V' + String(top + plotHeight)}
           className="emt-chart-cursor"
         />
         <circle

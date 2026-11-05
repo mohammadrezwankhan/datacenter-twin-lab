@@ -1,27 +1,25 @@
 """Pure-standard-library regression tests for the read-only public-site auditor."""
+
 from __future__ import annotations
 
-import importlib.util
 import json
-from hashlib import sha256
-from pathlib import Path
 import re
 import unittest
-from datacenter_twin import __version__
+from collections.abc import Callable, Mapping
+from email.message import Message
+from hashlib import sha256
+from pathlib import Path
 from urllib.error import HTTPError
 
-SOURCE = Path(__file__).resolve().parents[1] / 'scripts' / 'audit_public_site.py'
-spec = importlib.util.spec_from_file_location('auditor', SOURCE)
-auditor = importlib.util.module_from_spec(spec)
-import sys
-sys.modules[spec.name] = auditor
-spec.loader.exec_module(auditor)
-BASE = 'https://example.invalid/'
+from datacenter_twin import __version__
+from scripts import audit_public_site as auditor
+
+BASE = "https://example.invalid/"
 
 
-def page(path, schema='TechArticle', links=''):
-    title = 'Datacenter Twin Lab'
-    schema_json = json.dumps({'@context': 'https://schema.org', '@type': schema})
+def page(path: str, schema: str | list[str] = "TechArticle", links: str = "") -> bytes:
+    title = "Datacenter Twin Lab"
+    schema_json = json.dumps({"@context": "https://schema.org", "@type": schema})
     return f'''<!doctype html><html lang="en"><head><title>{title}</title>
 <link rel="canonical" href="{BASE[:-1]}{path}" />
 <meta name="description" content="Synthetic exercises" />
@@ -33,157 +31,253 @@ def page(path, schema='TechArticle', links=''):
 </head><body><h1>Datacenter Twin Lab</h1>{links}</body></html>'''.encode()
 
 
-def fixtures(*, corrupt=False):
-    receipt = b'This is a synthetic verification fixture.\n'
+def fixtures(*, corrupt: bool = False) -> dict[str, bytes]:
+    receipt = b"This is a synthetic verification fixture.\n"
     manifest = {
-        'engine_version': __version__,
-        'artifacts': {'receipt.md': {'sha256': sha256(receipt).hexdigest()}},
-        'cases': [],
+        "engine_version": __version__,
+        "artifacts": {"receipt.md": {"sha256": sha256(receipt).hexdigest()}},
+        "cases": [],
     }
-    learn = ''.join(f'<a href="/learn/{i:02d}/">Lesson {i}</a>' for i in range(1, 25))
+    learn = "".join(f'<a href="/learn/{i:02d}/">Lesson {i}</a>' for i in range(1, 25))
     items = {
-        '/': page('/', 'SoftwareApplication', '<a href="/learn/">Lessons</a>'),
-        '/learn/': page('/learn/', 'Course', learn),
-        '/about/': page('/about/'),
-        '/evidence/': page('/evidence/'),
-        '/studies/emt/': page('/studies/emt/'),
-        f'/data/evidence/v{__version__}/manifest.json': json.dumps(manifest).encode(),
-        f'/data/evidence/v{__version__}/receipt.md': b'TAMPERED' if corrupt else receipt,
+        "/": page("/", "SoftwareApplication", '<a href="/learn/">Lessons</a>'),
+        "/learn/": page("/learn/", "Course", learn),
+        "/about/": page("/about/"),
+        "/evidence/": page("/evidence/"),
+        "/studies/emt/": page("/studies/emt/"),
+        f"/data/evidence/v{__version__}/manifest.json": json.dumps(manifest).encode(),
+        f"/data/evidence/v{__version__}/receipt.md": b"TAMPERED" if corrupt else receipt,
     }
     for i in range(1, 25):
-        items[f'/learn/{i:02d}/'] = page(f'/learn/{i:02d}/', ['LearningResource', 'TechArticle'])
-    urls = ''.join(f'<url><loc>{BASE[:-1]}{path}</loc><lastmod>2026-10-12</lastmod></url>' for path in items if path.endswith('/'))
-    items['/sitemap.xml'] = f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'.encode()
-    items['/robots.txt'] = ('User-agent: *\nAllow: /\n' + ''.join(f'User-agent: {bot}\nAllow: /\n' for bot in auditor.BOTS) + f'Sitemap: {BASE}sitemap.xml\n').encode()
+        items[f"/learn/{i:02d}/"] = page(f"/learn/{i:02d}/", ["LearningResource", "TechArticle"])
+    urls = "".join(
+        f"<url><loc>{BASE[:-1]}{path}</loc><lastmod>2026-10-12</lastmod></url>"
+        for path in items
+        if path.endswith("/")
+    )
+    items["/sitemap.xml"] = (
+        f'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'.encode()
+    )
+    items["/robots.txt"] = (
+        "User-agent: *\nAllow: /\n"
+        + "".join(f"User-agent: {bot}\nAllow: /\n" for bot in auditor.BOTS)
+        + f"Sitemap: {BASE}sitemap.xml\n"
+    ).encode()
     return items
 
 
-def fetch_for(items):
-    def get(url):
+def fetch_for(items: Mapping[str, bytes]) -> Callable[[str], auditor.FetchResult]:
+    def get(url: str) -> auditor.FetchResult:
         path = url.removeprefix(BASE[:-1])
         if path not in items:
-            raise HTTPError(url, 404, 'missing', {}, None)
-        return 200, url, items[path], 'application/octet-stream'
+            raise HTTPError(url, 404, "missing", Message(), None)
+        return 200, url, items[path], "application/octet-stream"
+
     return get
 
 
 class AuditorTests(unittest.TestCase):
-    def test_embedded_lesson_config_matches_canonical_dashboard_url(self):
+    def test_embedded_lesson_config_matches_canonical_dashboard_url(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        html = (root / 'docs' / 'index.html').read_text(encoding='utf-8')
-        match = re.search(r'<script id="lab-config" type="application/json">(.*?)</script>', html, re.S)
-        self.assertIsNotNone(match)
+        html = (root / "docs" / "index.html").read_text(encoding="utf-8")
+        match = re.search(
+            r'<script id="lab-config" type="application/json">(.*?)</script>', html, re.S
+        )
+        if match is None:
+            self.fail("The canonical dashboard must expose its embedded lesson configuration")
         embedded = json.loads(match.group(1))
-        canonical = json.loads((root / 'docs' / 'lesson-config.json').read_text(encoding='utf-8'))
-        self.assertEqual(embedded['dashboard_url'], 'https://khanlab.co.technology/')
-        self.assertEqual(embedded['dashboard_url'], canonical['dashboard_url'])
+        canonical = json.loads((root / "docs" / "lesson-config.json").read_text(encoding="utf-8"))
+        self.assertEqual(embedded["dashboard_url"], "https://khanlab.co.technology/")
+        self.assertEqual(embedded["dashboard_url"], canonical["dashboard_url"])
 
-    def test_discovery_export_uses_current_engine_and_pinned_sources(self):
+    def test_discovery_export_uses_current_engine_and_pinned_sources(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        text = (root / 'apps' / 'web' / 'public' / 'llms-full.txt').read_text(encoding='utf-8')
-        self.assertIn(f'Datacenter Twin Lab, version {__version__}.', text)
-        self.assertNotIn('Documentation source: v1.0.0.', text)
-        pinned = re.findall(r'Documentation source: ([0-9a-f]{40})\.', text)
+        text = (root / "apps" / "web" / "public" / "llms-full.txt").read_text(encoding="utf-8")
+        self.assertIn(f"Datacenter Twin Lab, version {__version__}.", text)
+        self.assertNotIn("Documentation source: v1.0.0.", text)
+        pinned = re.findall(r"Documentation source: ([0-9a-f]{40})\.", text)
         self.assertEqual(len(pinned), 12)
 
-    def test_strict_site_clean_fixture_passes(self):
+    def test_strict_site_clean_fixture_passes(self) -> None:
         audit = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(fixtures()))
         report = audit.execute()
-        self.assertEqual(report.status, 'pass', report.failures)
-        self.assertEqual(report.checks['lessons_discovered'], 24)
-        self.assertEqual(report.checks['artifacts_verified'], 1)
+        self.assertEqual(report.status, "pass", report.failures)
+        self.assertEqual(report.checks["lessons_discovered"], 24)
+        self.assertEqual(report.checks["artifacts_verified"], 1)
         self.assertEqual(len(report.sitemap_pages), 29)
 
-    def test_current_packet_is_audited_even_when_clean_historical_packet_exists(self):
+    def test_current_packet_is_audited_even_when_clean_historical_packet_exists(self) -> None:
         items = fixtures(corrupt=True)
-        historical = b'Historical receipt.\n'
-        items['/data/evidence/v2.0.0/receipt.md'] = historical
-        items['/data/evidence/v2.0.0/manifest.json'] = json.dumps({
-            'engine_version': '2.0.0',
-            'artifacts': {'receipt.md': {'sha256': sha256(historical).hexdigest()}},
-            'cases': [],
-        }).encode()
+        historical = b"Historical receipt.\n"
+        items["/data/evidence/v2.0.0/receipt.md"] = historical
+        items["/data/evidence/v2.0.0/manifest.json"] = json.dumps(
+            {
+                "engine_version": "2.0.0",
+                "artifacts": {"receipt.md": {"sha256": sha256(historical).hexdigest()}},
+                "cases": [],
+            }
+        ).encode()
         report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute()
-        self.assertEqual(report.status, 'fail')
-        self.assertTrue(any('SHA-256 mismatch' in x for x in report.failures), report.failures)
+        self.assertEqual(report.status, "fail")
+        self.assertTrue(any("SHA-256 mismatch" in x for x in report.failures), report.failures)
 
-    def test_raw_byte_hash_mismatch_is_failure(self):
+    def test_raw_byte_hash_mismatch_is_failure(self) -> None:
         audit = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(fixtures(corrupt=True)))
         result = audit.execute()
-        self.assertEqual(result.status, 'fail')
-        self.assertTrue(any('SHA-256 mismatch' in x for x in result.failures))
+        self.assertEqual(result.status, "fail")
+        self.assertTrue(any("SHA-256 mismatch" in x for x in result.failures))
 
-    def test_missing_structured_data_fails_strict_only(self):
+    def test_retained_current_packet_passes_exact_case_and_ledger_checks(self) -> None:
+        packet = Path(__file__).resolve().parents[1] / "data" / "evidence" / f"v{__version__}"
         items = fixtures()
-        items['/'] = items['/'].replace(b'SoftwareApplication', b'WebPage')
-        self.assertTrue(any('SoftwareApplication' in x for x in auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute().failures))
+        for path in packet.iterdir():
+            if path.is_file():
+                items[auditor.PACKET + path.name] = path.read_bytes()
+        report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute()
+        self.assertEqual(report.status, "pass", report.failures)
+        self.assertEqual(report.checks["cases_declared"], 3)
+        self.assertEqual(report.checks["artifacts_verified"], 14)
+
+    def test_malformed_manifest_structures_are_failures_not_missing_evidence(self) -> None:
+        receipt = b"This is a synthetic verification fixture.\n"
+        valid_artifacts = {"receipt.md": {"sha256": sha256(receipt).hexdigest()}}
+        manifests: tuple[object, ...] = (
+            None,
+            [],
+            {"artifacts": []},
+            {"artifacts": {"receipt.md": []}},
+            {"artifacts": {"receipt.md": {"sha256": 42}}},
+            {"artifacts": valid_artifacts, "cases": "invalid"},
+            {"artifacts": valid_artifacts, "cases": [None]},
+            {"artifacts": valid_artifacts, "cases": [{"case_id": 42}]},
+        )
+        for manifest in manifests:
+            with self.subTest(manifest=manifest):
+                items = fixtures()
+                items[auditor.PACKET + "manifest.json"] = json.dumps(manifest).encode()
+                report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute()
+                self.assertEqual(report.status, "fail")
+                self.assertTrue(report.failures)
+
+    def test_ledger_structure_must_be_valid_before_exact_arithmetic(self) -> None:
+        invalid_runs: tuple[object, ...] = (
+            [],
+            {"intervals": "invalid", "summary": {}},
+            {"intervals": [None], "summary": {}},
+            {"intervals": [{"energy": []}], "summary": {}},
+            {"intervals": [], "summary": []},
+        )
+        for run in invalid_runs:
+            with self.subTest(run=run), self.assertRaises(ValueError):
+                auditor.SiteAudit.verify_ledger(run)
+
+    def test_missing_structured_data_fails_strict_only(self) -> None:
+        items = fixtures()
+        items["/"] = items["/"].replace(b"SoftwareApplication", b"WebPage")
+        self.assertTrue(
+            any(
+                "SoftwareApplication" in x
+                for x in auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items))
+                .execute()
+                .failures
+            )
+        )
         non_strict = auditor.SiteAudit(BASE, strict_seo=False, fetch=fetch_for(items)).execute()
-        self.assertEqual(non_strict.status, 'pass-with-warnings')
+        self.assertEqual(non_strict.status, "pass-with-warnings")
 
-    def test_missing_tech_article_fails_strict_seo(self):
+    def test_missing_tech_article_fails_strict_seo(self) -> None:
         items = fixtures()
-        items['/learn/01/'] = page('/learn/01/', ['LearningResource'])
+        items["/learn/01/"] = page("/learn/01/", ["LearningResource"])
         report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute()
-        self.assertTrue(any('Expected lesson TechArticle' in x for x in report.failures))
+        self.assertTrue(any("Expected lesson TechArticle" in x for x in report.failures))
 
-    def test_malformed_packet_name_rejected(self):
-        self.assertFalse(auditor.safe_packet_name('../secrets'))
-        self.assertFalse(auditor.safe_packet_name('manifest/next'))
-        self.assertTrue(auditor.safe_packet_name('run-canonical-sha.json'))
+    def test_malformed_packet_name_rejected(self) -> None:
+        self.assertFalse(auditor.safe_packet_name("../secrets"))
+        self.assertFalse(auditor.safe_packet_name("manifest/next"))
+        self.assertTrue(auditor.safe_packet_name("run-canonical-sha.json"))
 
-    def test_linked_download_is_probed_without_reading_entire_payload(self):
+    def test_linked_download_is_probed_without_reading_entire_payload(self) -> None:
         items = fixtures()
-        items['/'] = page('/', 'SoftwareApplication',
-                          '<a href="/data/evidence/v2.0.0/receipt.md">Download report</a>')
-        calls = []
-        def probe(url):
+        items["/"] = page(
+            "/",
+            "SoftwareApplication",
+            '<a href="/data/evidence/v2.0.0/receipt.md">Download report</a>',
+        )
+        calls: list[str] = []
+
+        def probe(url: str) -> auditor.ProbeResult:
             calls.append(url)
             return 200, url
-        result = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items), probe=probe).execute()
-        self.assertEqual(result.status, 'pass', result.failures)
+
+        result = auditor.SiteAudit(
+            BASE, strict_seo=True, fetch=fetch_for(items), probe=probe
+        ).execute()
+        self.assertEqual(result.status, "pass", result.failures)
         self.assertEqual(len(result.checked_linked_files), 1)
-        self.assertEqual(calls, [BASE + 'data/evidence/v2.0.0/receipt.md'])
+        self.assertEqual(calls, [BASE + "data/evidence/v2.0.0/receipt.md"])
 
-    def test_evidence_html_reports_are_probed_as_linked_files_not_crawled_as_pages(self):
+    def test_evidence_html_reports_are_probed_as_linked_files_not_crawled_as_pages(self) -> None:
         items = fixtures()
-        report_url = '/data/evidence/v2.0.0/report-canonical-1mw-100kwh.html'
-        items['/evidence/'] = page('/evidence/', links=f'<a href="{report_url}">Raw report</a>')
-        items[report_url] = b'<!doctype html><html><head><title>Raw</title></head><body>Raw</body></html>'
-        calls = []
-        def probe(url):
+        report_url = "/data/evidence/v2.0.0/report-canonical-1mw-100kwh.html"
+        items["/evidence/"] = page("/evidence/", links=f'<a href="{report_url}">Raw report</a>')
+        items[report_url] = (
+            b"<!doctype html><html><head><title>Raw</title></head><body>Raw</body></html>"
+        )
+        calls: list[str] = []
+
+        def probe(url: str) -> auditor.ProbeResult:
             calls.append(url)
             return 200, url
-        result = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items), probe=probe).execute()
-        self.assertEqual(result.status, 'pass', result.failures)
-        self.assertIn(BASE + report_url.lstrip('/'), result.checked_linked_files)
-        self.assertNotIn(BASE + report_url.lstrip('/'), result.checked_pages)
 
-    def test_broken_linked_download_is_a_release_failure(self):
-        items = fixtures()
-        items['/'] = page('/', 'SoftwareApplication', '<a href="/missing.md">Broken</a>')
-        def missing(url):
-            raise HTTPError(url, 404, 'not found', {}, None)
-        report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items), probe=missing).execute()
-        self.assertTrue(any('Broken same-site linked file' in x for x in report.failures))
+        result = auditor.SiteAudit(
+            BASE, strict_seo=True, fetch=fetch_for(items), probe=probe
+        ).execute()
+        self.assertEqual(result.status, "pass", result.failures)
+        self.assertIn(BASE + report_url.lstrip("/"), result.checked_linked_files)
+        self.assertNotIn(BASE + report_url.lstrip("/"), result.checked_pages)
 
-    def test_misdirected_lesson_canonical_fails_strict_seo(self):
+    def test_broken_linked_download_is_a_release_failure(self) -> None:
         items = fixtures()
-        items['/learn/01/'] = items['/learn/01/'].replace(
-            (BASE + 'learn/01/').encode(), BASE.encode())
+        items["/"] = page("/", "SoftwareApplication", '<a href="/missing.md">Broken</a>')
+
+        def missing(url: str) -> auditor.ProbeResult:
+            raise HTTPError(url, 404, "not found", Message(), None)
+
+        report = auditor.SiteAudit(
+            BASE, strict_seo=True, fetch=fetch_for(items), probe=missing
+        ).execute()
+        self.assertTrue(any("Broken same-site linked file" in x for x in report.failures))
+
+    def test_misdirected_lesson_canonical_fails_strict_seo(self) -> None:
+        items = fixtures()
+        items["/learn/01/"] = items["/learn/01/"].replace(
+            (BASE + "learn/01/").encode(), BASE.encode()
+        )
         report = auditor.SiteAudit(BASE, strict_seo=True, fetch=fetch_for(items)).execute()
-        self.assertTrue(any('Lesson canonical does not identify itself' in x for x in report.failures))
+        self.assertTrue(
+            any("Lesson canonical does not identify itself" in x for x in report.failures)
+        )
 
-    def test_independent_ledger_detects_partition_error(self):
-        energy = dict(requested_it_kwh='1', served_it_kwh='1', unserved_it_kwh='0',
-                      grid_kwh='1', generator_kwh='0', battery_stored_change_kwh='0',
-                      distribution_loss_kwh='0', battery_charge_loss_kwh='0',
-                      battery_discharge_loss_kwh='0')
-        run = {'intervals': [{'battery_start_kwh': '20', 'battery_end_kwh': '20', 'energy': energy}],
-               'summary': {'requested_it_kwh': '1', 'served_it_kwh': '1', 'unserved_it_kwh': '0'}}
+    def test_independent_ledger_detects_partition_error(self) -> None:
+        energy = {
+            "requested_it_kwh": "1",
+            "served_it_kwh": "1",
+            "unserved_it_kwh": "0",
+            "grid_kwh": "1",
+            "generator_kwh": "0",
+            "battery_stored_change_kwh": "0",
+            "distribution_loss_kwh": "0",
+            "battery_charge_loss_kwh": "0",
+            "battery_discharge_loss_kwh": "0",
+        }
+        run = {
+            "intervals": [{"battery_start_kwh": "20", "battery_end_kwh": "20", "energy": energy}],
+            "summary": {"requested_it_kwh": "1", "served_it_kwh": "1", "unserved_it_kwh": "0"},
+        }
         self.assertEqual(auditor.SiteAudit.verify_ledger(run), [])
-        run['intervals'][0]['energy']['unserved_it_kwh'] = '0.5'
+        energy["unserved_it_kwh"] = "0.5"
         self.assertTrue(auditor.SiteAudit.verify_ledger(run))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

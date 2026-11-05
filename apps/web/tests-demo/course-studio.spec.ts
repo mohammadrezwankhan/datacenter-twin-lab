@@ -165,7 +165,7 @@ test('every lesson has a responsive scene at phone, tablet and desktop sizes', a
         (width === 320 && lesson.id === 'ai-outage')
       ) {
         await page.screenshot({
-          path: testInfo.outputPath(`${lesson.id}-${width}.png`),
+          path: testInfo.outputPath(`${lesson.id}-${String(width)}.png`),
           fullPage: true,
         });
       }

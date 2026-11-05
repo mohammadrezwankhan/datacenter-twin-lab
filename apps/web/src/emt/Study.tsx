@@ -1,5 +1,6 @@
+import { requiredValue, requiredPresent } from '../required-value';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
+import type { SyntheticEvent } from 'react';
 import {
   DEFAULT_EMT,
   EMT_LIMITS,
@@ -107,7 +108,9 @@ function download(name: string, content: string, mime: string) {
   anchor.href = url;
   anchor.download = name;
   anchor.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  window.setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 function nearestRowIndex(result: EmtResult, timeMs: number) {
@@ -127,10 +130,16 @@ function predictionExplanation(result: EmtResult, prediction: string) {
   if (!prediction)
     return 'Choose a prediction before the next run to compare it with the sampled trace.';
   const config = result.config;
-  const start = result.rows[nearestRowIndex(result, config.sag_start_ms)];
-  const minimum = result.rows.reduce(
-    (lowest, row) => (row.bus_v < lowest.bus_v ? row : lowest),
-    result.rows[0],
+  const start = requiredValue(
+    result.rows[nearestRowIndex(result, config.sag_start_ms)],
+    'result.rows[nearestRowIndex(result, config.sag_start_ms)]',
+  );
+  const minimum = requiredValue(
+    result.rows.reduce(
+      (lowest, row) => (row.bus_v < lowest.bus_v ? row : lowest),
+      requiredValue(result.rows[0], 'initial EMT row'),
+    ),
+    "result.rows.reduce(\n    (lowest, row) => (row.bus_v < lowest.bus_v ? row : lowest),\n    requiredValue(result.rows[0], 'initial EMT row'),\n  )",
   );
   return `At the ${number(config.sag_start_ms)} ms event boundary, the sampled source is ${number(start.source_v, 1)} V while the bus is ${number(start.bus_v, 1)} V. The sampled bus minimum is ${number(minimum.bus_v, 1)} V at ${number(minimum.time_ms, 2)} ms. Capacitor voltage is a continuous state, and series inductance limits current change; the input can step before the bus responds. The selected idea was: “${prediction}”`;
 }
@@ -157,16 +166,24 @@ export function EmtStudy() {
   const parsed = useMemo(() => parseDraft(draft), [draft]);
   const dirty =
     !parsed.config ||
-    (Object.keys(DEFAULT_EMT) as Field[]).some((key) => parsed.config![key] !== result.config[key]);
-  const row = result.rows[Math.min(sampleIndex, result.rows.length - 1)] ?? result.rows[0]!;
+    (Object.keys(DEFAULT_EMT) as Field[]).some(
+      (key) => requiredPresent(parsed.config, 'parsed.config')[key] !== result.config[key],
+    );
+  const row =
+    result.rows[Math.min(sampleIndex, result.rows.length - 1)] ??
+    requiredPresent(result.rows[0], 'result.rows[0]');
   const currentTimeMs = row.time_ms;
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReducedMotion(query.matches);
+    const update = () => {
+      setReducedMotion(query.matches);
+    };
     update();
     query.addEventListener?.('change', update);
-    return () => query.removeEventListener?.('change', update);
+    return () => {
+      query.removeEventListener?.('change', update);
+    };
   }, []);
 
   useEffect(() => {
@@ -191,7 +208,9 @@ export function EmtStudy() {
       else frame = requestAnimationFrame(advance);
     };
     frame = requestAnimationFrame(advance);
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+    };
   }, [playing, result]);
 
   function choosePreset(id: string) {
@@ -208,7 +227,7 @@ export function EmtStudy() {
     setFormError('');
   }
 
-  function runStudy(event: FormEvent<HTMLFormElement>) {
+  function runStudy(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     const candidate = parseDraft(draft);
     if (!candidate.config) {
@@ -323,7 +342,9 @@ export function EmtStudy() {
           <select
             id="emt-preset"
             value={presetId}
-            onChange={(event) => choosePreset(event.target.value)}
+            onChange={(event) => {
+              choosePreset(event.target.value);
+            }}
           >
             <option value="custom">Custom draft</option>
             {EMT_PRESETS.map((preset) => (
@@ -352,7 +373,9 @@ export function EmtStudy() {
                       max={max}
                       step={field.step}
                       value={draft[field.key]}
-                      onChange={(event) => editField(field.key, event.target.value)}
+                      onChange={(event) => {
+                        editField(field.key, event.target.value);
+                      }}
                     />
                     <i>{field.unit}</i>
                   </span>
@@ -368,7 +391,9 @@ export function EmtStudy() {
                   aria-label="Integration step (µs)"
                   data-testid="emt-step-us"
                   value={draft.step_us}
-                  onChange={(event) => editField('step_us', event.target.value)}
+                  onChange={(event) => {
+                    editField('step_us', event.target.value);
+                  }}
                 >
                   {[5, 10, 20, 25, 50].map((step) => (
                     <option value={step} key={step}>
@@ -389,9 +414,9 @@ export function EmtStudy() {
                 name="emt-prediction"
                 value="instant"
                 checked={prediction === 'The bus voltage falls to the source level immediately.'}
-                onChange={() =>
-                  setPrediction('The bus voltage falls to the source level immediately.')
-                }
+                onChange={() => {
+                  setPrediction('The bus voltage falls to the source level immediately.');
+                }}
               />
               <span>The bus voltage falls to the source level immediately.</span>
             </label>
@@ -401,9 +426,9 @@ export function EmtStudy() {
                 name="emt-prediction"
                 value="stored"
                 checked={prediction === 'Stored energy delays the response; ringing is possible.'}
-                onChange={() =>
-                  setPrediction('Stored energy delays the response; ringing is possible.')
-                }
+                onChange={() => {
+                  setPrediction('Stored energy delays the response; ringing is possible.');
+                }}
               />
               <span>Stored energy delays the response; ringing is possible.</span>
             </label>
@@ -520,13 +545,25 @@ export function EmtStudy() {
             step="1"
             value={sampleIndex}
             aria-valuetext={number(currentTimeMs, 2) + ' milliseconds'}
-            onChange={(event) => seek(Number(event.target.value))}
+            onChange={(event) => {
+              seek(Number(event.target.value));
+            }}
           />
           <div className="emt-jumps">
-            <button type="button" onClick={() => jumpTo(result.config.sag_start_ms)}>
+            <button
+              type="button"
+              onClick={() => {
+                jumpTo(result.config.sag_start_ms);
+              }}
+            >
               Jump to sag · {result.config.sag_start_ms} ms
             </button>
-            <button type="button" onClick={() => jumpTo(eventEnd)}>
+            <button
+              type="button"
+              onClick={() => {
+                jumpTo(eventEnd);
+              }}
+            >
               Jump to recovery · {eventEnd} ms
             </button>
           </div>
@@ -631,22 +668,22 @@ export function EmtStudy() {
           <div className="emt-export-actions">
             <button
               type="button"
-              onClick={() =>
+              onClick={() => {
                 download(
                   'emt-study-result.json',
                   JSON.stringify(result, null, 2),
                   'application/json',
-                )
-              }
+                );
+              }}
               data-testid="emt-export-json"
             >
               Download JSON
             </button>
             <button
               type="button"
-              onClick={() =>
-                download('emt-study-samples.csv', csvFor(result), 'text/csv;charset=utf-8')
-              }
+              onClick={() => {
+                download('emt-study-samples.csv', csvFor(result), 'text/csv;charset=utf-8');
+              }}
               data-testid="emt-export-csv"
             >
               Download sample CSV
@@ -684,7 +721,7 @@ export function EmtStudy() {
               <tbody>
                 {minuteSampledRows.map((sample, index) => (
                   <tr
-                    key={sample.time_ms + '-' + index}
+                    key={String(sample.time_ms) + '-' + String(index)}
                     aria-current={
                       result.rows[sampleIndex]?.time_ms === sample.time_ms ? 'time' : undefined
                     }

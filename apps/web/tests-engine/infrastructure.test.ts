@@ -26,7 +26,7 @@ const golden = JSON.parse(
 ) as GoldenCase[];
 
 for (const item of golden) {
-  test('golden ' + item.id, () => {
+  void test('golden ' + item.id, () => {
     const result = calculateScreen(item.model, item.inputs);
     for (const [key, expected] of Object.entries(item.expected)) {
       const actual = result[key];
@@ -34,7 +34,7 @@ for (const item of golden) {
         assert.equal(typeof actual, 'number', key);
         assert.ok(
           Math.abs((actual as number) - expected) <= Math.max(1e-10, Math.abs(expected) * 1e-11),
-          key + ': ' + actual + ' != ' + expected,
+          key + ': ' + String(actual) + ' != ' + String(expected),
         );
       } else assert.deepEqual(actual, expected, key);
     }
@@ -86,7 +86,7 @@ function verifiedResultHash(result: InfrastructureScreenResult): string {
   return hash(canonicalJson(material));
 }
 
-test('canonical JSON sorts object keys recursively and keeps array order', () => {
+void test('canonical JSON sorts object keys recursively and keeps array order', () => {
   assert.equal(
     canonicalJson({ z: [2, { y: true, a: null }], a: { d: 'x', b: 1 } }),
     '{"a":{"b":1,"d":"x"},"z":[2,{"a":null,"y":true}]}',
@@ -95,12 +95,12 @@ test('canonical JSON sorts object keys recursively and keeps array order', () =>
   assert.throws(() => canonicalJson([, 1]));
 });
 
-test('canonicalHash is SHA-256 of the documented canonical text', async () => {
+void test('canonicalHash is SHA-256 of the documented canonical text', async () => {
   const value = { z: 2, a: [1, 3] };
   assert.equal(await canonicalHash(value), hash(canonicalJson(value)));
 });
 
-test('inputs, type shape and finite domains are validated', () => {
+void test('inputs, type shape and finite domains are validated', () => {
   assert.throws(() => calculateScreen('not-a-model' as ModelName, {}));
   assert.throws(() => calculateScreen('loadLedger', null as unknown as ScreenInputs));
   assert.throws(() => calculateScreen('loadLedger', [] as unknown as ScreenInputs));
@@ -133,7 +133,7 @@ test('inputs, type shape and finite domains are validated', () => {
   );
 });
 
-test('integer counts, availability bounds and overflow are rejected', () => {
+void test('integer counts, availability bounds and overflow are rejected', () => {
   const bank: ScreenInputs = {
     requiredMW: 9,
     unitMW: 2,
@@ -163,7 +163,7 @@ test('integer counts, availability bounds and overflow are rejected', () => {
   );
 });
 
-test('source claims remain failed and battery AC energy stays distinct from nominal energy', () => {
+void test('source claims remain failed and battery AC energy stays distinct from nominal energy', () => {
   const bank = calculateScreen('capacityBank', {
     requiredMW: 27,
     unitMW: 2.4,
@@ -187,7 +187,7 @@ test('source claims remain failed and battery AC energy stays distinct from nomi
   assert.ok((battery.nominalKWh as number) > 616 && (battery.nominalKWh as number) < 617);
 });
 
-test('inverse-time, disconnected network and no-rise edges stay explicit', () => {
+void test('inverse-time, disconnected network and no-rise edges stay explicit', () => {
   for (const multiple of [0, 1])
     assert.deepEqual(calculateScreen('inverseTime', { multiple, tms: 0.1 }), {
       tripS: null,
@@ -232,7 +232,7 @@ test('inverse-time, disconnected network and no-rise edges stay explicit', () =>
   assert.equal(thermal.status, 'no-rise-in-lumped-model');
 });
 
-test('all standalone screens fail closed when any release criterion is failed or unresolved', () => {
+void test('all standalone screens fail closed when any release criterion is failed or unresolved', () => {
   const unresolved: ReleaseGateInputs = {
     capacity: 'pass',
     connectivity: 'pass',
@@ -259,7 +259,7 @@ test('all standalone screens fail closed when any release criterion is failed or
   assert.throws(() => calculateScreen('releaseGate', {} as ReleaseGateInputs));
 });
 
-test('supplementary fuel, conductor and availability equations are present', () => {
+void test('supplementary fuel, conductor and availability equations are present', () => {
   assert.equal(
     calculateScreen('fuelScreen', { loadKW: 27000, hours: 48, litresPerKWh: 0.25 }).usableLitres,
     324000,
@@ -278,7 +278,7 @@ test('supplementary fuel, conductor and availability equations are present', () 
   assert.ok(Math.abs((availability.unavailableMinutesPer8760H as number) - 52.5608409) < 1e-6);
 });
 
-test('screen result hashes are canonical, tamper evident, and the completed input snapshot is immutable', async () => {
+void test('screen result hashes are canonical, tamper evident, and the completed input snapshot is immutable', async () => {
   const mutableInputs = { ...loadInputs };
   const pending = buildScreenResult(lesson, mutableInputs, 'revision-a');
   mutableInputs.racks = 1;
@@ -329,7 +329,7 @@ test('screen result hashes are canonical, tamper evident, and the completed inpu
   assert.notEqual(tampered.resultHash, verifiedResultHash(tampered));
 });
 
-test('stage-array edits after Run cannot alter the completed time result', async () => {
+void test('stage-array edits after Run cannot alter the completed time result', async () => {
   const timingLesson: LessonEvidence = {
     ...lesson,
     id: 'commissioning-evidence-loop',
@@ -358,7 +358,7 @@ test('stage-array edits after Run cannot alter the completed time result', async
   });
 });
 
-test('time and demand lessons retain the supplied 37.5 s and 25 s teaching values', () => {
+void test('time and demand lessons retain the supplied 37.5 s and 25 s teaching values', () => {
   const thermal = calculateScreen('thermalScreen', {
     heatMW: 20,
     removedMW: 0,
@@ -387,7 +387,7 @@ test('time and demand lessons retain the supplied 37.5 s and 25 s teaching value
   assert.equal(commissioning.thermalMarginSeconds, 12.5);
 });
 
-test('unit mappings describe every result value and preserve no legacy verification fields', async () => {
+void test('unit mappings describe every result value and preserve no legacy verification fields', async () => {
   const result = await buildScreenResult(lesson, loadInputs, null);
   assert.deepEqual(Object.keys(result.outputs).sort(), Object.keys(result.outputUnits).sort());
   assert.deepEqual(Object.keys(result.inputs).sort(), Object.keys(result.inputUnits).sort());

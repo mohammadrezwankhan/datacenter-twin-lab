@@ -1,15 +1,15 @@
+import unittest
+import warnings
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-import unittest
-import warnings
 from zipfile import ZipFile
 
 from scripts.verify_distribution import verify_web_inventory
 
 
 class WebInventoryTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.directory = TemporaryDirectory()
         self.addCleanup(self.directory.cleanup)
         self.web_root = Path(self.directory.name) / "web"
@@ -24,7 +24,14 @@ class WebInventoryTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(content)
 
-    def verify(self, files=None, *, require_web=False, directories=(), web_root=None):
+    def verify(
+        self,
+        files: list[tuple[str, bytes]] | None = None,
+        *,
+        require_web: bool = False,
+        directories: tuple[str, ...] = (),
+        web_root: Path | None = None,
+    ) -> None:
         entries = list(self.files.items()) if files is None else files
         buffer = BytesIO()
         with ZipFile(buffer, "w") as archive:
@@ -40,54 +47,58 @@ class WebInventoryTests(unittest.TestCase):
         with ZipFile(buffer) as archive:
             verify_web_inventory(archive, web_root or self.web_root, require_web=require_web)
 
-    def test_exact_inventory_and_bytes_pass(self):
+    def test_exact_inventory_and_bytes_pass(self) -> None:
         self.verify(require_web=True)
 
-    def test_extra_old_evidence_packet_fails(self):
-        files = list(self.files.items()) + [("data/evidence/1.0.0/manifest.json", b"old")]
+    def test_extra_old_evidence_packet_fails(self) -> None:
+        files = [*self.files.items(), ("data/evidence/1.0.0/manifest.json", b"old")]
         with self.assertRaisesRegex(RuntimeError, "extra"):
             self.verify(files)
 
-    def test_extra_obsolete_hashed_assets_fail(self):
+    def test_extra_obsolete_hashed_assets_fail(self) -> None:
         for name in ("assets/old-abc123.js", "assets/old-abc123.css"):
             with self.subTest(name=name), self.assertRaisesRegex(RuntimeError, "extra"):
-                self.verify(list(self.files.items()) + [(name, b"old")])
+                self.verify([*self.files.items(), (name, b"old")])
 
-    def test_changed_bytes_fail(self):
+    def test_changed_bytes_fail(self) -> None:
         files = dict(self.files, **{"assets/current.js": b"old code, same filename"})
         with self.assertRaisesRegex(RuntimeError, "hash mismatch"):
             self.verify(list(files.items()))
 
-    def test_missing_current_file_fails(self):
-        files = [(name, content) for name, content in self.files.items() if not name.endswith("manifest.json")]
+    def test_missing_current_file_fails(self) -> None:
+        files = [
+            (name, content)
+            for name, content in self.files.items()
+            if not name.endswith("manifest.json")
+        ]
         with self.assertRaisesRegex(RuntimeError, "missing"):
             self.verify(files)
 
-    def test_duplicate_web_file_fails(self):
+    def test_duplicate_web_file_fails(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "Duplicate"):
-            self.verify(list(self.files.items()) + [("index.html", self.files["index.html"])])
+            self.verify([*self.files.items(), ("index.html", self.files["index.html"])])
 
-    def test_directory_records_are_ignored(self):
+    def test_directory_records_are_ignored(self) -> None:
         self.verify(require_web=True, directories=("", "assets/", "data/evidence/"))
 
-    def test_core_only_is_optional_even_with_existing_build(self):
+    def test_core_only_is_optional_even_with_existing_build(self) -> None:
         self.verify([])
 
-    def test_core_only_directory_records_are_ignored(self):
+    def test_core_only_directory_records_are_ignored(self) -> None:
         self.verify([], directories=("", "assets/"))
 
-    def test_core_only_is_required_even_with_existing_build(self):
+    def test_core_only_is_required_even_with_existing_build(self) -> None:
         with self.assertRaises(RuntimeError):
             self.verify([], require_web=True)
 
-    def test_core_only_without_build_is_optional(self):
+    def test_core_only_without_build_is_optional(self) -> None:
         self.verify([], web_root=self.web_root / "absent")
 
-    def test_bundled_web_requires_current_build(self):
+    def test_bundled_web_requires_current_build(self) -> None:
         with self.assertRaisesRegex(RuntimeError, "current native build"):
             self.verify(web_root=self.web_root / "absent")
 
-    def test_bundled_web_rejects_empty_current_build(self):
+    def test_bundled_web_rejects_empty_current_build(self) -> None:
         empty = Path(self.directory.name) / "empty"
         empty.mkdir()
         with self.assertRaises(RuntimeError):

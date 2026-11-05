@@ -57,7 +57,9 @@ test('responsive-20261028 EMT SVG controls name each visible label and reading',
   }
 });
 
-test('responsive-20261028 EMT sample table passes WCAG 2.2 AA axe', async ({ page }, testInfo) => {
+test('responsive-20261028 EMT sample table passes WCAG 2.2 AA axe', async ({
+  page,
+}, testInfo) => {
   await openEmt(page);
   await page.locator('.emt-samples > summary').click();
   const violations = (
@@ -234,7 +236,7 @@ test('responsive-20261028 EMT and dynamics studies reflow at phone and tablet wi
       }));
       expect(
         layout.documentWidth - layout.viewportWidth,
-        `${route.path} at ${viewport.width}px`,
+        `${route.path} at ${String(viewport.width)}px`,
       ).toBeLessThanOrEqual(1);
 
       if (route.path.includes('study=')) {

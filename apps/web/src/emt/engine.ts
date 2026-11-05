@@ -1,3 +1,4 @@
+import { requiredValue } from '../required-value';
 /** Original DC-link RLC teaching circuit; see docs/studies/emt.md. */
 export type EmtConfig = {
   source_v: number;
@@ -116,7 +117,7 @@ export function validateEmt(config: EmtConfig): EmtConfig {
       config[key] < low ||
       config[key] > high
     )
-      throw new Error(`${key} must be between ${low} and ${high}`);
+      throw new Error(`${key} must be between ${String(low)} and ${String(high)}`);
   }
   for (const key of ['sag_start_ms', 'sag_duration_ms', 'duration_ms'] as const)
     if (!Number.isInteger(config[key]))
@@ -140,11 +141,12 @@ export function simulateEmt(input: EmtConfig = DEFAULT_EMT): EmtResult {
   const initialCurrent = nominal / (resistance + load);
   const initialVoltage = load * initialCurrent;
   // Integrate source/loss/load energy at the same RK stages as i and v.
-  let state = [initialCurrent, initialVoltage, 0, 0, 0];
+  type State = [number, number, number, number, number];
+  let state: State = [initialCurrent, initialVoltage, 0, 0, 0];
   const stored = (i: number, v: number) => 0.5 * inductance * i * i + 0.5 * capacitance * v * v;
   const initialEnergy = stored(initialCurrent, initialVoltage);
   const source = (us: number) => (us >= start && us < clear ? nominal * config.sag_pu : nominal);
-  const derivative = (values: number[], supply: number) => {
+  const derivative = (values: State, supply: number): State => {
     const [i, v] = values;
     return [
       (supply - resistance * i - v) / inductance,
@@ -154,6 +156,13 @@ export function simulateEmt(input: EmtConfig = DEFAULT_EMT): EmtResult {
       (v * v) / load,
     ];
   };
+  const mapState = (values: State, transform: (value: number, index: number) => number): State => [
+    transform(values[0], 0),
+    transform(values[1], 1),
+    transform(values[2], 2),
+    transform(values[3], 3),
+    transform(values[4], 4),
+  ];
   let minimum = initialVoltage;
   let peakCurrent = Math.abs(initialCurrent);
   let recoveryPeak = -Infinity;
@@ -181,20 +190,30 @@ export function simulateEmt(input: EmtConfig = DEFAULT_EMT): EmtResult {
     const supply = source(us);
     const k1 = derivative(state, supply);
     const k2 = derivative(
-      state.map((v, j) => v + (dt * k1[j]) / 2),
+      mapState(state, (v, j) => v + (dt * requiredValue(k1[j], 'k1[j]')) / 2),
       supply,
     );
     const k3 = derivative(
-      state.map((v, j) => v + (dt * k2[j]) / 2),
+      mapState(state, (v, j) => v + (dt * requiredValue(k2[j], 'k2[j]')) / 2),
       supply,
     );
     const k4 = derivative(
-      state.map((v, j) => v + dt * k3[j]),
+      mapState(state, (v, j) => v + dt * requiredValue(k3[j], 'k3[j]')),
       supply,
     );
-    state = state.map((v, j) => v + (dt * (k1[j] + 2 * k2[j] + 2 * k3[j] + k4[j])) / 6);
+    state = mapState(
+      state,
+      (v, j) =>
+        v +
+        (dt *
+          (requiredValue(k1[j], 'k1[j]') +
+            2 * requiredValue(k2[j], 'k2[j]') +
+            2 * requiredValue(k3[j], 'k3[j]') +
+            requiredValue(k4[j], 'k4[j]'))) /
+          6,
+    );
   }
-  const finalEnergy = stored(state[0], state[1]);
+  const finalEnergy = stored(requiredValue(state[0], 'state[0]'), state[1]);
   return {
     model: 'dc-link-rlc-v1',
     config,
@@ -211,7 +230,11 @@ export function simulateEmt(input: EmtConfig = DEFAULT_EMT): EmtResult {
       load_energy_j: state[4],
       initial_stored_j: initialEnergy,
       final_stored_j: finalEnergy,
-      balance_error_j: state[2] - state[3] - state[4] - (finalEnergy - initialEnergy),
+      balance_error_j:
+        requiredValue(state[2], 'state[2]') -
+        requiredValue(state[3], 'state[3]') -
+        requiredValue(state[4], 'state[4]') -
+        (finalEnergy - initialEnergy),
     },
   };
 }
@@ -223,7 +246,10 @@ export function refineEmt(config: EmtConfig) {
   const fine = simulateEmt({ ...config, step_us: config.step_us / 2 });
   let difference = 0;
   coarse.rows.forEach((row, i) => {
-    difference = Math.max(difference, Math.abs(row.bus_v - fine.rows[i].bus_v));
+    difference = Math.max(
+      difference,
+      Math.abs(row.bus_v - requiredValue(fine.rows[i], 'fine.rows[i]').bus_v),
+    );
   });
   return { coarse, fine, max_bus_difference_v: difference };
 }
@@ -239,18 +265,20 @@ export function compareEmt(actual: EmtResult, expected: EmtResult): number {
       maximum = Math.max(maximum, difference);
     } else if (Array.isArray(a) && Array.isArray(b)) {
       if (a.length !== b.length) throw new Error(`EMT length mismatch at ${path}`);
-      a.forEach((v, i) => walk(v, b[i], `${path}[${i}]`));
+      a.forEach((v, i) => {
+        walk(v, b[i], `${path}[${String(i)}]`);
+      });
     } else if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
       const keys = Object.keys(a).sort();
       if (JSON.stringify(keys) !== JSON.stringify(Object.keys(b).sort()))
         throw new Error(`EMT schema mismatch at ${path}`);
-      keys.forEach((key) =>
+      keys.forEach((key) => {
         walk(
           (a as Record<string, unknown>)[key],
           (b as Record<string, unknown>)[key],
           `${path}.${key}`,
-        ),
-      );
+        );
+      });
     } else if (a !== b) throw new Error(`EMT value mismatch at ${path}`);
   };
   walk(actual, expected, 'result');

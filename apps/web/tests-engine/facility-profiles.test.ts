@@ -15,7 +15,7 @@ const demoData = JSON.parse(
   readFileSync(resolve(root, '.local/browser-demo-assets/demo-data.json'), 'utf8'),
 ) as DemoData;
 
-test('facility profiles resolve to generated demo scenarios with the stated load and reserve', () => {
+void test('facility profiles resolve to generated demo scenarios with the stated load and reserve', () => {
   assert.deepEqual(
     facilityProfiles.map(({ id, loadMw }) => [id, loadMw]),
     [

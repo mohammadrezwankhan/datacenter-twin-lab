@@ -1,10 +1,10 @@
 """Offline CLI for synthetic scenario evaluation and comparison."""
 
 import argparse
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 
 from . import __version__
 from .contracts import InputError, load_json_document, load_scenario
@@ -15,20 +15,28 @@ from .reporting import render_html, render_markdown
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Datacenter Twin Lab: synthetic planning, preliminary")
+    parser = argparse.ArgumentParser(
+        description="Datacenter Twin Lab: synthetic planning, preliminary"
+    )
     parser.add_argument("--version", action="version", version=__version__)
     commands = parser.add_subparsers(dest="command", required=True)
     run = commands.add_parser("run", help="Evaluate a local JSON scenario")
     run.add_argument("scenario", type=Path)
-    comparison = commands.add_parser("compare", help="Compare scenarios with identical IT load intervals")
+    comparison = commands.add_parser(
+        "compare", help="Compare scenarios with identical IT load intervals"
+    )
     comparison.add_argument("baseline", type=Path)
     comparison.add_argument("alternative", type=Path)
-    continuity = commands.add_parser("simulate", help="Run a schema-v2 electrical continuity scenario")
+    continuity = commands.add_parser(
+        "simulate", help="Run a schema-v2 electrical continuity scenario"
+    )
     source = continuity.add_mutually_exclusive_group()
     source.add_argument("--scenario", type=Path)
     source.add_argument("--preset", default="utility_loss", choices=tuple(PRESETS))
     continuity.add_argument("--format", choices=["json", "markdown", "html"], default="json")
-    sweep = commands.add_parser("sweep", help="Sweep one field of a schema-v2 electrical continuity scenario")
+    sweep = commands.add_parser(
+        "sweep", help="Sweep one field of a schema-v2 electrical continuity scenario"
+    )
     sweep_source = sweep.add_mutually_exclusive_group()
     sweep_source.add_argument("--scenario", type=Path)
     sweep_source.add_argument("--preset", default="generator_failure", choices=tuple(PRESETS))
@@ -52,7 +60,9 @@ def main(argv: list[str] | None = None) -> int:
     serve = commands.add_parser("serve", help="Serve the local API and built dashboard on loopback")
     serve.add_argument("--port", type=int, default=8000)
     for command in (run, comparison, continuity, sweep):
-        command.add_argument("--output", type=Path, help="Write the selected result format to this path")
+        command.add_argument(
+            "--output", type=Path, help="Write the selected result format to this path"
+        )
         command.add_argument("--force", action="store_true", help="Replace an existing result file")
     args = parser.parse_args(argv)
     if args.command == "serve":
@@ -60,6 +70,7 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("--port must be from 1 to 65535")
         try:
             import uvicorn
+
             from .api import create_app
         except ImportError:
             parser.error('Install the API extra: python -m pip install -e ".[api]"')
@@ -78,6 +89,7 @@ def main(argv: list[str] | None = None) -> int:
             from .continuity import simulate_continuity
             from .demo import demo_scenario
             from .topology import SiteScenario
+
             input_paths = [args.scenario] if args.scenario else []
             scenario = (
                 SiteScenario.from_dict(load_json_document(args.scenario))
@@ -90,12 +102,16 @@ def main(argv: list[str] | None = None) -> int:
             elif args.format == "html":
                 content = render_html(result)
             else:
-                payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
+                payload = {
+                    "generated_at_utc": datetime.now(UTC).isoformat(),
+                    "result": result,
+                }
                 content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
         else:
             from .demo import demo_scenario
             from .sensitivity import sweep_continuity
             from .topology import SiteScenario
+
             input_paths = [args.scenario] if args.scenario else []
             scenario = (
                 SiteScenario.from_dict(load_json_document(args.scenario))
@@ -108,17 +124,20 @@ def main(argv: list[str] | None = None) -> int:
             elif args.format == "html":
                 content = render_html(result)
             else:
-                payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
+                payload = {
+                    "generated_at_utc": datetime.now(UTC).isoformat(),
+                    "result": result,
+                }
                 content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
         if args.command in ("run", "compare"):
-            payload = {"generated_at_utc": datetime.now(timezone.utc).isoformat(), "result": result}
+            payload = {"generated_at_utc": datetime.now(UTC).isoformat(), "result": result}
             content = json.dumps(payload, indent=2, ensure_ascii=True, allow_nan=False) + "\n"
         if args.output:
             write_result(args.output, content, protected_paths=input_paths, force=args.force)
-            print(f"Saved synthetic planning result: {args.output}")
+            sys.stdout.write((f"Saved synthetic planning result: {args.output}") + "\n")
         else:
-            print(content, end="")
+            sys.stdout.write(content)
     except (InputError, OSError, ValueError) as exc:
-        print(f"Error: {exc}", file=sys.stderr)
+        sys.stderr.write((f"Error: {exc}") + "\n")
         return 2
     return 0

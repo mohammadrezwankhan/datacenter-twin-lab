@@ -33,7 +33,7 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
     const controller = new AbortController();
     setStatus('Loading Python on request and checking this completed run…');
     setProgress({ stage: 'starting', message: 'Starting Python verification' });
-    (async () => {
+    void (async () => {
       try {
         const { pythonRequest } = await import('./python-client');
         const reference = await pythonRequest<unknown>(
@@ -61,12 +61,20 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
         }
       }
     })();
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+    };
   }, [enabled, attempt, run]);
   return (
     <section className="panel python-verification" aria-label="Optional Python verification">
       <label>
-        <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={enabled}
+          onChange={(e) => {
+            setEnabled(e.target.checked);
+          }}
+        />
         Verify against Python
       </label>
       <p>
@@ -82,7 +90,11 @@ export function PythonVerification({ run }: { run: Run | PlanningVerification })
       {error && (
         <div role="alert">
           <p>{error}</p>
-          <button onClick={() => setAttempt((value) => value + 1)}>
+          <button
+            onClick={() => {
+              setAttempt((value) => value + 1);
+            }}
+          >
             Retry Python verification
           </button>
         </div>

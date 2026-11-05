@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from './required-value';
 import { useRef, useState, useEffect } from 'react';
 import type { Catalog, Run } from './types';
 import { n, request } from './client';
@@ -26,7 +27,9 @@ interface Quote {
 }
 
 export function Evidence({ catalog, run }: { catalog: Catalog; run: Run }) {
-  const [offer, setOffer] = useState(catalog.cloud_offers[0].id),
+  const [offer, setOffer] = useState(
+      requiredValue(catalog.cloud_offers[0], 'catalog.cloud_offers[0]').id,
+    ),
     [rate, setRate] = useState(''),
     [hours, setHours] = useState('1'),
     [nodes, setNodes] = useState('1');
@@ -35,7 +38,10 @@ export function Evidence({ catalog, run }: { catalog: Catalog; run: Run }) {
     [error, setError] = useState('');
   const controller = useRef<AbortController | null>(null);
   useEffect(() => () => controller.current?.abort(), []);
-  const selected = catalog.cloud_offers.find((o) => o.id === offer)!;
+  const selected = requiredPresent(
+    catalog.cloud_offers.find((o) => o.id === offer),
+    'catalog.cloud_offers.find((o) => o.id === offer)',
+  );
   const allSources = [
     ...new Set([...run.scenario.source_ids, ...run.scenario.assets.flatMap((a) => a.source_ids)]),
   ];
@@ -244,7 +250,7 @@ export function Evidence({ catalog, run }: { catalog: Catalog; run: Run }) {
             type="button"
             disabled={busy}
             onClick={() => {
-              setRate(selected.rate!);
+              setRate(requiredPresent(selected.rate, 'selected.rate'));
               invalidate();
             }}
           >

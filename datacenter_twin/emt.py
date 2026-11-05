@@ -7,10 +7,12 @@ This is not a switching-converter or PSCAD/EMTDC equivalent.
 """
 
 import argparse
-from decimal import Decimal
 import json
 import math
+import sys
+from decimal import Decimal
 from pathlib import Path
+from typing import TypedDict
 
 from .contracts import InputError
 
@@ -49,13 +51,25 @@ ASSUMPTIONS = [
     "Initial state is the pre-sag DC steady state; source step events are right-continuous.",
     "No rectifier, switching devices, UPS controller, protection, AC network or thermal model.",
     "Signed source energy includes reverse flow into the ideal source; no reverse-blocking diode.",
-    "The ideal capacitor permits negative voltage; nonlinear voltage clamps and device limits are absent.",
+    (
+        "The ideal capacitor permits negative voltage; nonlinear"
+        " voltage clamps and device limits are absent."
+    ),
     "Authored teaching parameters, not a calibrated facility or a PSCAD/EMTDC reproduction.",
     "RK4 integration; 100 us output sampling. Reported extrema are integration-endpoint samples.",
 ]
 
 
-def validate_config(config: dict) -> dict:
+class EMTResult(TypedDict):
+    model: str
+    config: dict[str, int | float]
+    sample_step_us: int
+    assumptions: list[str]
+    rows: list[dict[str, float]]
+    summary: dict[str, float]
+
+
+def validate_config(config: object) -> dict[str, int | float]:
     """Reject ambiguous units, nonfinite numbers and unbounded computation."""
     if not isinstance(config, dict) or set(config) != set(DEFAULT_EMT):
         raise InputError("EMT config must contain exactly the documented ten fields")
@@ -80,17 +94,17 @@ def validate_config(config: dict) -> dict:
     }
 
 
-def simulate_emt(config: dict | None = None) -> dict:
+def simulate_emt(config: object = None) -> EMTResult:
     """Return a deterministic complete study, including reproducible inputs."""
-    config = validate_config(DEFAULT_EMT if config is None else config)
-    nominal, resistance, load = (config[k] for k in ("source_v", "resistance_ohm", "load_ohm"))
-    inductance = config["inductance_mh"] / 1000
-    capacitance = config["capacitance_mf"] / 1000
-    step_us = int(config["step_us"])
+    values = validate_config(DEFAULT_EMT if config is None else config)
+    nominal, resistance, load = (values[k] for k in ("source_v", "resistance_ohm", "load_ohm"))
+    inductance = values["inductance_mh"] / 1000
+    capacitance = values["capacitance_mf"] / 1000
+    step_us = int(values["step_us"])
     dt = step_us / 1_000_000
-    start_us = int(config["sag_start_ms"] * 1000)
-    clear_us = int((config["sag_start_ms"] + config["sag_duration_ms"]) * 1000)
-    steps = int(config["duration_ms"] * 1000 / step_us)
+    start_us = int(values["sag_start_ms"] * 1000)
+    clear_us = int((values["sag_start_ms"] + values["sag_duration_ms"]) * 1000)
+    steps = int(values["duration_ms"] * 1000 / step_us)
     initial_current = nominal / (resistance + load)
     initial_voltage = load * initial_current
     # State order: source current, bus voltage, source/loss/load energy.
@@ -102,7 +116,7 @@ def simulate_emt(config: dict | None = None) -> dict:
     initial_energy = stored(initial_current, initial_voltage)
 
     def source(time_us: int) -> float:
-        return nominal * config["sag_pu"] if start_us <= time_us < clear_us else nominal
+        return nominal * values["sag_pu"] if start_us <= time_us < clear_us else nominal
 
     def derivative(values: list[float], voltage_source: float) -> list[float]:
         current, voltage = values[:2]
@@ -144,17 +158,17 @@ def simulate_emt(config: dict | None = None) -> dict:
         # interval applies an event; no RK stage smears a discontinuity.
         voltage_source = source(time_us)
         k1 = derivative(state, voltage_source)
-        k2 = derivative([a + dt * b / 2 for a, b in zip(state, k1)], voltage_source)
-        k3 = derivative([a + dt * b / 2 for a, b in zip(state, k2)], voltage_source)
-        k4 = derivative([a + dt * b for a, b in zip(state, k3)], voltage_source)
+        k2 = derivative([a + dt * b / 2 for a, b in zip(state, k1, strict=True)], voltage_source)
+        k3 = derivative([a + dt * b / 2 for a, b in zip(state, k2, strict=True)], voltage_source)
+        k4 = derivative([a + dt * b for a, b in zip(state, k3, strict=True)], voltage_source)
         state = [
             value + dt * (a + 2 * b + 2 * c + d) / 6
-            for value, a, b, c, d in zip(state, k1, k2, k3, k4)
+            for value, a, b, c, d in zip(state, k1, k2, k3, k4, strict=True)
         ]
     final_energy = stored(state[0], state[1])
     return {
         "model": "dc-link-rlc-v1",
-        "config": config,
+        "config": values,
         "sample_step_us": 100,
         "assumptions": list(ASSUMPTIONS),
         "rows": rows,
@@ -204,9 +218,9 @@ def main() -> None:
                 protected_paths=[args.config] if args.config else [],
                 force=args.force,
             )
-            print(f"Saved EMT teaching study: {args.output}")
+            sys.stdout.write((f"Saved EMT teaching study: {args.output}") + "\n")
         else:
-            print(content, end="")
+            sys.stdout.write(content)
     except (InputError, OSError, ValueError) as exc:
         parser.error(str(exc))
 

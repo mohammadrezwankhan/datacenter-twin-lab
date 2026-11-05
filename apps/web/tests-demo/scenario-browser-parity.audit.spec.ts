@@ -5,7 +5,9 @@ import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { nativeRun } from './course-test-helpers';
 
-test('all 18 published continuity presets export native-equal runs', async ({ page }, testInfo) => {
+test('all 18 published continuity presets export native-equal runs', async ({
+  page,
+}, testInfo) => {
   test.setTimeout(300_000);
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));

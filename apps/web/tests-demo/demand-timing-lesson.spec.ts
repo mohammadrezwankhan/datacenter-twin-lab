@@ -28,7 +28,7 @@ test('equal-energy teaching inputs reproduce full native and optional Python res
     await expect(page.getByRole('button', { name: 'Run scenario', exact: true })).toBeEnabled();
     const pending = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Export run', exact: true }).click();
-    const run = JSON.parse(await readFile((await (await pending).path())!, 'utf8'));
+    const run = JSON.parse(await readFile(await (await pending).path(), 'utf8'));
     expect(run.scenario).toEqual(JSON.parse(bytes.toString('utf8')));
     expect(run).toEqual(nativeRun(run));
     expect(run.summary.requested_it_kwh).toBe('375');

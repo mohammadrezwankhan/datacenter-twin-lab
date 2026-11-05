@@ -24,8 +24,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 1574,
-      "sha256": "59f088e5fe88d71b3caa4aa77ee3311097923b36931acb805a7a54a83eddcb25"
+      "bytes": 1982,
+      "sha256": "0a900a1dfc193e7424897ee4611e6e4a07a2be587d09ea8377695636ac760441"
     },
     {
       "path": "integration/vanilla/embed.css",
@@ -39,8 +39,8 @@
     },
     {
       "path": "integration/vanilla/example.html",
-      "bytes": 1159,
-      "sha256": "4f448ec4e33f54ef6f29157ec7982d05ef61e9459eed9f0131a8a0f76f7bf6e3"
+      "bytes": 1513,
+      "sha256": "beec134a0e6760e913dbc4f3988e5f33a155dc4361234831fef68b4bf06ee86d"
     },
     {
       "path": "integration/vanilla/host.css",
@@ -49,8 +49,8 @@
     },
     {
       "path": "integration/vanilla/khan-grid-hero.js",
-      "bytes": 8956,
-      "sha256": "8a8f94696c29be49aab46a6136f2e1ebc4b0907bd0666758b3b099d3e70ed2ed"
+      "bytes": 9564,
+      "sha256": "6fa97c79ea656adb9a10ef1fddf21059580ba99b37fadafcc2a3462291b6907e"
     },
     {
       "path": "poster.png",

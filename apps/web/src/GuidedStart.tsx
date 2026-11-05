@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { requiredPresent } from './required-value';
+import { useEffect, useRef, useState, type SyntheticEvent } from 'react';
 import { lessons, lessonScenario } from './course-lessons';
 import { courseTotal } from './curriculum';
 import { n, request } from './client';
@@ -7,7 +8,10 @@ import { RunTools } from './RunTools';
 import type { Run, SiteScenario } from './types';
 import './guided-start.css';
 
-const lesson = lessons.find((item) => item.id === 'ride-through')!;
+const lesson = requiredPresent(
+  lessons.find((item) => item.id === 'ride-through'),
+  "lessons.find((item) => item.id === 'ride-through')",
+);
 const outageAt = 300;
 const recoveryAt = 900;
 
@@ -37,7 +41,9 @@ function downloadRun(run: Run) {
   link.href = url;
   link.download = `guided-ride-through-${run.run_id}.json`;
   link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setTimeout(() => {
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 function PhaseDiagram() {
@@ -251,7 +257,7 @@ export function GuidedStart({ onExplore, onLearn, onEvidence }: GuidedStartProps
     setNotice('');
   }
 
-  async function calculate(event: FormEvent<HTMLFormElement>) {
+  async function calculate(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
     setNotice('');
@@ -389,7 +395,11 @@ export function GuidedStart({ onExplore, onLearn, onEvidence }: GuidedStartProps
             <button
               type="button"
               aria-pressed={reserve === '100'}
-              onClick={() => revise(() => setReserve('100'))}
+              onClick={() => {
+                revise(() => {
+                  setReserve('100');
+                });
+              }}
             >
               <strong>100 kWh</strong>
               <span>Starting example</span>
@@ -397,7 +407,11 @@ export function GuidedStart({ onExplore, onLearn, onEvidence }: GuidedStartProps
             <button
               type="button"
               aria-pressed={reserve === '50'}
-              onClick={() => revise(() => setReserve('50'))}
+              onClick={() => {
+                revise(() => {
+                  setReserve('50');
+                });
+              }}
             >
               <strong>50 kWh</strong>
               <span>Half-reserve challenge</span>
@@ -422,7 +436,11 @@ export function GuidedStart({ onExplore, onLearn, onEvidence }: GuidedStartProps
                 step="any"
                 inputMode="decimal"
                 value={prediction}
-                onChange={(event) => revise(() => setPrediction(event.target.value))}
+                onChange={(event) => {
+                  revise(() => {
+                    setPrediction(event.target.value);
+                  });
+                }}
                 placeholder="e.g. 300"
               />
               <span aria-hidden="true">s</span>
@@ -581,7 +599,12 @@ export function GuidedStart({ onExplore, onLearn, onEvidence }: GuidedStartProps
                 limitations.
               </p>
             </div>
-            <button type="button" onClick={() => downloadRun(run)}>
+            <button
+              type="button"
+              onClick={() => {
+                downloadRun(run);
+              }}
+            >
               Export guided run (JSON)
             </button>
             <code>Input SHA-256 · {run.input_sha256}</code>

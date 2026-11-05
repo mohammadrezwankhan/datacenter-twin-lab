@@ -1,11 +1,21 @@
-# Adapted from user-supplied python_equivalent archive (SHA-256 c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace were supplied; no MATLAB/measurement validation is claimed.
+# Adapted from user-supplied python_equivalent archive (SHA-256
+# c467c157d39a2f36b2951a2a073b01d536c459ea653de5b28785c1b3e1a56cab). The supplied README maps
+# these equations to MATLAB source, but neither MATLAB originals nor the GPU measurement trace
+# were supplied; no MATLAB/measurement validation is claimed.
 """Shared reduced SDCIB equations and analysis helpers."""
-from __future__ import annotations
-import warnings
-from copy import deepcopy
-import numpy as np
 
-from .common import numeric_jacobian, safe_div, pi_bw_tuning, pll_bw_tuning
+from __future__ import annotations
+
+import sys
+import warnings
+from collections.abc import Callable, Mapping
+from types import SimpleNamespace
+
+import numpy as np
+from numpy.typing import NDArray
+
+from .common import numeric_jacobian, safe_div
+from .types import ComplexArray, FloatArray, Real
 
 STATE_NAMES = [
     "theta_pll",
@@ -33,41 +43,55 @@ STATE_NAMES = [
 IDX = {name: i for i, name in enumerate(STATE_NAMES)}
 
 
-def run_newton_solver(x, rhs_u, p_load, max_it=80, tol_f=1e-10, tol_x=1e-10, do_print=True):
+def run_newton_solver(
+    x: FloatArray,
+    rhs_u: Callable[[FloatArray, Real], FloatArray],
+    p_load: Real,
+    max_it: int = 80,
+    tol_f: float = 1e-10,
+    tol_x: float = 1e-10,
+    do_print: bool = True,
+) -> tuple[FloatArray, Real]:
     x = np.asarray(x, float).copy()
-    nF = np.inf
+    n_f: Real = np.inf
     for it in range(1, max_it + 1):
-        F = np.asarray(rhs_u(x, p_load), float)
-        nF = np.linalg.norm(F, 2)
+        residual = np.asarray(rhs_u(x, p_load), float)
+        n_f = np.linalg.norm(residual, 2)
         if do_print:
-            print(f"it={it:2d}  ||F||={nF:.3e}")
-        if nF < tol_f:
+            sys.stdout.write(f"it={it:2d}  ||F||={n_f:.3e}\n")
+        if n_f < tol_f:
             break
-        J = numeric_jacobian(lambda xx: rhs_u(xx, p_load), x)
+        jacobian = numeric_jacobian(lambda xx: rhs_u(xx, p_load), x)
         try:
-            dx = np.linalg.solve(J, -F)
+            dx = np.linalg.solve(jacobian, -residual)
         except np.linalg.LinAlgError:
-            dx = np.linalg.lstsq(J, -F, rcond=None)[0]
+            dx = np.linalg.lstsq(jacobian, -residual, rcond=None)[0]
         if np.linalg.norm(dx, 2) < tol_x * (1 + np.linalg.norm(x, 2)):
             break
         alpha, c1 = 1.0, 1e-4
         accepted = False
         while alpha > 1e-6:
             xt = x + alpha * dx
-            Ft = np.asarray(rhs_u(xt, p_load), float)
-            if np.linalg.norm(Ft, 2) <= (1 - c1 * alpha) * nF:
+            trial_residual = np.asarray(rhs_u(xt, p_load), float)
+            if np.linalg.norm(trial_residual, 2) <= (1 - c1 * alpha) * n_f:
                 x = xt
                 accepted = True
                 break
             alpha *= 0.5
         if not accepted:
             if do_print:
-                warnings.warn("Newton line-search stalled; applying damped step.")
+                warnings.warn("Newton line-search stalled; applying damped step.", stacklevel=2)
             x = x + 1e-3 * dx
-    return x, nF
+    return x, n_f
 
 
-def odefun_rhs_reduced(t, x, p, pload_fun, idx=IDX):
+def odefun_rhs_reduced(
+    t: float,
+    x: FloatArray,
+    p: SimpleNamespace,
+    pload_fun: Callable[[float], Real],
+    idx: Mapping[str, int] = IDX,
+) -> tuple[FloatArray, dict[str, Real]]:
     x = np.asarray(x, float).reshape(-1)
     theta_pll = x[idx["theta_pll"]]
     eps_pll = x[idx["eps_pll"]]
@@ -78,14 +102,14 @@ def odefun_rhs_reduced(t, x, p, pload_fun, idx=IDX):
     gamd_afe = x[idx["gamd_afe"]]
     gamq_afe = x[idx["gamq_afe"]]
     vdc_ups = x[idx["vdc_ups"]]
-    iU_cv = x[idx["iU_cv"]]
-    iV_cv = x[idx["iV_cv"]]
-    vU_vsi = x[idx["vU_vsi"]]
-    vV_vsi = x[idx["vV_vsi"]]
-    xiU_vsi = x[idx["xiU_vsi"]]
-    xiV_vsi = x[idx["xiV_vsi"]]
-    gamU_vsi = x[idx["gamU_vsi"]]
-    gamV_vsi = x[idx["gamV_vsi"]]
+    i_u_cv = x[idx["iU_cv"]]
+    i_v_cv = x[idx["iV_cv"]]
+    v_u_vsi = x[idx["vU_vsi"]]
+    v_v_vsi = x[idx["vV_vsi"]]
+    xi_u_vsi = x[idx["xiU_vsi"]]
+    xi_v_vsi = x[idx["xiV_vsi"]]
+    gam_u_vsi = x[idx["gamU_vsi"]]
+    gam_v_vsi = x[idx["gamV_vsi"]]
     v_psu = x[idx["v_psu"]]
     xi_psu = x[idx["xi_psu"]]
     v_eq = x[idx["v_eq"]]
@@ -96,28 +120,28 @@ def odefun_rhs_reduced(t, x, p, pload_fun, idx=IDX):
     i_eq = p.kp_v_eq * (p.veq_ref - v_eq) + p.ki_v_eq * xi_eq
     i_psu = safe_div(v_eq, v_psu) * i_eq
     g_eq = p.kp_v_psu * (p.vpsu_ref - v_psu) + p.ki_v_psu * xi_psu
-    iU_vsi = g_eq * vU_vsi
-    iV_vsi = g_eq * vV_vsi
-    vuv_sq = vU_vsi**2 + vV_vsi**2
+    i_u_vsi = g_eq * v_u_vsi
+    i_v_vsi = g_eq * v_v_vsi
+    vuv_sq = v_u_vsi**2 + v_v_vsi**2
     psu_injection = ((g_eq - p.r_psu * g_eq**2) * vuv_sq) / (3 * max(v_psu, 1e-9))
 
     omega_vsi = p.omega_vsi
-    vU_ref_vsi = p.vu_vsi_ref
-    vV_ref_vsi = 0.0
-    iU_ref_cv = (
-        p.kp_v_vsi * (vU_ref_vsi - vU_vsi) + p.ki_v_vsi * xiU_vsi - omega_vsi * p.c_vsi * vV_vsi
+    v_u_ref_vsi = p.vu_vsi_ref
+    v_v_ref_vsi = 0.0
+    i_u_ref_cv = (
+        p.kp_v_vsi * (v_u_ref_vsi - v_u_vsi) + p.ki_v_vsi * xi_u_vsi - omega_vsi * p.c_vsi * v_v_vsi
     )
-    iV_ref_cv = (
-        p.kp_v_vsi * (vV_ref_vsi - vV_vsi) + p.ki_v_vsi * xiV_vsi + omega_vsi * p.c_vsi * vU_vsi
+    i_v_ref_cv = (
+        p.kp_v_vsi * (v_v_ref_vsi - v_v_vsi) + p.ki_v_vsi * xi_v_vsi + omega_vsi * p.c_vsi * v_u_vsi
     )
-    vU_ref_cv = (
-        p.kp_c_vsi * (iU_ref_cv - iU_cv) + p.ki_c_vsi * gamU_vsi - omega_vsi * p.l_vsi * iV_cv
+    v_u_ref_cv = (
+        p.kp_c_vsi * (i_u_ref_cv - i_u_cv) + p.ki_c_vsi * gam_u_vsi - omega_vsi * p.l_vsi * i_v_cv
     )
-    vV_ref_cv = (
-        p.kp_c_vsi * (iV_ref_cv - iV_cv) + p.ki_c_vsi * gamV_vsi + omega_vsi * p.l_vsi * iU_cv
+    v_v_ref_cv = (
+        p.kp_c_vsi * (i_v_ref_cv - i_v_cv) + p.ki_c_vsi * gam_v_vsi + omega_vsi * p.l_vsi * i_u_cv
     )
-    mU = safe_div(vU_ref_cv, vdc_ups)
-    mV = safe_div(vV_ref_cv, vdc_ups)
+    m_u = safe_div(v_u_ref_cv, vdc_ups)
+    m_v = safe_div(v_v_ref_cv, vdc_ups)
 
     omega_pll = p.omega_s + p.kp_pll * vq_pll_f + p.ki_pll * eps_pll
     s = np.sin(theta_pll + np.pi / 2)
@@ -140,7 +164,7 @@ def odefun_rhs_reduced(t, x, p, pload_fun, idx=IDX):
     md = safe_div(vd_ref_afe, vdc_ups)
     mq = safe_div(vq_ref_afe, vdc_ups)
     i_dc_in = md * id_afe + mq * iq_afe
-    i_dc_out = mU * iU_cv + mV * iV_cv
+    i_dc_out = m_u * i_u_cv + m_v * i_v_cv
 
     xdot = np.zeros_like(x)
     xdot[idx["theta_pll"]] = p.omega_b * (omega_pll - p.omega_s)
@@ -157,45 +181,56 @@ def odefun_rhs_reduced(t, x, p, pload_fun, idx=IDX):
     xdot[idx["gamq_afe"]] = iq_afe - iq_ref_afe
     xdot[idx["vdc_ups"]] = (p.omega_b / p.c_dc) * (i_dc_in - i_dc_out)
     xdot[idx["iU_cv"]] = (p.omega_b / p.l_vsi) * (
-        mU * vdc_ups - vU_vsi - p.r_vsi * iU_cv + omega_vsi * p.l_vsi * iV_cv
+        m_u * vdc_ups - v_u_vsi - p.r_vsi * i_u_cv + omega_vsi * p.l_vsi * i_v_cv
     )
     xdot[idx["iV_cv"]] = (p.omega_b / p.l_vsi) * (
-        mV * vdc_ups - vV_vsi - p.r_vsi * iV_cv - omega_vsi * p.l_vsi * iU_cv
+        m_v * vdc_ups - v_v_vsi - p.r_vsi * i_v_cv - omega_vsi * p.l_vsi * i_u_cv
     )
-    xdot[idx["vU_vsi"]] = (p.omega_b / p.c_vsi) * (iU_cv - iU_vsi + omega_vsi * p.c_vsi * vV_vsi)
-    xdot[idx["vV_vsi"]] = (p.omega_b / p.c_vsi) * (iV_cv - iV_vsi - omega_vsi * p.c_vsi * vU_vsi)
-    xdot[idx["xiU_vsi"]] = vU_ref_vsi - vU_vsi
-    xdot[idx["xiV_vsi"]] = vV_ref_vsi - vV_vsi
-    xdot[idx["gamU_vsi"]] = iU_ref_cv - iU_cv
-    xdot[idx["gamV_vsi"]] = iV_ref_cv - iV_cv
+    xdot[idx["vU_vsi"]] = (p.omega_b / p.c_vsi) * (i_u_cv - i_u_vsi + omega_vsi * p.c_vsi * v_v_vsi)
+    xdot[idx["vV_vsi"]] = (p.omega_b / p.c_vsi) * (i_v_cv - i_v_vsi - omega_vsi * p.c_vsi * v_u_vsi)
+    xdot[idx["xiU_vsi"]] = v_u_ref_vsi - v_u_vsi
+    xdot[idx["xiV_vsi"]] = v_v_ref_vsi - v_v_vsi
+    xdot[idx["gamU_vsi"]] = i_u_ref_cv - i_u_cv
+    xdot[idx["gamV_vsi"]] = i_v_ref_cv - i_v_cv
     xdot[idx["v_psu"]] = (p.omega_b / p.c_psu) * (psu_injection - i_psu)
     xdot[idx["xi_psu"]] = p.vpsu_ref - v_psu
     xdot[idx["v_eq"]] = (p.omega_b / p.c_eq) * (i_eq - g_load * v_eq)
     xdot[idx["xi_eq"]] = p.veq_ref - v_eq
 
-    alg = dict(
-        p_load=p_load,
-        g_load=g_load,
-        i_eq=i_eq,
-        i_psu=i_psu,
-        g_eq=g_eq,
-        vdc_ups=vdc_ups,
-        v_psu=v_psu,
-        v_eq=v_eq,
-        p_pcc=vr_pcc * ir_pcc + vi_pcc * ii_pcc,
-        p_dc_in=vdc_ups * i_dc_in,
-        p_dc_out=vdc_ups * i_dc_out,
-    )
+    alg = {
+        "p_load": p_load,
+        "g_load": g_load,
+        "i_eq": i_eq,
+        "i_psu": i_psu,
+        "g_eq": g_eq,
+        "vdc_ups": vdc_ups,
+        "v_psu": v_psu,
+        "v_eq": v_eq,
+        "p_pcc": vr_pcc * ir_pcc + vi_pcc * ii_pcc,
+        "p_dc_in": vdc_ups * i_dc_in,
+        "p_dc_out": vdc_ups * i_dc_out,
+    }
     return xdot, alg
 
 
-def output_ppcc(x, p, p_load_scalar, idx=IDX):
-    return odefun_rhs_reduced(0, x, p, lambda t: p_load_scalar, idx)[1]["p_pcc"]
+def output_ppcc(
+    x: FloatArray,
+    p: SimpleNamespace,
+    p_load_scalar: Real,
+    idx: Mapping[str, int] = IDX,
+) -> Real:
+    return odefun_rhs_reduced(0, x, p, lambda _t: p_load_scalar, idx)[1]["p_pcc"]
 
 
-def collect_signals_reduced(t, X, p, u_fun, idx=IDX):
+def collect_signals_reduced(
+    t: FloatArray,
+    states: FloatArray,
+    p: SimpleNamespace,
+    u_fun: Callable[[float], Real],
+    idx: Mapping[str, int] = IDX,
+) -> dict[str, FloatArray]:
     t = np.asarray(t)
-    X = np.asarray(X)
+    states = np.asarray(states)
     fields = [
         "p_load_cmd",
         "p_pcc",
@@ -209,57 +244,77 @@ def collect_signals_reduced(t, X, p, u_fun, idx=IDX):
         "i_eq",
         "i_psu",
     ]
-    S = {f: np.zeros(len(t)) for f in fields}
+    signals = {f: np.zeros(len(t)) for f in fields}
     for k, tt in enumerate(t):
-        _, a = odefun_rhs_reduced(0, X[k], p, lambda _t: u_fun(tt), idx)
-        S["p_load_cmd"][k] = a["p_load"]
-        S["p_pcc"][k] = a["p_pcc"]
-        S["p_dc_in"][k] = a["p_dc_in"]
-        S["p_dc_out"][k] = a["p_dc_out"]
-        S["vdc_ups"][k] = a["vdc_ups"]
-        S["v_psu"][k] = a["v_psu"]
-        S["v_eq"][k] = a["v_eq"]
-        S["g_eq"][k] = a["g_eq"]
-        S["g_load"][k] = a["g_load"]
-        S["i_eq"][k] = a["i_eq"]
-        S["i_psu"][k] = a["i_psu"]
-    return S
+
+        def sample_load(_time: float, sample_time: float = tt) -> Real:
+            return u_fun(sample_time)
+
+        _, a = odefun_rhs_reduced(0, states[k], p, sample_load, idx)
+        signals["p_load_cmd"][k] = a["p_load"]
+        signals["p_pcc"][k] = a["p_pcc"]
+        signals["p_dc_in"][k] = a["p_dc_in"]
+        signals["p_dc_out"][k] = a["p_dc_out"]
+        signals["vdc_ups"][k] = a["vdc_ups"]
+        signals["v_psu"][k] = a["v_psu"]
+        signals["v_eq"][k] = a["v_eq"]
+        signals["g_eq"][k] = a["g_eq"]
+        signals["g_load"][k] = a["g_load"]
+        signals["i_eq"][k] = a["i_eq"]
+        signals["i_psu"][k] = a["i_psu"]
+    return signals
 
 
-def sort_eigs_for_tracking(lam):
+def sort_eigs_for_tracking(lam: ComplexArray) -> ComplexArray:
     lam = np.asarray(lam)
     idx = np.lexsort((-np.real(lam), -np.imag(lam)))
     return lam[idx]
 
 
-def match_eigs_global(lam_ref, lam_now):
+def match_eigs_global(lam_ref: ComplexArray, lam_now: ComplexArray) -> NDArray[np.int64]:
     lam_ref = np.asarray(lam_ref)
     lam_now = np.asarray(lam_now)
     n = len(lam_ref)
-    D = np.abs(lam_ref[:, None] - lam_now[None, :])
+    distance = np.abs(lam_ref[:, None] - lam_now[None, :])
     perm = np.zeros(n, dtype=int)
     for _ in range(n):
-        i, j = np.unravel_index(np.argmin(D), D.shape)
+        i, j = np.unravel_index(np.argmin(distance), distance.shape)
         perm[i] = j
-        D[i, :] = np.inf
-        D[:, j] = np.inf
+        distance[i, :] = np.inf
+        distance[:, j] = np.inf
     return perm
 
 
-def smoothstep01(x):
+def smoothstep01(x: Real) -> Real:
     x = np.clip(x, 0, 1)
     return x * x * (3 - 2 * x)
 
 
-def f_schedule(t, t_on, tA, f0, f1, tB, f2):
-    return 0.0 if t < t_on else f0 if t < tA else f1 if t < tB else f2
+def f_schedule(
+    t: float,
+    t_on: float,
+    t_a: float,
+    f0: float,
+    f1: float,
+    t_b: float,
+    f2: float,
+) -> float:
+    return 0.0 if t < t_on else f0 if t < t_a else f1 if t < t_b else f2
 
 
-def phase_stepfreq(t, t_on, tA, f0, f1, tB, f2):
+def phase_stepfreq(
+    t: float,
+    t_on: float,
+    t_a: float,
+    f0: float,
+    f1: float,
+    t_b: float,
+    f2: float,
+) -> float:
     if t <= t_on:
         return 0.0
-    if t < tA:
+    if t < t_a:
         return f0 * (t - t_on)
-    if t < tB:
-        return f0 * (tA - t_on) + f1 * (t - tA)
-    return f0 * (tA - t_on) + f1 * (tB - tA) + f2 * (t - tB)
+    if t < t_b:
+        return f0 * (t_a - t_on) + f1 * (t - t_a)
+    return f0 * (t_a - t_on) + f1 * (t_b - t_a) + f2 * (t - t_b)

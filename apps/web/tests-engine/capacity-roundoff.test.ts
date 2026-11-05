@@ -26,19 +26,19 @@ for (const model of ['capacityBank', 'designReview'] as const) {
   const status = model === 'capacityBank' ? 'status' : 'capacityStatus';
   const margin = model === 'capacityBank' ? 'marginMW' : 'marginMVA';
   for (const scale of [1e-9, 1, 1e9]) {
-    test(`${model} decimal equality at scale ${scale} passes with one spare`, () => {
+    void test(`${model} decimal equality at scale ${String(scale)} passes with one spare`, () => {
       const output = evaluate(model, scale);
       assert.equal(output[status], 'screen-satisfied');
       assert.equal(output[margin], 0);
       assert.equal(output.minimumNPlusOne, 4);
     });
-    test(`${model} meaningful deficit at scale ${scale} still needs another unit`, () => {
+    void test(`${model} meaningful deficit at scale ${String(scale)} still needs another unit`, () => {
       const output = evaluate(model, scale, 2.1 + 1e-10);
       assert.equal(output[status], 'screen-failed');
       assert.ok((output[margin] as number) < 0);
       assert.equal(output.minimumNPlusOne, 5);
     });
-    test(`${model} surplus at scale ${scale} remains positive`, () => {
+    void test(`${model} surplus at scale ${String(scale)} remains positive`, () => {
       const output = evaluate(model, scale, 2);
       assert.equal(output[status], 'screen-satisfied');
       assert.ok((output[margin] as number) > 0);
@@ -46,7 +46,7 @@ for (const model of ['capacityBank', 'designReview'] as const) {
     });
   }
 }
-test('capacity rejects a required count outside the safe integer range', () => {
+void test('capacity rejects a required count outside the safe integer range', () => {
   assert.throws(
     () =>
       calculateScreen('capacityBank', {
@@ -60,7 +60,7 @@ test('capacity rejects a required count outside the safe integer range', () => {
     /safe integer/,
   );
 });
-test('design review rejects an overflowing capacity ratio', () => {
+void test('design review rejects an overflowing capacity ratio', () => {
   assert.throws(
     () =>
       calculateScreen('designReview', {

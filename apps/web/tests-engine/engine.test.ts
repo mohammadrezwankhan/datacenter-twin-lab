@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -21,7 +22,7 @@ function preset(name: string): Record<string, unknown> {
   return structuredClone(demoData.scenarios[name]) as Record<string, unknown>;
 }
 
-test('exact arithmetic keeps Python-compatible decimal and money boundaries', () => {
+void test('exact arithmetic keeps Python-compatible decimal and money boundaries', () => {
   assert.equal(
     decimalText(new Rational(1n, 3n)),
     '0.3333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333',
@@ -35,7 +36,7 @@ test('exact arithmetic keeps Python-compatible decimal and money boundaries', ()
   assert.equal(moneyText(new Rational(5n, 200n)), '0.02');
 });
 
-test('seven public presets retain independent continuity expectations', () => {
+void test('seven public presets retain independent continuity expectations', () => {
   const normal = simulateContinuitySync(preset('normal'));
   assert.equal(normal.summary.served_it_kwh, '500');
   assert.equal(normal.summary.unserved_it_kwh, '0');
@@ -43,18 +44,27 @@ test('seven public presets retain independent continuity expectations', () => {
   assert.equal(failure.events.find((event) => event.action === 'battery_depleted')?.at_s, '607.8');
   assert.equal(failure.summary.unserved_duration_s, '292.2');
   const path = simulateContinuitySync(preset('path_maintenance'));
-  const pathRow = path.intervals.find((row) => row.start_s === '300')!;
+  const pathRow = requiredPresent(
+    path.intervals.find((row) => row.start_s === '300'),
+    "path.intervals.find((row) => row.start_s === '300')",
+  );
   assert.equal(pathRow.served_it_kw, '665');
   assert.equal(pathRow.unserved_it_kw, '335');
   const shared = simulateContinuitySync(preset('shared_domain'));
-  assert.equal(shared.intervals.find((row) => row.start_s === '300')!.served_it_kw, '0');
+  assert.equal(
+    requiredPresent(
+      shared.intervals.find((row) => row.start_s === '300'),
+      "shared.intervals.find((row) => row.start_s === '300')",
+    ).served_it_kw,
+    '0',
+  );
   for (const name of demoData.presets.map((item) => item.id)) {
     const run = simulateContinuitySync(preset(name));
     for (const row of run.intervals) assert.equal(row.energy_balance_residual_kwh, '0');
   }
 });
 
-test('charging, depletion, demand events, partial paths, and unknown costs are explicit', () => {
+void test('charging, depletion, demand events, partial paths, and unknown costs are explicit', () => {
   const empty = simulateContinuitySync({
     ...preset('generator_failure'),
     battery_initial_kwh: '0',
@@ -87,7 +97,13 @@ test('charging, depletion, demand events, partial paths, and unknown costs are e
     ...preset('normal'),
     events: [{ at_s: 10, action: 'set_demand', target: 'it-load', value_kw: '500' }],
   });
-  assert.equal(changedDemand.intervals.find((row) => row.start_s === '10')!.requested_it_kw, '500');
+  assert.equal(
+    requiredPresent(
+      changedDemand.intervals.find((row) => row.start_s === '10'),
+      "changedDemand.intervals.find((row) => row.start_s === '10')",
+    ).requested_it_kw,
+    '500',
+  );
   const unknown = simulateContinuitySync({
     ...preset('utility_loss'),
     generator_cost_per_kwh: null,
@@ -104,7 +120,7 @@ test('charging, depletion, demand events, partial paths, and unknown costs are e
   assert.equal(coincident.summary.battery_final_kwh, '100');
 });
 
-test('validation rejects bounded-contract violations and preserves arbitrary schema-2 topology', () => {
+void test('validation rejects bounded-contract violations and preserves arbitrary schema-2 topology', () => {
   assert.equal(validateScenario(preset('normal')).schema_version, 2);
   for (const patch of [
     { distribution_efficiency: '1.01' },
@@ -163,8 +179,8 @@ if (!pythonOutput)
   throw new Error(
     'Native Python differential harness unavailable; set TWIN_PYTHON to a Python 3.12+ interpreter.',
   );
-test('complete run objects match native Python for all seven presets', () => {
-  const expected = JSON.parse(pythonOutput!);
+void test('complete run objects match native Python for all seven presets', () => {
+  const expected = JSON.parse(pythonOutput);
   for (const name of Object.keys(expected))
     assert.deepEqual(simulateContinuitySync(preset(name)), expected[name]);
 });
@@ -268,8 +284,8 @@ if (!edgePythonOutput)
   throw new Error(
     'Native Python edge differential harness unavailable; set TWIN_PYTHON to a Python 3.12+ interpreter.',
   );
-test('complete run objects match native Python for bounded edge scenarios', () => {
-  const expected = JSON.parse(edgePythonOutput!);
+void test('complete run objects match native Python for bounded edge scenarios', () => {
+  const expected = JSON.parse(edgePythonOutput);
   for (const name of Object.keys(expected))
     assert.deepEqual(simulateContinuitySync(edgeCases[name]), expected[name]);
 });

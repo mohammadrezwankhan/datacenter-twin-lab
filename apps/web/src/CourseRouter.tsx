@@ -13,9 +13,13 @@ export function CourseRouter() {
   const [id, setId] = useState(route);
   const [reviewedIds, setReviewedIds] = useState<string[]>([]);
   useEffect(() => {
-    const update = () => setId(route());
+    const update = () => {
+      setId(route());
+    };
     window.addEventListener('popstate', update);
-    return () => window.removeEventListener('popstate', update);
+    return () => {
+      window.removeEventListener('popstate', update);
+    };
   }, []);
   return (
     <VisitReviews.Provider value={{ reviewedIds, setReviewedIds }}>

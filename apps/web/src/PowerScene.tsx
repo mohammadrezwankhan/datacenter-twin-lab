@@ -47,7 +47,7 @@ function DesktopCampus({
   const selectedClass = (key: SourceKey) => (selected === key ? ' is-selected' : '');
   const strokeWidth = (value: number) => 3 + (Math.min(value, demand) / demand) * 5;
   const assetState = (id: string) => words(states[id]);
-  const flowLabel = (value: number) => `${kw(value)}`;
+  const flowLabel = (value: number) => kw(value);
 
   return (
     <svg
@@ -97,10 +97,16 @@ function DesktopCampus({
       />
       <g clipPath="url(#ps-ground-clip)" className="power-scene-ground-grid" aria-hidden="true">
         {Array.from({ length: 12 }, (_, i) => (
-          <path key={`gx${i}`} d={`M${130 + i * 55} 380 ${510 + i * 55} 113`} />
+          <path
+            key={`gx${String(i)}`}
+            d={`M${String(130 + i * 55)} 380 ${String(510 + i * 55)} 113`}
+          />
         ))}
         {Array.from({ length: 8 }, (_, i) => (
-          <path key={`gy${i}`} d={`M50 ${150 + i * 34} 1090 ${150 + i * 34}`} />
+          <path
+            key={`gy${String(i)}`}
+            d={`M50 ${String(150 + i * 34)} 1090 ${String(150 + i * 34)}`}
+          />
         ))}
       </g>
       <path
@@ -182,7 +188,9 @@ function DesktopCampus({
         tabIndex={0}
         aria-pressed={selected === 'grid'}
         aria-describedby={`${descriptionId}-grid`}
-        onClick={() => onSelect('grid')}
+        onClick={() => {
+          onSelect('grid');
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -270,17 +278,21 @@ function DesktopCampus({
           return (
             <g key={i}>
               <path
-                d={`M${x} ${y}l25 8v52l-25-8Z`}
+                d={`M${String(x)} ${String(y)}l25 8v52l-25-8Z`}
                 fill="#0c1b26"
                 stroke="#547182"
                 strokeWidth="1.2"
               />
               <path
-                d={`M${x + 4} ${y + 8}l17 5v35l-17-5Z`}
+                d={`M${String(x + 4)} ${String(y + 8)}l17 5v35l-17-5Z`}
                 fill="url(#ps-rack-lights)"
                 opacity=".9"
               />
-              <path d={`M${x + 4} ${y + 48}l17 5`} stroke="#6de0bf" strokeWidth="1.4" />
+              <path
+                d={`M${String(x + 4)} ${String(y + 48)}l17 5`}
+                stroke="#6de0bf"
+                strokeWidth="1.4"
+              />
             </g>
           );
         })}
@@ -292,7 +304,7 @@ function DesktopCampus({
         {Array.from({ length: 5 }, (_, i) => (
           <path
             key={i}
-            d={`M${552 + i * 31} ${216 - i * 10.4}v73`}
+            d={`M${String(552 + i * 31)} ${String(216 - i * 10.4)}v73`}
             stroke="#456272"
             strokeWidth="2"
             opacity=".65"
@@ -335,7 +347,9 @@ function DesktopCampus({
         tabIndex={0}
         aria-pressed={selected === 'site'}
         aria-describedby={`${descriptionId}-site`}
-        onClick={() => onSelect('site')}
+        onClick={() => {
+          onSelect('site');
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -364,7 +378,9 @@ function DesktopCampus({
         tabIndex={0}
         aria-pressed={selected === 'battery'}
         aria-describedby={`${descriptionId}-battery`}
-        onClick={() => onSelect('battery')}
+        onClick={() => {
+          onSelect('battery');
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -410,7 +426,9 @@ function DesktopCampus({
         tabIndex={0}
         aria-pressed={selected === 'generator'}
         aria-describedby={`${descriptionId}-generator`}
-        onClick={() => onSelect('generator')}
+        onClick={() => {
+          onSelect('generator');
+        }}
         onKeyDown={(event) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -500,7 +518,9 @@ function MobileCampus({
     tabIndex: 0,
     'aria-pressed': picked(key),
     'aria-describedby': `${descriptionId}-${key}`,
-    onClick: () => onSelect(key),
+    onClick: () => {
+      onSelect(key);
+    },
     onKeyDown: (event: KeyboardEvent<SVGGElement>) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
@@ -633,8 +653,15 @@ function MobileCampus({
           const y = 167 + i * 8.5;
           return (
             <g key={i}>
-              <path d={`m${x} ${y} 16 6v45l-16-6Z`} fill="#0c1b26" stroke="#547182" />
-              <path d={`m${x + 3} ${y + 8} 10 4v28l-10-4Z`} fill="url(#psm-racks)" />
+              <path
+                d={`m${String(x)} ${String(y)} 16 6v45l-16-6Z`}
+                fill="#0c1b26"
+                stroke="#547182"
+              />
+              <path
+                d={`m${String(x + 3)} ${String(y + 8)} 10 4v28l-10-4Z`}
+                fill="url(#psm-racks)"
+              />
             </g>
           );
         })}
@@ -761,15 +788,21 @@ export function PowerScene({ run, row, motion, onMotionChange }: PowerSceneProps
       setCompact((current) => (width < 600 ? true : width > 640 ? false : current));
     });
     observer.observe(stage);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReducedMotion(query.matches);
+    const update = () => {
+      setReducedMotion(query.matches);
+    };
     update();
     query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
+    return () => {
+      query.removeEventListener('change', update);
+    };
   }, []);
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
@@ -781,8 +814,8 @@ export function PowerScene({ run, row, motion, onMotionChange }: PowerSceneProps
     const bounds = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - bounds.left) / Math.max(bounds.width, 1) - 0.5;
     const y = (event.clientY - bounds.top) / Math.max(bounds.height, 1) - 0.5;
-    stageRef.current.style.setProperty('--scene-pointer-x', `${-y * 2.6}deg`);
-    stageRef.current.style.setProperty('--scene-pointer-y', `${x * 3.3}deg`);
+    stageRef.current.style.setProperty('--scene-pointer-x', `${String(-y * 2.6)}deg`);
+    stageRef.current.style.setProperty('--scene-pointer-y', `${String(x * 3.3)}deg`);
   };
 
   const resetPointer = () => {
@@ -889,7 +922,9 @@ export function PowerScene({ run, row, motion, onMotionChange }: PowerSceneProps
             className="power-scene-control power-scene-turn"
             aria-label="Turn scene left"
             title="Turn scene left"
-            onClick={() => setView((current) => Math.max(-8, current - 3))}
+            onClick={() => {
+              setView((current) => Math.max(-8, current - 3));
+            }}
           >
             ↶
           </button>
@@ -898,7 +933,9 @@ export function PowerScene({ run, row, motion, onMotionChange }: PowerSceneProps
             className="power-scene-control power-scene-turn"
             aria-label="Turn scene right"
             title="Turn scene right"
-            onClick={() => setView((current) => Math.min(8, current + 3))}
+            onClick={() => {
+              setView((current) => Math.min(8, current + 3));
+            }}
           >
             ↷
           </button>
@@ -915,7 +952,9 @@ export function PowerScene({ run, row, motion, onMotionChange }: PowerSceneProps
           <button
             type="button"
             className="power-scene-control power-scene-motion"
-            onClick={() => onMotionChange(!motion)}
+            onClick={() => {
+              onMotionChange(!motion);
+            }}
           >
             {motion ? 'Pause animation' : 'Resume animation'}
           </button>
@@ -928,7 +967,7 @@ export function PowerScene({ run, row, motion, onMotionChange }: PowerSceneProps
         data-motion={motionAllowed ? 'on' : 'off'}
         onPointerMove={handlePointerMove}
         onPointerLeave={resetPointer}
-        style={{ '--scene-turn': `${view}deg` } as CSSProperties}
+        style={{ '--scene-turn': `${String(view)}deg` } as CSSProperties}
       >
         <div className="power-scene-art" aria-describedby="power-scene-description">
           {compact ? (

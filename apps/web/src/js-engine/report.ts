@@ -199,7 +199,7 @@ function sweepRows(result: Record<string, any>): { rows: unknown[][]; warningLin
     rows,
     warningLines: Array.from(counts)
       .sort(([left], [right]) => compareUnicode(left, right))
-      .map(([name, count]) => `${name}: ${count} interval(s)`),
+      .map(([name, count]) => `${name}: ${String(count)} interval(s)`),
   };
 }
 
@@ -261,7 +261,7 @@ export function renderMarkdown(input: unknown): string {
     );
     warningLines = Array.from(warnings(result))
       .sort(([left], [right]) => compareUnicode(left, right))
-      .map(([name, count]) => `${name}: ${count} interval(s)`);
+      .map(([name, count]) => `${name}: ${String(count)} interval(s)`);
   }
   lines.push(
     '',
@@ -355,7 +355,7 @@ export function renderHtml(input: unknown): string {
     );
     warningLines = Array.from(warnings(result))
       .sort(([left], [right]) => compareUnicode(left, right))
-      .map(([name, count]) => `${name}: ${count} interval(s)`);
+      .map(([name, count]) => `${name}: ${String(count)} interval(s)`);
   }
   parts.push(
     '<h2>Scenario assumptions</h2>',
@@ -378,7 +378,7 @@ export function renderHtml(input: unknown): string {
   ] as const)
     parts.push(
       `<h2>${heading}</h2>`,
-      `<ul>${(result[key] || []).map((item: unknown) => `<li>${html(item)}</li>`).join('')}</ul>`,
+      `<ul>${String((result[key] || []).map((item: unknown) => `<li>${html(item)}</li>`).join(''))}</ul>`,
     );
   parts.push('</body>', '</html>');
   return `${parts.join('\n')}\n`;

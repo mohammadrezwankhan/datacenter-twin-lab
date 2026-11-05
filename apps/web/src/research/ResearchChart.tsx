@@ -1,3 +1,4 @@
+import { requiredValue, requiredPresent } from '../required-value';
 import { useRef, type PointerEvent } from 'react';
 import { svgViewBoxPoint } from '../chartPointer';
 import type { ResearchChart as ChartData } from './types';
@@ -71,7 +72,7 @@ export function ResearchChart({
   const yTickValues = Array.from({ length: 5 }, (_, index) => yMax - (index / 4) * (yMax - yMin));
   const index = Math.max(0, Math.min(Math.max(0, count - 1), pointIndex));
   const valid = count > 0 && ys.length > 0;
-  const xValue = chart.x[index];
+  const xValue = requiredValue(chart.x[index], 'chart.x[index]');
   const cleanId = chart.id.replaceAll('_', ' ').replaceAll('-', ' ');
   const inspectingPointer = useRef<number | null>(null);
   const pathFor = (values: number[]) => {
@@ -80,7 +81,13 @@ export function ResearchChart({
     for (let point = 0; point < count; point++) {
       const xv = chart.x[point];
       const yv = values[point];
-      if (!Number.isFinite(xv) || !Number.isFinite(yv) || (xLog && xv <= 0)) {
+      if (
+        xv === undefined ||
+        yv === undefined ||
+        !Number.isFinite(xv) ||
+        !Number.isFinite(yv) ||
+        (xLog && xv <= 0)
+      ) {
         begun = false;
         continue;
       }
@@ -97,8 +104,8 @@ export function ResearchChart({
     let nearest = 0;
     for (let candidate = 1; candidate < count; candidate++) {
       if (
-        Math.abs(xTransform(chart.x[candidate]) - target) <
-        Math.abs(xTransform(chart.x[nearest]) - target)
+        Math.abs(xTransform(requiredValue(chart.x[candidate], 'chart.x[candidate]')) - target) <
+        Math.abs(xTransform(requiredValue(chart.x[nearest], 'chart.x[nearest]')) - target)
       )
         nearest = candidate;
     }
@@ -134,7 +141,7 @@ export function ResearchChart({
           <strong>{chart.title}</strong>
         </button>
         <span className="research-chart-sample">
-          {valid ? count + ' samples' : 'No finite samples'}
+          {valid ? String(count) + ' samples' : 'No finite samples'}
         </span>
       </div>
       <div className="research-chart-legend" role="group" aria-label="Chart legend">
@@ -149,7 +156,7 @@ export function ResearchChart({
         <>
           <svg
             className="research-line-chart"
-            viewBox={'0 0 ' + width + ' ' + height}
+            viewBox={'0 0 ' + String(width) + ' ' + String(height)}
             role="img"
             aria-label={
               chart.title +
@@ -158,7 +165,7 @@ export function ResearchChart({
               ', vertical axis ' +
               chart.y_label +
               '. ' +
-              count +
+              String(count) +
               ' actual samples.'
             }
             onPointerMove={focusPointFromPointer}
@@ -170,9 +177,11 @@ export function ResearchChart({
               {chart.title} · {chart.x_label} by {chart.y_label}
             </title>
             {yTickValues.map((value, tick) => (
-              <g key={'y' + tick}>
+              <g key={'y' + String(tick)}>
                 <path
-                  d={'M' + left + ' ' + yPos(value) + 'H' + (left + plotWidth)}
+                  d={
+                    'M' + String(left) + ' ' + String(yPos(value)) + 'H' + String(left + plotWidth)
+                  }
                   className="research-chart-gridline"
                 />
                 <text x={left - 10} y={yPos(value) + 4} textAnchor="end">
@@ -183,9 +192,16 @@ export function ResearchChart({
             {xTickPositions.map((value, tick) => {
               const xVal = xLog ? 10 ** value : value;
               return (
-                <g key={'x' + tick}>
+                <g key={'x' + String(tick)}>
                   <path
-                    d={'M' + (left + (tick / 4) * plotWidth) + ' ' + top + 'V' + (top + plotHeight)}
+                    d={
+                      'M' +
+                      String(left + (tick / 4) * plotWidth) +
+                      ' ' +
+                      String(top) +
+                      'V' +
+                      String(top + plotHeight)
+                    }
                     className="research-chart-gridline vertical"
                   />
                   <text
@@ -199,7 +215,9 @@ export function ResearchChart({
               );
             })}
             <path
-              d={'M' + left + ' ' + (top + plotHeight) + 'H' + (left + plotWidth)}
+              d={
+                'M' + String(left) + ' ' + String(top + plotHeight) + 'H' + String(left + plotWidth)
+              }
               className="research-chart-axis"
             />
             {xLog && (
@@ -226,7 +244,9 @@ export function ResearchChart({
             {active && Number.isFinite(xValue) && (!xLog || xValue > 0) && (
               <>
                 <path
-                  d={'M' + xPos(xValue) + ' ' + top + 'V' + (top + plotHeight)}
+                  d={
+                    'M' + String(xPos(xValue)) + ' ' + String(top) + 'V' + String(top + plotHeight)
+                  }
                   className="research-chart-crosshair"
                 />
                 {chart.lines.map((line, lineIndex) =>
@@ -234,7 +254,7 @@ export function ResearchChart({
                     <circle
                       key={line.label}
                       cx={xPos(xValue)}
-                      cy={yPos(lineAt(lineIndex)!)}
+                      cy={yPos(requiredPresent(lineAt(lineIndex), 'lineAt(lineIndex)'))}
                       r="4"
                       fill={line.color || colors[lineIndex % colors.length]}
                       className="research-chart-dot"
@@ -244,7 +264,7 @@ export function ResearchChart({
               </>
             )}
             <text
-              transform={'rotate(-90 18 ' + (top + plotHeight / 2) + ')'}
+              transform={'rotate(-90 18 ' + String(top + plotHeight / 2) + ')'}
               x="18"
               y={top + plotHeight / 2}
               textAnchor="middle"
@@ -274,7 +294,9 @@ export function ResearchChart({
                 aria-label={'Focus a data point on ' + chart.title}
                 aria-valuetext={chart.x_label + ' ' + fmt(xValue, 6)}
                 onFocus={onFocus}
-                onChange={(event) => onPointChange(Number(event.target.value))}
+                onChange={(event) => {
+                  onPointChange(Number(event.target.value));
+                }}
               />
               <strong>
                 {chart.x_label}: {fmt(xValue, 7)}
@@ -298,7 +320,9 @@ export function ResearchChart({
                 {line.label}:{' '}
                 <b>
                   {Number.isFinite(lineAt(lineIndex))
-                    ? fmt(lineAt(lineIndex)!, 7) + ' ' + chart.y_label
+                    ? fmt(requiredPresent(lineAt(lineIndex), 'lineAt(lineIndex)'), 7) +
+                      ' ' +
+                      chart.y_label
                     : 'Missing'}
                 </b>
               </span>
@@ -328,10 +352,12 @@ export function ResearchChart({
                 <tbody>
                   {Array.from({ length: count }, (_, row) => (
                     <tr key={row} aria-current={active && row === index ? 'true' : undefined}>
-                      <td>{fmt(chart.x[row], 7)}</td>
+                      <td>{fmt(requiredValue(chart.x[row], 'chart.x[row]'), 7)}</td>
                       {chart.lines.map((line) => (
                         <td key={line.label}>
-                          {Number.isFinite(line.values[row]) ? fmt(line.values[row], 8) : 'Missing'}
+                          {Number.isFinite(line.values[row])
+                            ? fmt(requiredValue(line.values[row], 'line.values[row]'), 8)
+                            : 'Missing'}
                         </td>
                       ))}
                     </tr>

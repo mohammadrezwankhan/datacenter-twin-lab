@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import fs from 'node:fs/promises';
 
@@ -23,10 +24,10 @@ test('visual demand timeline runs through the local Python API with preserved av
   expect(
     result.scenario.events.some((event: { action: string }) => event.action === 'asset_down'),
   ).toBe(true);
-  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${result.run_id.slice(0, 12)}`);
+  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${String(result.run_id.slice(0, 12))}`);
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run', exact: true }).click();
-  expect(JSON.parse(await fs.readFile((await (await pending).path())!, 'utf8'))).toEqual(result);
+  expect(JSON.parse(await fs.readFile(await (await pending).path(), 'utf8'))).toEqual(result);
 });
 
 test('a saved scenario is recalculated by the local Python dashboard after preview', async ({
@@ -45,7 +46,7 @@ test('a saved scenario is recalculated by the local Python dashboard after previ
     buffer: Buffer.from(JSON.stringify(scenario)),
   });
   await expect(page.getByTestId('scenario-file-preview')).toContainText('Ready to run');
-  await expect(page.getByTestId('run-id')).toHaveText(previous!);
+  await expect(page.getByTestId('run-id')).toHaveText(requiredPresent(previous, 'previous'));
   const response = page.waitForResponse(
     (value) => value.url().endsWith('/api/v1/simulations') && value.request().method() === 'POST',
   );
@@ -55,10 +56,10 @@ test('a saved scenario is recalculated by the local Python dashboard after previ
   expect(
     run.events.find((event: { action: string }) => event.action === 'battery_depleted').at_s,
   ).toBe('453.9');
-  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${run.run_id.slice(0, 12)}`);
+  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${String(run.run_id.slice(0, 12))}`);
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run', exact: true }).click();
-  expect(JSON.parse(await fs.readFile((await (await pending).path())!, 'utf8'))).toEqual(run);
+  expect(JSON.parse(await fs.readFile(await (await pending).path(), 'utf8'))).toEqual(run);
 });
 
 test('demand changes power, cost, warnings and exported provenance in the same run', async ({
@@ -84,11 +85,11 @@ test('demand changes power, cost, warnings and exported provenance in the same r
   await expect(page.getByTestId('grid-cost')).toHaveText('0.35 USD');
   await expect(page.getByTestId('warnings')).toContainText('it envelope exceeded');
   expect(run.scenario.it_demand_kw).toBe('1200');
-  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${run.run_id.slice(0, 12)}`);
+  await expect(page.getByTestId('run-id')).toHaveText(`RUN ${String(run.run_id.slice(0, 12))}`);
   expect(await page.getByTestId('run-id').innerText()).not.toBe(firstRun);
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export run' }).click();
-  const exported = JSON.parse(await fs.readFile((await (await download).path())!, 'utf-8'));
+  const exported = JSON.parse(await fs.readFile(await (await download).path(), 'utf-8'));
   expect(exported).toEqual(run);
   expect(exported.scenario.source_ids).toContain('DEMO-ELECTRICAL-002');
   expect(errors).toEqual([]);
@@ -140,7 +141,10 @@ test('evidence links and billing units preserve unknown prices', async ({ page }
   await page.getByRole('button', { name: 'Calculate', exact: true }).click();
   await expect(page.getByTestId('quote-result')).toContainText('98.32 USD');
   await expect(page.getByTestId('quote-result')).toContainText('Calculated from your assumption');
-  await page.getByRole('link', { name: 'NVIDIA-DGX-H100-20260908 ↗', exact: true }).first().click();
+  await page
+    .getByRole('link', { name: 'NVIDIA-DGX-H100-20260908 ↗', exact: true })
+    .first()
+    .click();
   await expect(page.locator('#source-NVIDIA-DGX-H100-20260908')).toBeInViewport();
   expect(await page.locator('#source-NVIDIA-DGX-H100-20260908 a').getAttribute('href')).toContain(
     'docs.nvidia.com',
@@ -157,16 +161,28 @@ test('local dashboard serves the complete research evidence', async ({ page }) =
   expect(indexResponse.headers()['content-type']).toContain('application/json');
   const index = await indexResponse.json();
   for (const item of index.cases) {
-    const result = await page.request.get(`/${item.run_path}`);
+    const result = await page.request.get(`/${String(item.run_path)}`);
     expect(result.ok()).toBe(true);
     expect((await result.json()).input_sha256).toBe(item.input_sha256);
-    expect((await page.request.get(`/${item.report_path}`)).ok()).toBe(true);
+    expect((await page.request.get(`/${String(item.report_path)}`)).ok()).toBe(true);
   }
   const video = page.locator('video');
-  expect((await page.request.get((await video.locator('source').getAttribute('src'))!)).ok()).toBe(
-    true,
+  expect(
+    (
+      await page.request.get(
+        requiredPresent(
+          await video.locator('source').getAttribute('src'),
+          "(await video.locator('source').getAttribute('src'))",
+        ),
+      )
+    ).ok(),
+  ).toBe(true);
+  const captions = await page.request.get(
+    requiredPresent(
+      await video.locator('track').getAttribute('src'),
+      "(await video.locator('track').getAttribute('src'))",
+    ),
   );
-  const captions = await page.request.get((await video.locator('track').getAttribute('src'))!);
   expect(await captions.text()).toContain('WEBVTT');
 });
 
@@ -189,7 +205,9 @@ for (const viewport of [
   { width: 768, height: 1024 },
   { width: 390, height: 844 },
 ]) {
-  test(`responsive layout and keyboard navigation ${viewport.width}px`, async ({ page }, info) => {
+  test(`responsive layout and keyboard navigation ${String(viewport.width)}px`, async ({
+    page,
+  }, info) => {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await expect(page.getByTestId('served-power')).toBeVisible();
@@ -208,7 +226,7 @@ for (const viewport of [
     ).toBe(true);
     await page.getByRole('button', { name: 'Overview', exact: true }).click();
     await page.screenshot({
-      path: info.outputPath(`overview-${viewport.width}.png`),
+      path: info.outputPath(`overview-${String(viewport.width)}.png`),
       fullPage: true,
     });
   });

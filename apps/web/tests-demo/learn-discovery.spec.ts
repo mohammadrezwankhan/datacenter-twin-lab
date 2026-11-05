@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { readFile } from 'node:fs/promises';
@@ -41,17 +42,17 @@ test('search pages discovery manifest and cards preserve the 12/1/5 records in s
   );
 
   for (const item of manifest.items) {
-    const card = page.locator(`.learning-card[data-learning-id="${item.id}"]`);
+    const card = page.locator(`.learning-card[data-learning-id="${String(item.id)}"]`);
     await expect(card.locator('h4 a')).toHaveText(item.title);
     if (item.question) await expect(card.locator('p').first()).toHaveText(item.question);
     await expect(card.locator('.card-description')).toHaveText(item.description);
     await expect(card.locator('.card-links a').first()).toHaveAttribute(
       'href',
-      `..${item.overviewPath}`,
+      `..${String(item.overviewPath)}`,
     );
     await expect(card.locator('.card-links a').nth(1)).toHaveAttribute(
       'href',
-      `..${item.runtimePath}`,
+      `..${String(item.runtimePath)}`,
     );
   }
 
@@ -197,7 +198,7 @@ test('search pages discovery loads no React or scientific runtime and stays unde
   const html = await readFile(resolve(artifactRoot, 'learn/index.html'), 'utf8');
   const src = html.match(/<script type="module" src="([^"]*learn-discovery[^"]+)"><\/script>/)?.[1];
   expect(src).toBeTruthy();
-  const scriptPath = resolve(artifactRoot, 'learn', src!);
+  const scriptPath = resolve(artifactRoot, 'learn', requiredPresent(src, 'src'));
   const compressedBytes = gzipSync(await readFile(scriptPath)).byteLength;
   expect(compressedBytes).toBeLessThan(35 * 1024);
 });
@@ -268,7 +269,9 @@ test('search pages discovery replays once, pauses, resets and respects motion an
   await expect(model).toHaveClass(/flow-playing/);
   await pause.click();
   await expect(model).toHaveClass(/flow-paused/);
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight);
+  });
   await expect(model).not.toHaveClass(/flow-playing|flow-paused/, { timeout: 5000 });
   await expect(model.locator('.flow-status')).toContainText('Static diagram.');
 
@@ -295,7 +298,7 @@ test('search pages discovery fits target widths, 48px controls and axe WCAG 2.2 
     await page.setViewportSize({ width, height: 900 });
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-      `document must not overflow at ${width}px`,
+      `document must not overflow at ${String(width)}px`,
     ).toBe(true);
     const shortTargets = await page
       .locator(
@@ -312,11 +315,13 @@ test('search pages discovery fits target widths, 48px controls and axe WCAG 2.2 
             height: element.getBoundingClientRect().height,
           })),
       );
-    expect(shortTargets, `primary controls must be at least 48px at ${width}px`).toEqual([]);
+    expect(shortTargets, `primary controls must be at least 48px at ${String(width)}px`).toEqual(
+      [],
+    );
 
     const audit = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
       .analyze();
-    expect(audit.violations, `axe WCAG 2.2 AA at ${width}px`).toEqual([]);
+    expect(audit.violations, `axe WCAG 2.2 AA at ${String(width)}px`).toEqual([]);
   }
 });

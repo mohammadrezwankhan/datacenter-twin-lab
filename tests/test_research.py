@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import math
 import unittest
+from typing import Any, ClassVar
 
 try:
     import numpy  # noqa: F401
@@ -17,15 +18,23 @@ except ImportError:
 
 @unittest.skipUnless(_NUMERICS_AVAILABLE, "research studies require the optional NumPy/SciPy stack")
 class ResearchStudyTests(unittest.TestCase):
+    defaults: ClassVar[dict[str, dict[str, float]]]
+    results: ClassVar[dict[str, dict[str, Any]]]
+
+    @staticmethod
+    def run_study(study_id: str, config: dict[str, Any]) -> dict[str, Any]:
+        from datacenter_twin.research import run_study
+
+        return run_study(study_id, config)
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         from datacenter_twin.research import STUDY_DEFAULTS, run_study
 
         cls.defaults = STUDY_DEFAULTS
-        cls.run_study = staticmethod(run_study)
         cls.results = {study_id: run_study(study_id, {}) for study_id in STUDY_DEFAULTS}
 
-    def test_five_defaults_return_complete_finite_json_contracts(self):
+    def test_five_defaults_return_complete_finite_json_contracts(self) -> None:
         self.assertEqual(
             set(self.results),
             {"load-step", "modal", "forced-response", "model-comparison", "grid-network"},
@@ -50,7 +59,7 @@ class ResearchStudyTests(unittest.TestCase):
                 encoded = json.dumps(result, allow_nan=False, separators=(",", ":"))
                 self.assertTrue(encoded)
 
-    def test_sdcib_equilibria_are_recomputed_and_modal_residuals_are_small(self):
+    def test_sdcib_equilibria_are_recomputed_and_modal_residuals_are_small(self) -> None:
         for study_id in ("load-step", "modal", "forced-response"):
             with self.subTest(study=study_id):
                 result = self.results[study_id]
@@ -63,7 +72,7 @@ class ResearchStudyTests(unittest.TestCase):
         self.assertEqual(keys, sorted(keys))
         self.assertEqual(len(modal["charts"][0]["x"]), 160)
 
-    def test_synthetic_fft_recovers_an_independent_known_input(self):
+    def test_synthetic_fft_recovers_an_independent_known_input(self) -> None:
         result = self.results["forced-response"]
         metrics = {m["label"]: m["value"] for m in result["metrics"]}
         self.assertAlmostEqual(metrics["Synthetic input frequency"], 5.0, places=12)
@@ -80,7 +89,7 @@ class ResearchStudyTests(unittest.TestCase):
             )
         )
 
-    def test_model_pair_uses_supplied_startup_and_short_lesson_window(self):
+    def test_model_pair_uses_supplied_startup_and_short_lesson_window(self) -> None:
         result = self.results["model-comparison"]
         diagnostics = result["diagnostics"]
         self.assertEqual(diagnostics["state_count"], 62)
@@ -96,7 +105,7 @@ class ResearchStudyTests(unittest.TestCase):
         )
         self.assertTrue(any("not a solved joint equilibrium" in a for a in result["assumptions"]))
 
-    def test_model_comparison_states_and_outputs_converge_to_refined_bdf(self):
+    def test_model_comparison_states_and_outputs_converge_to_refined_bdf(self) -> None:
         import numpy as np
 
         from datacenter_twin.research.model_comparison import run_model_comparison
@@ -111,7 +120,10 @@ class ResearchStudyTests(unittest.TestCase):
                 self.assertEqual(coarse["solver"]["rtol"], 1e-8)
                 self.assertEqual(coarse["solver"]["atol"], 1e-10)
                 coarse_state = np.asarray(coarse["diagnostics"]["final_state"])
-                refined_state = np.asarray(refined["diagnostics"]["final_state"])
+                refined_diagnostics = refined["diagnostics"]
+                if not isinstance(refined_diagnostics, dict):
+                    self.fail("Refined model comparison must return a diagnostics object")
+                refined_state = np.asarray(refined_diagnostics["final_state"])
                 scaled_state_error = np.abs(coarse_state - refined_state) / np.maximum(
                     1.0, np.abs(refined_state)
                 )
@@ -123,16 +135,19 @@ class ResearchStudyTests(unittest.TestCase):
                         for line in chart["lines"]
                     ]
                 )
+                refined_charts = refined["charts"]
+                if not isinstance(refined_charts, list):
+                    self.fail("Refined model comparison must return a chart list")
                 refined_outputs = np.concatenate(
                     [
                         np.asarray(line["values"])
-                        for chart in refined["charts"]
+                        for chart in refined_charts
                         for line in chart["lines"]
                     ]
                 )
                 self.assertLess(float(np.max(np.abs(coarse_outputs - refined_outputs))), 2e-6)
 
-    def test_grid_network_recomputes_power_flow_devices_and_schur_feedthrough(self):
+    def test_grid_network_recomputes_power_flow_devices_and_schur_feedthrough(self) -> None:
         result = self.results["grid-network"]
         metrics = {m["label"]: m["value"] for m in result["metrics"]}
         self.assertLess(metrics["Recomputed power-flow mismatch infinity norm"], 1e-8)
@@ -147,7 +162,7 @@ class ResearchStudyTests(unittest.TestCase):
         self.assertEqual(len(result["charts"][0]["x"]), 160)
         self.assertEqual(len(result["charts"][0]["lines"]), 4)
 
-    def test_inputs_are_strictly_bounded_and_decimal_numbers_are_supported(self):
+    def test_inputs_are_strictly_bounded_and_decimal_numbers_are_supported(self) -> None:
         from decimal import Decimal
 
         result = self.run_study("modal", {"load_pu": Decimal("0.55")})
@@ -169,7 +184,7 @@ class ResearchStudyTests(unittest.TestCase):
 
 @unittest.skipUnless(_NUMERICS_AVAILABLE, "research studies require the optional NumPy/SciPy stack")
 class ResearchSpectrumTests(unittest.TestCase):
-    def test_odd_length_spectrum_doubles_highest_positive_bin(self):
+    def test_odd_length_spectrum_doubles_highest_positive_bin(self) -> None:
         from datacenter_twin.research import run_study
 
         result = run_study(
@@ -190,10 +205,13 @@ class ResearchSpectrumTests(unittest.TestCase):
         # For odd N the final positive-frequency bin has a distinct negative
         # partner; it is not a self-conjugate Nyquist bin (NumPy rfft notes).
         window = [0.5 - 0.5 * math.cos(2.0 * math.pi * i / (count - 1)) for i in range(count)]
-        for signal, output in zip(time_chart["lines"], spectrum["lines"]):
+        for signal, output in zip(time_chart["lines"], spectrum["lines"], strict=True):
             with self.subTest(signal=signal["label"]):
                 mean = math.fsum(signal["values"]) / count
-                weighted = [(value - mean) * weight for value, weight in zip(signal["values"], window)]
+                weighted = [
+                    (value - mean) * weight
+                    for value, weight in zip(signal["values"], window, strict=True)
+                ]
                 real = math.fsum(
                     value * math.cos(2.0 * math.pi * bin_index * i / count)
                     for i, value in enumerate(weighted)

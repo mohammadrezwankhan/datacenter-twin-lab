@@ -1,3 +1,4 @@
+import { requiredValue } from '../required-value';
 import { useId, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import type { ResearchStudy } from './types';
@@ -38,7 +39,9 @@ function NodeButton({
       aria-pressed={active}
       aria-labelledby={`${labelId} ${sublabelId}`}
       aria-describedby={descriptionId}
-      onClick={() => onPick(id)}
+      onClick={() => {
+        onPick(id);
+      }}
       onKeyDown={onKeyDown}
       style={{ '--node-color': info.color } as React.CSSProperties}
     >
@@ -100,21 +103,21 @@ function IsoBlock({
       <path
         d={
           'M' +
-          x +
+          String(x) +
           ' ' +
-          (y + shift) +
+          String(y + shift) +
           'L' +
-          (x + depth) +
+          String(x + depth) +
           ' ' +
-          y +
+          String(y) +
           'L' +
-          (x + width + depth) +
+          String(x + width + depth) +
           ' ' +
-          (y + shift) +
+          String(y + shift) +
           'L' +
-          (x + width) +
+          String(x + width) +
           ' ' +
-          (y + shift * 2) +
+          String(y + shift * 2) +
           'Z'
         }
         fill={color}
@@ -124,19 +127,19 @@ function IsoBlock({
       <path
         d={
           'M' +
-          x +
+          String(x) +
           ' ' +
-          (y + shift) +
+          String(y + shift) +
           'L' +
-          (x + width) +
+          String(x + width) +
           ' ' +
-          (y + shift * 2) +
+          String(y + shift * 2) +
           'V' +
-          (y + shift * 2 + height) +
+          String(y + shift * 2 + height) +
           'L' +
-          x +
+          String(x) +
           ' ' +
-          (y + shift + height) +
+          String(y + shift + height) +
           'Z'
         }
         fill="#102330"
@@ -146,19 +149,19 @@ function IsoBlock({
       <path
         d={
           'M' +
-          (x + width) +
+          String(x + width) +
           ' ' +
-          (y + shift * 2) +
+          String(y + shift * 2) +
           'L' +
-          (x + width + depth) +
+          String(x + width + depth) +
           ' ' +
-          (y + shift) +
+          String(y + shift) +
           'V' +
-          (y + shift + height) +
+          String(y + shift + height) +
           'L' +
-          (x + width) +
+          String(x + width) +
           ' ' +
-          (y + shift * 2 + height) +
+          String(y + shift * 2 + height) +
           'Z'
         }
         fill="#0b1b25"
@@ -430,7 +433,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
             <path d="M620 108V319" stroke="#71a7af" strokeWidth="5" strokeLinecap="round" />
             <path d="M620 108V319" stroke="#b4e1e0" strokeWidth="1.2" strokeOpacity=".6" />
             {(['sm', 'gfm', 'gfl', 'dc'] as const).map((id, index) => {
-              const y = [70, 135, 200, 265][index];
+              const y = requiredValue([70, 135, 200, 265][index], '[70, 135, 200, 265][index]');
               const color = casePortInfo[id].color;
               const labelsById = {
                 sm: ['SM', 'SYNCHRONOUS'],
@@ -441,7 +444,7 @@ export function ResearchDiagram({ study }: { study: ResearchStudy }) {
               return (
                 <g key={id}>
                   <path
-                    d={'M500 ' + (y + 29) + 'H620'}
+                    d={'M500 ' + String(y + 29) + 'H620'}
                     stroke={color}
                     strokeOpacity=".62"
                     strokeWidth="2"

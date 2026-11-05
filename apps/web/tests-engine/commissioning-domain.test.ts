@@ -14,12 +14,12 @@ const inputs = {
 };
 
 for (const pue of [0.5, 0.999999]) {
-  test(`commissioning rejects PUE ${pue} below the facility energy boundary`, () => {
+  void test(`commissioning rejects PUE ${String(pue)} below the facility energy boundary`, () => {
     assert.throws(() => calculateScreen('commissioningScreen', { ...inputs, pue }), /pue/);
   });
 }
 for (const pue of [1, 1.35]) {
-  test(`commissioning accepts PUE ${pue} and includes IT in facility energy`, () => {
+  void test(`commissioning accepts PUE ${String(pue)} and includes IT in facility energy`, () => {
     const output = calculateScreen('commissioningScreen', { ...inputs, pue });
     assert.equal(output.annualItMWh, 175200);
     assert.equal(output.annualFacilityMWh, 175200 * pue);

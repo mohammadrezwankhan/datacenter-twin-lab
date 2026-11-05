@@ -1,3 +1,4 @@
+import { requiredPresent } from '../src/required-value';
 import { expect, test } from '@playwright/test';
 import { readFile, writeFile } from 'node:fs/promises';
 import { ENGINE_VERSION } from '../src/js-engine/version';
@@ -21,7 +22,7 @@ test('measure cold guide entry, first result and precomputed replay without clai
         );
     });
     const started = performance.now();
-    await page.goto(baseURL!);
+    await page.goto(requiredPresent(baseURL, 'baseURL'));
     await expect(page.getByTestId('guide-run')).toBeVisible();
     const interactiveMs = performance.now() - started;
     await page.getByTestId('guide-prediction').fill('300');
@@ -35,7 +36,7 @@ test('measure cold guide entry, first result and precomputed replay without clai
     ).toEqual([]);
     const download = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Export guided run (JSON)' }).click();
-    const run = JSON.parse(await readFile((await (await download).path())!, 'utf8'));
+    const run = JSON.parse(await readFile(await (await download).path(), 'utf8'));
     samples.push({
       sample: index + 1,
       interactive_ms: interactiveMs,
@@ -48,7 +49,7 @@ test('measure cold guide entry, first result and precomputed replay without clai
   }
   const context = await browser.newContext();
   const page = await context.newPage();
-  await page.goto(`${baseURL}?preset=generator_failure`);
+  await page.goto(`${String(baseURL)}?preset=generator_failure`);
   const slider = page.getByLabel('Replay interval', { exact: true });
   await expect(slider).toBeVisible();
   await slider.fill('0');
