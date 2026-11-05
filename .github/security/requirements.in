@@ -1,6 +1,6 @@
 # OpenGrep v1.33.1 runtime constraints, unchanged from cli/setup.py.
 attrs>=21.3
-boltons~=21.0
+boltons~=26.2
 click-option-group~=0.5
 click~=8.5
 colorama~=0.4.0
