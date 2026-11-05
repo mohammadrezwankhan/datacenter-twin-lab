@@ -13,7 +13,7 @@ rich~=13.5.2
 ruamel.yaml>=0.18.5
 typing-extensions~=4.2
 urllib3~=2.0
-wcmatch~=8.3
+wcmatch~=11.2
 # Existing scanners and pinned source-build tooling.
 zizmor==1.31.1
 pip-audit==2.10.1
