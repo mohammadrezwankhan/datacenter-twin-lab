@@ -2,7 +2,7 @@ name: CodeQL security analysis
 
 on:
   push:
-    branches: [main]
+    branches: [main, hardening/numerical-security-20261105]
   pull_request:
   merge_group:
   workflow_dispatch:
