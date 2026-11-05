@@ -94,6 +94,15 @@ jobs:
         run: python -m pip wheel . --no-deps --wheel-dir dist
       - name: Verify installed wheel outside the checkout
         run: python scripts/verify_distribution.py dist --require-web
+      - name: Use Canonical Ubuntu archives for browser dependencies
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        run: |
+          # Azure's mirror repeatedly stalled before the browser tests could start.
+          for sources in /etc/apt/sources.list /etc/apt/apt-mirrors*.txt /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$sources" ]; then
+              sudo sed -i -E 's|https?://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$sources"
+            fi
+          done
       - name: Install browser for end-to-end verification
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
         run: npx playwright install --with-deps chromium
@@ -177,6 +186,14 @@ jobs:
             unset VITE_PUBLIC_SOURCE_REVISION
           fi
           npm --prefix apps/web run build:demo
+      - name: Use Canonical Ubuntu archives for browser dependencies
+        run: |
+          # Azure's mirror repeatedly stalled before the browser tests could start.
+          for sources in /etc/apt/sources.list /etc/apt/apt-mirrors*.txt /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+            if [ -f "$sources" ]; then
+              sudo sed -i -E 's|https?://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$sources"
+            fi
+          done
       - name: Install browser
         run: npx playwright install --with-deps chromium
         working-directory: apps/web

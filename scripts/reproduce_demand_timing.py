@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+# Direct-script execution imports this checkout after adding ROOT to sys.path.
 from datacenter_twin.continuity import simulate_continuity  # noqa: E402
 from datacenter_twin.reporting import render_html, render_markdown  # noqa: E402
 from datacenter_twin.topology import SiteScenario  # noqa: E402

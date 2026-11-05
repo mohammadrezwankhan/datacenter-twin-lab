@@ -7,6 +7,7 @@ import math
 import unittest
 from typing import Any, ClassVar
 
+# Import both optional libraries to check they are usable before enabling numerical tests.
 try:
     import numpy  # noqa: F401
     import scipy  # noqa: F401

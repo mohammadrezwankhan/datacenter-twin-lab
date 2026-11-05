@@ -95,6 +95,29 @@ scope. The registry pack is live, while the CLI and local twelve-rule policy are
 pinned in this change. An audit-pattern match needs source review before being
 called a confirmed exploitable vulnerability.
 
+## Scoped minimatch security remediation
+
+The root development-tooling manifest pins `minimatch` to `11.0.4` only beneath
+`@typescript-eslint/typescript-estree@8.46.3`, using a version-scoped npm override
+to remediate [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249).
+This deliberately replaces that parent's declared `^9.0.4` resolution. Direct
+dependency pins and other minimatch consumers retain their existing versions;
+the lockfile records the patched subtree and archive integrity values.
+
+The reviewed parent calls the named public
+`minimatch(path, pattern, { dot: true })` function in
+`useProgramFromProjectService`; minimatch 11 retains that interface. The parent
+does not use the removed `makeRe`, `AST`, or regular-expression internals.
+Minimatch 11.0.4 supports Node `20 || >=22`, covering this tooling's Node 22-or-newer
+requirement and Node 24 CI. Its matcher implementation and some edge semantics
+changed, so updates require bounded matching cases and actual project-service
+allow/reject checks alongside clean installs, full authored lint, strict types,
+and dependency audits. No vulnerability IDs or scanner findings are suppressed.
+
+Remove this exact-parent override once an upstream parent release naturally
+resolves a version fixed for the advisory, then regenerate the lock and rerun
+those compatibility and security checks.
+
 ## Scanner dependency remediation
 
 The historical Semgrep 1.183.0 distribution requires vulnerable MCP and
