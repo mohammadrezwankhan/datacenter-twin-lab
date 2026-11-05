@@ -310,12 +310,8 @@ for (const width of [320, 1366]) {
       reducedMotion: 'reduce',
     });
     const page = await context.newPage();
-    let releaseTracks!: () => void;
     let releaseStudy!: () => void;
     let markStudyRequested!: () => void;
-    const tracksGate = new Promise<void>((resolveGate) => {
-      releaseTracks = resolveGate;
-    });
     const studyGate = new Promise<void>((resolveGate) => {
       releaseStudy = resolveGate;
     });
@@ -323,10 +319,8 @@ for (const width of [320, 1366]) {
       markStudyRequested = resolveRequest;
     });
     try {
-      await page.route('**/CurriculumTracks-*.js', async (route) => {
-        await tracksGate;
-        await route.continue();
-      });
+      // The curriculum outline loads with the shell. Delay only the lazy study so
+      // navigation can finish before comparing its loading and loaded layouts.
       await page.route('**/Study-*.js', async (route) => {
         markStudyRequested();
         await studyGate;
@@ -377,7 +371,6 @@ for (const width of [320, 1366]) {
       );
       expect(loading.documentWidth).toBeLessThanOrEqual(width + 1);
 
-      releaseTracks();
       releaseStudy();
       await expect(page.locator('.curriculum-tracks')).toBeVisible();
       await expect(page.locator('.emt-study')).toBeVisible();
@@ -415,7 +408,6 @@ for (const width of [320, 1366]) {
         ),
       ).toBeLessThanOrEqual(2);
     } finally {
-      releaseTracks();
       releaseStudy();
       await context.close();
     }
