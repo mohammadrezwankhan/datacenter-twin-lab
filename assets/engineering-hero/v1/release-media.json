@@ -124,8 +124,8 @@
     },
     {
       "path": "vendor/manifest.json",
-      "bytes": 1424,
-      "sha256": "7b91fa0a1fd43e444c5e97506c371a1a18b0d6fcf978296e56f771db2794e0df"
+      "bytes": 1731,
+      "sha256": "d0078fbdd033b904814bf3a3e595c619d2220b8870c7d70c836dc9181ba68efc"
     },
     {
       "path": "vendor/three/LICENSE",
@@ -134,8 +134,8 @@
     },
     {
       "path": "vendor/three/build/three.core.js",
-      "bytes": 1403455,
-      "sha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20"
+      "bytes": 1403418,
+      "sha256": "bb96e86e700014d4c87c63bf007167da9773c929dc45daf86ee99973ae74f0a5"
     },
     {
       "path": "vendor/three/build/three.module.js",
