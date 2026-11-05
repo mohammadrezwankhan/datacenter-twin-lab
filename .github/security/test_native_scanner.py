@@ -142,6 +142,65 @@ class AuditCompletenessTests(unittest.TestCase):
         self.assertEqual(result["blocking_findings"], 1)
 
 
+class CompilerClosureTests(unittest.TestCase):
+    """Compiler features cannot silently add an unaudited host library."""
+
+    def test_explicit_no_compression_configuration_is_accepted(self) -> None:
+        """The same supported compiler without compression has no zstd input."""
+        native_scanner.validate_compiler_configuration(
+            {"version": "5.5.2", "compression_c_libraries": ""},
+            "version: 5.5.2\ncompression_c_libraries: \nnative_compiler: true\n",
+        )
+
+    def test_enabled_missing_or_ambiguous_configuration_is_rejected(self) -> None:
+        """Host auto-detection, omitted evidence and duplicate settings fail."""
+        expected = {"version": "5.5.2", "compression_c_libraries": ""}
+        cases = [
+            "version: 5.5.2\ncompression_c_libraries: -lzstd\n",
+            "version: 5.5.2\n",
+            "version: 5.5.1\ncompression_c_libraries: \n",
+            "version: 5.5.2\ncompression_c_libraries: \ncompression_c_libraries: \n",
+            "version: 5.5.2\nmalformed setting\ncompression_c_libraries: \n",
+        ]
+        for output in cases:
+            with self.subTest(output=output), self.assertRaises(ValueError):
+                native_scanner.validate_compiler_configuration(expected, output)
+
+    def test_hosted_unrecorded_zstd_linkage_remains_rejected(self) -> None:
+        """The observed hosted libzstd failure remains a blocking regression."""
+        linked = (
+            "\tlinux-vdso.so.1 (0x00007ff3972b3000)\n"
+            "\tlibzstd.so.1 => /lib/x86_64-linux-gnu/libzstd.so.1 "
+            "(0x00007ff3971e7000)\n"
+            "\tlibgmp.so.10 => /private/native/lib/libgmp.so.10 "
+            "(0x00007ff397163000)\n"
+            "\tlibc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 "
+            "(0x00007ff38b400000)\n"
+        )
+        with self.assertRaisesRegex(RuntimeError, "Unrecorded.*libzstd"):
+            native_scanner.validate_scanner_libraries(linked)
+
+    def test_other_unverified_or_unresolved_libraries_remain_rejected(self) -> None:
+        """The compiler repair cannot bypass unknown, missing or PCRE2 checks."""
+        cases = [
+            "libunexpected.so.1 => /lib/libunexpected.so.1 (0x1)\n",
+            "libgmp.so.10 => not found\n",
+            "libpcre2-8.so.0 => /lib/libpcre2-8.so.0 (0x1)\n",
+        ]
+        for output in cases:
+            with self.subTest(output=output), self.assertRaises(RuntimeError):
+                native_scanner.validate_scanner_libraries(output)
+
+    def test_recorded_library_closure_is_accepted(self) -> None:
+        """The original bundled and system-runtime library set still passes."""
+        native_scanner.validate_scanner_libraries(
+            "libgmp.so.10 => /private/native/lib/libgmp.so.10 (0x1)\n"
+            "libtree-sitter.so.0 => /private/native/lib/libtree-sitter.so.0 (0x1)\n"
+            "libev.so.4 => /private/native/lib/libev.so.4 (0x1)\n"
+            "libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x1)\n"
+        )
+
+
 class SandboxIntegrityTests(unittest.TestCase):
     """An absent helper or disabled opam wrapper must never authorize a build."""
 

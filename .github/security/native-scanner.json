@@ -12,7 +12,7 @@
     "distribution": "ubuntu",
     "version": "24.04"
   },
-  "native_switch_sha256": "2c40357ea05702d50f66eb382228306f08c63b8208f0fdff9fdce0cc145cb622",
+  "native_switch_sha256": "e533b4d2d0e0b30e4bb3922190c121d38bfae9729c4171b2aac4004acd086c59",
   "installed_packages": {
     "ANSITerminal": "0.8.5",
     "alcotest": "1.9.1",
@@ -119,11 +119,11 @@
     "multicore-magic": "2.3.2",
     "num": "1.6",
     "ocaml": "5.5.2",
-    "ocaml-base-compiler": "5.5.2",
     "ocaml-compiler": "5.5.2",
     "ocaml-compiler-libs": "v0.17.0",
-    "ocaml-options-vanilla": "1",
+    "ocaml-option-no-compression": "1",
     "ocaml-syntax-shims": "1.0.0",
+    "ocaml-variants": "5.5.2+options",
     "ocaml-version": "4.1.5",
     "ocaml_intrinsics_kernel": "v0.17.3",
     "ocamlbuild": "0.16.1",
@@ -856,5 +856,9 @@
         "commit": "2a76602a8c71f36c1527cf9fc3417d9149822e0c"
       }
     }
-  ]
+  ],
+  "compiler_configuration": {
+    "version": "5.5.2",
+    "compression_c_libraries": ""
+  }
 }

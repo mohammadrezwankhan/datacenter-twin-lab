@@ -116,6 +116,21 @@ its original strong checksum preserved. GMP/libev are extracted into a private
 prefix from pinned Ubuntu packages; every opam system-library probe still runs.
 The build retains its JIT and all supported parser targets.
 
+The frozen switch selects upstream `ocaml-variants.5.5.2+options` and
+`ocaml-option-no-compression.1`, retaining the identical `ocaml-compiler.5.5.2`
+source archive. These two metadata packages replace `ocaml-base-compiler` and
+its conflicting `ocaml-options-vanilla` selection. The supported `--without-zstd`
+option makes compiler artifact compression independent of libraries installed on
+the runner. A hosted cold build had otherwise picked up an unrecorded system
+`libzstd.so.1`. After import, the builder records `ocamlc -config` and requires
+the expected compiler version and a present, unambiguous empty
+`compression_c_libraries` field before building OpenGrep. The original runtime
+library closure still rejects `libzstd`, unresolved libraries, dynamic PCRE2 and
+every unknown library; no runtime dependency is added to its accepted set.
+The two upstream metadata definitions are frozen from opam-repository commit
+`7652d3fcd371d9bfed1b9c2498f72dd9c5d4c5b9`, with their exact source hashes in
+`provenance.json`.
+
 The official OpenGrep native release embeds OCaml 5.5.1, so this build uses patched
 OCaml 5.5.2. PCRE2 10.49 is still flagged by the current advisory database; the build
 uses accepted upstream commit `ee7b43963d9a6a95c1745fa8ff1b56625d7b1dc3`, whose

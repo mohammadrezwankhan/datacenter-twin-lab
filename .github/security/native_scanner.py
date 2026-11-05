@@ -107,6 +107,41 @@ def validate_inventory(expected: dict[str, str], actual: dict[str, str]) -> None
         raise ValueError("Installed native dependencies differ from the frozen lock")
 
 
+def validate_compiler_configuration(expected: dict[str, str], output: str) -> None:
+    """Require recorded compiler features before building the scanner."""
+    actual: dict[str, str] = {}
+    for line in output.splitlines():
+        if ":" not in line:
+            raise ValueError("Compiler configuration contains a malformed setting")
+        name, value = (part.strip() for part in line.split(":", 1))
+        if not name or name in actual:
+            raise ValueError("Compiler configuration contains an ambiguous setting")
+        actual[name] = value
+    if not expected or any(actual.get(name) != value for name, value in expected.items()):
+        raise ValueError("Compiler configuration differs from the frozen lock")
+
+
+def validate_scanner_libraries(linked: str) -> None:
+    """Keep the original native closure fail-closed for every host dependency."""
+    if "not found" in linked or "libpcre2" in linked:
+        raise RuntimeError("Native scanner did not link its verified library closure")
+    allowed = {
+        "libtree-sitter.so.0",
+        "libgmp.so.10",
+        "libev.so.4",
+        "libstdc++.so.6",
+        "libgcc_s.so.1",
+        "libm.so.6",
+        "libc.so.6",
+        "libdl.so.2",
+        "libpthread.so.0",
+        "librt.so.1",
+    }
+    for name in re.findall(r"^\s*(\S+) =>", linked, re.M):
+        if name not in allowed:
+            raise RuntimeError(f"Unrecorded native scanner library: {name}")
+
+
 def verified_sandbox_helper(
     work: Path,
     manifest: dict[str, Any],
@@ -766,6 +801,12 @@ class Builder:
                     )
                 inventory[name] = version
         validate_inventory(self.manifest["installed_packages"], inventory)
+        configuration = self.command(
+            "ocaml-configuration", [opam, "exec", "--", "ocamlc", "-config"]
+        )
+        validate_compiler_configuration(
+            self.manifest["compiler_configuration"], configuration
+        )
 
     def scanner(self) -> None:
         """Build the upstream scanner target and package its complete Python CLI."""
@@ -807,25 +848,7 @@ class Builder:
             shutil.copyfile((directory / name).resolve(strict=True), libraries / name)
         self.environment["LD_LIBRARY_PATH"] = str(libraries)
         linked = self.command("scanner-libraries", ["ldd", str(binary)])
-        if "not found" in linked or "libpcre2" in linked:
-            raise RuntimeError(
-                "Native scanner did not link its verified library closure"
-            )
-        allowed = {
-            "libtree-sitter.so.0",
-            "libgmp.so.10",
-            "libev.so.4",
-            "libstdc++.so.6",
-            "libgcc_s.so.1",
-            "libm.so.6",
-            "libc.so.6",
-            "libdl.so.2",
-            "libpthread.so.0",
-            "librt.so.1",
-        }
-        for name in re.findall(r"^\s*(\S+) =>", linked, re.M):
-            if name not in allowed:
-                raise RuntimeError(f"Unrecorded native scanner library: {name}")
+        validate_scanner_libraries(linked)
         wheel_output = self.work / "wheel-output"
         wheel_output.mkdir()
         self.command(
