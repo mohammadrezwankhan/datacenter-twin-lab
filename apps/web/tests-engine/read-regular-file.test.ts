@@ -6,20 +6,20 @@ import test from 'node:test';
 import { readRegularFile } from '../read-regular-file.ts';
 import { nativeReaderCase } from './native-reader-fixture.ts';
 
-void test('regular-file reads reject a late same-inode symlink at native acquisition', () => {
-  nativeReaderCase('test_late_same_inode_symlink');
+void test('regular-file reads reject a late same-inode symlink at native acquisition', (t) => {
+  nativeReaderCase('test_late_same_inode_symlink', t);
 });
 
-void test('regular-file reads reject pathname replacement after opening the original inode', () => {
-  nativeReaderCase('test_replacement_after_metadata_open');
+void test('regular-file reads reject pathname replacement after opening the original inode', (t) => {
+  nativeReaderCase('test_replacement_after_metadata_open', t);
 });
 
-void test('regular-file reads close the descriptor when the pathname disappears during open', () => {
-  nativeReaderCase('test_disappearance_after_metadata_open');
+void test('regular-file reads close the descriptor when the pathname disappears during open', (t) => {
+  nativeReaderCase('test_disappearance_after_metadata_open', t);
 });
 
-void test('regular-file reads reject a transient same-inode symlink at acquisition', () => {
-  nativeReaderCase('test_transient_same_inode_symlink');
+void test('regular-file reads reject a transient same-inode symlink at acquisition', (t) => {
+  nativeReaderCase('test_transient_same_inode_symlink', t);
 });
 
 void test('native file bridge preserves binary data beyond execFile default limits', (t) => {

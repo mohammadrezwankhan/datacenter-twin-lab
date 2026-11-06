@@ -26,6 +26,8 @@ The existing Node security tests invoke those native-boundary cases where filesy
 
 Unprivileged local Windows sessions may report three precise skips when symlink fixture creation raises WinError 1314. Directory, device, missing-file and other acquisition checks still run. GitHub Actions requires symlink capability: the same privilege error fails there, as do all other fixture errors everywhere. No reader validation or host security setting is changed.
 
+Node cases delegated to unittest propagate those skips to the Node test report. Direct Node symlink fixtures still require symlink privileges; this local accommodation does not establish that every engine test can run without them.
+
 ## API references
 
 - [Python 3.12 `os` descriptor APIs](https://docs.python.org/3.12/library/os.html)
