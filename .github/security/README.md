@@ -97,11 +97,27 @@ called a confirmed exploitable vulnerability.
 
 ## Minimatch security remediation
 
-The updated `@typescript-eslint/typescript-estree@8.72.1` declares `minimatch`
-`^10.2.2`; the lock resolves `10.2.6`. This supersedes the historical exact-parent
-override for `8.46.3`, which no longer matches an installed package. Keep the
-dependency audit, authored lint and strict types active;
-no vulnerability IDs or scanner findings are suppressed.
+The root development-tool lock pins `minimatch@11.0.1` for the three qualified
+consumers: ESLint 10.13.0, config-array 0.23.5 and typescript-estree 8.72.1.
+Their declared ranges target version 10; these exact-parent overrides deliberately
+cross that major boundary to address
+[GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249).
+
+Version 11 removes regex-building APIs and changes some trailing-empty-segment
+and partial-globstar matches. The installed consumers use the retained named
+matcher and `Minimatch.match()` APIs, with `dot:true` and default optimization
+level 1. The tooling tests exercise every consumer's expansion bound, ordinary
+file selection, partial traversal, negation and corrected trailing separators.
+Strict lint also compares the actual authored-file inventory during qualification.
+Requalify or remove these overrides when upgrading their parent packages; do not
+apply version 11 blindly to callers using removed APIs.
+
+The bounded security regression expands at most eight rows in the old version.
+It checks the configured four-row cap at optimization level 2 without running a
+large denial-of-service input. Hitting that cap may change matches; ordinary lint
+does not set it. No vulnerability IDs, audit findings, authored sources or
+security checks are suppressed. Generated Playwright output directories already
+ignored by Git are excluded from authored lint, while maintained tests stay covered.
 
 ## Scanner dependency remediation
 
