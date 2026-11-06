@@ -96,7 +96,7 @@ function parseDraft(draft: Draft): { config?: EmtConfig; error?: string } {
     values[key] = value;
   }
   try {
-    return { config: validateEmt(values as EmtConfig) };
+    return { config: validateEmt(values) };
   } catch (error) {
     return { error: (error as Error).message };
   }

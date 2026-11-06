@@ -4,9 +4,41 @@ import { createHash } from 'node:crypto';
 import test from 'node:test';
 import {
   fetchVerifiedArchive,
+  observeRuntimeFetches,
   readResponseBytes,
   type RuntimeProgress,
 } from '../src/runtime-progress.ts';
+
+void test('runtime observation restores own and inherited fetch descriptors', () => {
+  const originalSelf = Object.getOwnPropertyDescriptor(globalThis, 'self');
+  try {
+    for (const own of [true, false]) {
+      const prototype = { fetch: () => Promise.resolve(new Response('ok')) };
+      const worker = Object.create(prototype) as object;
+      Object.defineProperty(worker, 'location', { value: new URL('https://local.example/') });
+      if (own)
+        Object.defineProperty(worker, 'fetch', {
+          value: prototype.fetch,
+          writable: true,
+          configurable: true,
+          enumerable: false,
+        });
+      const before = Object.getOwnPropertyDescriptor(worker, 'fetch');
+      Object.defineProperty(globalThis, 'self', { value: worker, configurable: true });
+      const restore = observeRuntimeFetches(
+        'https://local.example/',
+        () => 'download',
+        () => undefined,
+      );
+      restore();
+      assert.deepEqual(Object.getOwnPropertyDescriptor(worker, 'fetch'), before);
+      assert.equal(Reflect.get(worker, 'fetch'), prototype.fetch);
+    }
+  } finally {
+    if (originalSelf) Object.defineProperty(globalThis, 'self', originalSelf);
+    else Reflect.deleteProperty(globalThis, 'self');
+  }
+});
 
 function chunks(values: number[]) {
   return new ReadableStream<Uint8Array>({

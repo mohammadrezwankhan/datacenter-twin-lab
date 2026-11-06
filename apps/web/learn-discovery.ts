@@ -153,7 +153,7 @@ for (const diagram of diagrams) {
     if (!motionAllowed()) return;
     stop(diagram);
     // Restart the short illustration on an explicit replay, including after a completed run.
-    void stage.offsetWidth;
+    stage.getBoundingClientRect();
     diagram.classList.add('flow-playing');
     pause.disabled = false;
     status.textContent = 'Illustrative flow playing once. No solver inputs or results change.';

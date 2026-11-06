@@ -43,5 +43,5 @@ export function catalogFixture(serialized: string): Catalog {
       assert.ok(item.source_ids.every((id: unknown) => typeof id === 'string'));
     }
   }
-  return value as Catalog;
+  return value;
 }

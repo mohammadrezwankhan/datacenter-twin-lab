@@ -726,14 +726,14 @@ function unitMap(model: ModelName, supplied: InputRecord): Record<string, string
   const known = inputUnits[model];
   return Object.fromEntries(
     Object.keys(supplied).map((key) => [key, known[key] ?? 'unitless']),
-  ) as Record<string, string>;
+  );
 }
 
 function outputUnitMap(model: ModelName, output: OutputRecord): Record<string, string> {
   const known = outputUnits[model];
   return Object.fromEntries(
     Object.keys(output).map((key) => [key, known[key] ?? 'unitless']),
-  ) as Record<string, string>;
+  );
 }
 
 export function canonicalJson(value: unknown): string {
