@@ -53,6 +53,8 @@ For browser calculation or interaction changes, continue with the [browser devel
 
 For a numerical or scenario change, also run the affected preset and record the command, input hash, expected values, observed values, units, and whether the result is synthetic. A changed snapshot alone is not an independent derivation. Keep unknown costs and unavailable values explicit.
 
+On local Windows sessions without symlink creation privileges, three native-reader fixture cases report explicit skips. The remaining reader checks still run; GitHub Actions requires these symlink cases and fails if the capability is missing. See the [native-reader regression proof](docs/engineering/build-file-reader.md#regression-proof).
+
 ## Model and scope rules
 
 The current model covers one synthetic aggregate IT load, topology, finite stored energy, generator delay/failure, conversion losses, path limits, shared-domain events, and deterministic replay. The browser AI-cluster teaching case scales the synthetic demand to 50,000 kW and initial battery energy to 5,000 kWh while preserving the fixture ratios. It does not establish facility calibration, protection coordination, AC transients, cooling behavior, workload throughput, certification, uptime, grid adequacy, GPU performance, or physical safety. Do not add physical-control instructions or imply that a test is an equipment validation.
