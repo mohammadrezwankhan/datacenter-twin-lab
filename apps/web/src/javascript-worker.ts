@@ -79,7 +79,7 @@ async function loadCatalog(): Promise<Catalog> {
       }
     }
   }
-  return catalog as Catalog;
+  return catalog;
 }
 
 async function resourcesFor(route: URL): Promise<Assets> {

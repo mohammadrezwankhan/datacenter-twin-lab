@@ -192,8 +192,8 @@ export function observeRuntimeFetches(
   stage: () => RuntimeStage,
   report: ProgressReporter,
 ): () => void {
-  const originalFetch = self.fetch;
-  const nativeFetch = originalFetch.bind(self);
+  const originalFetch = Object.getOwnPropertyDescriptor(self, 'fetch');
+  const nativeFetch = self.fetch.bind(self);
   const root = new URL(runtimeBase, self.location.href);
   const emit = throttled(report);
   self.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -261,6 +261,7 @@ export function observeRuntimeFetches(
     });
   };
   return () => {
-    self.fetch = originalFetch;
+    if (originalFetch) Object.defineProperty(self, 'fetch', originalFetch);
+    else Reflect.deleteProperty(self, 'fetch');
   };
 }
