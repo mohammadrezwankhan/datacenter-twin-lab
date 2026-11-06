@@ -8,7 +8,7 @@
   "scripts": {
     "quality:lint": "eslint . --max-warnings 0",
     "quality:typecheck": "tsc --noEmit --project tsconfig.json",
-    "quality:format": "prettier --check eslint.config.mjs tsconfig.json tsconfig.eslint.json scripts/browser-csp.mjs tests/browser/csp.test.mjs",
+    "quality:format": "prettier --check eslint.config.mjs tsconfig.json tsconfig.eslint.json scripts/browser-csp.mjs tests/browser/csp.test.mjs tests/browser/tooling-globs.test.mjs",
     "quality:browser": "node --test tests/browser/*.test.mjs"
   },
   "devDependencies": {
@@ -19,5 +19,16 @@
     "prettier": "3.9.10",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1"
+  },
+  "overrides": {
+    "eslint@10.13.0": {
+      "minimatch": "11.0.1"
+    },
+    "@eslint/config-array@0.23.5": {
+      "minimatch": "11.0.1"
+    },
+    "@typescript-eslint/typescript-estree@8.72.1": {
+      "minimatch": "11.0.1"
+    }
   }
 }
