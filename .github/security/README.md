@@ -100,7 +100,7 @@ called a confirmed exploitable vulnerability.
 The updated `@typescript-eslint/typescript-estree@8.72.1` declares `minimatch`
 `^10.2.2`; the lock resolves `10.2.6`. This supersedes the historical exact-parent
 override for `8.46.3`, which no longer matches an installed package. Keep the
-dependency audit, authored lint, strict types and matching-contract tests active;
+dependency audit, authored lint and strict types active;
 no vulnerability IDs or scanner findings are suppressed.
 
 ## Scanner dependency remediation
