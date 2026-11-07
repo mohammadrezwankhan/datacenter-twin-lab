@@ -24,6 +24,10 @@ All routes preserve read-only files and directories. They require neither tempor
 
 The existing Node security tests invoke those native-boundary cases where filesystem acquisition moved into Python. Node integration cases also check raw binary transfer above 1 MiB, filenames containing shell metacharacters and strict interpreter selection. The existing Ubuntu/Windows Python matrix runs the native tests and bridge checks; a focused macOS job exercises its actual POSIX acquisition and byte bridge.
 
+Unprivileged local Windows sessions may report three precise skips when symlink fixture creation raises WinError 1314. Directory, device, missing-file and other acquisition checks still run. GitHub Actions requires symlink capability: the same privilege error fails there, as do all other fixture errors everywhere. No reader validation or host security setting is changed.
+
+Node cases delegated to unittest propagate those skips to the Node test report. Direct Node symlink fixtures still require symlink privileges; this local accommodation does not establish that every engine test can run without them.
+
 ## API references
 
 - [Python 3.12 `os` descriptor APIs](https://docs.python.org/3.12/library/os.html)

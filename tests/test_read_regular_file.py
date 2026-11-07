@@ -24,6 +24,23 @@ class RegularFileTests(unittest.TestCase):
         self.original = self.root / "original"
         self.source.write_bytes(b"original content")
 
+    def require_symlinks(self) -> None:
+        if sys.platform == "win32":
+            probe = self.root / "symlink-capability"
+            try:
+                probe.symlink_to(self.source)
+            except OSError as error:
+                if (
+                    getattr(error, "winerror", None) != 1314
+                    or os.environ.get("GITHUB_ACTIONS") == "true"
+                ):
+                    raise
+                self.skipTest(
+                    "Windows symlink fixture unavailable (WinError 1314); required in Actions"
+                )
+            else:
+                probe.unlink()
+
     def rejected_read(
         self,
         *,
@@ -89,13 +106,18 @@ class RegularFileTests(unittest.TestCase):
                 self.root.chmod(0o700)
                 self.source.chmod(0o600)
 
-    def test_symlink_directory_missing_and_device(self) -> None:
+    def test_symlink(self) -> None:
+        self.require_symlinks()
         link = self.root / "linked"
         link.symlink_to(self.source)
+        with self.assertRaisesRegex(ValueError, "regular file"):
+            reader.read_regular_file(link)
+
+    def test_directory_missing_and_device(self) -> None:
         directory = self.root / "directory"
         directory.mkdir()
         device = Path("NUL" if sys.platform == "win32" else "/dev/null")
-        for path in (link, directory, device):
+        for path in (directory, device):
             with self.subTest(path=path), self.assertRaisesRegex(ValueError, "regular file"):
                 reader.read_regular_file(path)
         with self.assertRaises(FileNotFoundError):
@@ -109,6 +131,8 @@ class RegularFileTests(unittest.TestCase):
         self.rejected_read(before=replace, pattern="changed while opening")
 
     def test_late_same_inode_symlink(self) -> None:
+        self.require_symlinks()
+
         def replace() -> None:
             self.source.rename(self.original)
             self.source.symlink_to(self.original)
@@ -120,6 +144,8 @@ class RegularFileTests(unittest.TestCase):
         )
 
     def test_transient_same_inode_symlink(self) -> None:
+        self.require_symlinks()
+
         def replace() -> None:
             self.source.rename(self.original)
             self.source.symlink_to(self.original)
@@ -245,6 +271,35 @@ class RegularFileTests(unittest.TestCase):
                     self.rejected_read(before=replace, pattern="regular file", acquire=acquire)
                     self.source.unlink()
                     self.original.rename(self.source)
+
+
+class SymlinkCapabilityTests(unittest.TestCase):
+    def run_fixture_failure(self, *, actions: str, winerror: int) -> unittest.TestResult:
+        error = OSError(errno.EPERM, "injected symlink fixture failure")
+        result = unittest.TestResult()
+        with (
+            patch.object(sys, "platform", "win32"),
+            patch.dict(os.environ, {"GITHUB_ACTIONS": actions}),
+            patch.object(error, "winerror", winerror, create=True),
+            patch.object(Path, "symlink_to", side_effect=error),
+        ):
+            RegularFileTests("test_late_same_inode_symlink").run(result)
+        return result
+
+    def test_local_missing_privilege_is_precise_skip(self) -> None:
+        result = self.run_fixture_failure(actions="", winerror=1314)
+        self.assertEqual(len(result.skipped), 1)
+        self.assertEqual(result.errors + result.failures, [])
+
+    def test_actions_missing_privilege_is_failure(self) -> None:
+        result = self.run_fixture_failure(actions="true", winerror=1314)
+        self.assertEqual(result.skipped, [])
+        self.assertEqual(len(result.errors) + len(result.failures), 1)
+
+    def test_other_local_errors_are_failures(self) -> None:
+        result = self.run_fixture_failure(actions="", winerror=5)
+        self.assertEqual(result.skipped, [])
+        self.assertEqual(len(result.errors) + len(result.failures), 1)
 
 
 if __name__ == "__main__":

@@ -111,10 +111,10 @@ void test('regular-file reads reject symlinks through the native platform helper
   assert.throws(() => readRegularFile(join(root, 'linked')), /regular file/);
 });
 
-void test('regular-file reads reject changed file identity and close the descriptor', () => {
+void test('regular-file reads reject changed file identity and close the descriptor', (t) => {
   // The native helper owns acquisition now. This real-filesystem regression
   // retains identity rejection, zero content reads, and EBADF after cleanup.
-  nativeReaderCase('test_replacement_before_open_and_descriptor_closure');
+  nativeReaderCase('test_replacement_before_open_and_descriptor_closure', t);
 });
 
 void test('worker request envelopes reject malformed or oversized payloads', () => {
