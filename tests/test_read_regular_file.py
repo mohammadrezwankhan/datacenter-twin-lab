@@ -25,22 +25,21 @@ class RegularFileTests(unittest.TestCase):
         self.source.write_bytes(b"original content")
 
     def require_symlinks(self) -> None:
-        if sys.platform != "win32":
-            return
-        probe = self.root / "symlink-capability"
-        try:
-            probe.symlink_to(self.source)
-        except OSError as error:
-            if (
-                getattr(error, "winerror", None) != 1314
-                or os.environ.get("GITHUB_ACTIONS") == "true"
-            ):
-                raise
-            self.skipTest(
-                "Windows symlink fixture unavailable (WinError 1314); required in GitHub Actions"
-            )
-        else:
-            probe.unlink()
+        if sys.platform == "win32":
+            probe = self.root / "symlink-capability"
+            try:
+                probe.symlink_to(self.source)
+            except OSError as error:
+                if (
+                    getattr(error, "winerror", None) != 1314
+                    or os.environ.get("GITHUB_ACTIONS") == "true"
+                ):
+                    raise
+                self.skipTest(
+                    "Windows symlink fixture unavailable (WinError 1314); required in Actions"
+                )
+            else:
+                probe.unlink()
 
     def rejected_read(
         self,
