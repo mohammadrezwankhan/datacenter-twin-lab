@@ -1,3 +1,15 @@
+<!-- repository-presentation:start -->
+
+![Datacenter Twin Lab — project overview](https://raw.githubusercontent.com/mohammadrezwankhan/mohammadrezwankhan/main/assets/makeover/social/datacenter-twin-lab.png)
+
+Investigate synthetic datacenter power interruptions with a Python continuity model, explicit battery reserves, and inspectable energy ledgers.
+
+[Install and run](docs/quickstart.md) · [Canonical case](#reproduce-the-canonical-case) · [Python source](datacenter_twin/continuity.py) · [Evidence](#checks-and-evidence) · [Limits](#assumptions-and-limits)
+
+---
+
+<!-- repository-presentation:end -->
+
 ![Datacenter Infrastructure Lab: original vector system illustration](assets/hero-25d.svg)
 
 The native lab models outages, source paths, finite reserve, and exact energy accounting alongside infrastructure lessons. This companion isolates an illustrative IT-load and cooling-power relationship.
