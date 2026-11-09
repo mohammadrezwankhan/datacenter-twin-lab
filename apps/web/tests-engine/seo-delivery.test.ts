@@ -1,5 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { readFileSync } from 'node:fs';
+import { courseTotal } from '../src/curriculum.ts';
+import { ENGINE_VERSION } from '../src/js-engine/version.ts';
 import { searchPages } from '../seo.ts';
 
 type EmittedFile =
@@ -71,4 +74,29 @@ void test('generated not-found page has a responsive, accessible recovery path',
   assert.match(notFound, /Return to the Datacenter Twin Lab home page/i);
   assert.match(notFound, /a:focus-visible\s*\{/i);
   assert.match(notFound, /<meta\s+name="robots"\s+content="noindex"/i);
+});
+
+void test('source HTML metadata matches curriculum and avoids unsupported facility claims', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const raw = html.match(/<script type="application\\/ld\\+json">\\s*([\\s\\S]*?)<\\/script>/)?.[1];
+  assert.ok(raw, 'the local HTML source should provide fallback JSON-LD');
+  const { '@graph': graph } = JSON.parse(raw) as {
+    '@graph': Array<Record<string, unknown>>;
+  };
+  const course = graph.find((entry) => entry['@type'] === 'Course');
+  const software = graph.find((entry) => entry['@type'] === 'SoftwareApplication');
+  const article = graph.find((entry) => entry['@type'] === 'TechArticle');
+  assert.ok(course);
+  assert.ok(software);
+  assert.ok(article);
+  assert.match(String(course.description), new RegExp('\\\\b' + String(courseTotal) + '\\\\b'));
+  assert.match(String(course.description), /12 continuity/i);
+  assert.match(String(course.description), /12 infrastructure/i);
+  assert.equal(software.softwareVersion, ENGINE_VERSION);
+  assert.match(String(software.description), /synthetic|uncalibrated/i);
+  assert.match(String(article.description), /DC-equivalent|R-L-C/i);
+  assert.doesNotMatch(
+    JSON.stringify(graph),
+    /generator synchronization dynamics|ATS slew|under-voltage lockout threshold|typically 0\\.85/i,
+  );
 });
