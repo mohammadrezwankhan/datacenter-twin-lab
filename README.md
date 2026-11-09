@@ -12,9 +12,11 @@ Investigate synthetic datacenter power interruptions with a Python continuity mo
 
 ![Datacenter Infrastructure Lab: original vector system illustration](assets/hero-25d.svg)
 
-The native lab models outages, source paths, finite reserve, and exact energy accounting alongside infrastructure lessons. This companion isolates an illustrative IT-load and cooling-power relationship.
+**Datacenter Twin Lab** combines a deterministic Python continuity engine, a 24-lesson browser course (12 continuity + 12 Infrastructure Engineering), and 18 synthetic scenario presets. One EMT study and five power-dynamics studies are separate learning tracks. The four-module offline dashboard below is a companion, not the full course.
 
-**[Native-source lesson guide](docs/portfolio/) · [Offline interactive lab](docs/index.html) · [Lesson configuration](docs/lesson-config.json) · [Configuration schema](docs/lesson-config.schema.json)**
+**[Open the 24-lesson course](https://khanlab.co.technology/learn/) · [Run the guided 1 MW experiment](https://khanlab.co.technology/) · [Inspect verified inputs](docs/canonical-case.md) · [Offline four-module companion](docs/index.html)**
+
+The companion's [lesson configuration](docs/lesson-config.json) and [schema](docs/lesson-config.schema.json) describe that separate dashboard; they are not the source of the 24-lesson course catalog.
 
 ## Previous animations
 
@@ -22,13 +24,13 @@ The native lab models outages, source paths, finite reserve, and exact energy ac
 
 Earlier animated artwork, waveform demos, and original interactive experiences are linked alongside the current animations.
 
-## Your first interactive result
+## Begin with the canonical battery question
 
-1. Download or clone this repository and open `docs/index.html` in a modern browser.
-2. Select **Module 1**, apply its preset, and compare the declared checkpoint with the plotted result.
-3. Change one slider, inspect the model assumptions, then export the configuration or telemetry for your notes.
+1. [Open the guided experiment](https://khanlab.co.technology/), then predict how long 100 kWh will supply a fixed 1,000 kW IT load after an outage.
+2. Run the charging-disabled, failed-generator case: **100 kWh × 0.90 × 0.95 = 85.5 kWh** delivered, or **307.8 seconds** of ride-through.
+3. Compare the prediction with the energy ledger. The outage begins at **300 s elapsed**, so battery depletion occurs at **607.8 s elapsed**. [Check the exact scenario](docs/canonical-case.md) or [reproduce it in Python](docs/quickstart.md).
 
-The browser lab runs offline with no packages, accounts, or live data feeds. Its numbers are deterministic teaching simulations. Each checkpoint states its model time and tolerance; passing it demonstrates agreement with that model, not field calibration or production readiness.
+The figures are deterministic results of declared synthetic inputs, **not** facility calibration, certified uptime, or permission to control equipment. For the separate offline companion, open [`docs/index.html`](docs/index.html), choose Module 1, change a slider and export the reported configuration.
 
 <!-- source-mapped-visuals:start -->
 
@@ -45,7 +47,7 @@ Motion is optional; the vector topology remains readable with reduced motion ena
 
 <!-- source-mapped-visuals:end -->
 
-## Four-module learning path
+## Optional offline companion: four-module learning path
 
 | Module | Investigation | Approximate time |
 |---|---|---:|
@@ -78,7 +80,7 @@ python -m unittest discover -s tests -v
 
 These commands come from the audited source revision. Runtime requirements and the project's own validation limits are documented below; the standalone browser lab does not execute these commands.
 
-The detailed project guide below remains the source for installation, supported features, licences, and scientific limits. The browser equations and laboratory settings do not change the original application or numerical engine.
+The detailed project guide below remains the source for installation, supported features, licences, and scientific limits. This presentation change does not alter the Python model, browser calculations, numerical tolerances, or Engineering HOLD.
 
 <details>
 <summary>Project documentation, installation, attribution, and existing validation</summary>
