@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Source metadata and responsive quality guards (2026-11-09)
+
+- Correct fallback local-dashboard JSON-LD to describe 24 lessons (12 continuity and 12 Infrastructure Engineering) and the current 2.0.1 engine, rather than 12 lessons and 1.0.0.
+- Remove unsupported ATS/generator-synchronization and threshold claims from legacy fallback structured data; retain the bounded DC-equivalent R-L-C and synthetic continuity descriptions.
+- Clarify the flagship 24-lesson course versus the independent four-module offline dashboard in the repository landing documentation.
+- Extend the existing Playwright viewport gate to 1024 × 768, 768 × 1024, 390 × 844 and 360 × 800, retaining previously covered device profiles.
+- Preserve the numerical core, fixtures, API security policy, historical releases and Engineering HOLD without changes.
+
 ## 2.0.1 — Numerical and packaging maintenance
 
 - Package the existing odd-length one-sided spectrum correction, including the saved 30 Hz / 0.05 pu case and scalar-DFT regression.
