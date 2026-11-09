@@ -4,7 +4,7 @@
 
 ## Verified baseline (before the patch)
 
-- GitHub repository reports zero open PRs, six open issues and latest published release [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1).
+- GitHub repository reports zero open PRs, zero open issues and six closed historical issues, plus the latest published release [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1).
 - [Hardened CI, 2026-11-09](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/42656884116) completed successfully on baseline SHA `2bcf770a`.
 - [CodeQL, 2026-11-09](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/42668389684) completed successfully on the same SHA.
 - Existing `apps/web/tests-demo/viewport-matrix.audit.spec.ts` covers 13 viewport profiles with no-root-overflow, touch-target, table-containment, page-error and same-origin HTTP-failure assertions. This patch adds four explicitly requested viewport sizes. No before/after screenshot claim is made.
