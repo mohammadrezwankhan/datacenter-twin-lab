@@ -78,7 +78,7 @@ void test('generated not-found page has a responsive, accessible recovery path',
 
 void test('source HTML metadata matches curriculum and avoids unsupported facility claims', () => {
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
-  const raw = html.match(/<script type="application\\/ld\\+json">\\s*([\\s\\S]*?)<\\/script>/)?.[1];
+  const raw = html.match(/<script type="application\/ld\+json">\s*([\s\S]*?)<\/script>/)?.[1];
   assert.ok(raw, 'the local HTML source should provide fallback JSON-LD');
   const { '@graph': graph } = JSON.parse(raw) as {
     '@graph': Array<Record<string, unknown>>;
@@ -89,7 +89,7 @@ void test('source HTML metadata matches curriculum and avoids unsupported facili
   assert.ok(course);
   assert.ok(software);
   assert.ok(article);
-  assert.match(String(course.description), new RegExp('\\\\b' + String(courseTotal) + '\\\\b'));
+  assert.match(String(course.description), new RegExp(String.raw`\b${courseTotal}\b`));
   assert.match(String(course.description), /12 continuity/i);
   assert.match(String(course.description), /12 infrastructure/i);
   assert.equal(software.softwareVersion, ENGINE_VERSION);
@@ -97,6 +97,6 @@ void test('source HTML metadata matches curriculum and avoids unsupported facili
   assert.match(String(article.description), /DC-equivalent|R-L-C/i);
   assert.doesNotMatch(
     JSON.stringify(graph),
-    /generator synchronization dynamics|ATS slew|under-voltage lockout threshold|typically 0\\.85/i,
+    /generator synchronization dynamics|ATS slew|under-voltage lockout threshold|typically 0\.85/i,
   );
 });
