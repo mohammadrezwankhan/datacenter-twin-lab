@@ -15,8 +15,8 @@ typing-extensions~=4.2
 urllib3~=2.0
 wcmatch~=8.3
 # Existing scanners and pinned source-build tooling.
-zizmor==1.31.1
+zizmor==1.32.0
 pip-audit==2.10.1
-pip==26.2.2
+pip==26.3
 setuptools==84.2.1
 wheel==0.48.0
