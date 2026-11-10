@@ -2,7 +2,7 @@
   "reviewed_on": "2026-11-05",
   "binary_verification": "Downloaded bytes matched official release checksum entries; not a claim of independent signature verification",
   "python_tools": {
-    "zizmor": "1.31.1",
+    "zizmor": "1.32.0",
     "pip-audit": "2.10.1",
     "opengrep": "1.33.1 (custom source build: complete pinned Python CLI plus reviewed Python PEP 695 parser backport)"
   },
@@ -17,7 +17,7 @@
     "https://github.com/pypa/pip-audit",
     "https://semgrep.dev/p/security-audit",
     "https://pypi.org/pypi/semgrep/1.183.0/json",
-    "https://pypi.org/pypi/zizmor/1.31.1/json",
+    "https://pypi.org/pypi/zizmor/1.32.0/json",
     "https://pypi.org/pypi/pip-audit/2.10.1/json",
     "https://github.com/opengrep/opengrep/tree/092c80faa0817840228349f93eff12a50fb9cf6b",
     "https://github.com/ocaml/ocaml/releases/tag/5.5.2",
