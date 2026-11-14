@@ -45,7 +45,8 @@
   gap: 10px 20px;
   margin-top: 16px;
 }
-.proof-links a {
+.proof-links a,
+.proof-build-note a {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
