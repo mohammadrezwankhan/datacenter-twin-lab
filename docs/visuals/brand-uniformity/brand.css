@@ -53,7 +53,7 @@ html[data-avatar-brand] body { background: var(--bg); color: var(--ink); }
 [data-avatar-brand="portfolio"] .node { background: #231331; border-color: #5c2a72; color: #fff6c8; box-shadow: none; }
 [data-avatar-brand="portfolio"] .node.one { left: 4%; top: 19%; }
 [data-avatar-brand="portfolio"] .node.two { right: 2%; left: auto; top: 59%; }
-[data-avatar-brand="portfolio"] .node.three { left: 8%; top: 78%; color: #ffe66d; }
+[data-avatar-brand="portfolio"] .node.three { left: 8%; top: 78%; bottom: auto; color: #ffe66d; }
 [data-avatar-brand="portfolio"] .visual-caption { color: var(--muted); bottom: 2px; z-index: 2; }
 [data-avatar-brand="portfolio"] :is(.lesson, .metrics, .boundary) { box-shadow: none; border-color: #5c2a72; border-radius: 12px; }
 [data-avatar-brand="portfolio"] .lesson { background: #231331; }
