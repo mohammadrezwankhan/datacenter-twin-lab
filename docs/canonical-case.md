@@ -18,14 +18,7 @@ For `100 kWh`, delivered energy is `85.5 kWh`, ride-through is `307.8 s`, deplet
 
 The third packet case is the existing `path_maintenance` preset. Path A is down from `300 s` to `900 s`; the surviving path's `700 kW` gross rating at `0.95` distribution efficiency serves `665 kW`. The remaining `335 kW` deficit over `600 s` is `55.833333… kWh` unserved. This follows the existing [scenario explanation](scenarios/path_maintenance.md).
 
-Predict before running, then compare both canonical variants and the path case:
-
-```sh
-python scripts/build_evidence.py --output outputs/reproduction-1.0.0 \
-  --revision <public-commit-or-tag> \
-  --repository mohammadrezwankhan/datacenter-twin-lab
-python scripts/build_evidence.py --verify outputs/reproduction-1.0.0
-```
+Predict both canonical variants and the path case, then follow the [v2.0.1 packet build and verification commands](evidence.md#versioned-packet-and-verification) from a clean checkout of that tag.
 
 The receipt prints equations beside expected and observed values. The packet includes the complete interval records so a reviewer can independently sum the ledger terms. The validator deliberately ignores each reported residual field. For each interval and for the whole run, reconstruct:
 
