@@ -148,7 +148,7 @@ ${site.bingSiteVerification && path === '' && base === site.url ? `<meta name="m
     const root = '../'.repeat(path.split('/').filter(Boolean).length);
     const learnIndex = path === 'learn/';
     const page = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/png" sizes="96x96" href="${root}favicon.png"><meta name="theme-color" content="#0b655d"><style>${style}</style>${learnIndex ? `<link rel="stylesheet" href="${root}assets/learn.css">` : ''}</head>
+${metadata(pageTitle, summary, path, schema)}<link rel="icon" type="image/svg+xml" href="${root}favicon.svg"><meta name="theme-color" content="#100b18"><style>${style}</style>${learnIndex ? `<link rel="stylesheet" href="${root}assets/learn.css">` : ''}</head>
 <body${learnIndex ? ' class="learn-index"' : ''}><a class="skip" href="#main">Skip to content</a><header><a href="${root}">DATACENTER TWIN LAB</a>
 <nav aria-label="Site"><a href="${root}learn/">Course notes</a><a href="${root}evidence/">Results &amp; sources</a><a href="${root}about/">About the lab</a><a href="${repository}">GitHub</a></nav></header>
 <main id="main">${content}</main><footer>Original teaching material by ${site.author} · Version ${ENGINE_VERSION} · Apache-2.0.<br>

@@ -57,5 +57,6 @@ export function stageLocalEvidenceAssets(root: string, engineVersion: string): s
     resolve(output, 'THIRD-PARTY-NOTICES.txt'),
   );
   copyFileSync(resolve(root, 'apps/web/public/favicon.png'), resolve(output, 'favicon.png'));
+  copyFileSync(resolve(root, 'apps/web/public/favicon.svg'), resolve(output, 'favicon.svg'));
   return output;
 }

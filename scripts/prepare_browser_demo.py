@@ -292,6 +292,7 @@ def prepare() -> dict[str, Any]:
     )
     for name in (
         "favicon.png",
+        "favicon.svg",
         "favicon.ico",
         "apple-touch-icon.png",
         "apple-touch-icon-precomposed.png",

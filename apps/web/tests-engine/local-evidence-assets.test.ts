@@ -24,6 +24,7 @@ const media = [
   'docs/images/proof-demo.vtt',
   'apps/web/public/THIRD-PARTY-NOTICES.txt',
   'apps/web/public/favicon.png',
+  'apps/web/public/favicon.svg',
 ];
 
 function fixture(t: test.TestContext) {
@@ -84,6 +85,7 @@ void test('repeated staging includes only the current allowlist and preserves so
       `data/evidence/v${version}/manifest.json`,
       'evidence-index.json',
       'favicon.png',
+      'favicon.svg',
       'guide-preview.png',
       'proof-demo.vtt',
       'proof-demo.webm',
