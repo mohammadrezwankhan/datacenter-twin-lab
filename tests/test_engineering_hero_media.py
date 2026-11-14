@@ -112,6 +112,7 @@ class EngineeringHeroMediaTests(unittest.TestCase):
         for name in (
             "THIRD-PARTY-NOTICES.txt",
             "favicon.png",
+            "favicon.svg",
             "favicon.ico",
             "apple-touch-icon.png",
             "apple-touch-icon-precomposed.png",

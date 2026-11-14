@@ -10,7 +10,7 @@ Investigate synthetic datacenter power interruptions with a Python continuity mo
 
 <!-- repository-presentation:end -->
 
-![Datacenter Infrastructure Lab: original vector system illustration](assets/hero-25d.svg)
+![Datacenter Infrastructure Lab: original vector system illustration](assets/brand-uniformity/hero-25d.svg)
 
 **Datacenter Twin Lab** combines a deterministic Python continuity engine, a 24-lesson browser course (12 continuity + 12 Infrastructure Engineering), and 18 synthetic scenario presets. One EMT study and five power-dynamics studies are separate learning tracks. The four-module offline dashboard below is a companion, not the full course.
 
@@ -37,7 +37,7 @@ The figures are deterministic results of declared synthetic inputs, **not** faci
 <details>
 <summary>System topology and model boundaries</summary>
 
-![Datacenter ups topology](assets/svg-2.5d/diagrams/datacenter-ups-topology.svg)
+![Datacenter ups topology](assets/brand-uniformity/svg-2.5d/diagrams/datacenter-ups-topology.svg)
 
 Conceptual supply topology; no source-specific reliability calculation.
 

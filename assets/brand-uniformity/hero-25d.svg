@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="h-datacenter-twin-lab-title h-datacenter-twin-lab-desc">
+<title id="h-datacenter-twin-lab-title">Datacenter Infrastructure Lab — 2.5D teaching laboratory</title>
+<desc id="h-datacenter-twin-lab-desc">An isometric vector illustration of compute hall. Decorative animation only; all dashboard telemetry is synthetic.</desc>
+<defs>
+      <linearGradient id="h-datacenter-twin-lab-bg" x2="1" y2="1"><stop stop-color="#231331"/><stop offset="1" stop-color="#100b18"/></linearGradient>
+      <linearGradient id="h-datacenter-twin-lab-top" x2="0.8" y2="1"><stop stop-color="#ff9f1c" stop-opacity=".3"/><stop offset="1" stop-color="#231331"/></linearGradient>
+      <radialGradient id="h-datacenter-twin-lab-halo"><stop stop-color="#ff9f1c" stop-opacity=".16"/><stop offset="1" stop-color="#ff9f1c" stop-opacity="0"/></radialGradient>
+      <pattern id="h-datacenter-twin-lab-dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#fff6c8" opacity=".12"/></pattern>
+      <clipPath id="h-datacenter-twin-lab-clip"><rect width="960" height="560" rx="24"/></clipPath>
+    </defs>
+    <style>
+      text{font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+      .flow{animation:h-datacenter-twin-lab-flow 4.8s linear 1 both}
+      .float{animation:h-datacenter-twin-lab-float 4.8s ease-in-out 1 both}
+      .signal{animation:h-datacenter-twin-lab-signal 4.8s ease-in-out 1 both}
+      @keyframes h-datacenter-twin-lab-flow{to{stroke-dashoffset:-34}}
+      @keyframes h-datacenter-twin-lab-float{50%{transform:translateY(-6px)}}
+      @keyframes h-datacenter-twin-lab-signal{50%{opacity:.35}}
+      @media(prefers-reduced-motion:reduce){.flow,.float,.signal{animation:none!important}}
+    </style>
+    <g clip-path="url(#h-datacenter-twin-lab-clip)">
+      <rect width="960" height="560" rx="24" fill="url(#h-datacenter-twin-lab-bg)"/>
+      <rect width="960" height="560" fill="url(#h-datacenter-twin-lab-dots)"/>
+      <ellipse cx="480" cy="326" rx="360" ry="225" fill="url(#h-datacenter-twin-lab-halo)"/>
+      <path d="M40 102H920" stroke="#ff9f1c" stroke-opacity=".16"/>
+
+<text x="40" y="39" fill="#ff9f1c" font-size="11" font-weight="700" letter-spacing="2.8">COMPUTE HALL</text>
+<text x="40" y="76" fill="#fff6c8" font-size="26" font-weight="600" >Datacenter Infrastructure Lab</text>
+<text x="920" y="40" fill="#fff6c8b8" font-size="11" font-weight="500" text-anchor="end" letter-spacing="2">25D / 01</text>
+<polygon points="480.0,135.2 790.8,298.0 480.0,460.8 169.2,298.0" fill="#100b18" stroke="#ff9f1c" stroke-width="1.2" opacity="0.7" />
+<polyline points="509.4,150.6 198.6,313.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="450.6,150.6 761.4,313.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="551.4,172.6 240.6,335.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="408.6,172.6 719.4,335.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="593.4,194.6 282.6,357.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="366.6,194.6 677.4,357.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="635.4,216.6 324.6,379.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="324.6,216.6 635.4,379.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="677.4,238.6 366.6,401.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="282.6,238.6 593.4,401.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="719.4,260.6 408.6,423.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="240.6,260.6 551.4,423.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="761.4,282.6 450.6,445.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="198.6,282.6 509.4,445.4" fill="none" stroke="#ff9f1c" stroke-width="0.7" opacity="0.14" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="169.2,298.0 480.0,460.8 790.8,298.0" fill="none" stroke="#ff9f1c" stroke-width="1.8" opacity="0.6" stroke-linecap="round" stroke-linejoin="round" />
+<g class="float">
+<polygon points="326.7,247.5 370.8,270.6 370.8,189.6 326.7,166.5" fill="#231331" stroke="#ff9f1c" stroke-width="1.2" opacity="0.95" />
+<polygon points="469.5,218.9 370.8,270.6 370.8,189.6 469.5,137.9" fill="#5c2a72" stroke="#ff9f1c" stroke-width="1.2" opacity="0.95" />
+<polygon points="425.4,114.8 469.5,137.9 370.8,189.6 326.7,166.5" fill="url(#h-datacenter-twin-lab-top)" stroke="#ff9f1c" stroke-width="1.2" opacity="1" />
+<polyline points="454.7,206.4 385.6,242.6" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="454.7,186.2 385.6,222.3" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="454.7,165.9 385.6,202.1" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="391.8" cy="244.6" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="391.8" cy="229.6" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="391.8" cy="214.6" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="391.8" cy="199.6" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="391.8" cy="184.6" r="2" fill="#ffe66d" class="signal"/>
+<polygon points="391.8,281.6 435.9,304.7 435.9,223.7 391.8,200.6" fill="#231331" stroke="#ff9f1c" stroke-width="1.2" opacity="0.95" />
+<polygon points="534.6,253.0 435.9,304.7 435.9,223.7 534.6,172.0" fill="#5c2a72" stroke="#ff9f1c" stroke-width="1.2" opacity="0.95" />
+<polygon points="490.5,148.9 534.6,172.0 435.9,223.7 391.8,200.6" fill="url(#h-datacenter-twin-lab-top)" stroke="#ff9f1c" stroke-width="1.2" opacity="1" />
+<polyline points="519.8,240.5 450.7,276.7" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="519.8,220.3 450.7,256.4" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="519.8,200.0 450.7,236.2" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="456.9" cy="278.7" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="456.9" cy="263.7" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="456.9" cy="248.7" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="456.9" cy="233.7" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="456.9" cy="218.7" r="2" fill="#ffe66d" class="signal"/>
+<polygon points="456.9,315.7 501.0,338.8 501.0,257.8 456.9,234.7" fill="#231331" stroke="#ffe66d" stroke-width="1.2" opacity="0.95" />
+<polygon points="599.7,287.1 501.0,338.8 501.0,257.8 599.7,206.1" fill="#5c2a72" stroke="#ffe66d" stroke-width="1.2" opacity="0.95" />
+<polygon points="555.6,183.0 599.7,206.1 501.0,257.8 456.9,234.7" fill="url(#h-datacenter-twin-lab-top)" stroke="#ffe66d" stroke-width="1.2" opacity="1" />
+<polyline points="584.9,274.6 515.8,310.8" fill="none" stroke="#ffe66d" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="584.9,254.4 515.8,290.5" fill="none" stroke="#ffe66d" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="584.9,234.1 515.8,270.3" fill="none" stroke="#ffe66d" stroke-width="1" opacity="0.5" stroke-linecap="round" stroke-linejoin="round" />
+<circle cx="522.0" cy="312.8" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="522.0" cy="297.8" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="522.0" cy="282.8" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="522.0" cy="267.8" r="2" fill="#ffe66d" class="signal"/>
+<circle cx="522.0" cy="252.8" r="2" fill="#ffe66d" class="signal"/>
+<polyline points="429.6,167.2 274.2,248.6 524.1,379.5" fill="none" stroke="#ffe66d" stroke-width="4.5" opacity="0.08" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="429.6,167.2 274.2,248.6 524.1,379.5" fill="none" stroke="#ffe66d" stroke-width="1.5" opacity="0.8" stroke-linecap="round" stroke-linejoin="round" class="flow" stroke-dasharray="9 8"/>
+<circle cx="429.6" cy="167.2" r="3" fill="#ffe66d"/>
+<circle cx="524.1" cy="379.5" r="3" fill="#ffe66d"/>
+<polyline points="412.8,176.0 257.4,257.4 507.3,388.3" fill="none" stroke="#ffe66d" stroke-width="4.5" opacity="0.08" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="412.8,176.0 257.4,257.4 507.3,388.3" fill="none" stroke="#ffe66d" stroke-width="1.5" opacity="0.8" stroke-linecap="round" stroke-linejoin="round" class="flow" stroke-dasharray="9 8"/>
+<circle cx="412.8" cy="176.0" r="3" fill="#ffe66d"/>
+<circle cx="507.3" cy="388.3" r="3" fill="#ffe66d"/>
+<polyline points="396.0,184.8 240.6,266.2 490.5,397.1" fill="none" stroke="#ffe66d" stroke-width="4.5" opacity="0.08" stroke-linecap="round" stroke-linejoin="round" />
+<polyline points="396.0,184.8 240.6,266.2 490.5,397.1" fill="none" stroke="#ffe66d" stroke-width="1.5" opacity="0.8" stroke-linecap="round" stroke-linejoin="round" class="flow" stroke-dasharray="9 8"/>
+<circle cx="396.0" cy="184.8" r="3" fill="#ffe66d"/>
+<circle cx="490.5" cy="397.1" r="3" fill="#ffe66d"/>
+</g>
+<polyline points="70.0,352.0 166.0,352.0 208.0,374.0" fill="none" stroke="#ff9f1c" stroke-width="1" opacity="0.4" stroke-linecap="round" stroke-linejoin="round" />
+<text x="40" y="326" fill="#fff6c8b8" font-size="11" font-weight="500" letter-spacing="2">EXPLORE THE</text>
+<text x="40" y="345" fill="#ff9f1c" font-size="16" font-weight="600" letter-spacing="1">SYSTEM</text>
+<polyline points="770.0,213.0 819.0,186.0 916.0,186.0" fill="none" stroke="#ffe66d" stroke-width="1" opacity="0.4" stroke-linecap="round" stroke-linejoin="round" />
+<text x="918" y="173" fill="#ffe66d" font-size="11" font-weight="600" text-anchor="end" letter-spacing="1">ADJUST → OBSERVE</text>
+<path d="M40 506H920" stroke="#ff9f1c" stroke-opacity=".15"/>
+<text x="40" y="532" fill="#fff6c8b8" font-size="10" font-weight="500" letter-spacing="2">WORKLOAD / COOLING / PUE</text>
+<circle cx="746.0" cy="528.0" r="3" fill="#ffe66d" class="signal"/>
+<text x="759" y="532" fill="#fff6c8b8" font-size="9" font-weight="600" letter-spacing="1.1">SYNTHETIC TEACHING MODEL</text>
+</g><g data-brand-decoration="true" aria-hidden="true"><g data-canonical-core="48" transform="translate(810 375) scale(1.79167)"><path fill="#231331" d="M24 5h1v5h-1zM8 20h5v2h-5zM36 20h5v2h-5zM8 22h1v2h-1zM40 22h1v2h-1zM5 24h4v1h-4zM40 24h4v1h-4zM8 25h1v2h-1zM12 22h1v5h-1zM36 22h1v5h-1zM40 25h1v2h-1zM8 27h5v2h-5zM36 27h5v2h-5zM24 39h1v5h-1z"/><path fill="#5c2a72" d="M24 3h2v2h-2zM21 7h1v1h-1zM27 7h1v1h-1zM18 8h4v1h-4zM27 8h4v1h-4zM7 8h2v2h-2zM15 9h7v1h-7zM27 9h7v1h-7zM40 8h2v2h-2zM14 10h8v1h-8zM27 10h8v1h-8zM13 11h9v1h-9zM27 11h9v1h-9zM13 12h6v1h-6zM30 12h6v1h-6zM12 13h5v1h-5zM32 13h5v1h-5zM11 14h5v1h-5zM33 14h5v1h-5zM10 15h6v1h-6zM33 15h6v1h-6zM10 16h5v2h-5zM34 16h5v2h-5zM10 18h4v2h-4zM35 18h4v2h-4zM13 20h1v1h-1zM35 20h1v1h-1zM3 24h2v2h-2zM44 24h2v2h-2zM13 28h1v1h-1zM35 28h1v1h-1zM10 29h4v2h-4zM35 29h4v2h-4zM10 31h5v2h-5zM34 31h5v2h-5zM10 33h6v1h-6zM33 33h6v1h-6zM11 34h5v1h-5zM33 34h5v1h-5zM12 35h5v1h-5zM32 35h5v1h-5zM13 36h6v1h-6zM30 36h6v1h-6zM13 37h9v1h-9zM27 37h9v1h-9zM14 38h8v1h-8zM27 38h8v1h-8zM15 39h7v1h-7zM27 39h7v1h-7zM7 39h2v2h-2zM18 40h4v1h-4zM27 40h4v1h-4zM40 39h2v2h-2zM21 41h1v1h-1zM27 41h1v1h-1zM24 44h2v2h-2z"/><path fill="#d94a4a" d="M17 4h2v2h-2zM21 13h7v1h-7zM19 14h11v1h-11zM18 15h1v1h-1zM29 15h2v1h-2zM16 16h3v1h-3zM29 16h4v1h-4zM16 17h2v1h-2zM31 17h2v1h-2zM15 18h2v1h-2zM32 18h2v1h-2zM14 19h1v2h-1zM34 19h1v2h-1zM13 21h2v7h-2zM34 21h2v7h-2zM14 28h1v1h-1zM34 28h1v1h-1zM14 29h3v1h-3zM32 29h3v1h-3zM15 30h2v1h-2zM32 30h2v1h-2zM16 31h2v1h-2zM31 31h2v1h-2zM16 32h3v1h-3zM29 32h4v1h-4zM18 33h1v1h-1zM29 33h2v1h-2zM19 34h11v1h-11zM21 35h7v1h-7zM31 44h2v2h-2z"/><path fill="#ff9f1c" d="M5 15h2v2h-2zM18 17h6v1h-6zM25 17h6v1h-6zM17 18h5v1h-5zM27 18h5v1h-5zM17 19h4v1h-4zM28 19h4v1h-4zM17 20h3v1h-3zM24 20h1v1h-1zM29 20h3v1h-3zM17 21h2v1h-2zM23 21h3v1h-3zM30 21h2v1h-2zM22 22h1v1h-1zM26 22h1v1h-1zM17 22h1v2h-1zM21 23h2v1h-2zM26 23h2v1h-2zM31 22h1v2h-1zM20 24h3v1h-3zM26 24h3v1h-3zM21 25h2v1h-2zM26 25h2v1h-2zM9 22h3v5h-3zM17 25h1v2h-1zM22 26h1v1h-1zM26 26h1v1h-1zM31 25h1v2h-1zM37 22h3v5h-3zM17 27h2v1h-2zM23 27h3v1h-3zM30 27h2v1h-2zM17 28h3v1h-3zM24 28h1v1h-1zM29 28h3v1h-3zM17 29h4v1h-4zM28 29h4v1h-4zM17 30h5v1h-5zM27 30h5v1h-5zM18 31h6v1h-6zM25 31h6v1h-6zM39 37h2v2h-2z"/><path fill="#ffe66d" d="M19 15h10v2h-10zM42 15h2v2h-2zM22 18h1v1h-1zM26 18h1v1h-1zM21 19h1v1h-1zM27 19h1v1h-1zM20 20h1v1h-1zM28 20h1v1h-1zM19 21h1v1h-1zM29 21h1v1h-1zM18 22h1v1h-1zM30 22h1v1h-1zM18 26h1v1h-1zM30 26h1v1h-1zM19 27h1v1h-1zM29 27h1v1h-1zM15 19h2v10h-2zM20 28h1v1h-1zM28 28h1v1h-1zM32 19h2v10h-2zM21 29h1v1h-1zM27 29h1v1h-1zM22 30h1v1h-1zM26 30h1v1h-1zM19 32h10v2h-10zM8 35h2v2h-2z"/><path fill="#fff6c8" d="M24 17h1v1h-1zM23 18h3v1h-3zM22 19h5v1h-5zM21 20h3v1h-3zM25 20h3v1h-3zM20 21h3v1h-3zM26 21h3v1h-3zM19 22h3v1h-3zM27 22h3v1h-3zM18 23h3v1h-3zM28 23h3v1h-3zM17 24h3v1h-3zM29 24h3v1h-3zM18 25h3v1h-3zM28 25h3v1h-3zM19 26h3v1h-3zM23 22h3v5h-3zM27 26h3v1h-3zM20 27h3v1h-3zM26 27h3v1h-3zM21 28h3v1h-3zM25 28h3v1h-3zM22 29h5v1h-5zM23 30h3v1h-3zM24 31h1v1h-1z"/></g></g></svg>

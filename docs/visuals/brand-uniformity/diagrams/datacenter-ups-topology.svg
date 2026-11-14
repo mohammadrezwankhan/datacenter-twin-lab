@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="datacenter-ups-title datacenter-ups-desc">
+<title id="datacenter-ups-title">DATACENTER — Conceptual online UPS path</title>
+<desc id="datacenter-ups-desc">A conceptual utility and standby-generator path through a transfer switch, rectifier, DC link with battery, inverter, and IT load. Switching sequence is illustrative, not an availability or reliability model. Decorative dash motion is not runtime telemetry and stops when reduced motion is requested.</desc>
+<defs>
+  <linearGradient id="datacenter-ups-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="var(--bg-top)"/><stop offset="1" stop-color="var(--bg)"/></linearGradient>
+  <pattern id="datacenter-ups-dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="var(--grid)" opacity=".28"/></pattern>
+  <marker id="datacenter-ups-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5c2a72"/></marker>
+  <style>
+    :root { color-scheme: dark light; --bg:#100b18; --bg-top:#231331; --surface:#231331; --surface-2:#231331; --ink:#fff6c8; --muted:#fff6c8; --grid:#fff6c8b8; --outline:#5c2a72; --shadow:#100b18; --accent:#5c2a72; }
+    @media (prefers-color-scheme: light) { :root { --bg:#fff6c8; --bg-top:#fff6c8; --surface:#fff6c8; --surface-2:#fff6c8; --ink:#231331; --muted:#5c2a72; --grid:#fff6c8; --outline:#fff6c8; --shadow:#fff6c8b8; --accent:#5c2a72; } }
+    text { font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; fill:var(--ink); }
+    .eyebrow { font-size:12px; font-weight:750; letter-spacing:2px; fill:var(--accent); }
+    .title { font-size:26px; font-weight:650; letter-spacing:-.35px; }
+    .micro { font-size:12px; fill:var(--muted); }
+    .label { font-size:15px; font-weight:620; }
+    .small-label { font-size:13px; font-weight:620; }
+    .stage-top { fill:var(--surface-2); stroke:var(--outline); stroke-width:1.4; }
+    .stage-front { fill:var(--surface); stroke:var(--outline); stroke-width:1.2; }
+    .edge { stroke:var(--outline); stroke-width:1.3; fill:none; }
+    .wire { fill:none; stroke:var(--ink); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+    .thin-wire { fill:none; stroke:var(--muted); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+    .flow { stroke-dasharray:10 9; animation:datacenter-ups-flow 4.8s linear 1 both; }
+    @keyframes datacenter-ups-flow { to { stroke-dashoffset:-38; } }
+    .box-shadow { fill:var(--shadow); opacity:.38; }
+    .panel { fill:var(--surface); stroke:var(--outline); stroke-width:1.35; }
+    .capsule { fill:var(--surface-2); stroke:var(--outline); stroke-width:1.1; }
+    .physics { stroke:#ff9f1c; } .estimation { stroke:#ffe66d; } .power { stroke:#ff9f1c; } .qa { stroke:#5c2a72; } .limits { stroke:#d94a4a; }
+    .fill-physics { fill:#231331; stroke:#ff9f1c; } .fill-estimation { fill:#231331; stroke:#ffe66d; } .fill-power { fill:#231331; stroke:#ff9f1c; } .fill-qa { fill:#5c2a72; stroke:#5c2a72; } .fill-limits { fill:#231331; stroke:#d94a4a; }
+    .component { stroke-width:1.7; stroke-linejoin:round; }
+    .on-color { fill:#fff6c8 !important; }
+    .note { fill:var(--surface); stroke:#d94a4a; stroke-width:1.15; }
+    .note-text { font-size:13px; font-weight:560; }
+    @media (prefers-reduced-motion: reduce) { .flow { animation:none !important; stroke-dashoffset:0; } }
+  </style>
+</defs>
+<rect width="960" height="560" rx="24" fill="url(#datacenter-ups-bg)"/>
+<rect width="960" height="560" rx="24" fill="url(#datacenter-ups-dots)" opacity=".42"/>
+<text class="eyebrow" x="40" y="39">DATACENTER</text>
+<text class="title" x="40" y="77">Conceptual online UPS path</text>
+<text class="micro" x="920" y="42" text-anchor="end" letter-spacing="1.5">2.5D / CONCEPTUAL</text>
+<g aria-hidden="true">
+  <polygon class="box-shadow" points="480,139 882,278 480,417 78,278" transform="translate(0 18)"/>
+  <polygon class="stage-front" points="78,278 480,417 480,443 78,304"/>
+  <polygon class="stage-front" points="882,278 480,417 480,443 882,304"/>
+  <polygon class="stage-top" points="480,139 882,278 480,417 78,278"/>
+  <path d="M160 278 480 168 800 278 480 388Z" fill="none" stroke="var(--grid)" stroke-width=".9" opacity=".26"/>
+  <path d="M240 278 480 195 720 278 480 361Z" fill="none" stroke="var(--grid)" stroke-width=".9" opacity=".22"/>
+</g>
+
+<!-- Sources -->
+<rect x="78" y="215" width="137" height="59" rx="12" class="fill-physics component"/><text class="small-label on-color" x="146" y="239" text-anchor="middle">utility</text><text class="micro on-color" x="146" y="258" text-anchor="middle">normal source</text>
+<rect x="78" y="317" width="137" height="59" rx="12" class="fill-power component"/><text class="small-label on-color" x="146" y="341" text-anchor="middle">generator</text><text class="micro on-color" x="146" y="360" text-anchor="middle">standby source</text>
+<!-- transfer switch -->
+<rect x="270" y="247" width="116" height="92" rx="12" class="fill-qa component"/><text class="small-label on-color" x="328" y="278" text-anchor="middle">ATS</text><text class="micro on-color" x="328" y="299" text-anchor="middle">transfer</text><text class="micro on-color" x="328" y="318" text-anchor="middle">selection</text>
+<path d="M215 245h55M215 346h28v-51h27" class="wire"/>
+<path d="M220 245h42M220 346h20v-51h22" fill="none" stroke="#5c2a72" stroke-width="2" stroke-dasharray="7 6" class="flow"/>
+<!-- online conversion chain -->
+<rect x="422" y="262" width="112" height="61" rx="11" class="fill-physics component"/><text class="small-label on-color" x="478" y="287" text-anchor="middle">rectifier</text><text class="micro on-color" x="478" y="307" text-anchor="middle">AC → DC</text>
+<rect x="572" y="249" width="99" height="86" rx="11" class="fill-estimation component"/><text class="small-label on-color" x="621" y="280" text-anchor="middle">DC link</text><text class="micro on-color" x="621" y="301" text-anchor="middle">bus capacitor</text><text class="micro on-color" x="621" y="320" text-anchor="middle">Vdc</text>
+<rect x="710" y="262" width="105" height="61" rx="11" class="fill-power component"/><text class="small-label on-color" x="762" y="287" text-anchor="middle">inverter</text><text class="micro on-color" x="762" y="307" text-anchor="middle">DC → AC</text>
+<rect x="843" y="262" width="92" height="61" rx="11" class="fill-qa component"/><text class="small-label on-color" x="889" y="287" text-anchor="middle">IT load</text><text class="micro on-color" x="889" y="307" text-anchor="middle">critical bus</text>
+<path d="M386 293h36M534 293h38M671 293h39M815 293h28" class="wire"/>
+<path d="M391 293h25M539 293h26M676 293h27M820 293h18" fill="none" stroke="#5c2a72" stroke-width="2" class="flow"/>
+<!-- battery supports the DC link -->
+<path d="M621 335v23" class="wire"/><rect x="568" y="358" width="107" height="59" rx="11" class="fill-physics component"/><text class="small-label on-color" x="621" y="383" text-anchor="middle">battery</text><text class="micro on-color" x="621" y="403" text-anchor="middle">DC support</text>
+<path d="M603 380v-7m0-4v-7m11 18v-14m11 14v-7m0-4v-7" stroke="#ff9f1c" stroke-width="2"/>
+<text class="micro" x="455" y="230" text-anchor="middle">double-conversion path</text>
+<rect x="284" y="383" width="208" height="45" rx="11" class="capsule"/><text class="small-label" x="388" y="410" text-anchor="middle">source transfer is conceptual</text>
+<rect class="note" x="40" y="478" width="880" height="54" rx="12"/>
+<circle cx="62" cy="505" r="7" fill="#d94a4a"/>
+<text class="note-text" x="80" y="501">SCOPE</text><text class="micro" x="80" y="519">Illustrative supply topology for a synthetic continuity lesson. It does not quantify transfer time, redundancy, fault coverage, or service availability.</text>
+<style>
+:root{--bg:#100b18;--bg-top:#231331;--surface:#231331;--surface-2:#231331;--ink:#fff6c8;--muted:#fff6c8;--grid:#5c2a72;--outline:#5c2a72;--shadow:#100b18;--accent:#ff9f1c}
+@media(prefers-color-scheme:light){:root{--bg:#fff6c8;--bg-top:#fff6c8;--surface:#fff6c8;--surface-2:#ffe66d;--ink:#231331;--muted:#5c2a72;--grid:#5c2a72;--outline:#5c2a72;--shadow:#5c2a72;--accent:#5c2a72}}
+</style></svg>

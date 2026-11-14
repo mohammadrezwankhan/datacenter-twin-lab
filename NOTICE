@@ -30,3 +30,8 @@ and approved educational publication and attribution; see
 docs/releases/v2.0.0-publication-decision.md. The manuscript's engineering HOLD
 remains. No private manuscript PDF, source archive, paid standards, third-party
 figures or font files are redistributed with these adaptations.
+
+The decorative energy-core avatar incorporates the MIT-licensed pixel core from
+mohammadrezwankhan/mohammadrezwankhan (scripts/makeover/pixel-core.json).
+The original copyright and permission notice is retained in
+apps/web/public/THIRD-PARTY-NOTICES.txt.
