@@ -60,6 +60,7 @@ html[data-avatar-brand] body { background: var(--bg); color: var(--ink); }
 [data-avatar-brand="portfolio"] .lesson:hover { border-color: #ff9f1c; transform: none; }
 [data-avatar-brand="portfolio"] .lesson.complete::after { color: #ffe66d; }
 [data-avatar-brand="catalog"] .surface-nav .brand-avatar { width: 38px; height: 38px; flex-basis: 38px; }
+[data-avatar-brand="catalog"] .lesson-card h3 { overflow-wrap: anywhere; }
 [data-avatar-brand="catalog"] .section-banner { max-width: 960px; }
 [data-avatar-brand="catalog"] .section-link { outline-offset: 4px; }
 [data-avatar-brand="catalog"] .model-figure { background: var(--panel); }
@@ -90,4 +91,15 @@ body[data-motion="off"] .champion-art * { animation: none !important; }
 @media print {
   [data-avatar-brand] .champion-art, [data-avatar-brand] .brand-avatar { display: none; }
   html[data-avatar-brand] body { color: #100b18; background: white; }
+  [data-avatar-brand="portfolio"] :is(.lesson, .metrics, .boundary) {
+    background: white;
+    border-color: #5c2a72;
+    color: #100b18;
+    --ink: #100b18;
+    --muted: #231331;
+    --faint: #231331;
+  }
+  [data-avatar-brand="portfolio"] :is(.lesson, .metrics, .boundary) * { color: #100b18; }
+  [data-avatar-brand="portfolio"] :is(.lesson, .metrics, .boundary) a { color: #5c2a72; text-decoration: underline; }
+  [data-avatar-brand="portfolio"] .lesson.complete::after { color: #5c2a72; }
 }
