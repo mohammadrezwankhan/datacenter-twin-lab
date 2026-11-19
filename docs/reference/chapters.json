@@ -1,0 +1,128 @@
+{
+  "repository": "mohammadrezwankhan/datacenter-twin-lab",
+  "source_sha": "d8dc3773830a397409a7a9c00a6ffed33c46fb4b",
+  "reviewed": "2026-11-19",
+  "title": "Datacenter Twin Lab reference handbook",
+  "chapters": [
+    {
+      "path": "docs/INDEX.md",
+      "group": "Evidence and navigation",
+      "label": "Datacenter Twin Lab documentation index"
+    },
+    {
+      "path": "README.md",
+      "group": "Project",
+      "label": "Project overview and history"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "group": "Project",
+      "label": "Contributing to Datacenter Twin Lab"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "group": "Project",
+      "label": "Changelog"
+    },
+    {
+      "path": "CITATION.cff",
+      "group": "Project",
+      "label": "Citation metadata"
+    },
+    {
+      "path": "SECURITY.md",
+      "group": "Project",
+      "label": "Security policy"
+    },
+    {
+      "path": "ROADMAP.md",
+      "group": "Project",
+      "label": "Datacenter Twin Lab roadmap"
+    },
+    {
+      "path": "docs/developer/ARCHITECTURE.md",
+      "group": "Developer",
+      "label": "Architecture and execution boundaries"
+    },
+    {
+      "path": "docs/developer/SETUP_AND_REPRODUCIBILITY.md",
+      "group": "Developer",
+      "label": "Setup and reproducibility"
+    },
+    {
+      "path": "docs/developer/API_CLI_AND_INTERFACES.md",
+      "group": "Developer",
+      "label": "APIs, commands and data contracts"
+    },
+    {
+      "path": "docs/developer/WORKED_EXAMPLES_AND_LABS.md",
+      "group": "Developer",
+      "label": "Worked examples and labs"
+    },
+    {
+      "path": "docs/developer/TROUBLESHOOTING.md",
+      "group": "Developer",
+      "label": "Troubleshooting by failed contract"
+    },
+    {
+      "path": "docs/math-and-physics/EQUATIONS_AND_DERIVATIONS.md",
+      "group": "Science",
+      "label": "Equations and derivations"
+    },
+    {
+      "path": "docs/math-and-physics/PARAMETERS_AND_SYMBOLS.md",
+      "group": "Science",
+      "label": "Parameters, symbols and units"
+    },
+    {
+      "path": "docs/math-and-physics/ASSUMPTIONS_AND_LIMITS.md",
+      "group": "Science",
+      "label": "Assumptions and limits of the evidence"
+    },
+    {
+      "path": "docs/maintainer/VERIFICATION_EVIDENCE_LEDGER.md",
+      "group": "Maintainer",
+      "label": "Verification evidence ledger"
+    },
+    {
+      "path": "docs/maintainer/CI_CD_AND_RELEASE_PLAYBOOK.md",
+      "group": "Maintainer",
+      "label": "CI, delivery and release playbook"
+    },
+    {
+      "path": "docs/maintainer/TOOLCHAIN_AND_DEPENDENCY_MATRIX.md",
+      "group": "Maintainer",
+      "label": "Toolchain and dependency matrix"
+    },
+    {
+      "path": "docs/maintainer/FAILURE_MODES_AND_TECH_DEBT.md",
+      "group": "Maintainer",
+      "label": "Failure modes and technical debt"
+    },
+    {
+      "path": "docs/maintainer/DOCS_MAINTENANCE_RUNBOOK.md",
+      "group": "Maintainer",
+      "label": "Documentation maintenance runbook"
+    },
+    {
+      "path": "docs/owner/ADR/ADR-0000-INDEX.md",
+      "group": "Owner",
+      "label": "Architecture decision index"
+    },
+    {
+      "path": "docs/owner/GOVERNANCE_AND_SCOPE.md",
+      "group": "Owner",
+      "label": "Governance and scope"
+    },
+    {
+      "path": "docs/owner/BUS_FACTOR_RECOVERY_RUNBOOK.md",
+      "group": "Owner",
+      "label": "Recovery runbook for a new maintainer"
+    },
+    {
+      "path": "docs/owner/PORTFOLIO_INTEGRATION.md",
+      "group": "Owner",
+      "label": "Portfolio integration boundaries"
+    }
+  ]
+}
