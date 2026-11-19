@@ -1,0 +1,31 @@
+# Troubleshooting by boundary
+
+Use the error and exact source revision to identify the failing boundary. Preserve a failing input and raw diagnostic before changing anything. The examples here refer to `d8dc3773830a397409a7a9c00a6ffed33c46fb4b`; they are not permission to weaken a validator or a scientific tolerance.
+
+| Symptom | Likely boundary | Useful next action |
+| --- | --- | --- |
+| `ModuleNotFoundError` for API or studies packages | Optional extras are absent from the selected Python | Confirm `TWIN_PYTHON`, run lock-only validation, install corresponding locks, then run installed-version checks |
+| Installed-version diagnostic fails | Available environment differs from declarations | Record both versions; reproduce with the locks before calling it CI-equivalent; do not loosen pins |
+| `/` returns 503, while API routes exist | Dashboard bundle is missing | Run the existing `apps/web` install/build steps; use the local API contract independently |
+| JSON is rejected | Size, encoding, duplicate fields, numeric precision, unknown keys or model-specific bounds | Start from a bundled valid fixture and change one field; Python and browser raw JSON parsers have distinct duplicate-key behavior |
+| Output already exists / unsafe output | Atomic writer protects files and input aliases | Choose a new destination; use `--force` only for a deliberately replaceable output |
+| 50 kWh depletion is 478.2675 s rather than 453.9 s | Charging-enabled preset versus charging-disabled guide | Inspect `battery_charge_kw`, scenario identity and input hash; count time from the 300 s outage separately |
+| Generator does not start after a path failure | Start logic follows utility asset availability | Inspect the event's target and topology; a downstream outage does not make the utility asset unavailable |
+| IT capacity warning without extra dispatch clipping | `it_capacity_kw` is a reporting envelope | Inspect gross topology capacities and distribution efficiency; do not treat the warning field as another network capacity |
+| Decimal export sums leave a tiny residue | Exact rational totals were serialized to finite decimal text | Apply the existing evidence-method tolerance; do not replace the invariant with a visually rounded sum |
+| Browser result still shows old inputs | Draft changes have not replaced the completed run | Use explicit calculate/run, then inspect applied configuration and run identity before exporting |
+| Worker timeout or cancelled comparison | Shared worker request lifecycle | Retry the bounded operation after recording the failure; timeout rejects all pending work, while abort preserves other pending requests |
+| Scientific wheel/archive digest mismatch | Verified runtime staging failed | Keep the rejected bytes out of the cache, inspect the pinned lock and transport; never bypass SHA-256 checks |
+| Research equilibrium, condition number or BDF rejection | Numerical acceptance boundary | Retain study/config/diagnostics; use accepted bounds and verify the same dependency versions before interpreting a model failure |
+| EMT negative voltage or reverse source power | Allowed ideal circuit behavior | Check signed definitions and missing physical clamps; do not infer real hardware capability |
+| `buildScreenResult('releaseGate', ...)` rejects states | Numeric lesson wrapper differs from direct state-based model | Use the documented direct interface for review states; a future API repair needs a scoped source change and tests |
+| Native Node subset passes but full build fails | Different validation scope | Run locked typecheck/build/parse5 tests and browser checks; native arithmetic parity does not cover the whole frontend |
+| New handbook absent from a live site | Publication route or artifact mismatch | Verify the docs copy in the exact merged artifact; distinguish GitHub Pages from the separate custom-domain Direct Upload |
+
+Source boundaries: [datacenter_twin/contracts.py](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/datacenter_twin/contracts.py), [datacenter_twin/output.py](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/datacenter_twin/output.py), [datacenter_twin/continuity.py](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/datacenter_twin/continuity.py), [apps/web/src/worker-request.ts](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/apps/web/src/worker-request.ts), [scripts/fetch_study_runtime.py](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/scripts/fetch_study_runtime.py), [datacenter_twin/research/sdcib.py](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/datacenter_twin/research/sdcib.py), [apps/web/src/infrastructure/screens.ts:679–717](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/apps/web/src/infrastructure/screens.ts#L679-L717), [apps/web/src/infrastructure/screens.ts:796–838](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/apps/web/src/infrastructure/screens.ts#L796-L838), [.github/workflows/tests.yml:200–219](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/d8dc3773830a397409a7a9c00a6ffed33c46fb4b/.github/workflows/tests.yml#L200-L219).
+
+## Report a reproducible issue
+
+Include the smallest public-safe input, command or page/control sequence, exact source/version, expected result with units, observed result/error, and environment. Remove private site traces, account credentials and private manuals. For confidential vulnerabilities use the preserved [security policy](../../SECURITY.md); for ordinary support use [SUPPORT.md](../../SUPPORT.md).
+
+A failed local capability is not a failed algorithm. A successful software test is not a calibrated facility result. Consult [the evidence ledger](../maintainer/VERIFICATION_EVIDENCE_LEDGER.md) for dated execution scope and [technical debt](../maintainer/FAILURE_MODES_AND_TECH_DEBT.md) for proposals that require a later implementation change.

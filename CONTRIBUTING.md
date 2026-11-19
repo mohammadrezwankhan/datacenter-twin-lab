@@ -76,3 +76,19 @@ The model excludes cooling transients, workload queues and throughput, battery a
 The browser demo has no shared simulation backend or client analytics. The API binds to loopback. No shared service, database, login, tenant isolation, persistent audit, facility telemetry, FAT/SAT, independent external review, formal security audit, or calibration dataset is supplied by this release. The browser's exact JavaScript default and optional on-demand Python verification are software behaviors to be checked by the current release evidence; neither establishes physical accuracy. Review the [reproducibility capsule](docs/validation/reproducibility-capsule.md) and [review protocol](docs/validation/review-protocol.md) before making a numerical claim.
 
 The public source tree excludes private manuals, planning references and the private repository history. Original code and synthetic fixtures use [Apache-2.0](LICENSE); preserve [NOTICE](NOTICE) and the [browser runtime licenses](docs/third-party/README.md).
+
+## Maintaining the reference package
+
+Use [the documentation index](docs/INDEX.md) to find the canonical guide before adding another explanation. The new reference chapters cross-link the existing contracts and tutorials; they do not replace their release history. Follow the [documentation maintenance runbook](docs/maintainer/DOCS_MAINTENANCE_RUNBOOK.md) for changed equations, interface contracts, rendered HTML and evidence dates.
+
+Before dependency installation, run the repository's offline gate:
+
+```sh
+python scripts/check_dependency_versions.py --lock-only api test-api studies
+```
+
+After installing the corresponding locks, run the installed-version check with the same Python interpreter. A passing lock check only compares declared files; it does not prove that an environment contains those versions. Keep source-test results, candidate documentation validation, PR checks, merge identity and deployment identity separate. See [setup](docs/developer/SETUP_AND_REPRODUCIBILITY.md) and [the CI playbook](docs/maintainer/CI_CD_AND_RELEASE_PLAYBOOK.md).
+
+For a source claim, cite an immutable commit and useful line range. For a numerical claim, include the model family, inputs, units, sign convention, expected arithmetic, observed result and tolerance. Preserve the distinction between the charging-enabled CLI preset and the charging-disabled guided lesson. A changed draft is not a completed run; a decorative scene is not measured telemetry. Keep uncertainty, explicit `null` values and Engineering HOLD visible.
+
+The documentation author checks links, source preservation, the declared CFF schema and handbook regeneration. A separate reviewer evaluates the frozen candidate and its complete diff. Neither author checks nor agent review satisfy the project's existing goal of independent external scientific reproduction.

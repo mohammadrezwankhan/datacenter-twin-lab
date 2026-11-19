@@ -79,3 +79,9 @@ Published 9 September 2026. Added the static Python browser demo, bounded sensit
 ## 0.2.0a0 — synthetic continuity alpha
 
 Published 8 September 2026. Initial clean public companion with the deterministic continuity engine, synthetic scenarios, local API and dashboard.
+
+## Unreleased documentation review — 2026-11-19
+
+Added a source-linked reference package for developer setup/interfaces/labs, implemented equations and units, verification scope, maintenance, owner recovery and a proposed twelve-month roadmap. Added a generated static reference handbook and a narrow link from the existing offline companion. The source reviewed is `d8dc3773830a397409a7a9c00a6ffed33c46fb4b`.
+
+The existing release history, software version 2.0.1, citation, security policy, licenses, application/scientific implementations, fixtures, tests, dependencies and workflows are preserved. Local source checks and their limitations are recorded in [the verification ledger](docs/maintainer/VERIFICATION_EVIDENCE_LEDGER.md); later candidate CI, merge and publication require separate receipts. No new tag, package release or deployment is announced by this entry.

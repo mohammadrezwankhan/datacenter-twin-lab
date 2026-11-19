@@ -226,3 +226,11 @@ Original code and synthetic fixtures use [Apache-2.0](LICENSE). See [NOTICE](NOT
 Earlier alpha and candidate assets remain historical and unchanged. Version 2.0.0 is the owner-selected product milestone; planning schema 1, electrical schema 2 and historical releases are preserved. Independent external reproduction remains outstanding; no facility validation, award or outside endorsement is claimed.
 
 </details>
+
+## Reference handbook — source review of 19 November 2026
+
+The [documentation index](docs/INDEX.md) and [readable reference handbook](docs/reference/index.html) connect the existing tutorials to implementation, equations, interfaces, worked examples, verification evidence, maintenance and recovery. The reviewed source is [`d8dc3773830a397409a7a9c00a6ffed33c46fb4b`](https://github.com/mohammadrezwankhan/datacenter-twin-lab/tree/d8dc3773830a397409a7a9c00a6ffed33c46fb4b); the software citation remains version **2.0.1**. This documentation addition does not announce a new software release.
+
+Start with [setup and reproducibility](docs/developer/SETUP_AND_REPRODUCIBILITY.md), [worked labs](docs/developer/WORKED_EXAMPLES_AND_LABS.md), or the [equation derivations](docs/math-and-physics/EQUATIONS_AND_DERIVATIONS.md). The [dated verification ledger](docs/maintainer/VERIFICATION_EVIDENCE_LEDGER.md) separates executed local checks, historical exact-source CI, unexecuted browser/build checks and pending integration. The [twelve-month plan](ROADMAP.md#rolling-plan-19-november-2026-to-18-november-2027) is a set of proposals with acceptance criteria, not a release commitment.
+
+The offline companion, aggregate continuity engine, infrastructure screens, EMT circuit and power-dynamics studies retain their separate assumptions. In particular, a zero internal energy residual, a passing software comparison or an Engineering HOLD decision is not a facility measurement or independent engineering approval.
