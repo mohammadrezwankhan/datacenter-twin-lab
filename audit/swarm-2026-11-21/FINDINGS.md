@@ -13,3 +13,14 @@
 - **Status:** PATCH WRITTEN; final-SHA CI required.
 
 No false positives are reported as confirmed critical vulnerabilities. Additional source observations (e.g. permissive static CSP `'unsafe-eval'`) are research/hosting-review questions until actual runtime and risk are verified.
+
+## DTL-002 — Vulnerable hash-locked scanner dependency blocks CI (P2, confidence high)
+
+- **Source:** `.github/security/requirements.in` and `requirements.txt`; historical pin `wcmatch~=8.3`, resolved `wcmatch==8.5.2`.
+- **Reproduction:** first PR Hardened CI SHA `30ae35373009b0724a126d13e5757aaa3009a4a6`, [Security / dependencies failure](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44957669592/job/137009255442). Retrieved and decoded the job artifact `security-dependencies-44957669592-1`: `pip-requirements-2.json` identifies `wcmatch 8.5.2`, `CVE-2026-132276`, fixed version 11.2. The scanner returned exit 1, with every other requirements manifest and npm audit passing in that job.
+- **Impact:** a moderate untrusted-file-name pattern-matching denial of service in the CI scanner environment, and a mandatory failing dependency-security gate. No evidence that the application engine imports the affected scanner library.
+- **Root cause:** pinned OpenGrep 1.33.1 Python tooling retained a historical `wcmatch~=8.3` compatibility constraint, which cannot select fixed 11.2.
+- **Fix proposal committed:** narrow scanner-only exception `wcmatch==11.2`; official PyPI-attested wheel/sdist SHA-256 hashes; preserve `bracex==3.2.1` which satisfies upstream 11.2's `bracex>=3.2`. No suppression or guard removal.
+- **High-risk compatibility boundary:** jump from 8.x to 11.x crosses upstream OpenGrep's declared dependency range. Requalify security scanner functions, authored-file selection, rule coverage and bootstrap. No general claim of OpenGrep upstream compatibility until checks pass.
+- **Verifier:** full PR security/bootstrap jobs on final SHA required; independent Gemini Carbon review unavailable.
+- **Status:** PATCH WRITTEN; final-SHA scanner CI **PENDING**.

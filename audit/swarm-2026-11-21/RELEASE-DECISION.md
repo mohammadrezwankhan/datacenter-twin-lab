@@ -21,3 +21,13 @@ Scoped proposed change: JavaScript browser scenario validation rejects array-typ
 No production claim, technical certification, test-pass count, or measured speedup is inferred. Reversal: revert the single scoped code/test commit after review, preserving historical records. If checks fail, retain draft PR and repair in branch before reconsidering release.
 
 **Actions to complete:** evaluate final PR SHA against mandatory tests, record links and totals; independently review source contract/parity; only then consider PR readiness under normal repository policy.
+
+## New mandatory blocker exposed by first PR-run security scan
+
+On initial proposed SHA `30ae35373009b0724a126d13e5757aaa3009a4a6`, `Security / dependencies` failed after
+detecting **CVE-2026-132276** in scanner `wcmatch==8.5.2`; see
+[FINDINGS.md](FINDINGS.md#dtl-002--vulnerable-hash-locked-scanner-dependency-blocks-ci-p2-confidence-high).
+A narrow patched scanner 11.2 lock refresh is proposed on the next head.
+Release decision remains **NOT RELEASE READY** until the new SHA's required
+security / Python / browser / CodeQL jobs pass and an independent review
+assesses the OpenGrep major-version override. No merge/deployment was authorized.

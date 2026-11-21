@@ -333,3 +333,29 @@ complete cold source build still require the hosted run; local source-build
 timings do not establish that result. The derived policy compiled successfully
 with the real Ubuntu 4.0.1 parser without loading any local kernel policy; that
 syntax check also does not establish a successful hosted sandbox or cold build.
+
+
+### Reviewed wcmatch security override (2026-11-21)
+
+The pull-request dependency gate failed on `pip-requirements-2` at
+[Security / dependencies](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44957669592/job/137009255442):
+its archived `pip-audit` report identified `wcmatch==8.5.2`,
+`CVE-2026-132276` / `GHSA-53pm-wgxf-c6qf` (moderate ReDoS).
+The upstream advisory affects versions through 11.1 and identifies **11.2** as patched.
+This is a development-scanner dependency, not a demonstrated production-engine
+vulnerability.
+
+`requirements.in` intentionally overrides the historical OpenGrep v1.33.1
+`wcmatch~=8.3` runtime constraint to **`wcmatch==11.2`**. This crosses a
+major-version compatibility boundary and is **not** represented as upstream-
+supported without qualification. PyPI's official, provenance-attested wheel
+and sdist SHA-256 digests are pinned in `requirements.txt`. Upstream 11.2
+requires Python >=3.11 and `bracex>=3.2`; the existing Python 3.12 scanner
+environment and locked `bracex==3.2.1` meet these constraints. Other pinned
+packages and scanner checks are unchanged.
+
+Mandatory qualification: hash-locked scanner bootstrap; `workflow`,
+`dependencies`, and `sast` modes; authored-source inventory and OpenGrep
+rule coverage; actual PR security jobs on the new SHA. If the major-version
+override breaks OpenGrep semantics, **do not bypass or suppress the audit gate**;
+revert the exception and track an upstream-compatible patched scanner path.

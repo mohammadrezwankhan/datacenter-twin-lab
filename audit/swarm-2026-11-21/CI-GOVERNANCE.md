@@ -12,3 +12,19 @@ At `519152b6fb2289607f6bb77ccb24976a537675f0` the seven workflow files are `test
 Last observed 2026-11-19 base-SHA status: [Tests](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44641661298), [Hardened CI](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44641661527), [CodeQL](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44641661302), [Flagship dashboard](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44641661317) all completed success as workflows. The dashboard deployment job was skipped.
 
 **NOT_VERIFIED:** final-head PR checks, required-protection/ruleset enforcement details, before/after elapsed CI runtime, billed minutes, cache hit rates, and claimed CI savings. No optimization or savings are asserted.
+
+## Audit PR observed failure and scoped repair
+
+On the first proposed SHA `30ae35373009b0724a126d13e5757aaa3009a4a6`, the mandatory
+[Hardened CI dependency-security job](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44957669592/job/137009255442)
+**FAILED**. The retained `pip-audit` artifact identifies `wcmatch==8.5.2`
+and CVE-2026-132276 inside `.github/security/requirements.txt`. Scanner-only
+manifest and hash-lock entries were updated to fixed 11.2, with documented
+cross-major API compatibility risks. This is not a CI bypass. Re-run every
+relevant gate on the newest PR SHA; the first failing SHA is historical
+evidence, not a final verdict.
+
+Read-only GitHub ruleset inspection found one active `Default branch history
+protection` ruleset for the default branch with deletion and non-fast-forward
+prohibition. No ruleset or check settings were changed; other repository
+policy enforcement remains separately subject to review.

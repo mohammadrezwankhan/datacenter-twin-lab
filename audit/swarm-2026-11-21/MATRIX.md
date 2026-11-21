@@ -28,3 +28,13 @@ Source of truth: `AGENTS.md`, `README.md`, `docs/engineering/release-readiness.m
 | Comprehensive new secrets/CVE scan | NOT_VERIFIED | Historical checks are not a new audit-branch scan |
 
 **Severity status at authoring:** 1 P2 source defect patched on proposed branch, pending integration checks; 0 independently confirmed P0/P1/P3 in the reviewed subset. This is not a declaration that comprehensive scans found no other defects.
+
+## Supplemental gate evidence: CVE in scanner lock
+
+At initial PR SHA `30ae35373009b0724a126d13e5757aaa3009a4a6`, `Security / dependencies` was **FAIL**, due to
+`wcmatch 8.5.2` / `CVE-2026-132276` detected in
+`.github/security/requirements.txt`. DTL-002 proposes a scoped hashed
+scanner dependency update to 11.2. The resulting new SHA is
+**NOT_VERIFIED** until the complete applicable security scanner and OpenGrep
+contract checks run. The prior eight-domain final-head verdict remains
+unverified, with no premature PASS assigned.
