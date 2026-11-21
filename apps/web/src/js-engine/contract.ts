@@ -51,7 +51,10 @@ function asset(value: unknown): Asset {
   const data = object(value, 'asset');
   exactKeys(data, ['id', 'name', 'kind', 'capacity_kw', 'failure_domains', 'source_ids'], 'asset');
   const kind = data.kind;
-  if (!['utility', 'generator', 'battery', 'bus', 'distribution', 'load'].includes(String(kind)))
+  if (
+    typeof kind !== 'string' ||
+    !['utility', 'generator', 'battery', 'bus', 'distribution', 'load'].includes(kind)
+  )
     throw new InputError('asset.kind: unsupported asset type');
   return {
     id: text(data.id, 'asset.id'),
@@ -69,7 +72,11 @@ function dependency(value: unknown): Dependency {
   const source = text(data.source, 'dependency.source');
   const target = text(data.target, 'dependency.target');
   const relation = data.relation;
-  if (source === target || !['feeds', 'requires', 'charges'].includes(String(relation)))
+  if (
+    source === target ||
+    typeof relation !== 'string' ||
+    !['feeds', 'requires', 'charges'].includes(relation)
+  )
     throw new InputError(
       'dependency: distinct endpoints and feeds/requires/charges relation required',
     );

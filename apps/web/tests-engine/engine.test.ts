@@ -147,6 +147,25 @@ void test('validation rejects bounded-contract violations and preserves arbitrar
   assert.equal(validateScenario(custom).assets.length, 9);
 });
 
+
+void test('topology validation rejects arrays masquerading as valid enum strings', () => {
+  const wrongKind = preset('normal') as unknown as Record<string, unknown>;
+  const assets = wrongKind.assets as Array<Record<string, unknown>>;
+  const pathA = assets.find((item) => item.id === 'path-a');
+  assert.ok(pathA);
+  pathA.kind = ['distribution'];
+  assert.throws(() => validateScenario(wrongKind), /asset\.kind/);
+
+  const wrongRelation = preset('normal') as unknown as Record<string, unknown>;
+  const dependencies = wrongRelation.dependencies as Array<Record<string, unknown>>;
+  const pathAFeed = dependencies.find(
+    (item) => item.source === 'main-bus' && item.target === 'path-a',
+  );
+  assert.ok(pathAFeed);
+  pathAFeed.relation = ['feeds'];
+  assert.throws(() => validateScenario(wrongRelation), /dependency/);
+});
+
 function nativePython(payload: Record<string, unknown>): string | null {
   const source = [
     'import sys,json',
