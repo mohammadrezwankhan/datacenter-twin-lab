@@ -24,3 +24,7 @@ No false positives are reported as confirmed critical vulnerabilities. Additiona
 - **High-risk compatibility boundary:** jump from 8.x to 11.x crosses upstream OpenGrep's declared dependency range. Requalify security scanner functions, authored-file selection, rule coverage and bootstrap. No general claim of OpenGrep upstream compatibility until checks pass.
 - **Verifier:** full PR security/bootstrap jobs on final SHA required; independent Gemini Carbon review unavailable.
 - **Status:** PATCH WRITTEN; final-SHA scanner CI **PENDING**.
+
+## DTL-003 — OpenGrep metadata conflicts with fixed wcmatch (P1 release blocker)
+
+Second head `10a81523c1692cdf000e17a851933e6d96f3e14a` [Security / sast](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44958030374/job/137010374800) **FAILED** at bootstrap: `pip check` reported `opengrep 1.33.1 has requirement wcmatch~=8.3, but you have wcmatch 11.2`. The dependency audit on that SHA passed, but wheel metadata was incompatible. Proposed fix patches one `cli/setup.py` dependency in this custom-built OpenGrep wheel, with pinned upstream preimage, patch bytes and postimage SHA-256, source scope inventory and new globfilter/metadata qualification. All full SAST/AST/CLI tests and `pip check` remain mandatory. Release blocked until this compatibility test passes; no CVE exemption or scanner bypass.

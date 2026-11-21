@@ -31,3 +31,11 @@ A narrow patched scanner 11.2 lock refresh is proposed on the next head.
 Release decision remains **NOT RELEASE READY** until the new SHA's required
 security / Python / browser / CodeQL jobs pass and an independent review
 assesses the OpenGrep major-version override. No merge/deployment was authorized.
+
+### Third-wave mandatory blocker
+
+`Security / sast` failed at scanner bootstrap on SHA `10a81523c1692cdf000e17a851933e6d96f3e14a`, due to a real
+`pip check` incompatibility. A separately reviewed custom-wheel dependency
+metadata patch and runtime verification were proposed. **NOT RELEASE READY**
+until a new exact-head SAST success, browser parity, independent review and
+other mandatory criteria are evidenced. No merge or deployment performed.

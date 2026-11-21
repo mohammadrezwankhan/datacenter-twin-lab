@@ -27,3 +27,12 @@ exception to OpenGrep's original `~=8.3` constraint. No vulnerability
 suppression/allowlist or weakening of the security gate occurred. Qualification
 requires final-SHA `Security / dependencies`, `Security / sast`, `Security /
 workflow` and scanner bootstrap to succeed before declaring DTL-002 resolved.
+
+### DTL-003 native scanner metadata incompatibility
+
+The latest fixed `wcmatch==11.2` lock passed the dependency audit while
+upstream-built OpenGrep wheel metadata still required vulnerable 8.x, so
+`pip check` correctly blocked SAST bootstrap. The candidate now contains
+a separately reviewed one-file upstream `cli/setup.py` patch for this
+custom wheel. All hashes, normal `pip check`, SAST and source/CLI/AST
+qualification remain enforced. No scanner vulnerability is ignored.
