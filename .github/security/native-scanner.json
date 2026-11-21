@@ -7,8 +7,20 @@
     "source_date_epoch": 1793265646,
     "customization": {
       "name": "Python PEP 695 parser backport",
-      "description": "Custom source build of pinned OpenGrep 1.33.1 with official PR845 simple-alias support and the separately reviewed authored Menhir adaptation; not an unchanged official release.",
-      "source_manifest": "parser-backports/source-manifest.json"
+      "description": "Custom source build of pinned OpenGrep 1.33.1 with official PR845 simple-alias support and the separately reviewed authored Menhir adaptation; not an unchanged official release. A separately reviewed source patch binds the Python CLI wheel to patched wcmatch 11.2.",
+      "source_manifest": "parser-backports/source-manifest.json",
+      "wcmatch_metadata_patch": {
+        "path": "parser-backports/wcmatch-11.2-compat.patch",
+        "sha256": "55efffbffbf191b190c84c0aa047970ce731d9ce732174e4c70a2c1e1466d9a2",
+        "production_files": [
+          {
+            "path": "cli/setup.py",
+            "before_sha256": "8ecb1591b09bd67afac372ae34b16ebd928e42246b965d0ab59200f6b9640090",
+            "after_sha256": "9b851042e2b7aa9348a858b3ca95a5bf28904e98654a8232cabc53a3fa72b791"
+          }
+        ],
+        "reason": "Reviewed custom wheel metadata pins patched wcmatch 11.2; retains pip check and native CLI qualification."
+      }
     }
   },
   "platform": {
@@ -881,6 +893,7 @@
     "parser-backports/repository-fixture-binding.json": "0c089c7898fd6a60e983594f4bb6c7ab9572c59af190a2eb74d2fd62820d8926",
     "parser-backports/source-manifest.json": "d936e7a4869809d274c3be3a49ce400b35f6ddb1cf83699f57d3aee7e683e006",
     "run.py": "76492e77a371dff0f4c03225f83fdbefc8437533b79d3293f31e46391e4e2668",
-    "scanner_contracts.py": "b0c52daeb3f776b79bad4ae95b3c0550d282b16d9014c0293e0a774e8c9bf428"
+    "scanner_contracts.py": "b0c52daeb3f776b79bad4ae95b3c0550d282b16d9014c0293e0a774e8c9bf428",
+    "parser-backports/wcmatch-11.2-compat.patch": "55efffbffbf191b190c84c0aa047970ce731d9ce732174e4c70a2c1e1466d9a2"
   }
 }

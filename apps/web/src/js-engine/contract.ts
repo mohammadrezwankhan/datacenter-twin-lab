@@ -51,12 +51,15 @@ function asset(value: unknown): Asset {
   const data = object(value, 'asset');
   exactKeys(data, ['id', 'name', 'kind', 'capacity_kw', 'failure_domains', 'source_ids'], 'asset');
   const kind = data.kind;
-  if (!['utility', 'generator', 'battery', 'bus', 'distribution', 'load'].includes(String(kind)))
+  if (
+    typeof kind !== 'string' ||
+    !['utility', 'generator', 'battery', 'bus', 'distribution', 'load'].includes(kind)
+  )
     throw new InputError('asset.kind: unsupported asset type');
   return {
     id: text(data.id, 'asset.id'),
     name: text(data.name, 'asset.name'),
-    kind: kind as string,
+    kind,
     capacity_kw: decimalText(decimal(data.capacity_kw, 'capacity_kw', true)),
     failure_domains: stringList(data.failure_domains, 'failure_domains'),
     source_ids: stringList(data.source_ids, 'source_ids'),
@@ -69,11 +72,15 @@ function dependency(value: unknown): Dependency {
   const source = text(data.source, 'dependency.source');
   const target = text(data.target, 'dependency.target');
   const relation = data.relation;
-  if (source === target || !['feeds', 'requires', 'charges'].includes(String(relation)))
+  if (
+    source === target ||
+    typeof relation !== 'string' ||
+    !['feeds', 'requires', 'charges'].includes(relation)
+  )
     throw new InputError(
       'dependency: distinct endpoints and feeds/requires/charges relation required',
     );
-  return { source, target, relation: relation as string };
+  return { source, target, relation };
 }
 
 function event(value: unknown): ScenarioEvent {

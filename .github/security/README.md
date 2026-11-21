@@ -126,7 +126,8 @@ OpenTelemetry versions. Its incompatible patched constraints and all five
 advisories remain in `known-scanner-findings.json`; that file is not an allowlist.
 The scanner now uses the complete OpenGrep 1.33.1 upstream Python CLI and native
 engine, built from commit `092c80faa0817840228349f93eff12a50fb9cf6b`. The supported
-upstream build targets and all declared Python dependency ranges are preserved.
+upstream build targets remain unchanged. This custom Python wheel carries a
+separately reviewed dependency metadata exception for fixed wcmatch 11.2.
 The Python environment has a complete 47-package hash lock and is checked with
 strict pip-audit, including its pip/setuptools/wheel build tools. CMake's separate
 build lock is also audited. Existing Semgrep environments are rejected so their
@@ -333,3 +334,42 @@ complete cold source build still require the hosted run; local source-build
 timings do not establish that result. The derived policy compiled successfully
 with the real Ubuntu 4.0.1 parser without loading any local kernel policy; that
 syntax check also does not establish a successful hosted sandbox or cold build.
+
+
+### Reviewed wcmatch security override (2026-11-21)
+
+The pull-request dependency gate failed on `pip-requirements-2` at
+[Security / dependencies](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/44957669592/job/137009255442):
+its archived `pip-audit` report identified `wcmatch==8.5.2`,
+`CVE-2026-132276` / `GHSA-53pm-wgxf-c6qf` (moderate ReDoS).
+The upstream advisory affects versions through 11.1 and identifies **11.2** as patched.
+This is a development-scanner dependency, not a demonstrated production-engine
+vulnerability.
+
+`requirements.in` intentionally overrides the historical OpenGrep v1.33.1
+`wcmatch~=8.3` runtime constraint to **`wcmatch==11.2`**. This crosses a
+major-version compatibility boundary and is **not** represented as upstream-
+supported without qualification. PyPI's official, provenance-attested wheel
+and sdist SHA-256 digests are pinned in `requirements.txt`. Upstream 11.2
+requires Python >=3.11 and `bracex>=3.2`; the existing Python 3.12 scanner
+environment and locked `bracex==3.2.1` meet these constraints. Other pinned
+packages and scanner checks are unchanged.
+
+Mandatory qualification: hash-locked scanner bootstrap; `workflow`,
+`dependencies`, and `sast` modes; authored-source inventory and OpenGrep
+rule coverage; actual PR security jobs on the new SHA. If the major-version
+override breaks OpenGrep semantics, **do not bypass or suppress the audit gate**;
+revert the exception and track an upstream-compatible patched scanner path.
+
+### Custom wheel metadata security adaptation (2026-11-21)
+
+After the `wcmatch==11.2` hash-locked update passed the complete dependency
+audit, the SAST job failed `pip check` because upstream OpenGrep 1.33.1
+still declared `wcmatch~=8.3`. The verified native build now applies an
+independently scoped, SHA-256-pinned change to the frozen `cli/setup.py`
+source that declares exact `wcmatch==11.2` for **this custom wheel only**.
+The exact upstream preimage, patch bytes and postimage are verified. No
+unrelated source can change, and the new input invalidates the native build
+cache. Installation still requires `pip check`; qualification also exercises
+wheel metadata, wcmatch globfilter calls and native CLI/AST cases. This is not
+an upstream release. Merge remains blocked until new full-head SAST and CI pass.

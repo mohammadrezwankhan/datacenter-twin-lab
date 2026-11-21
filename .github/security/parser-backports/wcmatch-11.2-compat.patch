@@ -1,0 +1,11 @@
+--- a/cli/setup.py
++++ b/cli/setup.py
+@@ -118,7 +118,7 @@
+     "ruamel.yaml>=0.18.5",
+     "typing-extensions~=4.2",
+     "urllib3~=2.0",
+-    "wcmatch~=8.3",
++    "wcmatch==11.2",
+ ]
+ 
+ 

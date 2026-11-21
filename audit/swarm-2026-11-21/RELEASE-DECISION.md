@@ -1,0 +1,41 @@
+# Release decision — 2026-11-21 initial branch evidence
+
+**NOT RELEASE READY / REVIEW REQUIRED** at writing time. Base SHA: `519152b6fb2289607f6bb77ccb24976a537675f0`. Proposed branch: `audit/datacenter-carbon-20261121-519152b6`. Final branch commit and PR checks must be added only after the remote commit/PR is created and verified.
+
+Scoped proposed change: JavaScript browser scenario validation rejects array-typed asset kinds and dependency relations; one focused test asserts these rejection cases. Numerical core, existing tolerance, build/deploy workflows, historical tags/evidence and production are not modified.
+
+## Gate register
+
+| Gate | Decision |
+| --- | --- |
+| Exact base / isolated branch | Verified from GitHub |
+| DTL-001 source proof | Reproduced guard-level bug in Node v22.16 |
+| JS fix and regression | Source patch prepared; final CI required |
+| Native physics / browser parity | NOT_VERIFIED on new SHA |
+| Local supported Node 24 / Python 3.12–3.14 | BLOCKED (no clone/download/network in container) |
+| Independent Gemini Carbon High challenge | BLOCKED (not available) |
+| Hosted browser performance / security headers | NOT_VERIFIED |
+| Historical release / package publication | No change authorized or performed |
+| Merge / deploy | NOT AUTHORIZED; no action taken |
+
+No production claim, technical certification, test-pass count, or measured speedup is inferred. Reversal: revert the single scoped code/test commit after review, preserving historical records. If checks fail, retain draft PR and repair in branch before reconsidering release.
+
+**Actions to complete:** evaluate final PR SHA against mandatory tests, record links and totals; independently review source contract/parity; only then consider PR readiness under normal repository policy.
+
+## New mandatory blocker exposed by first PR-run security scan
+
+On initial proposed SHA `30ae35373009b0724a126d13e5757aaa3009a4a6`, `Security / dependencies` failed after
+detecting **CVE-2026-132276** in scanner `wcmatch==8.5.2`; see
+[FINDINGS.md](FINDINGS.md#dtl-002--vulnerable-hash-locked-scanner-dependency-blocks-ci-p2-confidence-high).
+A narrow patched scanner 11.2 lock refresh is proposed on the next head.
+Release decision remains **NOT RELEASE READY** until the new SHA's required
+security / Python / browser / CodeQL jobs pass and an independent review
+assesses the OpenGrep major-version override. No merge/deployment was authorized.
+
+### Third-wave mandatory blocker
+
+`Security / sast` failed at scanner bootstrap on SHA `10a81523c1692cdf000e17a851933e6d96f3e14a`, due to a real
+`pip check` incompatibility. A separately reviewed custom-wheel dependency
+metadata patch and runtime verification were proposed. **NOT RELEASE READY**
+until a new exact-head SAST success, browser parity, independent review and
+other mandatory criteria are evidenced. No merge or deployment performed.

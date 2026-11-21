@@ -639,6 +639,33 @@ def qualify_native(destination: Path, output: Path) -> dict[str, Any]:
         raise RuntimeError("The compiled Python AST preservation controls failed")
     ast = json.loads(process.stdout)
     inspect_parser_qualification(ast, fixtures)
+    # Require actual installed wheel metadata and the globfilter interface
+    # used by the OpenGrep target manager before sealing the native cache.
+    compatibility = run_process(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from importlib.metadata import requires,version; "
+                "from wcmatch import glob; "
+                "assert version('wcmatch')=='11.2'; "
+                "assert any(r.replace(' ','')=='wcmatch==11.2' "
+                "for r in (requires('opengrep') or [])); "
+                "files=['src/entry.py','src/.hidden.py','src/entry.ts']; "
+                "assert glob.globfilter(files,'**/*.py',"
+                "flags=glob.GLOBSTAR|glob.DOTGLOB)==files[:2]; "
+                "assert glob.globfilter(files,'**/*.tsx',"
+                "flags=glob.GLOBSTAR|glob.DOTGLOB)==[]"
+            ),
+        ],
+        cwd=output,
+        environment=environment,
+        timeout=30,
+    )
+    (output / "wcmatch.stdout.log").write_text(compatibility.stdout)
+    (output / "wcmatch.stderr.log").write_text(compatibility.stderr)
+    if compatibility.returncode:
+        raise RuntimeError("Patched scanner metadata or globfilter behavior failed qualification")
     cli_output = output / "cli"
     process = run_process(
         [sys.executable, str(HERE / "scanner_contracts.py"), "--scanner", str(scanner),
@@ -681,7 +708,7 @@ def seal_cache(root: Path, identity: str, qualification: dict[str, Any]) -> None
 
 
 class Builder:
-    """Build upstream targets from locked inputs without changing their constraints."""
+    """Build frozen upstream targets with separately reviewed source adaptations."""
 
     def __init__(
         self, destination: Path, output: Path, manifest: dict[str, Any]
@@ -813,6 +840,15 @@ class Builder:
             self.source, local_source_path(folder, patch["path"]).read_bytes(),
             patch["sha256"], package["production_files"],
         )
+        # A separately hashed, exact-source edit binds this custom wheel to
+        # patched wcmatch; keep pip check and scanner qualifications mandatory.
+        runtime_patch = self.manifest["scanner"]["customization"]["wcmatch_metadata_patch"]
+        apply_reviewed_patch(
+            self.source,
+            local_source_path(HERE, runtime_patch["path"]).read_bytes(),
+            runtime_patch["sha256"],
+            runtime_patch["production_files"],
+        )
         for item in package["build_source_overlay"]:
             if item["preimage"] != "absent" or item["mode"] != "100644":
                 raise ValueError("Parser controls require ordinary new source files")
@@ -826,7 +862,11 @@ class Builder:
             target.write_bytes(blob)
             target.chmod(0o644)
         (self.output / "parser-source-adaptation.json").write_text(
-            json.dumps({"status": "passed", "package": package}, indent=2) + "\n"
+            json.dumps(
+                {"status": "passed", "package": package, "wcmatch_metadata_patch": runtime_patch},
+                indent=2,
+            )
+            + "\n"
         )
 
 
