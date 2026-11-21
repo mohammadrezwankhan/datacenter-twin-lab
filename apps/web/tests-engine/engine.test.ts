@@ -147,7 +147,6 @@ void test('validation rejects bounded-contract violations and preserves arbitrar
   assert.equal(validateScenario(custom).assets.length, 9);
 });
 
-
 void test('topology validation rejects arrays masquerading as valid enum strings', () => {
   const wrongKind = preset('normal') as unknown as Record<string, unknown>;
   const assets = wrongKind.assets as Array<Record<string, unknown>>;

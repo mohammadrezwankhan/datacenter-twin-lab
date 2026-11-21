@@ -59,7 +59,7 @@ function asset(value: unknown): Asset {
   return {
     id: text(data.id, 'asset.id'),
     name: text(data.name, 'asset.name'),
-    kind: kind as string,
+    kind,
     capacity_kw: decimalText(decimal(data.capacity_kw, 'capacity_kw', true)),
     failure_domains: stringList(data.failure_domains, 'failure_domains'),
     source_ids: stringList(data.source_ids, 'source_ids'),
@@ -80,7 +80,7 @@ function dependency(value: unknown): Dependency {
     throw new InputError(
       'dependency: distinct endpoints and feeds/requires/charges relation required',
     );
-  return { source, target, relation: relation as string };
+  return { source, target, relation };
 }
 
 function event(value: unknown): ScenarioEvent {
