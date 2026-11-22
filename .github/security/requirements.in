@@ -15,7 +15,7 @@ typing-extensions~=4.2
 urllib3~=2.0
 # Security exception to upstream ~=8.3: CVE-2026-132276 affects <=11.1.
 # Python scanner usage and authored-file matching must pass the existing CI tests.
-wcmatch==11.2
+wcmatch==12.0.3
 # Existing scanners and pinned source-build tooling.
 zizmor==1.32.0
 pip-audit==2.10.1
