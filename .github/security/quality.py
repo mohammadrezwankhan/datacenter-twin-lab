@@ -37,23 +37,36 @@ def install_python(gate: Gate, config: dict[str, Any]) -> None:
     dependencies = expand_group(groups, "dev")
     if not dependencies:
         raise ValueError("The development dependency group is empty")
-    command = [sys.executable, "-m", "pip", "install", "--disable-pip-version-check"]
-    command.extend(dependencies)
+    pip = [sys.executable, "-m", "pip", "install", "--disable-pip-version-check"]
     for requirement in strings(config.get("requirements", []), "requirements"):
         path = ROOT / requirement
         if not path.is_file():
             raise ValueError(f"Required dependency manifest is missing: {requirement}")
+        command = list(pip)
+        if "--hash=sha256:" in path.read_text(encoding="utf-8"):
+            command.append("--require-hashes")
         command.extend(["-r", str(path)])
-    for project in strings(config.get("projects", []), "projects"):
+        gate.run(f"install-python-lock-{path.stem}", command, timeout=900)
+        if gate.checks[-1]["exit_code"] != 0:
+            raise RuntimeError(f"Python locked dependencies could not be installed: {requirement}")
+
+    gate.run("install-python-development", [*pip, *dependencies], timeout=900)
+    if gate.checks[-1]["exit_code"] != 0:
+        raise RuntimeError("Python development dependencies could not be installed")
+
+    for index, project in enumerate(strings(config.get("projects", []), "projects")):
         directory = project.split("[", maxsplit=1)[0]
         with (ROOT / directory / "pyproject.toml").open("rb") as source:
             project_data = tomllib.load(source)
         if not table(project_data.get("project"), "installable project").get("name"):
             raise ValueError(f"{directory} is not an installable project")
-        command.extend(["--editable", project])
-    gate.run("install-python-development", command, timeout=900)
-    if gate.checks[-1]["exit_code"] != 0:
-        raise RuntimeError("Python development dependencies could not be installed")
+        gate.run(
+            f"install-python-project-{index}",
+            [*pip, "--no-deps", "--editable", project],
+            timeout=900,
+        )
+        if gate.checks[-1]["exit_code"] != 0:
+            raise RuntimeError(f"Python project could not be installed: {project}")
 
 
 def python_check(gate: Gate, config: dict[str, Any], mode: str) -> None:
