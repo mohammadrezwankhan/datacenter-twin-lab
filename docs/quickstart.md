@@ -4,6 +4,17 @@
 
 The default browser route opens the five-minute guided experiment. It derives from course lesson 3 and uses the exact `generator_failure` fixture with charging set to **0 kW**, the generator failed, and utility outage/recovery at **300/900 s**. The 100 kWh reserve delivers `100 × 0.90 × 0.95 = 85.5 kWh` to IT. At 1,000 kW, ride-through is **307.8 s from the 300 s outage** and depletion is **607.8 s elapsed**. With the **50 kWh challenge**, the corresponding values are **153.9 s from outage** and **453.9 s elapsed**. Those are separate durations/timestamps.
 
+## Install the Python core from PyPI
+
+In a fresh Python 3.12+ environment, install the package and run the reference case.
+
+```sh
+pip install datacenter-twin
+datacenter-twin simulate --preset generator_failure --format markdown
+```
+
+The case reports battery depletion at **607.8 s elapsed**. The [PyPI release](https://pypi.org/project/datacenter-twin/2.0.2/) includes the Python core and CLI. For the bundled local dashboard, use the [GitHub wheel](#run-the-released-dashboard-python-only). If you have an older `datacenter-twin-lab` wheel installed, use a separate environment because both distributions provide the same Python module and command.
+
 ## Run the guided browser experiment
 
 1. Open the [zero-install browser demo](https://khanlab.co.technology/).
@@ -14,7 +25,7 @@ No result is presented before the deliberate run. The equation applies both effi
 
 Open the [advanced simulator](https://khanlab.co.technology/?mode=advanced), the existing [50 MW outage case](https://khanlab.co.technology/?preset=ai_cluster_utility_loss), the [course and study catalog](https://khanlab.co.technology/learn/), or the [evidence hub](https://khanlab.co.technology/?mode=evidence#demo). The catalog contains 24 continuity/infrastructure lessons, one EMT lesson and five dynamics studies; these 30 learning items are separate from the eighteen facility presets. The [captioned 60-second tour notes](examples/proof-demo.md) describe that recording. Existing [course studio guide](engineering/course-studio.md) and [worked course notes](tutorials/power-systems-course.md) cover the continuity lesson atlas.
 
-The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. The installation commands below select the published [v2.0.1 numerical and packaging maintenance release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1), built from `513ddc7150027f5e274a8d50d5edcd3c31167a5e` and published on 2026-10-26. The [patch receipt](releases/v2.0.1.md) records its source, checks and SHA-256. Earlier v2.0.0 and v1.0.0 assets remain unchanged; the original hash-pinned v2.0.0 recipe is retained in [README-PYPI](../README-PYPI.md#historical-v200-reproduction). Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
+The 50 MW case scales electrical demand and stored energy; it is not a GPU workload or grid-adequacy model. The local dashboard commands below select the published [v2.0.1 numerical and packaging maintenance release](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1), built from `513ddc7150027f5e274a8d50d5edcd3c31167a5e` and published on 2026-10-26. The [patch receipt](releases/v2.0.1.md) records its source, checks and SHA-256. Earlier v2.0.0 and v1.0.0 assets remain unchanged; the original hash-pinned v2.0.0 recipe is retained in [README-PYPI](../README-PYPI.md#historical-v200-reproduction). Independent external technical review has not been obtained; see [release readiness](engineering/release-readiness.md).
 
 The original `generator_failure` preset remains available for CLI reproduction. Its default 100 kWh battery starts full, so pre-outage charging cannot increase that opening balance. In that preset, changing the starting reserve to 50 kWh allows pre-outage charging and yields **478.2675 s elapsed**, rather than the guide challenge's **453.9 s** with charging disabled. The exact lesson recipe and independent hand calculation are in the [canonical case](canonical-case.md).
 
@@ -39,7 +50,7 @@ Automated checks establish software behavior for these synthetic fixtures. Check
 
 If [uv is installed](https://docs.astral.sh/uv/getting-started/installation/), run the released CLI from an empty working folder with one command. `uvx` creates a cached, isolated environment; it downloads Python 3.12 if needed. Git, Node, and a source checkout are unnecessary.
 
-The commands below install the published [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1). Its wheel includes the CLI, compiled local dashboard, 24 course lessons, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. The package is not published on PyPI; these commands download the GitHub release directly.
+The commands below install the published [v2.0.1](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1). Its wheel includes the CLI, compiled local dashboard, 24 course lessons, eighteen presets and packaged research evidence. The exact asset and SHA-256 are pinned in each command. These commands download the dashboard wheel from GitHub.
 
 The v2 distribution name is `datacenter-twin`, replacing the historical GitHub wheel name `datacenter-twin-lab`. Both provide `datacenter_twin` and the `datacenter-twin` command. Use a fresh environment rather than installing both distributions together; do not remove a working older environment to try this release.
 
@@ -53,7 +64,7 @@ This command runs the original 1 MW / 100 kWh reference fixture and reports batt
 uvx --python 3.12 --from "datacenter-twin[api] @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.1/datacenter_twin-2.0.1-py3-none-any.whl#sha256=79af09170ff937f7d8beed5777161a14e71b982569c3a6d9766858614506ef6b" datacenter-twin serve
 ```
 
-Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8001` if that port is occupied. These commands work in PowerShell and POSIX shells. They pin the GitHub wheel and its digest; this project is **not published on PyPI**. The API extra resolves compatible transitive dependencies from the package index. Use the locked source workflow for the exact development dependency set.
+Open [127.0.0.1:8000](http://127.0.0.1:8000); stop with Ctrl+C. Append `--port 8001` if that port is occupied. These commands work in PowerShell and POSIX shells. The API extra resolves compatible transitive dependencies from the package index. Use the locked source workflow for the exact development dependency set.
 
 The release routes are checked outside the checkout so they import the installed wheel. For an installed Python 3.12+, `--python` can also take its executable path. See [uv's tool isolation and source options](https://docs.astral.sh/uv/guides/tools/). If you prefer pip, use the following route.
 
@@ -174,7 +185,7 @@ python scripts/verify_distribution.py dist --require-web
 
 The verifier expects exactly one project wheel in the selected directory. Use a separate directory for each retained version. The verifier creates a temporary environment, installs the local wheel with `--no-index --no-deps`, checks import/version identity, and exercises both entry points plus continuity and catalogue resources. Schema-1 samples are copied from this repository. The schema-2 demo and catalogue are package resources. `--require-web` also checks that the compiled dashboard is included; omit it for an intentional CLI-only wheel. The installed core needs no network; an installed dashboard server still requires the optional API dependencies.
 
-The workflow is configured to run on each push to `main` and each pull request. It targets Python 3.12 and 3.14 on Windows and Ubuntu for the core/API, frontend type/build, and installed-wheel checks. Playwright Chromium journeys run on Ubuntu/Python 3.12. This describes the per-commit matrix; check the exact commit to establish which jobs passed. PyPI publication remains pending a configured owner publishing identity; the pinned GitHub wheel commands above install the published 2.0.1 release. Containers and shared deployment are outside this delivery.
+The workflow is configured to run on each push to `main` and each pull request. It targets Python 3.12 and 3.14 on Windows and Ubuntu for the core/API, frontend type/build, and installed-wheel checks. Playwright Chromium journeys run on Ubuntu/Python 3.12. This describes the per-commit matrix; check the exact commit to establish which jobs passed. Containers and shared deployment are outside this delivery.
 
 ## Assumptions and limits
 
