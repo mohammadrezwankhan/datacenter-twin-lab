@@ -181,7 +181,7 @@ Versioned expected-versus-observed receipt
 
 Cite the claim and its configuration
 
-Mohammad Rezwan Khan. Datacenter Twin Lab, version 2.0.1. Synthetic continuity reference cases. https://khanlab.co.technology/evidence/
+Mohammad Rezwan Khan. Datacenter Twin Lab, version 2.0.2. Synthetic continuity reference cases. https://khanlab.co.technology/evidence/
 
 For numerical reuse, include the case name, input SHA-256, engine version, result file and exact source revision. Documentation for this build: f2e9cd40a84e6f34bb5c714b5e4361b32bc096ce. Use the software citation record for author and repository details.
 
