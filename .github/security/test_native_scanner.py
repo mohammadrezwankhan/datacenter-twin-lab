@@ -54,13 +54,13 @@ class SourceIntegrityTests(unittest.TestCase):
         """Keep a source-reviewed security repair, not a pip-check bypass."""
         manifest = native_scanner.load_manifest()
         patch = manifest["scanner"]["customization"]["wcmatch_metadata_patch"]
-        self.assertEqual(patch["path"], "parser-backports/wcmatch-11.2-compat.patch")
+        self.assertEqual(patch["path"], "parser-backports/wcmatch-12.0.3-compat.patch")
         self.assertEqual(len(patch["production_files"]), 1)
         self.assertEqual(patch["production_files"][0]["path"], "cli/setup.py")
         blob = (native_scanner.HERE / patch["path"]).read_bytes()
         native_scanner.verify_blob(blob, patch["sha256"])
         self.assertIn(b'-    "wcmatch~=8.3",', blob)
-        self.assertIn(b'+    "wcmatch==11.2",', blob)
+        self.assertIn(b'+    "wcmatch==12.0.3",', blob)
 
     def test_source_root_is_removed_without_losing_files(self) -> None:
         """A Git source archive installs its contents at the requested root."""
@@ -351,7 +351,7 @@ class ParserQualificationIntegrityTests(unittest.TestCase):
             "parser-backports/" + package["build_source_overlay"][1]["source_path"],
             "parser-backports/python-parser-fixtures.json",
             "scanner_contracts.py",
-            "parser-backports/wcmatch-11.2-compat.patch",
+            "parser-backports/wcmatch-12.0.3-compat.patch",
         )
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary) / "security"

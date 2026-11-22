@@ -127,7 +127,7 @@ advisories remain in `known-scanner-findings.json`; that file is not an allowlis
 The scanner now uses the complete OpenGrep 1.33.1 upstream Python CLI and native
 engine, built from commit `092c80faa0817840228349f93eff12a50fb9cf6b`. The supported
 upstream build targets remain unchanged. This custom Python wheel carries a
-separately reviewed dependency metadata exception for fixed wcmatch 11.2.
+separately reviewed dependency metadata exception for patched wcmatch 12.0.3.
 The Python environment has a complete 47-package hash lock and is checked with
 strict pip-audit, including its pip/setuptools/wheel build tools. CMake's separate
 build lock is also audited. Existing Semgrep environments are rejected so their
@@ -367,9 +367,25 @@ After the `wcmatch==11.2` hash-locked update passed the complete dependency
 audit, the SAST job failed `pip check` because upstream OpenGrep 1.33.1
 still declared `wcmatch~=8.3`. The verified native build now applies an
 independently scoped, SHA-256-pinned change to the frozen `cli/setup.py`
-source that declares exact `wcmatch==11.2` for **this custom wheel only**.
+source that declared exact `wcmatch==11.2` for **this custom wheel only**.
 The exact upstream preimage, patch bytes and postimage are verified. No
 unrelated source can change, and the new input invalidates the native build
 cache. Installation still requires `pip check`; qualification also exercises
-wheel metadata, wcmatch globfilter calls and native CLI/AST cases. This is not
-an upstream release. Merge remains blocked until new full-head SAST and CI pass.
+wheel metadata, wcmatch globfilter calls and native CLI/AST cases. This was not
+an upstream release.
+
+### wcmatch 12.0.3 compatibility candidate (2026-11-22)
+
+The reviewed dependency update advances the security-scanner pin from 11.2 to
+12.0.3. The lock includes `bracex==3.2.4`, satisfying wcmatch 12.0.3's updated
+minimum. The custom OpenGrep wheel metadata patch now pins the same exact
+version; its source preimage and postimage, patch bytes, and manifest entry are
+verified. Scanner install continues to require `pip check`, followed by the
+existing globfilter, CLI, AST and repository-rule checks. The requirements lock
+also retains hash-pinned pip and setuptools entries declared in
+`requirements.in`, including pip required transitively by `pip-api` during
+strict pip-audit hash resolution.
+
+This crosses a major-version boundary and needs fresh SAST and dependency
+checks on the updated PR head. Do not bypass or suppress scanner checks if
+compatibility qualification fails.

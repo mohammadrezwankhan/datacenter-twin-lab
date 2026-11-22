@@ -648,8 +648,8 @@ def qualify_native(destination: Path, output: Path) -> dict[str, Any]:
             (
                 "from importlib.metadata import requires,version; "
                 "from wcmatch import glob; "
-                "assert version('wcmatch')=='11.2'; "
-                "assert any(r.replace(' ','')=='wcmatch==11.2' "
+                "assert version('wcmatch')=='12.0.3'; "
+                "assert any(r.replace(' ','')=='wcmatch==12.0.3' "
                 "for r in (requires('opengrep') or [])); "
                 "files=['src/entry.py','src/.hidden.py','src/entry.ts']; "
                 "assert glob.globfilter(files,'**/*.py',"
