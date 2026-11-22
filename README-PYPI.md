@@ -11,10 +11,15 @@ battery reserves, surviving power paths, shared failures, and recovery. Python
 
 ## Install and run
 
-PyPI publication is pending. For the latest published GitHub wheel, use the
-[Python quickstart](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md#run-the-released-dashboard-python-only),
-which records the actual release URL, checksum and fresh-environment commands.
-The package-index command `pip install datacenter-twin` is not available yet.
+Install the Python core from PyPI in a Python 3.12+ environment.
+
+```sh
+pip install datacenter-twin
+```
+
+For the GitHub wheel with the local dashboard, see the
+[Python quickstart](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md#run-the-released-dashboard-python-only)
+for the release URL, checksum, and fresh-environment commands.
 
 ### Historical v2.0.0 reproduction
 
@@ -24,12 +29,11 @@ odd-record spectrum correction and subsequent packaging/setup fixes. Version
 the quickstart above for its checksum-pinned installation and maintenance scope.
 Historical assets remain unchanged.
 
-PyPI publication is pending. Use the published [v2.0.0 GitHub
+Use the published [v2.0.0 GitHub
 wheel](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.0)
 with its pinned SHA-256 below. Start in a fresh Python 3.12+ environment; the
 [quickstart](https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/main/docs/quickstart.md#run-the-released-dashboard-python-only)
-provides isolated PowerShell and POSIX instructions. The package-index command
-`pip install datacenter-twin` is not available yet.
+provides isolated PowerShell and POSIX instructions.
 
 ```sh
 python -m pip install "datacenter-twin @ https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/download/v2.0.0/datacenter_twin-2.0.0-py3-none-any.whl#sha256=274e5a837ebcb2872c0d9bc0a40eb5db7092e9793bb97b075e17e73fa20e9393"
