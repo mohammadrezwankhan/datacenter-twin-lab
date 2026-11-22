@@ -46,7 +46,7 @@ jobs:
       - name: Install pinned Python API and study dependencies
         run: |
           python scripts/check_dependency_versions.py --lock-only api test-api studies
-          python -m pip install -r requirements-api.lock
+          python -m pip install --require-hashes -r requirements-api.lock
           python -m pip install -r requirements-studies.lock
       - name: Install pinned frontend packages
         run: npm --prefix apps/web ci --ignore-scripts

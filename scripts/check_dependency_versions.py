@@ -22,12 +22,15 @@ def main(argv: Sequence[str] | None = None) -> None:
     for extra in args.extras:
         lock_name = "requirements-studies.lock" if extra == "studies" else "requirements-api.lock"
         lock = (root / lock_name).read_text(encoding="utf-8")
+        lock_requirements = {
+            line.strip().removesuffix("\\").strip() for line in lock.splitlines()
+        }
         for requirement in metadata["project"]["optional-dependencies"][extra]:
             match = re.fullmatch(r"([A-Za-z0-9_.-]+)==([^;\s]+)", requirement)
             if match is None:
                 raise SystemExit(f"Expected an exact extra pin: {requirement}")
             name, expected = match.groups()
-            if requirement not in lock.splitlines():
+            if requirement not in lock_requirements:
                 raise SystemExit(f"{requirement} is missing from {lock_name}")
             if not args.lock_only:
                 actual = importlib.metadata.version(name)

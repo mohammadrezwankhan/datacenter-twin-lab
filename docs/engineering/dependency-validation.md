@@ -25,7 +25,7 @@ direct dependency pin in `pyproject.toml`, then regenerate the lock with a
 *targeted* upgrade. For example, after changing FastAPI:
 
 ```sh
-uv pip compile pyproject.toml --extra api --extra test-api --universal --python-version 3.12 --output-file requirements-api.lock --upgrade-package fastapi
+uv pip compile pyproject.toml --extra api --extra test-api --universal --python-version 3.12 --generate-hashes --output-file requirements-api.lock --upgrade-package fastapi
 ```
 
 Replace `fastapi` with the direct dependency you changed. Do not use a
@@ -40,7 +40,8 @@ PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe -c "import sys; print(sys.executable, sys.version)"
-.\.venv\Scripts\python.exe -m pip install -r requirements-api.lock ".[api,test-api]"
+.\.venv\Scripts\python.exe -m pip install --require-hashes -r requirements-api.lock
+.\.venv\Scripts\python.exe -m pip install --no-deps ".[api,test-api]"
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe scripts/check_dependency_versions.py api test-api
 .\.venv\Scripts\python.exe -m unittest tests.test_api -v
@@ -50,7 +51,8 @@ On macOS or Linux:
 
 ```sh
 .venv/bin/python -c "import sys; print(sys.executable, sys.version)"
-.venv/bin/python -m pip install -r requirements-api.lock ".[api,test-api]"
+.venv/bin/python -m pip install --require-hashes -r requirements-api.lock
+.venv/bin/python -m pip install --no-deps ".[api,test-api]"
 .venv/bin/python -m pip check
 .venv/bin/python scripts/check_dependency_versions.py api test-api
 .venv/bin/python -m unittest tests.test_api -v
