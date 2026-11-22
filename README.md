@@ -70,8 +70,8 @@ Motion is optional; the vector topology remains readable with reduced motion ena
 
 ### Install from PyPI
 
-The Python core requires Python 3.12 or later. The first PyPI release is
-[2.0.1](https://pypi.org/project/datacenter-twin/2.0.1/).
+The Python core requires Python 3.12 or later. The current PyPI release is
+[2.0.2](https://pypi.org/project/datacenter-twin/2.0.2/).
 
 ```bash
 pip install datacenter-twin
@@ -112,7 +112,7 @@ Halving the opening reserve to **50 kWh** gives **42.75 kWh** delivered to IT: *
 
 > This is a teaching and research tool for datacenter engineers learning electrical continuity. It is a narrow, synthetic, uncalibrated model—not a production reliability analysis. Detailed model boundaries and validation status are below.
 
-[![v2.0.1](https://img.shields.io/badge/release-v2.0.1-blue)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.1) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
+[![v2.0.2](https://img.shields.io/badge/release-v2.0.2-blue)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.2) [![CI on main](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/workflows/tests.yml) [![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on%20Ko--fi-72a4f2?logo=ko-fi&logoColor=white)](https://ko-fi.com/N7V826XG89)
 
 **v2.0.0 — Infrastructure Engineering** adds twelve manuscript-derived lessons, 36 assessments, separate educational models and twelve original SVG scenes to the existing guide, twelve continuity lessons, eighteen presets, reports, EMT and five dynamics studies. [Publication decision and attribution](docs/releases/v2.0.0-publication-decision.md); engineering HOLD remains. The CI badge follows `main`; check the exact released commit's results before relying on them. See [release readiness](docs/engineering/release-readiness.md).
 
@@ -184,7 +184,7 @@ python -m datacenter_twin sweep --preset generator_failure --parameter battery_i
 
 Choose a new output path if it already exists, or explicitly add `--force`. The preset allows charging; at 50 kWh it gives **478.2675 s elapsed**, rather than the guided lesson's **453.9 s elapsed** with charging disabled. The [sensitivity guide](docs/engineering/sensitivity.md) explains the distinction.
 
-The [quickstart](docs/quickstart.md#run-with-uv) installs the published v2.0.1 GitHub wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, 24 course lessons, eighteen presets and research evidence, so no Git or Node setup is needed for that route. The distribution is now named `datacenter-twin`; use a fresh environment when switching from the historical `datacenter-twin-lab` wheels because both provide the same module and CLI. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier release assets retain their original contents.
+The [quickstart](docs/quickstart.md#install-the-python-core-from-pypi) installs the Python core from PyPI. For the local dashboard, the [GitHub wheel instructions](docs/quickstart.md#run-the-released-dashboard-python-only) install the published v2.0.1 GitHub wheel with a pinned SHA-256, using uv or Python/pip. It includes the CLI, local dashboard, 24 course lessons, eighteen presets and research evidence, so no Git or Node setup is needed for that route. The distribution is now named `datacenter-twin`; use a fresh environment when switching from the historical `datacenter-twin-lab` wheels because both provide the same module and CLI. A Python 3.12+ source checkout remains available for development and running the full tests. Earlier release assets retain their original contents.
 
 ## Checks and evidence
 
