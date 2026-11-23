@@ -211,9 +211,9 @@ click==8.5.1 \
     # via
     #   -r requirements.in
     #   click-option-group
-click-option-group==0.5.9 \
-    --hash=sha256:ad2599248bd373e2e19bec5407967c3eec1d0d4fc4a5e77b08a0481e75991080 \
-    --hash=sha256:f94ed2bc4cf69052e0f29592bd1e771a1789bd7bfc482dd0bc482134aff95823
+click-option-group==0.5.10 \
+    --hash=sha256:22d6a7d102b4ead6a0b8601d577386d390deae91038662f2bd1d013806184ab7 \
+    --hash=sha256:667f9dafdbe15f69c7e877e14c94175ab2e16b6a1ab4b7ffac51513ed624a8dc
     # via -r requirements.in
 colorama==0.4.6 \
     --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
