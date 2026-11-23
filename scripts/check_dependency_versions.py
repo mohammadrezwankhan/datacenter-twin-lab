@@ -20,7 +20,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     args = parser.parse_args(argv)
     metadata = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
     for extra in args.extras:
-        lock_name = "requirements-studies.lock" if extra == "studies" else "requirements-api.lock"
+        lock_name = "requirements-studies.txt" if extra == "studies" else "requirements-api.txt"
         lock = (root / lock_name).read_text(encoding="utf-8")
         for requirement in metadata["project"]["optional-dependencies"][extra]:
             match = re.fullmatch(r"([A-Za-z0-9_.-]+)==([^;\s]+)", requirement)

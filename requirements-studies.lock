@@ -1,4 +1,2 @@
-# Native scientific runtime. Browser Pyodide retains NumPy 2.4.6 / SciPy 1.18.0.
-# Intentional cross-version parity is checked by the complete browser-demo suite.
-numpy==2.5.4
-scipy==1.18.1
+# Compatibility entry point for existing source-checkout commands.
+-r requirements-studies.txt

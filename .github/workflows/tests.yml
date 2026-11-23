@@ -38,22 +38,22 @@ jobs:
           cache: pip
           cache-dependency-path: |
             pyproject.toml
-            requirements-api.lock
-            requirements-studies.lock
+            requirements-api.txt
+            requirements-studies.txt
       - name: Check dependency locks before downloads
         run: python scripts/check_dependency_versions.py --lock-only api test-api studies
       - name: Standard-library core, without optional dependencies
         run: python -m unittest discover -s tests -v
       - name: Install locked API and test dependencies
         run: |
-          python -m pip install -r requirements-api.lock ".[api,test-api]"
+          python -m pip install -r requirements-api.txt ".[api,test-api]"
           python -m pip check
           python scripts/check_dependency_versions.py api test-api
       - name: HTTP contracts and full regression suite
         run: python -m unittest discover -s tests -v
       - name: Optional numerical studies with pinned scientific runtime
         run: |
-          python -m pip install -r requirements-studies.lock ".[studies]"
+          python -m pip install -r requirements-studies.txt ".[studies]"
           python -m pip check
           python scripts/check_dependency_versions.py studies
           python -m unittest tests.test_research -v
@@ -161,7 +161,7 @@ jobs:
           cache: pip
           cache-dependency-path: |
             pyproject.toml
-            requirements-studies.lock
+            requirements-studies.txt
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
@@ -170,7 +170,7 @@ jobs:
       - run: npm --prefix apps/web ci --ignore-scripts
       - name: Prepare pinned numerical study runtimes
         run: |
-          python -m pip install -r requirements-studies.lock ".[studies]"
+          python -m pip install -r requirements-studies.txt ".[studies]"
           python -m pip check
           python scripts/check_dependency_versions.py studies
           python scripts/fetch_study_runtime.py

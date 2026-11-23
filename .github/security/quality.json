@@ -4,8 +4,8 @@
     ".[api,test-api,studies]"
   ],
   "requirements": [
-    "requirements-api.lock",
-    "requirements-studies.lock"
+    "requirements-api.txt",
+    "requirements-studies.txt"
   ],
   "python_paths": [],
   "test_targets": [

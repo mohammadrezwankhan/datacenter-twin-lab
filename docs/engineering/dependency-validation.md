@@ -4,6 +4,10 @@ Native scientific dependencies intentionally differ from the pinned Pyodide brow
 
 CI installs API/study extras together with their locks, runs pip check, and verifies installed versions against project metadata and the lock. React and React DOM are updated together, with a prebuild installed-version guard and a grouped Dependabot update including their type packages. React type patch numbers may differ from runtime patch numbers. Vite 8.3.5 includes the launch-editor security fixes reported for the previous 8.2.2 pin.
 
+The API and studies pins live in `requirements-api.txt` and
+`requirements-studies.txt` so Dependabot can discover them. The old `.lock`
+filenames include the corresponding pin files for existing install commands.
+
 ## Refreshing the API dependency lock
 
 CI checks all direct extra pins against their locks before downloading packages:
@@ -16,7 +20,7 @@ This offline check catches manifest-only dependency updates early. The existing
 installed-version check, resolver, `pip check` and runtime tests still apply.
 
 When changing a direct dependency of the `api` or `test-api` extras in
-`pyproject.toml`, update `requirements-api.lock` in the same change. The
+`pyproject.toml`, update `requirements-api.txt` in the same change. The
 committed lock is used for source-checkout API testing and CI; changing only the
 project metadata can make installation fail before tests start.
 
@@ -25,7 +29,7 @@ direct dependency pin in `pyproject.toml`, then regenerate the lock with a
 *targeted* upgrade. For example, after changing FastAPI:
 
 ```sh
-uv pip compile pyproject.toml --extra api --extra test-api --universal --python-version 3.12 --output-file requirements-api.lock --upgrade-package fastapi
+uv pip compile pyproject.toml --extra api --extra test-api --universal --python-version 3.12 --output-file requirements-api.txt --upgrade-package fastapi
 ```
 
 Replace `fastapi` with the direct dependency you changed. Do not use a
@@ -40,7 +44,7 @@ PowerShell:
 
 ```powershell
 .\.venv\Scripts\python.exe -c "import sys; print(sys.executable, sys.version)"
-.\.venv\Scripts\python.exe -m pip install -r requirements-api.lock ".[api,test-api]"
+.\.venv\Scripts\python.exe -m pip install -r requirements-api.txt ".[api,test-api]"
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe scripts/check_dependency_versions.py api test-api
 .\.venv\Scripts\python.exe -m unittest tests.test_api -v
@@ -50,7 +54,7 @@ On macOS or Linux:
 
 ```sh
 .venv/bin/python -c "import sys; print(sys.executable, sys.version)"
-.venv/bin/python -m pip install -r requirements-api.lock ".[api,test-api]"
+.venv/bin/python -m pip install -r requirements-api.txt ".[api,test-api]"
 .venv/bin/python -m pip check
 .venv/bin/python scripts/check_dependency_versions.py api test-api
 .venv/bin/python -m unittest tests.test_api -v

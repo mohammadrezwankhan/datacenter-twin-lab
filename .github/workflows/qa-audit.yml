@@ -36,8 +36,8 @@ jobs:
           cache: pip
           cache-dependency-path: |
             pyproject.toml
-            requirements-api.lock
-            requirements-studies.lock
+            requirements-api.txt
+            requirements-studies.txt
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
@@ -46,8 +46,8 @@ jobs:
       - name: Install pinned Python API and study dependencies
         run: |
           python scripts/check_dependency_versions.py --lock-only api test-api studies
-          python -m pip install -r requirements-api.lock
-          python -m pip install -r requirements-studies.lock
+          python -m pip install -r requirements-api.txt
+          python -m pip install -r requirements-studies.txt
       - name: Install pinned frontend packages
         run: npm --prefix apps/web ci --ignore-scripts
       - name: Python reference tests and site auditor self-tests
