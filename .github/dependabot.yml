@@ -20,6 +20,11 @@ updates:
   open-pull-requests-limit: 5
   cooldown:
     default-days: 7
+  groups:
+    pydantic-runtime:
+      patterns:
+      - pydantic
+      - pydantic-core
 - package-ecosystem: npm
   directory: /apps/web
   schedule:
