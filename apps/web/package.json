@@ -15,6 +15,7 @@
     "check:react": "node ../../scripts/check-react-versions.mjs"
   },
   "dependencies": {
+    "lossless-json": "4.3.4",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

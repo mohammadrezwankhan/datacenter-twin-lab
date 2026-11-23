@@ -1,4 +1,5 @@
 import { requiredPresent } from '../required-value';
+import { isLosslessNumber } from 'lossless-json';
 /** Exact non-negative input decimals and signed rational arithmetic.
  *
  * The Python continuity engine keeps all simulation quantities as Fraction
@@ -165,11 +166,11 @@ export class Rational {
     name = 'value',
     options: { positive?: boolean } = {},
   ): Rational {
-    if (typeof value !== 'string' && typeof value !== 'number')
+    if (typeof value !== 'string' && typeof value !== 'number' && !isLosslessNumber(value))
       throw new InputError(`${name}: expected a finite decimal number`);
     if (typeof value === 'number' && !Number.isFinite(value))
       throw new InputError(`${name}: expected a finite decimal number`);
-    const rawInput = String(value);
+    const rawInput = isLosslessNumber(value) ? value.toString() : String(value);
     if (Array.from(rawInput).length > 128)
       throw new InputError(`${name}: numeric representation is too long`);
     const input = normalizeDecimalText(rawInput);

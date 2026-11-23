@@ -1,8 +1,9 @@
 import unittest
+from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from datacenter_twin.contracts import InputError, Scenario, load_scenario
+from datacenter_twin.contracts import InputError, Scenario, load_scenario, parse_json_document
 from datacenter_twin.engine import simulate
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,9 +61,20 @@ class ContractTests(unittest.TestCase):
     def test_duplicate_json_keys_are_rejected(self) -> None:
         with TemporaryDirectory() as directory:
             path = Path(directory) / "bad.json"
-            path.write_text('{"schema_version":1,"schema_version":2}', encoding="utf-8")
+            path.write_text(
+                '{"nested":{"schema_version":1,"schema_version":1}}', encoding="utf-8"
+            )
             with self.assertRaisesRegex(InputError, "Duplicate"):
                 load_scenario(path)
+
+    def test_json_number_tokens_preserve_decimal_text_and_integer_types(self) -> None:
+        value = parse_json_document(
+            b'{"decimal":999999999999.000000001,"exponent":1.25e-7,"integer":9007199254740993}'
+        )
+        self.assertEqual(value["decimal"], Decimal("999999999999.000000001"))
+        self.assertEqual(value["exponent"], Decimal("1.25e-7"))
+        self.assertIs(type(value["integer"]), int)
+        self.assertEqual(value["integer"], 9007199254740993)
 
     def test_equivalent_numeric_text_has_same_input_hash(self) -> None:
         original = simulate(Scenario.from_dict(self.data))

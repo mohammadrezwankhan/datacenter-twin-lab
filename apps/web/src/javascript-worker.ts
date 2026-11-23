@@ -11,6 +11,7 @@ import {
 } from './js-engine/index';
 import type { Catalog, DemoData } from './js-engine/index';
 import { InputError } from './js-engine/index';
+import { parseLosslessJson } from './js-engine/json';
 
 const MAX_REQUEST_BYTES = 4 * 1024 * 1024;
 export type Assets = { demoData?: DemoData; catalog?: Catalog };
@@ -177,7 +178,7 @@ export async function dispatchJson(path: string, body = 'null', assets?: Assets)
   if (typeof body !== 'string') throw new InputError('Request body must be JSON text');
   if (new TextEncoder().encode(body).byteLength > MAX_REQUEST_BYTES)
     throw new InputError('Request exceeds the 4 MiB input limit');
-  const payload: unknown = JSON.parse(body);
+  const payload: unknown = parseLosslessJson(body);
   const resources = assets ?? (await resourcesFor(pathParts(path)));
   return dispatchParsed(path, payload, resources);
 }
