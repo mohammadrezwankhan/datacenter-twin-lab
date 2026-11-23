@@ -19,10 +19,10 @@ class DependencyVersionTests(unittest.TestCase):
             'test-api = ["httpx==0.28.1"]\nstudies = ["numpy==2.5.4"]\n',
             encoding="utf-8",
         )
-        self.root.joinpath("requirements-api.lock").write_text(
+        self.root.joinpath("requirements-api.txt").write_text(
             "fastapi==0.162.0\nhttpx==0.28.1\n", encoding="utf-8"
         )
-        self.root.joinpath("requirements-studies.lock").write_text(
+        self.root.joinpath("requirements-studies.txt").write_text(
             "numpy==2.5.4\n", encoding="utf-8"
         )
         root_patch = patch.object(check, "root", self.root)
@@ -36,17 +36,17 @@ class DependencyVersionTests(unittest.TestCase):
             check.main(["--lock-only", "api", "test-api", "studies"])
 
     def test_pr100_conflict_fails_before_install(self) -> None:
-        self.root.joinpath("requirements-api.lock").write_text(
+        self.root.joinpath("requirements-api.txt").write_text(
             "fastapi==0.159.1\nhttpx==0.28.1\n", encoding="utf-8"
         )
         with self.assertRaisesRegex(SystemExit, "fastapi==0.162.0 is missing"):
             check.main(["--lock-only", "api"])
 
     def test_studies_uses_its_own_lock(self) -> None:
-        self.root.joinpath("requirements-studies.lock").write_text(
+        self.root.joinpath("requirements-studies.txt").write_text(
             "numpy==2.4.6\n", encoding="utf-8"
         )
-        with self.assertRaisesRegex(SystemExit, "requirements-studies.lock"):
+        with self.assertRaisesRegex(SystemExit, "requirements-studies.txt"):
             check.main(["--lock-only", "studies"])
 
     def test_default_still_checks_installed_version(self) -> None:
