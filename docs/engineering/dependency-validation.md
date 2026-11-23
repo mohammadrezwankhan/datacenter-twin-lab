@@ -29,7 +29,7 @@ direct dependency pin in `pyproject.toml`, then regenerate the lock with a
 *targeted* upgrade. For example, after changing FastAPI:
 
 ```sh
-uv pip compile pyproject.toml --extra api --extra test-api --universal --python-version 3.12 --output-file requirements-api.txt --upgrade-package fastapi
+uv pip compile pyproject.toml --extra api --extra test-api --universal --python-version 3.12 --no-header --no-annotate --output-file requirements-api.txt --upgrade-package fastapi
 ```
 
 Replace `fastapi` with the direct dependency you changed. Do not use a
