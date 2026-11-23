@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
-import { dispatchParsed } from '../src/javascript-worker';
+import { dispatchJson, dispatchParsed } from '../src/javascript-worker';
 import { catalogFixture, demoFixture } from './json-fixtures';
 
 const root = resolve(process.cwd(), '../..');
@@ -106,4 +106,123 @@ void test('dispatcher covers fixed demo, catalog, simulation, sweep, report, pla
     assumed_rate: '98.32',
   };
   assert.deepEqual(dispatchParsed('quotes/normalize', quote, assets), native('quote', quote));
+});
+
+void test('worker simulation preserves decimal number tokens beyond binary precision', async () => {
+  const exactDemand = '999999999999.000000001';
+  const scenario = { ...demoData.scenarios.generator_failure, it_demand_kw: exactDemand };
+  const body = JSON.stringify(scenario).replace(
+    `"it_demand_kw":"${exactDemand}"`,
+    `"it_demand_kw":${exactDemand}`,
+  );
+  assert.match(body, /"it_demand_kw":999999999999\.000000001/);
+  assert.deepEqual(
+    await dispatchJson('simulations', body, assets),
+    dispatchParsed('simulations', scenario, assets),
+  );
+});
+
+void test('worker rejects duplicate JSON keys and decimal schema-version tokens', async () => {
+  const duplicate = '{"schema_version":2,"schema_version":2}';
+  await assert.rejects(dispatchJson('simulations', duplicate, assets), /duplicate/i);
+
+  const schema = JSON.stringify(demoData.scenarios.generator_failure).replace(
+    '"schema_version":2',
+    '"schema_version":2.0',
+  );
+  await assert.rejects(dispatchJson('simulations', schema, assets), /schema_version/i);
+
+  const numericName = JSON.stringify(demoData.scenarios.generator_failure).replace(
+    /"name":"[^"]*"/,
+    '"name":123',
+  );
+  await assert.rejects(
+    dispatchJson('simulations', numericName, assets),
+    /name: expected nonempty text/i,
+  );
+
+  const unsafeId = JSON.stringify(demoData.scenarios.generator_failure).replace(
+    /"id":"[^"]*"/,
+    '"id":9007199254740993',
+  );
+  await assert.rejects(
+    dispatchJson('simulations', unsafeId, assets),
+    /id: expected nonempty text/i,
+  );
+});
+
+void test('worker quote endpoint preserves decimal number tokens', async () => {
+  const exactHours = '999999999999.000000001';
+  const quote = {
+    offer_id: 'azure-nd-h100',
+    node_count: 2,
+    billed_hours: exactHours,
+    assumed_rate: '1',
+  };
+  const body = JSON.stringify(quote).replace(
+    `"billed_hours":"${exactHours}"`,
+    `"billed_hours":${exactHours}`,
+  );
+  assert.deepEqual(
+    await dispatchJson('quotes/normalize', body, { catalog }),
+    dispatchParsed('quotes/normalize', quote, { catalog }),
+  );
+});
+
+void test('worker planning endpoint preserves decimal number tokens', async () => {
+  const exactLoad = '999999999999.000000001';
+  const planning = {
+    schema_version: 1,
+    id: 'exact-json-number',
+    name: 'Exact JSON number',
+    currency: 'USD',
+    it_capacity_kw: '1',
+    tariff_per_kwh: null,
+    price_status: 'unknown',
+    assumption_date: '2026-09-08',
+    source_ids: ['TEST-001'],
+    segments: [{ label: 'Test period', hours: '1', it_load_kw: exactLoad, assumed_pue: '1.25' }],
+  };
+  const body = JSON.stringify(planning).replace(
+    `"it_load_kw":"${exactLoad}"`,
+    `"it_load_kw":${exactLoad}`,
+  );
+  assert.deepEqual(
+    await dispatchJson('planning', body, assets),
+    dispatchParsed('planning', planning, assets),
+  );
+});
+
+void test('worker sweeps preserve decimal and exponent number tokens without accepting booleans', async () => {
+  const scenario = demoData.scenarios.generator_failure;
+  const sweep = {
+    scenario,
+    parameter: 'battery_initial_kwh',
+    values: ['1.25e+1', '12.500000001'],
+  };
+  const body = JSON.stringify(sweep)
+    .replace('"1.25e+1"', '1.25e+1')
+    .replace('"12.500000001"', '12.500000001');
+  assert.deepEqual(
+    await dispatchJson('sweeps', body, assets),
+    dispatchParsed('sweeps', sweep, assets),
+  );
+
+  const booleanValue = JSON.stringify({ ...sweep, values: [true] });
+  await assert.rejects(
+    dispatchJson('sweeps', booleanValue, assets),
+    /expected a finite decimal value/i,
+  );
+});
+
+void test('worker strips one leading BOM and rejects an internal BOM', async () => {
+  const scenario = demoData.scenarios.generator_failure;
+  const serialized = JSON.stringify(scenario);
+  assert.deepEqual(
+    await dispatchJson('simulations', `\uFEFF${serialized}`, assets),
+    dispatchParsed('simulations', scenario, assets),
+  );
+
+  const internalBom = `${serialized.slice(0, 1)}\uFEFF${serialized.slice(1)}`;
+  await assert.rejects(dispatchJson('simulations', internalBom, assets), SyntaxError);
 });

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { SiteScenario } from './types';
+import { parseLosslessJson } from './js-engine/json';
 import './scenario-files.css';
 
 const maximumFileBytes = 10 * 1024 * 1024;
@@ -84,7 +85,7 @@ export function ScenarioFiles({
       const text = await file.text();
       let document: unknown;
       try {
-        document = JSON.parse(text.replace(/^\uFEFF/, ''));
+        document = parseLosslessJson(text);
       } catch {
         throw new Error(
           'This file is not valid JSON. Choose a scenario or an exported electrical run.',

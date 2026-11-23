@@ -151,6 +151,30 @@ test('a native CLI export reopens with its complete result and hashes preserved'
   expect(result.summary.peak_unserved_kw).toBe('335');
 });
 
+test('scenario file imports preserve exact decimal tokens with a leading BOM', async ({ page }) => {
+  test.setTimeout(60000);
+  await openFiles(page);
+  const original = await download(page, 'Export run');
+  const exactDemand = '999999999999.000000001';
+  const scenario = { ...original.scenario, it_demand_kw: exactDemand };
+  const body = JSON.stringify(scenario).replace(
+    `"it_demand_kw":"${exactDemand}"`,
+    `"it_demand_kw":${exactDemand}`,
+  );
+  expect(body).toContain('"it_demand_kw":999999999999.000000001');
+  await choose(page, `\uFEFF${body}`, 'precise-number.json');
+  await expect(page.getByTestId('scenario-file-preview')).toContainText('Ready to run');
+  const result = await runImported(page);
+  expect(result.scenario.it_demand_kw).toBe(exactDemand);
+});
+
+test('scenario file imports reject duplicate JSON keys', async ({ page }) => {
+  const panel = await openFiles(page);
+  await choose(page, '{"schema_version":2,"schema_version":2}', 'duplicate-keys.json');
+  await expect(panel.getByRole('alert')).toContainText('not valid JSON');
+  await expect(page.getByTestId('scenario-file-preview')).toHaveCount(0);
+});
+
 const invalidFiles: {
   name: string;
   make: (scenario: SiteScenario) => unknown;

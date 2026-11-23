@@ -1,4 +1,5 @@
 import { requiredValue } from '../required-value';
+import { isLosslessNumber } from 'lossless-json';
 import { canonicalJson, compareUnicode } from './canonical';
 import { decimalText, InputError, Rational } from './decimal';
 import { simulateValidated } from './continuity';
@@ -39,7 +40,7 @@ function parseSweepValue(
   parameter: string,
   index: number,
 ): { label: string; parsed: Rational } {
-  if (typeof value !== 'string' && typeof value !== 'number')
+  if (typeof value !== 'string' && typeof value !== 'number' && !isLosslessNumber(value))
     throw new InputError(`values[${String(index)}]: expected a finite decimal value`);
   const parsed = Rational.fromDecimal(value, `values[${String(index)}]`);
   if (parameter === 'generator_start_delay_s' && parsed.denominator !== 1n)
