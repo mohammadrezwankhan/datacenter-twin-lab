@@ -8,6 +8,7 @@ rules:
       - pattern: requests.$METHOD(..., verify=False, ...)
       - pattern: $SESSION.request(..., verify=False, ...)
       - pattern: httpx.$METHOD(..., verify=False, ...)
+      - pattern: httpx2.$METHOD(..., verify=False, ...)
       - pattern: ssl._create_unverified_context(...)
       - pattern: $CONTEXT.check_hostname = False
       - pattern: $CONTEXT.verify_mode = ssl.CERT_NONE
