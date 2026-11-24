@@ -71,7 +71,7 @@ These are source matches, not a new successful execution record. Follow the docu
 
 ## CI and verification ledger
 
-The seven workflow files were inspected: tests.yml, hardened-ci.yml, codeql.yml, qa-audit.yml, deploy-dashboard.yml, portfolio-dashboard-check.yml and publish-pypi.yml. The tests and hardened CI workflows run on PRs; QA audit has a PR trigger; flagship deployment uses main docs/assets pushes and manual dispatch; PyPI publication is manual. Existing scopes must not be weakened.
+The seven workflow files were inspected: tests.yml, hardened-ci.yml, codeql.yml, qa-audit.yml, deploy-dashboard.yml, portfolio-dashboard-check.yml and publish-pypi.yml. Tests, Hardened CI and QA Audit run on PRs. The Flagship workflow validates on matching main pushes and manual dispatch; its deploy job is disabled and Pages uses a separate publisher. PyPI publication is manual. Existing scopes must not be weakened.
 
 The root and web Prettier configurations were inspected. Current scripts target named JS/TS/JSON/HTML surfaces, not a dedicated Markdown check. Existing local pre-commit security hooks call the repository security runner; the existing Gitleaks policy extends defaults with narrowly reviewed exceptions. No bypass or policy changes are proposed.
 
@@ -85,7 +85,7 @@ The root and web Prettier configurations were inspected. Current scripts target 
 
 ## Draft follow-up verification
 
-A separate coding-agent language review refined the Chinese terms for modeled path capacity, elapsed battery depletion time, and PUE. The follow-up checked six commands against the frozen source lines, 33 local links, 53 pinned file references, and all 15 glossary pairs. Both diagrams rendered in standalone Mermaid 12.3.0 in installed Chrome in light and dark themes. These are documentation checks, not human native-speaker sign-off or a test of GitHub's exact renderer.
+A separate coding-agent language review refined the Chinese terms for modeled path capacity, elapsed battery depletion time, and PUE. A separate technical review checked both diagrams against source and confirmed the canonical calculations. The follow-up checked six commands against the frozen source lines, 33 local links, 53 pinned file references, and all 15 glossary pairs. Both diagrams rendered in standalone Mermaid 12.3.0 in installed Chrome in light and dark themes. These are documentation checks, not human native-speaker sign-off or a test of GitHub's exact renderer.
 
 On Windows with Python 3.12, the full unittest suite ran 307 tests with 56 skips and no failures. The generator-failure CLI preset still reported simulated depletion at 607.8 seconds. Final candidate and post-merge checks belong to their exact GitHub revisions. This audit does not authorise an application deployment or change Engineering HOLD.
 
