@@ -4,7 +4,7 @@
 
 **一次停电，一本能量收支台账，一套可复现的供电连续性实验。**
 
-从市电中断到蓄电池耗尽，从冗余供电路径到共因故障域，用可检查的输入、计算和结果理解数据中心供配电系统。面向工程师、科研人员及学生，所有示例均为合成教学场景。
+从市电中断到蓄电池耗尽，从冗余供电路径到共因故障域，用可检查的输入、计算和结果理解数据中心供配电系统。面向工程师、科研人员及学生，模型示例均为合成教学场景。
 
 **[打开在线实验室](https://khanlab.co.technology/) · [学习 24 节课程](https://khanlab.co.technology/learn/) · [查看典型算例](./docs/canonical-case.md)**
 
@@ -64,14 +64,14 @@ flowchart TD
 
 - IT 侧可交付电量：100 kWh × 0.90 × 0.95 = 85.5 kWh。
 - 蓄电池支撑时长：85.5 kWh ÷ 1,000 kW × 3,600 s/h = 307.8 s。
-- 蓄电池耗尽时刻：300 s + 307.8 s = 607.8 s。
+- 蓄电池耗尽时间（自仿真开始计）：300 s + 307.8 s = 607.8 s。
 
-| 初始储能量 | IT 侧可交付电量 | 支撑时长 | 耗尽时刻 |
+| 初始储能量 | IT 侧可交付电量 | 支撑时长 | 耗尽时间 |
 | ---: | ---: | ---: | ---: |
 | 100 kWh | 85.5 kWh | 307.8 s | 607.8 s |
 | 50 kWh | 42.75 kWh | 153.9 s | 453.9 s |
 
-支撑时长从市电中断时刻起算，耗尽时刻从仿真开始起算。能量收支台账同时核对 IT 需求电量、已供电量、未供电量及转换损耗。以上是[典型算例](./docs/canonical-case.md)中的确定性教学结果，不是现场测量数据。
+支撑时长从市电中断时刻起算，耗尽时间从仿真开始起算。能量收支台账同时核对 IT 需求电量、已供电量、未供电量及转换损耗。以上是[典型算例](./docs/canonical-case.md)中的确定性教学结果，不是现场测量数据。
 
 ## 05｜安装与运行
 
@@ -129,13 +129,13 @@ npm --prefix apps/web run build
 | Stored battery energy | 蓄电池储能量 |
 | Battery ride-through duration | 蓄电池支撑时长 |
 | Distribution efficiency | 配电效率 |
-| Gross path capacity | 供电路径额定容量 |
+| Gross path capacity | 供电路径容量上限 |
 | Redundancy | 冗余 |
 | Shared failure domain | 共因故障域 |
 | Energy ledger | 能量收支台账 |
 | Requested / served / unserved IT energy | IT 需求电量／已供电量／未供电量 |
-| Battery depletion elapsed time | 蓄电池耗尽时刻 |
-| Power usage effectiveness (PUE) | 电能利用效率（PUE） |
+| Battery depletion elapsed time | 蓄电池耗尽时间 |
+| Power usage effectiveness (PUE) | 电能使用效率（PUE） |
 | Electromagnetic transients (EMT) | 电磁暂态（EMT） |
 
 完整定义、标准参考及编辑约定见[中英双语工程术语表](./docs/i18n/GLOSSARY.zh-CN.md)。保留 kW、MW、kWh、MWh、kV、PUE 等单位与缩写；代码标识符和机器可读数据不翻译。

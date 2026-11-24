@@ -67,7 +67,7 @@ These are source matches, not a new successful execution record. Follow the docu
 3. Interface: extend to App, RunTools, chart/scene labels, runtime/error messages and course content. Use a locale-aware display adapter; machine-readable JSON/CSV, units, identifiers, canonical data and engine parity remain stable.
 4. Layout: test local CJK fallback, text zoom, line wrapping, keyboard controls, screen-reader accessible names and responsive viewports. Reuse mobile-text-layout.spec.ts and viewport-matrix.audit.spec.ts without removing existing coverage.
 5. SEO: localise static build metadata and actual translated pages, not fictional routes. Verify canonical and hreflang reciprocity, no-JS delivery, sitemap and evidence links; check deployed artifact separately.
-6. Add an additive docs-sync and Mermaid-validation check with reviewed, pinned tooling in a follow-up PR. Preserve all existing check names and events, lock validation, security settings, and scientific tolerances.
+6. Add docs-sync and Mermaid validation to a compatible existing CI job after reviewing pinned tooling. Preserve existing check names, events, lock validation, security settings, and scientific tolerances.
 
 ## CI and verification ledger
 
@@ -83,6 +83,10 @@ The root and web Prettier configurations were inspected. Current scripts target 
 | G4 glossary | 15 locked bilingual terms, same table terms in Chinese README; native technical review pending. |
 | G5 roadmap | File-referenced actions delivered; docs-sync implementation is a follow-up, not an existing CI feature. |
 
-No independent reviewers were dispatched. R1 technical, R2 native-language and R3 CI review remain outstanding as independent sign-offs. Actual candidate checks, Markdown formatting, pre-commit, Semgrep/Gitleaks, render and deployment must be recorded against the candidate commit, not the baseline. No new release or Engineering HOLD change is authorised by this audit.
+## Draft follow-up verification
+
+A separate coding-agent language review refined the Chinese terms for modeled path capacity, elapsed battery depletion time, and PUE. The follow-up checked six commands against the frozen source lines, 33 local links, 53 pinned file references, and all 15 glossary pairs. Both diagrams rendered in standalone Mermaid 12.3.0 in installed Chrome in light and dark themes. These are documentation checks, not human native-speaker sign-off or a test of GitHub's exact renderer.
+
+On Windows with Python 3.12, the full unittest suite ran 307 tests with 56 skips and no failures. The generator-failure CLI preset still reported simulated depletion at 607.8 seconds. Final candidate and post-merge checks belong to their exact GitHub revisions. This audit does not authorise an application deployment or change Engineering HOLD.
 
 [Chinese README](../../README.zh-CN.md) · [Bilingual glossary](GLOSSARY.zh-CN.md)
