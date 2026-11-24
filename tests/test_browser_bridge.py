@@ -87,7 +87,7 @@ class BrowserBridgeTests(unittest.TestCase):
 
 HAS_API = (
     importlib.util.find_spec("fastapi") is not None
-    and importlib.util.find_spec("httpx") is not None
+    and importlib.util.find_spec("httpx2") is not None
 )
 
 
