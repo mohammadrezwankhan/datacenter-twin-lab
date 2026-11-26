@@ -105,6 +105,8 @@ In B, move the 1,000 kW step earlier and add a return to 500 kW exactly 900 seco
 
 Alternatively, increase a battery's **energy** capacity while reducing its **power** rating. Predict whether the reserve calculation alone will still describe service. The [surviving-path walkthrough](continuity-walkthrough.md) explains a separate power-capacity constraint.
 
+Continue with [Battery power and stored energy](battery-power-and-energy.md) for four downloadable cases and independent calculations. The comparison shows why two cases can lose the same total energy while supplying different power histories, and why stored energy can remain during a persistent shortfall.
+
 ## Assumptions, scope and sources
 
 ![Section 05 · Scope / limitations](../visuals/sections/section-05-scope.svg)

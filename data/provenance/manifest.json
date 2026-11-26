@@ -62,6 +62,13 @@
       "license": "Apache-2.0",
       "assumption_date": "2026-09-27",
       "notes": "Three original prescribed-demand schedules each request 375 kWh over 1800 seconds, with 900 seconds each at 1000 and 500 kW. They share a 100 kWh initial battery, disabled charging, 0.90 discharge and 0.95 distribution efficiencies, and utility/generator loss from 300 to 900 seconds. Timing is varied to teach the difference between total energy and outage-overlap energy. No measured workload, GPU job scheduling, throughput equivalence, physical transfer performance or facility reliability is implied."
+    },
+    {
+      "id": "EDU-BATTERY-LIMITS-001",
+      "source_type": "original_synthetic_assumption",
+      "license": "Apache-2.0",
+      "assumption_date": "2026-11-26",
+      "notes": "Four original controlled teaching cases vary initial/maximum battery energy (100 or 200 kWh) and battery electrical output rating before distribution loss (600 or 1200 kW). All request 1000 kW for 1800 seconds, disable charging, retain 0.90 discharge and 0.95 distribution efficiencies, and lose utility/generator supply from 300 to 900 seconds. Equal unserved energy can hide different power histories; remaining energy does not establish full-demand coverage. No equipment sizing, real-site calibration, reliability probability, physical transfer performance or independent external review is claimed."
     }
   ]
 }
