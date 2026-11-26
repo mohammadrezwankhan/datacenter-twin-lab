@@ -75,18 +75,35 @@ The seven workflow files were inspected: tests.yml, hardened-ci.yml, codeql.yml,
 
 The root and web Prettier configurations were inspected. Current scripts target named JS/TS/JSON/HTML surfaces, not a dedicated Markdown check. Existing local pre-commit security hooks call the repository security runner; the existing Gitleaks policy extends defaults with narrowly reviewed exceptions. No bypass or policy changes are proposed.
 
-| Gate | Candidate state before remote CI |
+| Gate | Final verification status — 26 November |
 | --- | --- |
-| G1 commands | Source-line equality checked for every README shell command; all links and claims require final review. |
-| G2 switchers | Static link and unchanged-English-body checks performed; candidate GitHub rendering pending. |
-| G3 Mermaid | Quoted labels, balanced fences and source-mapped topology; actual parser and light/dark rendering pending. |
-| G4 glossary | 15 locked bilingual terms, same table terms in Chinese README; native technical review pending. |
-| G5 roadmap | File-referenced actions delivered; docs-sync implementation is a follow-up, not an existing CI feature. |
+| G1 commands | Six README commands were source-traced. Independent review found no mismatch in documented calculations, product claims, or stated model limits; this documentation audit does not claim command execution. |
+| G2 switchers | Reciprocal README switchers are present; the English README body remains unchanged after adding its switcher. |
+| G3 Mermaid | Both diagrams parsed and rendered with Mermaid 12.3.0 in installed Chrome in light and dark themes. The merged GitHub Markdown preview was also visually verified in installed Chrome in both themes on 2026-11-26. |
+| G4 glossary | All 15 locked bilingual pairs match across the glossary and Chinese README. AI editorial review found no term inconsistency; human/native-speaker sign-off remains pending. |
+| G5 roadmap | Sixteen file-referenced actions cover GitHub SEO, docs-sync CI and web i18n. Docs-sync remains a proposed follow-up, not an implemented CI check. |
 
-## Draft follow-up verification
+## Follow-up verification — 26 November
 
-A separate coding-agent language review refined the Chinese terms for modeled path capacity, elapsed battery depletion time, and PUE. A separate technical review checked both diagrams against source and confirmed the canonical calculations. The follow-up checked six commands against the frozen source lines, 33 local links, 53 pinned file references, and all 15 glossary pairs. Both diagrams rendered in standalone Mermaid 12.3.0 in installed Chrome in light and dark themes. These are documentation checks, not human native-speaker sign-off or a test of GitHub's exact renderer.
+A separate coding-agent language review refined the Chinese terms for modeled path capacity, elapsed battery depletion time, and PUE. A separate technical review checked both diagrams against source and confirmed the canonical calculations. The follow-up checked six commands against the frozen source lines, 33 local links, 53 pinned file references, and all 15 glossary pairs. Both diagrams rendered in standalone Mermaid 12.3.0 in installed Chrome in light and dark themes. These are documentation checks, not human native-speaker sign-off. The exact GitHub Markdown preview was separately checked in installed Chrome in light and dark modes; see the post-merge record below.
 
 On Windows with Python 3.12, the full unittest suite ran 307 tests with 56 skips and no failures. The generator-failure CLI preset still reported simulated depletion at 607.8 seconds. Final candidate and post-merge checks belong to their exact GitHub revisions. This audit does not authorise an application deployment or change Engineering HOLD.
+
+
+
+### Independent review panel
+
+| Reviewer role | Evidence | Status |
+| --- | --- | --- |
+| R1 — Technical accuracy | Separate read-only model audit traced six README commands, claims, canonical arithmetic and model boundaries to the pinned source; no substantive mismatch found. | Source-traceability pass; no runtime command execution claimed. |
+| R2 — Engineering-language review | Separate read-only editorial pass found glossary terms consistent and suggested two optional sentence-level refinements. | AI editorial pass; human/native-speaker sign-off remains pending. |
+| R3 — CI and document quality | Separate read-only review confirmed link, diagram and CI evidence; conditional skips are listed below. | Evidence review complete; no Markdown-specific CI formatter or local pre-commit run is claimed. |
+
+### Post-merge check record
+
+PR head `6a232d0bd4e5c82eb32d219d48087138b268eb0c` had 22 successful checks and two conditional skips: `Publish static demo` and the manual hosted crawl/SHA-256 check. On merge revision `4f98315db719df82d82390aa796c4acc97be18f6`, four main workflows completed with 22 successful jobs, zero failures, and the conditional Flagship `deploy` job skipped; static-demo publishing succeeded on the main push. No check was bypassed.
+[PR #176](https://github.com/mohammadrezwankhan/datacenter-twin-lab/pull/176) · PR checks: [Tests](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45370798836), [Hardened CI](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45370798797), [CodeQL](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45370798803), [QA audit](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45370798837). Main workflows on the merge revision: [Tests](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45374433343), [Hardened CI](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45374433380), [CodeQL](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45374433518), [QA audit](https://github.com/mohammadrezwankhan/datacenter-twin-lab/actions/runs/45374433458).
+
+On 2026-11-26, installed Chrome loaded the merged Chinese README's public GitHub preview at 1440 px. Both Mermaid diagrams were visibly rendered in light and dark modes. Private screenshots are retained in the review workspace, not published as release assets.
 
 [Chinese README](../../README.zh-CN.md) · [Bilingual glossary](GLOSSARY.zh-CN.md)
