@@ -2,6 +2,8 @@
 
 ## 2.0.3 — Dependency and input-validation maintenance (2026-11-27)
 
+- Reject duplicate fields and config files exceeding 4 MiB in both EMT and research study CLIs, preserving valid numerical results.
+
 - Update compatible API, development, browser, build and security-tool dependencies with complete regenerated locks and immutable action references.
 - Remove obsolete dependency overrides after verifying the updated parent packages and glob behavior.
 - Reject oversized EMT integers through the documented input-error boundary; the CLI returns an actionable error and creates no output file.

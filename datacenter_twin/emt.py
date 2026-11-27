@@ -14,7 +14,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import TypedDict
 
-from .contracts import InputError
+from .contracts import InputError, load_json_document
 
 DEFAULT_EMT = {
     "source_v": 800,
@@ -207,11 +207,7 @@ def main() -> None:
     try:
         if args.force and not args.output:
             raise InputError("--force requires --output")
-        config = (
-            json.loads(args.config.read_text(encoding="utf-8"))
-            if args.config
-            else EMT_PRESETS[args.preset]
-        )
+        config = load_json_document(args.config) if args.config else EMT_PRESETS[args.preset]
         result = simulate_emt(config)
         content = json.dumps(result, indent=2, allow_nan=False) + "\n"
         if args.output:

@@ -19,7 +19,7 @@ class EngineeringHeroMediaTests(unittest.TestCase):
 
             with (
                 patch.object(prepare_browser_demo, "ROOT", root),
-                patch.dict(os.environ, {}, clear=True),
+                patch.object(os, "environ", {}),
             ):
                 self.assertTrue(prepare_browser_demo.engineering_hero_enabled())
 
@@ -30,7 +30,7 @@ class EngineeringHeroMediaTests(unittest.TestCase):
 
             with (
                 patch.object(prepare_browser_demo, "ROOT", root),
-                patch.dict(os.environ, {"VITE_ENGINEERING_HERO": "0"}),
+                patch.object(os, "environ", {"VITE_ENGINEERING_HERO": "0"}),
             ):
                 prepare_browser_demo.prepare()
 
@@ -46,7 +46,7 @@ class EngineeringHeroMediaTests(unittest.TestCase):
 
             with (
                 patch.object(prepare_browser_demo, "ROOT", root),
-                patch.dict(os.environ, {"VITE_ENGINEERING_HERO": "1"}),
+                patch.object(os, "environ", {"VITE_ENGINEERING_HERO": "1"}),
             ):
                 prepare_browser_demo.prepare()
 

@@ -9,6 +9,7 @@ import runpy
 import tempfile
 import unittest
 from contextlib import redirect_stdout
+from decimal import Decimal
 from importlib.util import find_spec
 from pathlib import Path
 from types import SimpleNamespace
@@ -624,7 +625,7 @@ class ResearchCommandTests(unittest.TestCase):
                     redirect_stdout(stdout),
                 ):
                     runpy.run_module("datacenter_twin.research", run_name="__main__")
-                study.assert_called_once_with("modal", {"load_pu": 0.55})
+                study.assert_called_once_with("modal", {"load_pu": Decimal("0.55")})
                 encoded = output.read_text(encoding="utf-8") if to_file else stdout.getvalue()
                 self.assertEqual(json.loads(encoded), result)
                 if to_file:
