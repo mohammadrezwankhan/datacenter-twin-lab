@@ -5,8 +5,8 @@ title: "Datacenter Twin Lab"
 authors:
   - family-names: Khan
     given-names: Mohammad Rezwan
-version: 2.0.1
-date-released: 2026-10-26
+version: 2.0.3
+date-released: 2026-11-27
 repository-code: "https://github.com/mohammadrezwankhan/datacenter-twin-lab"
 license: Apache-2.0
 abstract: >-

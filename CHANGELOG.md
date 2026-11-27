@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.3 — Dependency and input-validation maintenance (2026-11-27)
+
+- Reject duplicate fields and config files exceeding 4 MiB in both EMT and research study CLIs, preserving valid numerical results.
+
+- Update compatible API, development, browser, build and security-tool dependencies with complete regenerated locks and immutable action references.
+- Remove obsolete dependency overrides after verifying the updated parent packages and glob behavior.
+- Reject oversized EMT integers through the documented input-error boundary; the CLI returns an actionable error and creates no output file.
+- Align Python, JavaScript, dashboard package and citation versions; add a separately reproduced 2.0.3 continuity evidence packet.
+- Preserve historical evidence, model assumptions, supported environments, numerical tolerances and Engineering HOLD. See [release scope and verification](docs/releases/v2.0.3.md).
+
 ## Unreleased — Source metadata and responsive quality guards (2026-11-09)
 
 - Correct fallback local-dashboard JSON-LD to describe 24 lessons (12 continuity and 12 Infrastructure Engineering) and the current 2.0.1 engine, rather than 12 lessons and 1.0.0.

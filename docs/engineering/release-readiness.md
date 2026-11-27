@@ -1,6 +1,13 @@
 # Release scope and reproducibility
 
-The published **[2.0.1 maintenance release](../releases/v2.0.1.md)** packages the later odd-record spectrum
+The current source is the **[2.0.3 maintenance candidate](../releases/v2.0.3.md)**.
+As checked on 27 November 2026, the latest published GitHub release is
+**[v2.0.2](https://github.com/mohammadrezwankhan/datacenter-twin-lab/releases/tag/v2.0.2)**,
+from source `a3754ac4d02041b811b6cab37e28db49f3af0629`. Source maintenance,
+package publication and the canonical website each require their own verification;
+a prepared candidate does not establish a new release or deployment.
+
+The historical **[2.0.1 maintenance release](../releases/v2.0.1.md)** packages the later odd-record spectrum
 correction, complete current-dashboard inventory checks and Windows first-run
 guidance. See [the patch notes](../releases/v2.0.1.md) and [current evidence](../evidence.md).
 Its 2026-10-26 publication receipt identifies the exact checked source, fresh installed artifacts and verified static delivery. The gates below continue to apply to future releases; a prepared source, tag or draft alone is not publication. Published v2.0.0 assets remain unchanged.

@@ -13,22 +13,11 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@types/node": "26.6.6",
-    "eslint": "10.15.0",
+    "@types/node": "26.6.11",
+    "eslint": "10.16.0",
     "globals": "17.14.0",
     "prettier": "3.10.1",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.72.2"
-  },
-  "overrides": {
-    "eslint@10.13.0": {
-      "minimatch": "11.0.1"
-    },
-    "@eslint/config-array@0.23.5": {
-      "minimatch": "11.0.1"
-    },
-    "@typescript-eslint/typescript-estree@8.72.2": {
-      "minimatch": "11.0.1"
-    }
+    "typescript-eslint": "8.74.0"
   }
 }

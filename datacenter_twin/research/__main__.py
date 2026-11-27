@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 
+from datacenter_twin.contracts import load_json_document
 from datacenter_twin.output import write_result
 
 from . import STUDY_DEFAULTS, run_study
@@ -22,7 +23,7 @@ def main() -> None:
     try:
         if args.force and not args.output:
             raise ValueError("--force requires --output")
-        config = json.loads(args.config.read_text(encoding="utf-8")) if args.config else {}
+        config = load_json_document(args.config) if args.config else {}
         result = run_study(args.study, config)
         content = json.dumps(result, indent=2, allow_nan=False) + "\n"
         if args.output:

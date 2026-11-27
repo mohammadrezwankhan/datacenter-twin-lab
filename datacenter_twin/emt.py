@@ -14,7 +14,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import TypedDict
 
-from .contracts import InputError
+from .contracts import InputError, load_json_document
 
 DEFAULT_EMT = {
     "source_v": 800,
@@ -77,7 +77,10 @@ def validate_config(config: object) -> dict[str, int | float]:
         value = config[field]
         if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
             raise InputError(f"{field} must be a finite number")
-        numeric = float(value)
+        try:
+            numeric = float(value)
+        except (OverflowError, ValueError) as exc:
+            raise InputError(f"{field} must be between {low} and {high}") from exc
         if not math.isfinite(numeric) or not low <= numeric <= high:
             raise InputError(f"{field} must be between {low} and {high}")
     for field in ("sag_start_ms", "sag_duration_ms", "duration_ms"):
@@ -204,11 +207,7 @@ def main() -> None:
     try:
         if args.force and not args.output:
             raise InputError("--force requires --output")
-        config = (
-            json.loads(args.config.read_text(encoding="utf-8"))
-            if args.config
-            else EMT_PRESETS[args.preset]
-        )
+        config = load_json_document(args.config) if args.config else EMT_PRESETS[args.preset]
         result = simulate_emt(config)
         content = json.dumps(result, indent=2, allow_nan=False) + "\n"
         if args.output:

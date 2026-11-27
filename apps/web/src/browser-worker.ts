@@ -1,4 +1,3 @@
-import type { PyDict } from 'pyodide/ffi';
 import { workerRequest } from './worker-envelope';
 import type { PyodideInterface } from 'pyodide';
 import {
@@ -64,8 +63,12 @@ self.addEventListener('message', (event: MessageEvent<unknown>) => {
         throw error;
       }));
       report({ stage: 'calculate', message: 'Running the Python verification calculation' });
-      (py.globals as PyDict).set('_request_path', path);
-      (py.globals as PyDict).set('_request_json', body);
+      const globals = py.globals;
+      if (!(globals instanceof py.ffi.PyDict)) {
+        throw new Error('Python runtime globals are not a dictionary');
+      }
+      globals.set('_request_path', path);
+      globals.set('_request_json', body);
       const value: unknown = py.runPython('_bridge_dispatch(_request_path, _request_json)');
       if (typeof value !== 'string') throw new Error('Python runtime did not return JSON text');
       const result: unknown = JSON.parse(value);

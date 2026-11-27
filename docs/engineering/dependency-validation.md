@@ -1,12 +1,16 @@
 # Dependency validation
 
-Native scientific dependencies intentionally differ from the pinned Pyodide browser distribution: native NumPy 2.5.4 and SciPy 1.18.1; browser NumPy 2.4.6 and SciPy 1.18.0 in Pyodide 314.0.7. The browser packages remain hash verified. This is a software parity policy, not a claim of scientific calibration. Both versions must satisfy the existing differential checks without changing numerical tolerances under the project and root demo base paths. CI failures block integration.
+Native scientific dependencies intentionally differ from the pinned Pyodide browser distribution: native NumPy 2.5.5 and SciPy 1.18.1; browser NumPy 2.4.6 and SciPy 1.18.0 in Pyodide 314.0.8. The browser packages remain hash verified. Pyodide 314.0.8 retains the same NumPy/SciPy wheel names, SHA-256 hashes, Python 3.14.2 and ABI as 314.0.7; the runtime update still requires the existing browser parity checks. This is a software parity policy, not a claim of scientific calibration. Both versions must satisfy the existing differential checks without changing numerical tolerances under the project and root demo base paths. CI failures block integration.
 
-CI installs API/study extras together with their locks, runs pip check, and verifies installed versions against project metadata and the lock. React and React DOM are updated together, with a prebuild installed-version guard and a grouped Dependabot update including their type packages. React type patch numbers may differ from runtime patch numbers. Vite 8.3.5 includes the launch-editor security fixes reported for the previous 8.2.2 pin.
+CI installs API/study extras together with their locks, runs pip check, and verifies installed versions against project metadata and the lock. React and React DOM remain paired at 19.3.1, with a prebuild installed-version guard and a grouped Dependabot update including their type packages. React type patch numbers may differ from runtime patch numbers. The frontend uses Vite 8.4.0 with plugin-react 6.3.0.
+
+The root lint toolchain retains TypeScript 6.0.3 because typescript-eslint 8.74.0 declares a TypeScript peer range of `>=4.8.4 <6.1.0`. The application compiler remains TypeScript 7.0.2. These separate pins are intentional; installing the newest application compiler into the lint toolchain would violate that peer contract. ESLint 10.16.0, config-array 0.23.7 and typescript-estree 8.74.0 now declare compatible minimatch 11 ranges, so the former exact-parent security overrides are removed. The regenerated root lock selects minimatch 11.0.9, subject to the existing glob behavior and authored-source lint checks.
 
 The API and studies pins live in `requirements-api.txt` and
 `requirements-studies.txt` so Dependabot can discover them. The old `.lock`
 filenames include the corresponding pin files for existing install commands.
+
+The 27 November 2026 maintenance refresh used Python 3.12.14, uv 0.13.9, Node 24.22.3 and npm 11.19.1. It selected FastAPI 0.165.0 and explicitly refreshed its compatible annotated-doc, click, Pydantic/pydantic-core and Starlette lock entries. Declared native NumPy/SciPy versions remain unchanged. Current package metadata and lock regeneration establish dependency identity; they do not substitute for installed API tests, browser execution or exact-source CI.
 
 ## Refreshing the API dependency lock
 

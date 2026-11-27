@@ -47,8 +47,13 @@ test('every tooling matcher respects an explicit globstar expansion budget', () 
   // Three splits expand to only eight rows in the vulnerable version: no large DoS input.
   const pattern = '**/../a/x/**/../b/x/**/../c/x';
   for (const [consumer, { Minimatch }] of matchers) {
-    const matcher = new Minimatch(pattern, { optimizationLevel: 2, braceExpandMax: 4 });
-    assert.ok(matcher.globParts.length <= 4, `${consumer} exceeded the expansion budget`);
+    assert.throws(
+      () => new Minimatch(pattern, { optimizationLevel: 2, braceExpandMax: 4 }),
+      { name: 'RangeError', message: "optimizationLevel 2: too many patterns from '**/..'" },
+      `${consumer} must reject expansion beyond the configured budget`,
+    );
+    const allowed = new Minimatch(pattern, { optimizationLevel: 2, braceExpandMax: 8 });
+    assert.equal(allowed.globParts.length, 8, `${consumer} must preserve an in-budget expansion`);
   }
 });
 
