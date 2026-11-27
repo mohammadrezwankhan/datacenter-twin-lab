@@ -1,4 +1,3 @@
-import type { PyDict } from 'pyodide/ffi';
 import { workerRequest } from '../worker-envelope';
 import type { PyodideInterface } from 'pyodide';
 import {
@@ -78,7 +77,11 @@ self.addEventListener('message', (event: MessageEvent<unknown>) => {
         throw error;
       }));
       report({ stage: 'calculate', message: 'Calculating the configured research study' });
-      (py.globals as PyDict).set('_study_request_json', body);
+      const globals = py.globals;
+      if (!(globals instanceof py.ffi.PyDict)) {
+        throw new Error('Python runtime globals are not a dictionary');
+      }
+      globals.set('_study_request_json', body);
       const value: unknown = py.runPython(
         [
           '_request = json.loads(_study_request_json)',

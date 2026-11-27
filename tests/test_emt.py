@@ -1,7 +1,13 @@
 """Independent circuit expectations for the bounded EMT teaching study."""
 
+import json
 import math
+import subprocess
+import sys
 import unittest
+from decimal import Decimal
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from datacenter_twin.contracts import InputError
 from datacenter_twin.emt import DEFAULT_EMT, EMT_PRESETS, simulate_emt
@@ -37,6 +43,50 @@ def analytic_segment(
 
 
 class EmtCircuitTests(unittest.TestCase):
+    def test_signaling_decimal_nan_is_a_field_specific_input_error(self) -> None:
+        for field in DEFAULT_EMT:
+            with self.subTest(field=field):
+                with self.assertRaises(ValueError) as raised:
+                    simulate_emt({**DEFAULT_EMT, field: Decimal("sNaN")})
+                self.assertIsInstance(raised.exception, InputError)
+                self.assertIn(field, str(raised.exception))
+
+    def test_oversized_integers_are_bounded_input_errors(self) -> None:
+        for field in DEFAULT_EMT:
+            for value in (10**400, -(10**400)):
+                with (
+                    self.subTest(field=field, negative=value < 0),
+                    self.assertRaisesRegex(InputError, field),
+                ):
+                    simulate_emt({**DEFAULT_EMT, field: value})
+
+    def test_cli_rejects_oversized_integer_without_writing_output(self) -> None:
+        with TemporaryDirectory() as directory:
+            source = Path(directory) / "config.json"
+            target = Path(directory) / "result.json"
+            source.write_text(json.dumps({**DEFAULT_EMT, "source_v": 10**400}), encoding="utf-8")
+            completed = subprocess.run(  # noqa: S603
+                [
+                    sys.executable,
+                    "-m",
+                    "datacenter_twin.emt",
+                    "--config",
+                    str(source),
+                    "--output",
+                    str(target),
+                ],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                timeout=15,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 2, completed.stderr)
+            self.assertIn("source_v", completed.stderr)
+            self.assertNotIn("Traceback", completed.stderr)
+            self.assertEqual(completed.stdout, "")
+            self.assertFalse(target.exists())
+
     def test_dc_divider_and_no_event_steady_state(self) -> None:
         result = simulate_emt({**DEFAULT_EMT, "sag_pu": 1})
         current = 800 / (0.08 + 12.8)

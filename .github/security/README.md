@@ -45,7 +45,7 @@ if it has subsequently been removed from the tree. Never rewrite history as an a
 `requirements.txt` pins the complete Python scanner dependency graph and package hashes for
 Python 3.12. `provenance.json` records source URLs and review date. Hash verification detects
 unexpected artifact changes; it does not independently prove publisher trust. Trivy is installed
-from the verified post-incident v0.76.1 release archive rather than an affected mutable Action tag.
+from the verified post-incident v0.76.2 release archive rather than an affected mutable Action tag.
 No network bootstrap script is piped into a shell. Narrow Ruff annotations document the reviewed
 HTTPS and subprocess calls; scanner code is included in ordinary Python linting.
 
@@ -95,12 +95,32 @@ scope. The registry pack is live, while the CLI and local twelve-rule policy are
 pinned in this change. An audit-pattern match needs source review before being
 called a confirmed exploitable vulnerability.
 
+## Dependency maintenance, 27 November 2026
+
+The maintained workflow pins use Harden-Runner 2.23.0 and CodeQL Action
+4.39.5 at immutable commit references. The Trivy 0.76.2 archive is pinned to
+its upstream SHA-256; zizmor 1.33.1 and CMake 4.4.5 use regenerated hash locks.
+The bootstrap lock is the matching packaging/pip/setuptools/wheel subset of
+the scanner lock. The refresh also selects newer compatible scanner dependency
+patches; scanner constraints and all fail-closed audit gates remain active.
+
+This is a compatible maintenance update, not a claim that every upstream
+component is at its newest major release. The custom OpenGrep 1.33.1 source
+build, reviewed PEP 695 parser backport, wcmatch 11.2 metadata patch and native
+source/AST controls remain pinned. Upstream OpenGrep 2.1.0 and wcmatch 12.0.4
+were available when checked. OpenGrep 2.1.0 changes ignore-file targeting;
+replacing this scanner requires a separately qualified source build, dependency
+closure, parser behavior and complete authored-file inventory. Its constrained
+boltons/glom/peewee/rich dependencies likewise retain the compatible upstream
+ranges. No advisory, source path, test, parser failure or timeout is suppressed
+to make an update pass.
+
 ## Minimatch security remediation
 
-The root development-tool lock pins `minimatch@11.0.1` for the three qualified
-consumers: ESLint 10.13.0, config-array 0.23.5 and typescript-estree 8.72.1.
-Their declared ranges target version 10; these exact-parent overrides deliberately
-cross that major boundary to address
+The root development-tool lock now resolves `minimatch@11.0.9` for ESLint
+10.16.0, config-array 0.23.7 and typescript-estree 8.74.0. These upstream
+consumers declare compatible version 11 ranges. The 27 November 2026 refresh
+therefore removes the obsolete exact-parent overrides previously used to address
 [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249).
 
 Version 11 removes regex-building APIs and changes some trailing-empty-segment
@@ -109,13 +129,15 @@ matcher and `Minimatch.match()` APIs, with `dot:true` and default optimization
 level 1. The tooling tests exercise every consumer's expansion bound, ordinary
 file selection, partial traversal, negation and corrected trailing separators.
 Strict lint also compares the actual authored-file inventory during qualification.
-Requalify or remove these overrides when upgrading their parent packages; do not
-apply version 11 blindly to callers using removed APIs.
+The existing glob and authored-source inventory checks remain required when
+upgrading these packages; do not apply version 11 blindly to callers using
+removed APIs.
 
 The bounded security regression expands at most eight rows in the old version.
-It checks the configured four-row cap at optimization level 2 without running a
-large denial-of-service input. Hitting that cap may change matches; ordinary lint
-does not set it. No vulnerability IDs, audit findings, authored sources or
+It requires the current matcher to throw `RangeError` at a configured four-row
+cap and preserve all eight rows with an eight-row budget, without running a
+large denial-of-service input. These checks use optimization level 2; ordinary
+lint retains its default optimization level 1. No vulnerability IDs, audit findings, authored sources or
 security checks are suppressed. Generated Playwright output directories already
 ignored by Git are excluded from authored lint, while maintained tests stay covered.
 

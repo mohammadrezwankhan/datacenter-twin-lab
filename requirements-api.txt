@@ -1,17 +1,17 @@
-annotated-doc==0.0.6
+annotated-doc==0.0.7
 annotated-types==0.8.0
 anyio==4.16.0
-click==8.5.0
-fastapi==0.162.2
+click==8.5.1
+fastapi==0.165.0
 h11==0.16.0
 httpcore2==2.16.2 ; sys_platform != 'emscripten'
 httpx2==2.16.2
 httpx2-jsfetch==1.0 ; sys_platform == 'emscripten'
 idna==3.20
 opentelemetry-api==1.45.2
-pydantic==2.14.3
-pydantic-core==2.50.4
-starlette==1.9.0
+pydantic==2.14.4
+pydantic-core==2.50.5
+starlette==1.10.0
 truststore==0.10.5 ; sys_platform != 'emscripten'
 typing-extensions==4.16.0
 typing-inspection==0.4.5

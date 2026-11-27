@@ -1,5 +1,21 @@
 # Reproduction evidence
 
+## Current 2.0.3 source evidence
+
+The current source uses continuity engine **2.0.3**. Its [evidence index](../data/evidence/index-v2.0.3.json) links the three canonical cases, their complete inputs and results, the [SHA-256 manifest](../data/evidence/v2.0.3/manifest.json), and the [reproduction receipt](../data/evidence/v2.0.3/receipt.md). From this source checkout, verify the packet with:
+
+```sh
+python scripts/build_evidence.py --verify data/evidence/v2.0.3
+```
+
+All three complete run documents were compared with 2.0.2. Only the engine version and deterministic run identifiers differ; scenario hashes, intervals, energy balances, assumptions and outcomes are unchanged. The [2.0.3 maintenance notes](releases/v2.0.3.md) describe the input-validation and dependency changes.
+
+This is maintainer-generated source evidence. It does not establish release or deployment status, independent external reproduction, facility calibration, physical safety or removal of the Engineering HOLD. Current verification requires the packet version to match the executing engine. Use the corresponding historical source tag for an older packet.
+
+## Historical 2.0.1 release evidence
+
+The release recipes, source revision and packet hashes below retain their original 2.0.1 context.
+
 The `2.0.1` continuity engine remains a synthetic teaching model for one aggregate IT load. It covers utility/generator availability, finite battery energy, conversion losses, distribution-path limits, deterministic restoration, and interval energy accounting. It is not calibrated to a facility and does not model cooling transients, workload service, protection coordination, safety certification, or physical controls. See the [electrical-continuity boundary](engineering/electrical-continuity.md) and the [external-review protocol](validation/review-protocol.md).
 
 ## Canonical outcomes

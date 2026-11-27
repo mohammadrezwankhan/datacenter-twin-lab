@@ -77,7 +77,10 @@ def validate_config(config: object) -> dict[str, int | float]:
         value = config[field]
         if isinstance(value, bool) or not isinstance(value, (int, float, Decimal)):
             raise InputError(f"{field} must be a finite number")
-        numeric = float(value)
+        try:
+            numeric = float(value)
+        except (OverflowError, ValueError) as exc:
+            raise InputError(f"{field} must be between {low} and {high}") from exc
         if not math.isfinite(numeric) or not low <= numeric <= high:
             raise InputError(f"{field} must be between {low} and {high}")
     for field in ("sag_start_ms", "sag_duration_ms", "duration_ms"):

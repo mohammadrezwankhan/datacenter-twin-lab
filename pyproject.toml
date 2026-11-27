@@ -19,7 +19,7 @@ Documentation = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/blob/
 Issues = "https://github.com/mohammadrezwankhan/datacenter-twin-lab/issues"
 
 [project.optional-dependencies]
-api = ["fastapi==0.162.2", "uvicorn==0.54.0"]
+api = ["fastapi==0.165.0", "uvicorn==0.54.0"]
 test-api = ["httpx2==2.16.2"]
 studies = ["numpy==2.5.5", "scipy==1.18.1"]
 
@@ -37,11 +37,11 @@ datacenter_twin = ["resources/*.json", "web/*", "web/assets/*", "web/data/eviden
 
 [dependency-groups]
 dev = [
-  "ruff==0.17.5",
+  "ruff==0.17.6",
   "mypy==2.4.1",
   "pytest==9.2.0",
   "pytest-cov==7.1.0",
-  "hypothesis==6.170.15",
+  "hypothesis==6.170.22",
   "scipy-stubs==1.18.1.1",
   "matplotlib==3.11.2",
 ]

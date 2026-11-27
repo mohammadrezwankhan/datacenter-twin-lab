@@ -1,0 +1,8 @@
+{
+  "engine_version": "2.0.3",
+  "machine_architecture": "x86_64",
+  "operating_system": "Linux",
+  "operating_system_release": "6.18.57",
+  "python_implementation": "CPython",
+  "python_version": "3.12.14"
+}
